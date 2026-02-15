@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Real-time global market indicators and news impacting Indian stock market - GIFT Nifty, US markets, commodities">
+    <title>Global Market Impact on Indian Stocks | Live Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Space+Mono:wght@400;700&family=IBM+Plex+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-bg: #0a0e27;
+            --secondary-bg: #141b3d;
+            --accent-bg: #1a2347;
+            --text-primary: #e8edf5;
+            --text-secondary: #a8b2d1;
+            --accent-blue: #4a9eff;
+            --accent-green: #00ff88;
+            --accent-red: #ff4757;
+            --accent-yellow: #ffd93d;
+            --border-color: #2a3a5f;
+            --card-shadow: rgba(0, 0, 0, 0.5);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'IBM Plex Sans', sans-serif;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 50%, #0f1629 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(74, 158, 255, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: moveGrid 20s linear infinite;
+            z-index: 0;
+        }
+        
+        @keyframes moveGrid {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 60px;
+            padding: 40px 20px;
+            background: rgba(26, 35, 71, 0.5);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 20px 60px var(--card-shadow);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        header::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(74, 158, 255, 0.2), transparent);
+            animation: shimmer 3s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+        
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 3.5em;
+            font-weight: 900;
+            background: linear-gradient(135deg, #4a9eff, #00ff88);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 15px;
+            letter-spacing: -1px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .subtitle {
+            font-family: 'Space Mono', monospace;
+            font-size: 1.1em;
+            color: var(--text-secondary);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        
+        .timestamp {
+            margin-top: 20px;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.9em;
+            color: var(--accent-blue);
+            opacity: 0.8;
+        }
+        
+        .quick-links {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+        
+        .quick-link {
+            padding: 12px 25px;
+            background: linear-gradient(135deg, var(--accent-bg), var(--secondary-bg));
+            border: 1px solid var(--border-color);
+            border-radius: 25px;
+            color: var(--accent-blue);
+            text-decoration: none;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.85em;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(74, 158, 255, 0.2);
+        }
+        
+        .quick-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(74, 158, 255, 0.4);
+            border-color: var(--accent-blue);
+        }
+        
+        .indicators-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 50px;
+        }
+        
+        .indicator-card {
+            background: rgba(26, 35, 71, 0.6);
+            backdrop-filter: blur(10px);
+            padding: 30px;
+            border-radius: 15px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 10px 30px var(--card-shadow);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .indicator-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+        }
+        
+        .indicator-card.positive::before {
+            background: linear-gradient(90deg, var(--accent-green), var(--accent-blue));
+        }
+        
+        .indicator-card.negative::before {
+            background: linear-gradient(90deg, var(--accent-red), var(--accent-yellow));
+        }
+        
+        .indicator-card.neutral::before {
+            background: linear-gradient(90deg, var(--text-secondary), var(--accent-blue));
+        }
+        
+        .indicator-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(74, 158, 255, 0.3);
+            border-color: var(--accent-blue);
+        }
+        
+        .indicator-title {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.85em;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+        }
+        
+        .indicator-value {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.2em;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 10px;
+        }
+        
+        .indicator-change {
+            font-family: 'Space Mono', monospace;
+            font-size: 1em;
+            padding: 5px 12px;
+            border-radius: 5px;
+            display: inline-block;
+        }
+        
+        .positive {
+            color: var(--accent-green);
+            background: rgba(0, 255, 136, 0.1);
+        }
+        
+        .negative {
+            color: var(--accent-red);
+            background: rgba(255, 71, 87, 0.1);
+        }
+        
+        .neutral {
+            color: var(--text-secondary);
+            background: rgba(168, 178, 209, 0.1);
+        }
+        
+        .section-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5em;
+            font-weight: 900;
+            margin-bottom: 30px;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-green));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .news-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+        }
+        
+        .news-card {
+            background: rgba(26, 35, 71, 0.6);
+            backdrop-filter: blur(10px);
+            padding: 25px;
+            border-radius: 15px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 10px 30px var(--card-shadow);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .news-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(74, 158, 255, 0.3);
+        }
+        
+        .impact-badge {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.7em;
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+        
+        .impact-high {
+            background: rgba(255, 71, 87, 0.2);
+            color: var(--accent-red);
+            border: 1px solid var(--accent-red);
+        }
+        
+        .impact-medium {
+            background: rgba(255, 217, 61, 0.2);
+            color: var(--accent-yellow);
+            border: 1px solid var(--accent-yellow);
+        }
+        
+        .news-icon {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        
+        .news-category {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.75em;
+            color: var(--accent-green);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+        
+        .news-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.4em;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 12px;
+            line-height: 1.3;
+        }
+        
+        .news-description {
+            color: var(--text-secondary);
+            line-height: 1.6;
+            font-size: 0.95em;
+        }
+        
+        footer {
+            margin-top: 80px;
+            text-align: center;
+            padding: 40px;
+            background: rgba(26, 35, 71, 0.3);
+            border-radius: 15px;
+            border: 1px solid var(--border-color);
+        }
+        
+        footer p {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.85em;
+            color: var(--text-secondary);
+        }
+        
+        @media (max-width: 768px) {
+            h1 { font-size: 2.2em; }
+            .indicators-grid, .news-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Global Market Impact</h1>
+            <div class="subtitle">On Indian Stock Market</div>
+            <div class="timestamp">📅 Last Updated: February 15, 2026 at 09:18 PM IST</div>
+            
+            <div class="quick-links">
+                <a href="https://krishnateja08.github.io/Nifty_option_chain/" class="quick-link" target="_blank">
+                    📊 Nifty Option Chain
+                </a>
+                <a href="https://krishnateja08.github.io/USA-SP500-Stocks-Review/" class="quick-link" target="_blank">
+                    🇺🇸 USA S&P 500 Stocks
+                </a>
+            </div>
+        </header>
+        
+        <section class="indicators-section">
+            <h2 class="section-title">Live Market Indicators</h2>
+            <div class="indicators-grid">
+                <div class="indicator-card positive">
+                    <div class="indicator-title">🎯 GIFT Nifty (Nifty 50)</div>
+                    <div class="indicator-value">23,500.00</div>
+                    <div class="indicator-change positive">
+                        +125.50 (+0.54%)
+                    </div>
+                </div>
+                
+                <div class="indicator-card positive">
+                    <div class="indicator-title">📈 Dow Jones</div>
+                    <div class="indicator-value">43,500.00</div>
+                    <div class="indicator-change positive">
+                        +150.00 (+0.35%)
+                    </div>
+                </div>
+                
+                <div class="indicator-card positive">
+                    <div class="indicator-title">💹 S&P 500</div>
+                    <div class="indicator-value">5,875.00</div>
+                    <div class="indicator-change positive">
+                        +25.50 (+0.44%)
+                    </div>
+                </div>
+                
+                <div class="indicator-card positive">
+                    <div class="indicator-title">💻 Nasdaq</div>
+                    <div class="indicator-value">18,350.00</div>
+                    <div class="indicator-change positive">
+                        +75.00 (+0.41%)
+                    </div>
+                </div>
+                
+                <div class="indicator-card positive">
+                    <div class="indicator-title">🛢️ Crude Oil (WTI)</div>
+                    <div class="indicator-value">$78.50</div>
+                    <div class="indicator-change positive">
+                        +1.25 (+1.62%)
+                    </div>
+                </div>
+                
+                <div class="indicator-card negative">
+                    <div class="indicator-title">💵 Dollar Index (DXY)</div>
+                    <div class="indicator-value">104.25</div>
+                    <div class="indicator-change negative">
+                        -0.15 (-0.14%)
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section class="news-section">
+            <h2 class="section-title">Major Impact Factors</h2>
+            <div class="news-grid">
+
+                <div class="news-card">
+                    <span class="impact-badge impact-high">high impact</span>
+                    <div class="news-icon">🏦</div>
+                    <div class="news-category">Monetary Policy</div>
+                    <h3 class="news-title">US Federal Reserve Policy Update</h3>
+                    <p class="news-description">Monitor Fed rate decisions and policy statements affecting global liquidity. Current stance impacts FII flows into Indian markets.</p>
+                </div>
+
+                <div class="news-card">
+                    <span class="impact-badge impact-high">high impact</span>
+                    <div class="news-icon">🎯</div>
+                    <div class="news-category">Market Indicators</div>
+                    <h3 class="news-title">GIFT Nifty Trading Activity</h3>
+                    <p class="news-description">Early indicator of Indian market direction based on overnight global developments. Tracks Nifty futures on GIFT City exchange.</p>
+                </div>
+
+                <div class="news-card">
+                    <span class="impact-badge impact-high">high impact</span>
+                    <div class="news-icon">🛢️</div>
+                    <div class="news-category">Commodities</div>
+                    <h3 class="news-title">Crude Oil Price Movements</h3>
+                    <p class="news-description">Oil price changes impact India's import bill (85%+ import dependency) and inflation outlook. Key driver for energy sector stocks.</p>
+                </div>
+
+                <div class="news-card">
+                    <span class="impact-badge impact-medium">medium impact</span>
+                    <div class="news-icon">💵</div>
+                    <div class="news-category">Currency</div>
+                    <h3 class="news-title">Dollar Index Fluctuations</h3>
+                    <p class="news-description">USD strength affects FII flows and emerging market investments. Weak dollar typically benefits Indian equities.</p>
+                </div>
+
+                <div class="news-card">
+                    <span class="impact-badge impact-high">high impact</span>
+                    <div class="news-icon">💻</div>
+                    <div class="news-category">Technology</div>
+                    <h3 class="news-title">US Tech Sector Performance</h3>
+                    <p class="news-description">Nasdaq movements impact Indian IT stocks significantly. Many Indian IT companies derive large revenues from US clients.</p>
+                </div>
+
+                <div class="news-card">
+                    <span class="impact-badge impact-medium">medium impact</span>
+                    <div class="news-icon">🌍</div>
+                    <div class="news-category">Geopolitics</div>
+                    <h3 class="news-title">Global Geopolitical Developments</h3>
+                    <p class="news-description">Trade policies, conflicts, and international relations affecting market sentiment. Supply chain disruptions and sanctions impact various sectors.</p>
+                </div>
+
+                <div class="news-card">
+                    <span class="impact-badge impact-high">high impact</span>
+                    <div class="news-icon">💰</div>
+                    <div class="news-category">Market Flow</div>
+                    <h3 class="news-title">Foreign Institutional Investment (FII) Flows</h3>
+                    <p class="news-description">Net FII buying/selling activity directly impacts market direction. Strong inflows support higher valuations.</p>
+                </div>
+
+                <div class="news-card">
+                    <span class="impact-badge impact-medium">medium impact</span>
+                    <div class="news-icon">🇨🇳</div>
+                    <div class="news-category">Global Economy</div>
+                    <h3 class="news-title">China Economic Data</h3>
+                    <p class="news-description">China's economic performance affects global commodity demand and emerging market sentiment, impacting Indian exports.</p>
+                </div>
+
+            </div>
+        </section>
+        
+        <footer>
+            <p>🔄 Data updates in real-time | Sources: NSE, Yahoo Finance, Market APIs</p>
+            <p style="margin-top: 10px; opacity: 0.6;">Built with Python & yfinance | Hosted on GitHub Pages</p>
+            <p style="margin-top: 10px; font-size: 0.75em; opacity: 0.5;">⚠️ For informational purposes only. Not financial advice.</p>
+        </footer>
+    </div>
+</body>
+</html>
