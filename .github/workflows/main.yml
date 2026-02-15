@@ -12,7 +12,7 @@ jobs:
   update-data:
     runs-on: ubuntu-latest
     
-    # 1. FIXES THE 403 ERROR: Grants explicit write access to the runner
+    # 1. FIXES THE 403 ERROR: Explicitly grants write access to the runner
     permissions:
       contents: write
       pages: write
@@ -20,21 +20,20 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4 # Updated to v4
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
       
       - name: Set up Python
-        uses: actions/setup-python@v5 # Updated to v5
+        uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-          cache: 'pip' # Built-in caching for faster runs
+          cache: 'pip'
       
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          # 2. FIXES THE "yfinance not installed" ISSUE
-          # We force-install the core requirements needed for your dashboard
+          # 2. FIXES THE MISSING LIBRARY: Force-install core requirements
           pip install yfinance pandas requests
           if [ -f requirements.txt ]; then
             pip install -r requirements.txt
@@ -49,7 +48,7 @@ jobs:
           git config --local user.email "action@github.com"
           git config --local user.name "github-actions[bot]"
           git add index.html
-          # Only commit if index.html actually changed
+          # Only commit if index.html actually changed to avoid empty commit errors
           if git diff --staged --quiet; then
             echo "No changes detected in index.html"
           else
