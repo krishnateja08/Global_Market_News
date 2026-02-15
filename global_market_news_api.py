@@ -788,7 +788,12 @@ class ComprehensiveMarketDashboard:
                         {silver.get('change', 'N/A')} ({silver.get('pchange', 'N/A')}%)
                     </div>
                 </div>
-                
+            </div>
+        </section>
+        
+        <section class="economic-indicators-section">
+            <h2 class="section-title">Economic Indicators</h2>
+            <div class="indicators-grid">
                 <div class="indicator-card {usa_rate.get('status', 'neutral')}">
                     <div class="indicator-title">🇺🇸 USA Interest Rate</div>
                     <div class="indicator-value">{usa_rate.get('range', 'N/A')}</div>
