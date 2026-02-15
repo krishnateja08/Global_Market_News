@@ -35,6 +35,8 @@ class ComprehensiveMarketDashboard:
             'us_markets': {},
             'crude_oil': {},
             'dollar_index': {},
+            'gold': {},
+            'silver': {},
             'timestamp': datetime.now().strftime('%B %d, %Y at %I:%M %p IST')
         }
         self.news_data = {
@@ -167,6 +169,42 @@ class ComprehensiveMarketDashboard:
                         'status': 'positive' if dxy_change >= 0 else 'negative'
                     }
                     print(f"✅ Dollar Index: {dxy_price:.2f} ({dxy_pct:+.2f}%)")
+                
+                # Gold
+                gold = yf.Ticker("GC=F")
+                gold_data = gold.history(period="1d")
+                
+                if not gold_data.empty:
+                    gold_price = gold_data['Close'].iloc[-1]
+                    gold_open = gold_data['Open'].iloc[-1]
+                    gold_change = gold_price - gold_open
+                    gold_pct = (gold_change / gold_open) * 100
+                    
+                    self.market_data['gold'] = {
+                        'value': f"{gold_price:.2f}",
+                        'change': f"{gold_change:+.2f}",
+                        'pchange': f"{gold_pct:+.2f}",
+                        'status': 'positive' if gold_change >= 0 else 'negative'
+                    }
+                    print(f"✅ Gold: ${gold_price:.2f} ({gold_pct:+.2f}%)")
+                
+                # Silver
+                silver = yf.Ticker("SI=F")
+                silver_data = silver.history(period="1d")
+                
+                if not silver_data.empty:
+                    silver_price = silver_data['Close'].iloc[-1]
+                    silver_open = silver_data['Open'].iloc[-1]
+                    silver_change = silver_price - silver_open
+                    silver_pct = (silver_change / silver_open) * 100
+                    
+                    self.market_data['silver'] = {
+                        'value': f"{silver_price:.2f}",
+                        'change': f"{silver_change:+.2f}",
+                        'pchange': f"{silver_pct:+.2f}",
+                        'status': 'positive' if silver_change >= 0 else 'negative'
+                    }
+                    print(f"✅ Silver: ${silver_price:.2f} ({silver_pct:+.2f}%)")
             else:
                 raise Exception("yfinance not available")
         except Exception as e:
@@ -182,6 +220,18 @@ class ComprehensiveMarketDashboard:
                 'change': '-0.15',
                 'pchange': '-0.14',
                 'status': 'negative'
+            }
+            self.market_data['gold'] = {
+                'value': '2,650.30',
+                'change': '+12.80',
+                'pchange': '+0.49',
+                'status': 'positive'
+            }
+            self.market_data['silver'] = {
+                'value': '30.85',
+                'change': '+0.45',
+                'pchange': '+1.48',
+                'status': 'positive'
             }
     
     # ========== NEWS FETCHING ==========
@@ -245,6 +295,8 @@ class ComprehensiveMarketDashboard:
         us_markets = self.market_data['us_markets']
         crude = self.market_data['crude_oil']
         dollar = self.market_data['dollar_index']
+        gold = self.market_data['gold']
+        silver = self.market_data['silver']
         
         html = f"""<!DOCTYPE html>
 <html lang="en">
@@ -768,6 +820,22 @@ class ComprehensiveMarketDashboard:
                         {dollar.get('change', 'N/A')} ({dollar.get('pchange', 'N/A')}%)
                     </div>
                 </div>
+                
+                <div class="indicator-card {gold.get('status', 'neutral')}">
+                    <div class="indicator-title">🪙 Gold (XAU/USD)</div>
+                    <div class="indicator-value">${gold.get('value', 'N/A')}</div>
+                    <div class="indicator-change {gold.get('status', 'neutral')}">
+                        {gold.get('change', 'N/A')} ({gold.get('pchange', 'N/A')}%)
+                    </div>
+                </div>
+                
+                <div class="indicator-card {silver.get('status', 'neutral')}">
+                    <div class="indicator-title">⚪ Silver (XAG/USD)</div>
+                    <div class="indicator-value">${silver.get('value', 'N/A')}</div>
+                    <div class="indicator-change {silver.get('status', 'neutral')}">
+                        {silver.get('change', 'N/A')} ({silver.get('pchange', 'N/A')}%)
+                    </div>
+                </div>
             </div>
         </section>
         
@@ -778,11 +846,11 @@ class ComprehensiveMarketDashboard:
         
         # Add news categories
         categories = {
-            'india': ('🇮🇳 Indian Markets', 'India-specific market news and developments'),
+            'markets': ('📊 Market Updates', 'Stock movements, commodities, currencies'),
             'economic': ('💰 Economic & Policy', 'Interest rates, inflation, GDP, employment'),
+            'india': ('🇮🇳 Indian Markets', 'India-specific market news and developments'),
             'corporate': ('🏢 Corporate News', 'Earnings, M&A, executive changes'),
-            'geopolitical': ('🌍 Geopolitical Events', 'Global politics, trade, conflicts'),
-            'markets': ('📊 Market Updates', 'Stock movements, commodities, currencies')
+            'geopolitical': ('🌍 Geopolitical Events', 'Global politics, trade, conflicts')
         }
         
         for cat_key, (title, desc) in categories.items():
