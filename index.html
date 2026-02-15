@@ -124,10 +124,6 @@
             opacity: 0.8;
         }
         
-        .quick-links {
-            display: none;
-        }
-        
         .section-title {
             font-family: 'Playfair Display', serif;
             font-size: 2.5em;
@@ -218,6 +214,14 @@
             border-radius: 4px;
             display: inline-block;
             white-space: nowrap;
+        }
+        
+        .indicator-updated {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.65em;
+            color: var(--text-secondary);
+            margin-top: 4px;
+            opacity: 0.7;
         }
         
         .positive {
@@ -393,7 +397,6 @@
         
         @media (max-width: 768px) {
             h1 { font-size: 1.8em; }
-            .quick-links { flex-direction: column; }
             
             .indicators-grid {
                 gap: 10px;
@@ -423,7 +426,7 @@
         <header>
             <h1>🌍 Global Market Dashboard</h1>
             <div class="subtitle">Live Indicators & News Feed</div>
-            <div class="timestamp">📅 Last Updated: February 15, 2026 at 10:33 PM IST</div>
+            <div class="timestamp">📅 Last Updated: February 16, 2026 at 04:13 AM IST</div>
         </header>
         
         <section class="indicators-section">
@@ -431,66 +434,102 @@
             <div class="indicators-grid">
                 <div class="indicator-card positive">
                     <div class="indicator-title">🎯 GIFT Nifty</div>
-                    <div class="indicator-value">23,656.97</div>
+                    <div class="indicator-value">23,417.11</div>
                     <div class="indicator-change positive">
-                        +89.60 (+0.38%)
+                        +13.37 (+0.06%)
                     </div>
                 </div>
                 
                 <div class="indicator-card positive">
                     <div class="indicator-title">📈 Dow Jones</div>
-                    <div class="indicator-value">43,740.95</div>
+                    <div class="indicator-value">43,913.57</div>
                     <div class="indicator-change positive">
-                        +146.82 (+0.34%)
+                        +136.57 (+0.31%)
                     </div>
                 </div>
                 
-                <div class="indicator-card negative">
+                <div class="indicator-card positive">
                     <div class="indicator-title">💹 S&P 500</div>
-                    <div class="indicator-value">5,922.68</div>
-                    <div class="indicator-change negative">
-                        -6.99 (-0.12%)
+                    <div class="indicator-value">5,857.63</div>
+                    <div class="indicator-change positive">
+                        +13.12 (+0.22%)
                     </div>
                 </div>
                 
                 <div class="indicator-card positive">
                     <div class="indicator-title">💻 Nasdaq</div>
-                    <div class="indicator-value">18,439.78</div>
+                    <div class="indicator-value">18,405.51</div>
                     <div class="indicator-change positive">
-                        +49.89 (+0.27%)
+                        +2.21 (+0.01%)
                     </div>
                 </div>
                 
-                <div class="indicator-card positive">
+                <div class="indicator-card negative">
                     <div class="indicator-title">🛢️ Crude Oil</div>
-                    <div class="indicator-value">$79.12</div>
-                    <div class="indicator-change positive">
-                        +1.81 (+2.28%)
+                    <div class="indicator-value">$77.52</div>
+                    <div class="indicator-change negative">
+                        -0.13 (-0.16%)
                     </div>
                 </div>
                 
-                <div class="indicator-card positive">
+                <div class="indicator-card negative">
                     <div class="indicator-title">💵 Dollar Index</div>
-                    <div class="indicator-value">104.71</div>
-                    <div class="indicator-change positive">
-                        +0.00 (+0.00%)
+                    <div class="indicator-value">104.51</div>
+                    <div class="indicator-change negative">
+                        -0.07 (-0.06%)
                     </div>
                 </div>
                 
                 <div class="indicator-card positive">
                     <div class="indicator-title">🪙 Gold</div>
-                    <div class="indicator-value">$2679.59</div>
+                    <div class="indicator-value">$2637.50</div>
                     <div class="indicator-change positive">
-                        +7.27 (+0.27%)
+                        +18.55 (+0.70%)
                     </div>
                 </div>
                 
                 <div class="indicator-card positive">
                     <div class="indicator-title">⚪ Silver</div>
-                    <div class="indicator-value">$31.37</div>
+                    <div class="indicator-value">$30.78</div>
                     <div class="indicator-change positive">
-                        +0.40 (+1.27%)
+                        +0.47 (+1.54%)
                     </div>
+                </div>
+                
+                <div class="indicator-card neutral">
+                    <div class="indicator-title">🇺🇸 USA Interest Rate</div>
+                    <div class="indicator-value">4.25-4.50%</div>
+                    <div class="indicator-change neutral">
+                        Fed Funds Rate
+                    </div>
+                    <div class="indicator-updated">Updated: Jan 29, 2026</div>
+                </div>
+                
+                <div class="indicator-card neutral">
+                    <div class="indicator-title">📊 USA Inflation</div>
+                    <div class="indicator-value">2.4%</div>
+                    <div class="indicator-change neutral">
+                        YoY +0.1%
+                    </div>
+                    <div class="indicator-updated">Updated: Jan 2026</div>
+                </div>
+                
+                <div class="indicator-card neutral">
+                    <div class="indicator-title">🇮🇳 India Repo Rate</div>
+                    <div class="indicator-value">6.50%</div>
+                    <div class="indicator-change neutral">
+                        RBI Policy Rate
+                    </div>
+                    <div class="indicator-updated">Updated: Dec 06, 2025</div>
+                </div>
+                
+                <div class="indicator-card neutral">
+                    <div class="indicator-title">📈 USA CPI</div>
+                    <div class="indicator-value">314.2</div>
+                    <div class="indicator-change neutral">
+                        +0.3% MoM | +2.4% YoY
+                    </div>
+                    <div class="indicator-updated">Updated: Jan 2026</div>
                 </div>
             </div>
         </section>
@@ -508,7 +547,7 @@
                         <h3><a href="#" target="_blank">Global Stock Markets Rally on Positive Economic Data</a></h3>
                         <div class="news-meta">
                             <span class="news-source">CNBC Markets</span>
-                            <span class="news-date">Sun, 15 Feb 2026 22:33:50</span>
+                            <span class="news-date">Mon, 16 Feb 2026 04:13:47</span>
                         </div>
                         <p class="news-summary">Major stock indices across the world posted gains today following better-than-expected economic indicators and corporate earnings reports...</p>
                     </div>
@@ -517,27 +556,18 @@
                         <h3><a href="#" target="_blank">Tech Sector Leads Market Gains Amid AI Investment Surge</a></h3>
                         <div class="news-meta">
                             <span class="news-source">MarketWatch</span>
-                            <span class="news-date">Sun, 15 Feb 2026 22:33:50</span>
+                            <span class="news-date">Mon, 16 Feb 2026 04:13:47</span>
                         </div>
-                        <p class="news-summary">Technology stocks outperformed broader markets as investors continue to pour capital into artificial intelligence and cloud computing sectors...</p>
+                        <p class="news-summary">Technology stocks outperformed broader markets as investors continue to pour capital into artificial intelligence sectors...</p>
                     </div>
 
                     <div class="news-item">
                         <h3><a href="#" target="_blank">Emerging Markets Attract Record Foreign Investment</a></h3>
                         <div class="news-meta">
                             <span class="news-source">CNBC Markets</span>
-                            <span class="news-date">Sun, 15 Feb 2026 22:33:50</span>
+                            <span class="news-date">Mon, 16 Feb 2026 04:13:47</span>
                         </div>
-                        <p class="news-summary">Developing economy equity markets are experiencing unprecedented inflows as investors seek higher returns and portfolio diversification...</p>
-                    </div>
-
-                    <div class="news-item">
-                        <h3><a href="#" target="_blank">Cryptocurrency Markets Show Institutional Adoption Growth</a></h3>
-                        <div class="news-meta">
-                            <span class="news-source">MarketWatch</span>
-                            <span class="news-date">Sun, 15 Feb 2026 22:33:50</span>
-                        </div>
-                        <p class="news-summary">Digital assets gain traction with traditional financial institutions increasing exposure following regulatory clarity improvements...</p>
+                        <p class="news-summary">Developing economy equity markets are experiencing unprecedented inflows as investors seek higher returns...</p>
                     </div>
 
                 </div>
@@ -548,39 +578,30 @@
                     </div>
 
                     <div class="news-item">
-                        <h3><a href="#" target="_blank">Central Banks Signal Shift in Monetary Policy Stance</a></h3>
+                        <h3><a href="#" target="_blank">Federal Reserve Holds Interest Rates Steady at 4.25-4.50%</a></h3>
                         <div class="news-meta">
                             <span class="news-source">Reuters Business</span>
-                            <span class="news-date">Sun, 15 Feb 2026 22:33:50</span>
+                            <span class="news-date">Mon, 16 Feb 2026 04:13:47</span>
                         </div>
-                        <p class="news-summary">Major central banks are adjusting interest rate policies in response to evolving inflation trends and economic growth patterns...</p>
+                        <p class="news-summary">Fed maintains current rate range while monitoring inflation trends and employment data for future policy decisions...</p>
                     </div>
 
                     <div class="news-item">
-                        <h3><a href="#" target="_blank">Global Trade Tensions Ease as Nations Reach New Agreements</a></h3>
+                        <h3><a href="#" target="_blank">US Inflation Edges Up to 2.4% in Latest CPI Report</a></h3>
                         <div class="news-meta">
                             <span class="news-source">Bloomberg Markets</span>
-                            <span class="news-date">Sun, 15 Feb 2026 22:33:50</span>
+                            <span class="news-date">Mon, 16 Feb 2026 04:13:47</span>
                         </div>
-                        <p class="news-summary">International trade relations improve with recent bilateral agreements reducing tariffs and enhancing market access...</p>
+                        <p class="news-summary">Consumer Price Index shows modest increase driven by energy and housing costs while core inflation remains stable...</p>
                     </div>
 
                     <div class="news-item">
-                        <h3><a href="#" target="_blank">Inflation Trends Show Regional Variations Across Major Economies</a></h3>
+                        <h3><a href="#" target="_blank">Global Trade Activity Shows Signs of Strengthening</a></h3>
                         <div class="news-meta">
                             <span class="news-source">Reuters Business</span>
-                            <span class="news-date">Sun, 15 Feb 2026 22:33:50</span>
+                            <span class="news-date">Mon, 16 Feb 2026 04:13:47</span>
                         </div>
-                        <p class="news-summary">Latest inflation data reveals divergent price pressure trajectories in developed and emerging markets...</p>
-                    </div>
-
-                    <div class="news-item">
-                        <h3><a href="#" target="_blank">Employment Data Indicates Strong Labor Market Resilience</a></h3>
-                        <div class="news-meta">
-                            <span class="news-source">Bloomberg Markets</span>
-                            <span class="news-date">Sun, 15 Feb 2026 22:33:50</span>
-                        </div>
-                        <p class="news-summary">Job creation numbers exceed forecasts while unemployment rates remain near historic lows across major economies...</p>
+                        <p class="news-summary">International trade volumes improve as supply chains normalize and demand patterns stabilize across major economies...</p>
                     </div>
 
                 </div>
@@ -594,36 +615,27 @@
                         <h3><a href="#" target="_blank">Sensex Hits New Record High on Strong FII Inflows</a></h3>
                         <div class="news-meta">
                             <span class="news-source">MoneyControl</span>
-                            <span class="news-date">Sun, 15 Feb 2026 22:33:50</span>
+                            <span class="news-date">Mon, 16 Feb 2026 04:13:47</span>
                         </div>
-                        <p class="news-summary">Indian equity benchmarks reach fresh peaks driven by robust foreign institutional investor participation and positive corporate earnings...</p>
+                        <p class="news-summary">Indian equity benchmarks reach fresh peaks driven by robust foreign institutional investor participation...</p>
                     </div>
 
                     <div class="news-item">
-                        <h3><a href="#" target="_blank">RBI Maintains Repo Rate, Monitors Inflation Trajectory</a></h3>
+                        <h3><a href="#" target="_blank">RBI Holds Repo Rate at 6.50%, Focuses on Inflation Management</a></h3>
                         <div class="news-meta">
                             <span class="news-source">Economic Times</span>
-                            <span class="news-date">Sun, 15 Feb 2026 22:33:50</span>
+                            <span class="news-date">Mon, 16 Feb 2026 04:13:47</span>
                         </div>
-                        <p class="news-summary">Reserve Bank of India keeps key policy rates unchanged while emphasizing data-dependent approach to monetary decisions...</p>
+                        <p class="news-summary">Reserve Bank of India maintains key policy rate while emphasizing data-dependent approach to monetary decisions...</p>
                     </div>
 
                     <div class="news-item">
                         <h3><a href="#" target="_blank">IT Sector Shows Strong Demand Recovery in Key Markets</a></h3>
                         <div class="news-meta">
                             <span class="news-source">MoneyControl</span>
-                            <span class="news-date">Sun, 15 Feb 2026 22:33:50</span>
+                            <span class="news-date">Mon, 16 Feb 2026 04:13:47</span>
                         </div>
-                        <p class="news-summary">Major Indian technology companies report improved deal pipelines and client spending in digital transformation projects...</p>
-                    </div>
-
-                    <div class="news-item">
-                        <h3><a href="#" target="_blank">India GDP Growth Projections Revised Upward by Analysts</a></h3>
-                        <div class="news-meta">
-                            <span class="news-source">Economic Times</span>
-                            <span class="news-date">Sun, 15 Feb 2026 22:33:50</span>
-                        </div>
-                        <p class="news-summary">Economic forecasters upgrade India growth estimates citing strong domestic consumption and infrastructure investments...</p>
+                        <p class="news-summary">Major Indian technology companies report improved deal pipelines and client spending in digital projects...</p>
                     </div>
 
                 </div>
@@ -637,25 +649,16 @@
                         <h3><a href="#" target="_blank">Major Tech Companies Report Better Than Expected Earnings</a></h3>
                         <div class="news-meta">
                             <span class="news-source">Reuters Companies</span>
-                            <span class="news-date">Sun, 15 Feb 2026 22:33:50</span>
+                            <span class="news-date">Mon, 16 Feb 2026 04:13:47</span>
                         </div>
                         <p class="news-summary">Leading technology firms exceed analyst estimates with strong revenue growth from cloud and AI services...</p>
                     </div>
 
                     <div class="news-item">
-                        <h3><a href="#" target="_blank">Pharmaceutical Giants Announce Strategic Merger Agreement</a></h3>
-                        <div class="news-meta">
-                            <span class="news-source">Yahoo Finance</span>
-                            <span class="news-date">Sun, 15 Feb 2026 22:33:50</span>
-                        </div>
-                        <p class="news-summary">Two major drug manufacturers plan to combine operations in deal aimed at expanding research capabilities...</p>
-                    </div>
-
-                    <div class="news-item">
                         <h3><a href="#" target="_blank">Renewable Energy Sector Sees Record Investment Activity</a></h3>
                         <div class="news-meta">
-                            <span class="news-source">Reuters Companies</span>
-                            <span class="news-date">Sun, 15 Feb 2026 22:33:50</span>
+                            <span class="news-source">Yahoo Finance</span>
+                            <span class="news-date">Mon, 16 Feb 2026 04:13:47</span>
                         </div>
                         <p class="news-summary">Clean energy companies attract unprecedented capital commitments as sustainability focus intensifies...</p>
                     </div>
@@ -671,16 +674,16 @@
                         <h3><a href="#" target="_blank">International Climate Summit Produces New Commitments</a></h3>
                         <div class="news-meta">
                             <span class="news-source">Reuters World</span>
-                            <span class="news-date">Sun, 15 Feb 2026 22:33:50</span>
+                            <span class="news-date">Mon, 16 Feb 2026 04:13:47</span>
                         </div>
-                        <p class="news-summary">Global leaders announce enhanced pledges to reduce emissions and accelerate transition to clean energy...</p>
+                        <p class="news-summary">Global leaders announce enhanced pledges to reduce emissions and accelerate clean energy transition...</p>
                     </div>
 
                     <div class="news-item">
                         <h3><a href="#" target="_blank">Supply Chain Resilience Improves Across Key Industries</a></h3>
                         <div class="news-meta">
                             <span class="news-source">Reuters World</span>
-                            <span class="news-date">Sun, 15 Feb 2026 22:33:50</span>
+                            <span class="news-date">Mon, 16 Feb 2026 04:13:47</span>
                         </div>
                         <p class="news-summary">International logistics networks show significant efficiency gains following infrastructure investments...</p>
                     </div>
