@@ -367,13 +367,13 @@ class ComprehensiveMarketDashboard:
         
         header {{
             text-align: center;
-            margin-bottom: 40px;
-            padding: 40px 20px;
+            margin-bottom: 30px;
+            padding: 25px 20px;
             background: rgba(26, 35, 71, 0.5);
             backdrop-filter: blur(10px);
-            border-radius: 20px;
+            border-radius: 15px;
             border: 1px solid var(--border-color);
-            box-shadow: 0 20px 60px var(--card-shadow);
+            box-shadow: 0 15px 40px var(--card-shadow);
             position: relative;
             overflow: hidden;
         }}
@@ -396,13 +396,13 @@ class ComprehensiveMarketDashboard:
         
         h1 {{
             font-family: 'Playfair Display', serif;
-            font-size: 3.5em;
+            font-size: 2.2em;
             font-weight: 900;
             background: linear-gradient(135deg, #4a9eff, #00ff88);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
             letter-spacing: -1px;
             position: relative;
             z-index: 1;
@@ -410,23 +410,23 @@ class ComprehensiveMarketDashboard:
         
         .subtitle {{
             font-family: 'Space Mono', monospace;
-            font-size: 1.1em;
+            font-size: 0.85em;
             color: var(--text-secondary);
-            letter-spacing: 2px;
+            letter-spacing: 1px;
             text-transform: uppercase;
         }}
         
         .timestamp {{
-            margin-top: 20px;
+            margin-top: 12px;
             font-family: 'Space Mono', monospace;
-            font-size: 0.9em;
+            font-size: 0.75em;
             color: var(--accent-blue);
             opacity: 0.8;
         }}
         
         .quick-links {{
-            display: flex;
-            gap: 15px;
+            display: none;
+        }}
             justify-content: center;
             margin: 30px 0;
             flex-wrap: wrap;
