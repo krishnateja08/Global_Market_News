@@ -164,22 +164,28 @@
         
         /* Market Indicators Grid */
         .indicators-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 25px;
-            margin-bottom: 50px;
+            display: flex;
+            gap: 15px;
+            margin-bottom: 40px;
+            overflow-x: auto;
+            padding-bottom: 10px;
         }
         
         .indicator-card {
             background: rgba(26, 35, 71, 0.6);
             backdrop-filter: blur(10px);
-            padding: 30px;
-            border-radius: 15px;
+            padding: 15px 20px;
+            border-radius: 12px;
             border: 1px solid var(--border-color);
-            box-shadow: 0 10px 30px var(--card-shadow);
+            box-shadow: 0 8px 20px var(--card-shadow);
             transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
+            min-width: 180px;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
         
         .indicator-card::before {
@@ -188,7 +194,7 @@
             top: 0;
             left: 0;
             right: 0;
-            height: 3px;
+            height: 2px;
         }
         
         .indicator-card.positive::before {
@@ -204,34 +210,37 @@
         }
         
         .indicator-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 40px rgba(74, 158, 255, 0.3);
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(74, 158, 255, 0.3);
             border-color: var(--accent-blue);
         }
         
         .indicator-title {
             font-family: 'Space Mono', monospace;
-            font-size: 0.85em;
+            font-size: 0.7em;
             color: var(--text-secondary);
             text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 15px;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+            white-space: nowrap;
         }
         
         .indicator-value {
             font-family: 'Playfair Display', serif;
-            font-size: 2.2em;
+            font-size: 1.4em;
             font-weight: 700;
             color: var(--text-primary);
-            margin-bottom: 10px;
+            margin-bottom: 6px;
+            white-space: nowrap;
         }
         
         .indicator-change {
             font-family: 'Space Mono', monospace;
-            font-size: 1em;
-            padding: 5px 12px;
-            border-radius: 5px;
+            font-size: 0.8em;
+            padding: 3px 8px;
+            border-radius: 4px;
             display: inline-block;
+            white-space: nowrap;
         }
         
         .positive {
@@ -406,12 +415,41 @@
             .news-grid {
                 grid-template-columns: 1fr;
             }
+            
+            .indicators-grid {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            
+            .indicator-card {
+                min-width: 160px;
+            }
         }
         
         @media (max-width: 768px) {
             h1 { font-size: 2.2em; }
-            .indicators-grid { grid-template-columns: 1fr; }
             .quick-links { flex-direction: column; }
+            
+            .indicators-grid {
+                gap: 10px;
+            }
+            
+            .indicator-card {
+                min-width: 140px;
+                padding: 12px 15px;
+            }
+            
+            .indicator-title {
+                font-size: 0.65em;
+            }
+            
+            .indicator-value {
+                font-size: 1.2em;
+            }
+            
+            .indicator-change {
+                font-size: 0.7em;
+            }
         }
     </style>
 </head>
@@ -420,7 +458,7 @@
         <header>
             <h1>🌍 Global Market Dashboard</h1>
             <div class="subtitle">Live Indicators & News Feed</div>
-            <div class="timestamp">📅 Last Updated: February 15, 2026 at 09:59 PM IST</div>
+            <div class="timestamp">📅 Last Updated: February 15, 2026 at 10:05 PM IST</div>
             
             <div class="quick-links">
                 <a href="https://krishnateja08.github.io/Nifty_option_chain/" class="quick-link" target="_blank">
@@ -492,6 +530,78 @@
                 <div class="news-category-card india">
                     <div class="category-header">
                         <h3 class="category-title">🇮🇳 Indian Markets</h3>
+                    </div>
+
+                    <div class="news-item">
+                        <h3><a href="https://www.moneycontrol.com/news/recommendations/buy-hdfc-bank-targetrs-1850-icici-securities_17531671.html" target="_blank">Buy HDFC Bank; target of Rs 1,850: ICICI Securities</a></h3>
+                        <div class="news-meta">
+                            <span class="news-source">MoneyControl</span>
+                            <span class="news-date">Tue, 23 Apr 2024 13:41:02 +0530</span>
+                        </div>
+                        <p class="news-summary"><img align=" left" alt="Buy HDFC Bank; target of Rs 1,850: ICICI Securities" border="0" height="75" hspace="5" src="https://www.moneycontrol.com/news_image_files/2024/200x200/B/Buy-378x213_200.jpg" title="Buy HDFC Bank; target of Rs 1,850: ICICI Secu...</p>
+                    </div>
+
+                    <div class="news-item">
+                        <h3><a href="https://www.moneycontrol.com/news/recommendations/buy-tejas-networks-targetrs-1100-emkay-global-financial_17531621.html" target="_blank">Buy Tejas Networks; target of Rs 1100: Emkay Global Financial</a></h3>
+                        <div class="news-meta">
+                            <span class="news-source">MoneyControl</span>
+                            <span class="news-date">Tue, 23 Apr 2024 13:36:47 +0530</span>
+                        </div>
+                        <p class="news-summary"><img align=" left" alt="Buy Tejas Networks; target of Rs 1100: Emkay Global Financial" border="0" height="75" hspace="5" src="https://www.moneycontrol.com/news_image_files/2024/200x200/B/Buy_1280x720_1_200.jpg" title="Buy Tejas Networks; target of Rs...</p>
+                    </div>
+
+                    <div class="news-item">
+                        <h3><a href="https://www.moneycontrol.com/news/recommendations/buy-bajaj-finance-targetrs-9000-emkay-global-financial_17531641.html" target="_blank">Buy Bajaj Finance; target of Rs 9000: Emkay Global Financial</a></h3>
+                        <div class="news-meta">
+                            <span class="news-source">MoneyControl</span>
+                            <span class="news-date">Tue, 23 Apr 2024 13:36:44 +0530</span>
+                        </div>
+                        <p class="news-summary"><img align=" left" alt="Buy Bajaj Finance; target of Rs 9000: Emkay Global Financial" border="0" height="75" hspace="5" src="https://www.moneycontrol.com/news_image_files/2024/200x200/B/Buy_1280x720_5_200.jpg" title="Buy Bajaj Finance; target of Rs 9...</p>
+                    </div>
+
+                    <div class="news-item">
+                        <h3><a href="https://www.moneycontrol.com/news/recommendations/buy-bajaj-finance-targetrs-9000-emkay-global-financial_17531631.html" target="_blank">Buy Bajaj Finance; target of Rs 9000: Emkay Global Financial</a></h3>
+                        <div class="news-meta">
+                            <span class="news-source">MoneyControl</span>
+                            <span class="news-date">Tue, 23 Apr 2024 13:36:44 +0530</span>
+                        </div>
+                        <p class="news-summary"><img align=" left" alt="Buy Bajaj Finance; target of Rs 9000: Emkay Global Financial" border="0" height="75" hspace="5" src="https://www.moneycontrol.com/news_image_files/2024/200x200/B/Buy_1280x720_5_200.jpg" title="Buy Bajaj Finance; target of Rs 9...</p>
+                    </div>
+
+                    <div class="news-item">
+                        <h3><a href="https://www.moneycontrol.com/news/recommendations/reduce-persistent-systems-targetrs-3700-emkay-global-financial_17531581.html" target="_blank">Reduce Persistent Systems; target of Rs 3700: Emkay Global Financial</a></h3>
+                        <div class="news-meta">
+                            <span class="news-source">MoneyControl</span>
+                            <span class="news-date">Tue, 23 Apr 2024 13:26:31 +0530</span>
+                        </div>
+                        <p class="news-summary"><img align=" left" alt="Reduce Persistent Systems; target of Rs 3700: Emkay Global Financial" border="0" height="75" hspace="5" src="https://www.moneycontrol.com/news_image_files/2023/200x200/R/Reduce-2_200.jpg" title="Reduce Persistent Systems; targ...</p>
+                    </div>
+
+                    <div class="news-item">
+                        <h3><a href="https://www.moneycontrol.com/news/recommendations/reduce-aditya-birla-fashionretail-targetrs-230-emkay-global-financial_17531571.html" target="_blank">Reduce Aditya Birla Fashion and Retail; target of Rs 230: Emkay Global Financial</a></h3>
+                        <div class="news-meta">
+                            <span class="news-source">MoneyControl</span>
+                            <span class="news-date">Tue, 23 Apr 2024 13:22:33 +0530</span>
+                        </div>
+                        <p class="news-summary"><img align=" left" alt="Reduce Aditya Birla Fashion and Retail; target of Rs 230: Emkay Global Financial" border="0" height="75" hspace="5" src="https://www.moneycontrol.com/news_image_files/2024/200x200/r/reduced-378x213_200.jpg" title="Reduce Adity...</p>
+                    </div>
+
+                    <div class="news-item">
+                        <h3><a href="https://www.moneycontrol.com/news/recommendations/reduce-wipro-targetrs-410-icici-securities_17531461.html" target="_blank">Reduce Wipro; target of Rs 410: ICICI Securities</a></h3>
+                        <div class="news-meta">
+                            <span class="news-source">MoneyControl</span>
+                            <span class="news-date">Tue, 23 Apr 2024 12:22:08 +0530</span>
+                        </div>
+                        <p class="news-summary"><img align=" left" alt="Reduce Wipro; target of Rs 410: ICICI Securities" border="0" height="75" hspace="5" src="https://www.moneycontrol.com/news_image_files/2023/200x200/R/Reduce-5_200.jpg" title="Reduce Wipro; target of Rs 410: ICICI Securities" w...</p>
+                    </div>
+
+                    <div class="news-item">
+                        <h3><a href="https://www.moneycontrol.com/news/recommendations/buy-hdfc-life-insurance-company-targetrs-739-icici-securities_17531391.html" target="_blank">Buy HDFC Life Insurance Company; target of Rs 739: ICICI Securities</a></h3>
+                        <div class="news-meta">
+                            <span class="news-source">MoneyControl</span>
+                            <span class="news-date">Tue, 23 Apr 2024 12:05:52 +0530</span>
+                        </div>
+                        <p class="news-summary"><img align=" left" alt="Buy HDFC Life Insurance Company; target of Rs 739: ICICI Securities" border="0" height="75" hspace="5" src="https://www.moneycontrol.com/news_image_files/2024/200x200/B/Buy_1-378x213_200.jpg" title="Buy HDFC Life Insurance Com...</p>
                     </div>
 
                     <div class="news-item">
