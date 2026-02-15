@@ -6,10 +6,8 @@ on:
     # IST = UTC+5:30, so 9:15 AM IST = 3:45 AM UTC
     - cron: '*/15 3-10 * * 1-5'  # Monday to Friday
   
-  # Allow manual trigger
   workflow_dispatch:
   
-  # Run on push to main branch
   push:
     branches:
       - main
@@ -27,18 +25,17 @@ jobs:
         with:
           python-version: '3.11'
       
-      - name: Cache pip packages
-        uses: actions/cache@v3
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
-      
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          # Check if requirements.txt exists before trying to install it
+          if [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          else
+            echo "requirements.txt not found, installing defaults..."
+            # Add your specific libraries here (e.g., requests, pandas, beautifulsoup4)
+            pip install requests pandas
+          fi
       
       - name: Fetch market data and generate HTML
         run: |
@@ -47,14 +44,19 @@ jobs:
       - name: Check for changes
         id: check_changes
         run: |
-          git diff --quiet index.html || echo "changed=true" >> $GITHUB_OUTPUT
+          # Check if index.html exists and has changed
+          git add index.html
+          if git diff --staged --quiet; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+          fi
       
       - name: Commit and push if changed
         if: steps.check_changes.outputs.changed == 'true'
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add index.html
           git commit -m "🔄 Auto-update market data - $(date +'%Y-%m-%d %H:%M:%S UTC')"
           git push
         env:
