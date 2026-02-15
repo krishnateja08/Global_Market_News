@@ -2,8 +2,14 @@ name: Update Market Data
 
 on:
   schedule:
-    - cron: '*/15 3-10 * * 1-5'
+    # Run every 15 minutes during Indian market hours (9:15 AM - 3:30 PM IST)
+    # IST is UTC+5:30, so 9:15 AM IST = 3:45 AM UTC, 3:30 PM IST = 10:00 AM UTC
+    - cron: '*/15 3-10 * * 1-5'  # Monday to Friday, 3:45 AM - 10:00 AM UTC
+  
+  # Allow manual trigger from Actions tab
   workflow_dispatch:
+  
+  # Run when code is pushed to main branch
   push:
     branches:
       - main
@@ -12,37 +18,93 @@ jobs:
   update-data:
     runs-on: ubuntu-latest
     
+    # Required permissions for pushing to repo and deploying to Pages
     permissions:
       contents: write
+      pages: write
+      id-token: write
     
     steps:
-      - name: Checkout
+      # Step 1: Check out the repository code
+      - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       
-      - name: Setup Python
+      # Step 2: Set up Python environment
+      - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
       
-      - name: Install packages
-        run: pip install yfinance feedparser requests beautifulsoup4
-      
-      - name: Generate dashboard
+      # Step 3: Install required Python packages
+      - name: Install dependencies
         run: |
+          python -m pip install --upgrade pip
+          pip install yfinance feedparser requests beautifulsoup4 python-dateutil
+      
+      # Step 4: Find and run the Python script to generate index.html
+      - name: Generate HTML dashboard
+        run: |
+          echo "🔍 Looking for Python script..."
+          
           if [ -f "comprehensive_market_dashboard.py" ]; then
+            echo "✅ Found comprehensive_market_dashboard.py"
             python comprehensive_market_dashboard.py
           elif [ -f "comprehensive_market_dashboard_demo.py" ]; then
+            echo "✅ Found comprehensive_market_dashboard_demo.py"
             python comprehensive_market_dashboard_demo.py
           elif [ -f "global_market_news_api.py" ]; then
+            echo "✅ Found global_market_news_api.py"
             python global_market_news_api.py
+          elif [ -f "global_market_news.py" ]; then
+            echo "✅ Found global_market_news.py"
+            python global_market_news.py
+          else
+            echo "❌ No Python script found!"
+            echo "Please add one of these files to your repository:"
+            echo "  - comprehensive_market_dashboard.py"
+            echo "  - comprehensive_market_dashboard_demo.py"
+            echo "  - global_market_news_api.py"
+            exit 1
+          fi
+          
+          # Verify index.html was created
+          if [ -f "index.html" ]; then
+            echo "✅ index.html generated successfully"
+            ls -lh index.html
+          else
+            echo "❌ index.html was not created!"
+            exit 1
           fi
       
-      - name: Commit changes
+      # Step 5: Check if index.html has changed
+      - name: Check for changes
+        id: verify_diff
         run: |
-          git config user.name "GitHub Actions"
-          git config user.email "actions@github.com"
-          git add -A
-          git diff --staged --quiet || git commit -m "Update dashboard $(date)"
+          git diff --quiet index.html && echo "changed=false" >> $GITHUB_OUTPUT || echo "changed=true" >> $GITHUB_OUTPUT
+      
+      # Step 6: Commit and push the updated index.html to main branch
+      - name: Commit and push changes
+        if: steps.verify_diff.outputs.changed == 'true'
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Actions Bot"
+          git add index.html
+          git commit -m "🔄 Auto-update market data - $(date -u +'%Y-%m-%d %H:%M:%S UTC')"
           git push
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      # Step 7: Deploy to GitHub Pages
+      - name: Deploy to GitHub Pages
+        if: steps.verify_diff.outputs.changed == 'true'
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: .
+          publish_branch: gh-pages
+          force_orphan: true
+          user_name: 'github-actions[bot]'
+          user_email: 'github-actions[bot]@users.noreply.github.com'
+          commit_message: '🚀 Deploy updated dashboard'
