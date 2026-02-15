@@ -412,22 +412,28 @@ class ComprehensiveMarketDashboard:
         
         /* Market Indicators Grid */
         .indicators-grid {{
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 25px;
-            margin-bottom: 50px;
+            display: flex;
+            gap: 15px;
+            margin-bottom: 40px;
+            overflow-x: auto;
+            padding-bottom: 10px;
         }}
         
         .indicator-card {{
             background: rgba(26, 35, 71, 0.6);
             backdrop-filter: blur(10px);
-            padding: 30px;
-            border-radius: 15px;
+            padding: 15px 20px;
+            border-radius: 12px;
             border: 1px solid var(--border-color);
-            box-shadow: 0 10px 30px var(--card-shadow);
+            box-shadow: 0 8px 20px var(--card-shadow);
             transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
+            min-width: 180px;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }}
         
         .indicator-card::before {{
@@ -436,7 +442,7 @@ class ComprehensiveMarketDashboard:
             top: 0;
             left: 0;
             right: 0;
-            height: 3px;
+            height: 2px;
         }}
         
         .indicator-card.positive::before {{
@@ -452,34 +458,37 @@ class ComprehensiveMarketDashboard:
         }}
         
         .indicator-card:hover {{
-            transform: translateY(-5px);
-            box-shadow: 0 15px 40px rgba(74, 158, 255, 0.3);
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(74, 158, 255, 0.3);
             border-color: var(--accent-blue);
         }}
         
         .indicator-title {{
             font-family: 'Space Mono', monospace;
-            font-size: 0.85em;
+            font-size: 0.7em;
             color: var(--text-secondary);
             text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 15px;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+            white-space: nowrap;
         }}
         
         .indicator-value {{
             font-family: 'Playfair Display', serif;
-            font-size: 2.2em;
+            font-size: 1.4em;
             font-weight: 700;
             color: var(--text-primary);
-            margin-bottom: 10px;
+            margin-bottom: 6px;
+            white-space: nowrap;
         }}
         
         .indicator-change {{
             font-family: 'Space Mono', monospace;
-            font-size: 1em;
-            padding: 5px 12px;
-            border-radius: 5px;
+            font-size: 0.8em;
+            padding: 3px 8px;
+            border-radius: 4px;
             display: inline-block;
+            white-space: nowrap;
         }}
         
         .positive {{
@@ -654,12 +663,41 @@ class ComprehensiveMarketDashboard:
             .news-grid {{
                 grid-template-columns: 1fr;
             }}
+            
+            .indicators-grid {{
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }}
+            
+            .indicator-card {{
+                min-width: 160px;
+            }}
         }}
         
         @media (max-width: 768px) {{
             h1 {{ font-size: 2.2em; }}
-            .indicators-grid {{ grid-template-columns: 1fr; }}
             .quick-links {{ flex-direction: column; }}
+            
+            .indicators-grid {{
+                gap: 10px;
+            }}
+            
+            .indicator-card {{
+                min-width: 140px;
+                padding: 12px 15px;
+            }}
+            
+            .indicator-title {{
+                font-size: 0.65em;
+            }}
+            
+            .indicator-value {{
+                font-size: 1.2em;
+            }}
+            
+            .indicator-change {{
+                font-size: 0.7em;
+            }}
         }}
     </style>
 </head>
