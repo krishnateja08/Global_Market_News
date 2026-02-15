@@ -19,10 +19,24 @@ class ComprehensiveMarketDashboard:
             'dollar_index': {},
             'gold': {},
             'silver': {},
+            # USA Economic Indicators
             'usa_interest_rate': {},
-            'usa_inflation': {},
-            'india_interest_rate': {},
             'usa_cpi': {},
+            'usa_core_cpi': {},
+            'usa_ppi': {},
+            'usa_inflation': {},
+            'usa_unemployment': {},
+            'usa_gdp': {},
+            'usa_nfp': {},
+            'usa_fomc': {},
+            # India Economic Indicators
+            'india_interest_rate': {},
+            'india_cpi': {},
+            'india_wpi': {},
+            'india_iip': {},
+            'india_pmi': {},
+            'india_gdp': {},
+            'india_fiscal_deficit': {},
             'timestamp': ist_time.strftime('%B %d, %Y at %I:%M %p IST')
         }
         self.news_data = {
@@ -120,28 +134,21 @@ class ComprehensiveMarketDashboard:
             'status': 'positive' if silver_change >= 0 else 'negative'
         }
         
-        # Economic Indicators with last updated dates
+        # ========== USA Economic Indicators ==========
         
-        # USA Interest Rate (Federal Funds Rate) - Updated at FOMC meetings
+        # USA Interest Rate (Federal Funds Rate) - FOMC decision
         self.market_data['usa_interest_rate'] = {
-            'value': '4.50',  # Current Fed rate range midpoint
+            'value': '4.50',
             'range': '4.25-4.50%',
             'last_updated': 'Jan 29, 2026',
             'status': 'neutral'
         }
         
-        # USA Inflation Rate (YoY)
-        self.market_data['usa_inflation'] = {
-            'value': '2.4',
-            'change': '+0.1',
-            'last_updated': 'Jan 2026',
-            'status': 'neutral'
-        }
-        
-        # India Interest Rate (Repo Rate)
-        self.market_data['india_interest_rate'] = {
-            'value': '6.50',
-            'last_updated': 'Dec 06, 2025',
+        # USA FOMC (Next meeting info)
+        self.market_data['usa_fomc'] = {
+            'value': 'Hold',
+            'next_meeting': 'Mar 18-19, 2026',
+            'last_decision': 'Jan 29, 2026',
             'status': 'neutral'
         }
         
@@ -151,6 +158,108 @@ class ComprehensiveMarketDashboard:
             'change': '+0.3',
             'yoy': '+2.4%',
             'last_updated': 'Jan 2026',
+            'status': 'neutral'
+        }
+        
+        # USA Core CPI (excluding food & energy)
+        self.market_data['usa_core_cpi'] = {
+            'value': '2.2',
+            'yoy': '+2.2%',
+            'last_updated': 'Jan 2026',
+            'status': 'neutral'
+        }
+        
+        # USA Inflation Rate
+        self.market_data['usa_inflation'] = {
+            'value': '2.4',
+            'change': '+0.1',
+            'last_updated': 'Jan 2026',
+            'status': 'neutral'
+        }
+        
+        # USA PPI (Producer Price Index)
+        self.market_data['usa_ppi'] = {
+            'value': '1.8',
+            'yoy': '+1.8%',
+            'last_updated': 'Jan 2026',
+            'status': 'neutral'
+        }
+        
+        # USA GDP Growth Rate
+        self.market_data['usa_gdp'] = {
+            'value': '2.8',
+            'quarter': 'Q4 2025',
+            'last_updated': 'Jan 30, 2026',
+            'status': 'positive'
+        }
+        
+        # USA Unemployment Rate
+        self.market_data['usa_unemployment'] = {
+            'value': '3.7',
+            'last_updated': 'Jan 2026',
+            'status': 'positive'
+        }
+        
+        # USA NFP (Non-Farm Payrolls)
+        self.market_data['usa_nfp'] = {
+            'value': '+256K',
+            'last_updated': 'Jan 2026',
+            'status': 'positive'
+        }
+        
+        # ========== India Economic Indicators ==========
+        
+        # India Interest Rate (Repo Rate)
+        self.market_data['india_interest_rate'] = {
+            'value': '6.50',
+            'last_updated': 'Dec 06, 2025',
+            'status': 'neutral'
+        }
+        
+        # India CPI (Consumer Price Index)
+        self.market_data['india_cpi'] = {
+            'value': '5.2',
+            'yoy': '+5.2%',
+            'last_updated': 'Jan 2026',
+            'status': 'neutral'
+        }
+        
+        # India WPI (Wholesale Price Index)
+        self.market_data['india_wpi'] = {
+            'value': '2.4',
+            'yoy': '+2.4%',
+            'last_updated': 'Jan 2026',
+            'status': 'neutral'
+        }
+        
+        # India IIP (Index of Industrial Production)
+        self.market_data['india_iip'] = {
+            'value': '4.2',
+            'yoy': '+4.2%',
+            'last_updated': 'Dec 2025',
+            'status': 'positive'
+        }
+        
+        # India PMI (Manufacturing)
+        self.market_data['india_pmi'] = {
+            'value': '56.8',
+            'last_updated': 'Jan 2026',
+            'status': 'positive'
+        }
+        
+        # India GDP Growth Rate
+        self.market_data['india_gdp'] = {
+            'value': '7.2',
+            'quarter': 'Q3 FY25',
+            'last_updated': 'Nov 30, 2025',
+            'status': 'positive'
+        }
+        
+        # India Fiscal Deficit
+        self.market_data['india_fiscal_deficit'] = {
+            'value': '5.8',
+            'percent_gdp': '5.8% of GDP',
+            'last_updated': 'FY 2025-26',
             'status': 'neutral'
         }
         
@@ -286,10 +395,26 @@ class ComprehensiveMarketDashboard:
         dollar = self.market_data['dollar_index']
         gold = self.market_data['gold']
         silver = self.market_data['silver']
+        
+        # USA Economic Indicators
         usa_rate = self.market_data['usa_interest_rate']
-        usa_inflation = self.market_data['usa_inflation']
-        india_rate = self.market_data['india_interest_rate']
+        usa_fomc = self.market_data['usa_fomc']
         usa_cpi = self.market_data['usa_cpi']
+        usa_core_cpi = self.market_data['usa_core_cpi']
+        usa_inflation = self.market_data['usa_inflation']
+        usa_ppi = self.market_data['usa_ppi']
+        usa_gdp = self.market_data['usa_gdp']
+        usa_unemployment = self.market_data['usa_unemployment']
+        usa_nfp = self.market_data['usa_nfp']
+        
+        # India Economic Indicators
+        india_rate = self.market_data['india_interest_rate']
+        india_cpi = self.market_data['india_cpi']
+        india_wpi = self.market_data['india_wpi']
+        india_iip = self.market_data['india_iip']
+        india_pmi = self.market_data['india_pmi']
+        india_gdp = self.market_data['india_gdp']
+        india_fiscal = self.market_data['india_fiscal_deficit']
         
         html = f"""<!DOCTYPE html>
 <html lang="en">
@@ -792,10 +917,10 @@ class ComprehensiveMarketDashboard:
         </section>
         
         <section class="economic-indicators-section">
-            <h2 class="section-title">Economic Indicators</h2>
+            <h2 class="section-title">🇺🇸 USA Economic Indicators</h2>
             <div class="indicators-grid">
                 <div class="indicator-card {usa_rate.get('status', 'neutral')}">
-                    <div class="indicator-title">🇺🇸 USA Interest Rate</div>
+                    <div class="indicator-title">💵 Interest Rate</div>
                     <div class="indicator-value">{usa_rate.get('range', 'N/A')}</div>
                     <div class="indicator-change {usa_rate.get('status', 'neutral')}">
                         Fed Funds Rate
@@ -803,8 +928,35 @@ class ComprehensiveMarketDashboard:
                     <div class="indicator-updated">Updated: {usa_rate.get('last_updated', 'N/A')}</div>
                 </div>
                 
+                <div class="indicator-card {usa_fomc.get('status', 'neutral')}">
+                    <div class="indicator-title">🏛️ FOMC</div>
+                    <div class="indicator-value">{usa_fomc.get('value', 'N/A')}</div>
+                    <div class="indicator-change {usa_fomc.get('status', 'neutral')}">
+                        Next: {usa_fomc.get('next_meeting', 'N/A')}
+                    </div>
+                    <div class="indicator-updated">Last: {usa_fomc.get('last_decision', 'N/A')}</div>
+                </div>
+                
+                <div class="indicator-card {usa_cpi.get('status', 'neutral')}">
+                    <div class="indicator-title">📊 CPI</div>
+                    <div class="indicator-value">{usa_cpi.get('value', 'N/A')}</div>
+                    <div class="indicator-change {usa_cpi.get('status', 'neutral')}">
+                        {usa_cpi.get('change', 'N/A')}% MoM | {usa_cpi.get('yoy', 'N/A')} YoY
+                    </div>
+                    <div class="indicator-updated">Updated: {usa_cpi.get('last_updated', 'N/A')}</div>
+                </div>
+                
+                <div class="indicator-card {usa_core_cpi.get('status', 'neutral')}">
+                    <div class="indicator-title">📈 Core CPI</div>
+                    <div class="indicator-value">{usa_core_cpi.get('value', 'N/A')}%</div>
+                    <div class="indicator-change {usa_core_cpi.get('status', 'neutral')}">
+                        {usa_core_cpi.get('yoy', 'N/A')} YoY
+                    </div>
+                    <div class="indicator-updated">Updated: {usa_core_cpi.get('last_updated', 'N/A')}</div>
+                </div>
+                
                 <div class="indicator-card {usa_inflation.get('status', 'neutral')}">
-                    <div class="indicator-title">📊 USA Inflation</div>
+                    <div class="indicator-title">📉 Inflation</div>
                     <div class="indicator-value">{usa_inflation.get('value', 'N/A')}%</div>
                     <div class="indicator-change {usa_inflation.get('status', 'neutral')}">
                         YoY {usa_inflation.get('change', 'N/A')}%
@@ -812,8 +964,49 @@ class ComprehensiveMarketDashboard:
                     <div class="indicator-updated">Updated: {usa_inflation.get('last_updated', 'N/A')}</div>
                 </div>
                 
+                <div class="indicator-card {usa_ppi.get('status', 'neutral')}">
+                    <div class="indicator-title">🏭 PPI</div>
+                    <div class="indicator-value">{usa_ppi.get('value', 'N/A')}%</div>
+                    <div class="indicator-change {usa_ppi.get('status', 'neutral')}">
+                        {usa_ppi.get('yoy', 'N/A')} YoY
+                    </div>
+                    <div class="indicator-updated">Updated: {usa_ppi.get('last_updated', 'N/A')}</div>
+                </div>
+                
+                <div class="indicator-card {usa_gdp.get('status', 'neutral')}">
+                    <div class="indicator-title">💹 GDP Growth</div>
+                    <div class="indicator-value">{usa_gdp.get('value', 'N/A')}%</div>
+                    <div class="indicator-change {usa_gdp.get('status', 'neutral')}">
+                        {usa_gdp.get('quarter', 'N/A')}
+                    </div>
+                    <div class="indicator-updated">Updated: {usa_gdp.get('last_updated', 'N/A')}</div>
+                </div>
+                
+                <div class="indicator-card {usa_unemployment.get('status', 'neutral')}">
+                    <div class="indicator-title">👔 Unemployment</div>
+                    <div class="indicator-value">{usa_unemployment.get('value', 'N/A')}%</div>
+                    <div class="indicator-change {usa_unemployment.get('status', 'neutral')}">
+                        Unemployment Rate
+                    </div>
+                    <div class="indicator-updated">Updated: {usa_unemployment.get('last_updated', 'N/A')}</div>
+                </div>
+                
+                <div class="indicator-card {usa_nfp.get('status', 'neutral')}">
+                    <div class="indicator-title">👥 NFP</div>
+                    <div class="indicator-value">{usa_nfp.get('value', 'N/A')}</div>
+                    <div class="indicator-change {usa_nfp.get('status', 'neutral')}">
+                        Non-Farm Payrolls
+                    </div>
+                    <div class="indicator-updated">Updated: {usa_nfp.get('last_updated', 'N/A')}</div>
+                </div>
+            </div>
+        </section>
+        
+        <section class="economic-indicators-section">
+            <h2 class="section-title">🇮🇳 India Economic Indicators</h2>
+            <div class="indicators-grid">
                 <div class="indicator-card {india_rate.get('status', 'neutral')}">
-                    <div class="indicator-title">🇮🇳 India Repo Rate</div>
+                    <div class="indicator-title">💰 Repo Rate</div>
                     <div class="indicator-value">{india_rate.get('value', 'N/A')}%</div>
                     <div class="indicator-change {india_rate.get('status', 'neutral')}">
                         RBI Policy Rate
@@ -821,13 +1014,58 @@ class ComprehensiveMarketDashboard:
                     <div class="indicator-updated">Updated: {india_rate.get('last_updated', 'N/A')}</div>
                 </div>
                 
-                <div class="indicator-card {usa_cpi.get('status', 'neutral')}">
-                    <div class="indicator-title">📈 USA CPI</div>
-                    <div class="indicator-value">{usa_cpi.get('value', 'N/A')}</div>
-                    <div class="indicator-change {usa_cpi.get('status', 'neutral')}">
-                        {usa_cpi.get('change', 'N/A')}% MoM | {usa_cpi.get('yoy', 'N/A')} YoY
+                <div class="indicator-card {india_cpi.get('status', 'neutral')}">
+                    <div class="indicator-title">📊 CPI</div>
+                    <div class="indicator-value">{india_cpi.get('value', 'N/A')}%</div>
+                    <div class="indicator-change {india_cpi.get('status', 'neutral')}">
+                        {india_cpi.get('yoy', 'N/A')} YoY
                     </div>
-                    <div class="indicator-updated">Updated: {usa_cpi.get('last_updated', 'N/A')}</div>
+                    <div class="indicator-updated">Updated: {india_cpi.get('last_updated', 'N/A')}</div>
+                </div>
+                
+                <div class="indicator-card {india_wpi.get('status', 'neutral')}">
+                    <div class="indicator-title">📈 WPI</div>
+                    <div class="indicator-value">{india_wpi.get('value', 'N/A')}%</div>
+                    <div class="indicator-change {india_wpi.get('status', 'neutral')}">
+                        {india_wpi.get('yoy', 'N/A')} YoY
+                    </div>
+                    <div class="indicator-updated">Updated: {india_wpi.get('last_updated', 'N/A')}</div>
+                </div>
+                
+                <div class="indicator-card {india_iip.get('status', 'neutral')}">
+                    <div class="indicator-title">🏭 IIP</div>
+                    <div class="indicator-value">{india_iip.get('value', 'N/A')}%</div>
+                    <div class="indicator-change {india_iip.get('status', 'neutral')}">
+                        {india_iip.get('yoy', 'N/A')} YoY
+                    </div>
+                    <div class="indicator-updated">Updated: {india_iip.get('last_updated', 'N/A')}</div>
+                </div>
+                
+                <div class="indicator-card {india_pmi.get('status', 'neutral')}">
+                    <div class="indicator-title">📉 PMI</div>
+                    <div class="indicator-value">{india_pmi.get('value', 'N/A')}</div>
+                    <div class="indicator-change {india_pmi.get('status', 'neutral')}">
+                        Manufacturing PMI
+                    </div>
+                    <div class="indicator-updated">Updated: {india_pmi.get('last_updated', 'N/A')}</div>
+                </div>
+                
+                <div class="indicator-card {india_gdp.get('status', 'neutral')}">
+                    <div class="indicator-title">💹 GDP Growth</div>
+                    <div class="indicator-value">{india_gdp.get('value', 'N/A')}%</div>
+                    <div class="indicator-change {india_gdp.get('status', 'neutral')}">
+                        {india_gdp.get('quarter', 'N/A')}
+                    </div>
+                    <div class="indicator-updated">Updated: {india_gdp.get('last_updated', 'N/A')}</div>
+                </div>
+                
+                <div class="indicator-card {india_fiscal.get('status', 'neutral')}">
+                    <div class="indicator-title">🏛️ Fiscal Deficit</div>
+                    <div class="indicator-value">{india_fiscal.get('value', 'N/A')}%</div>
+                    <div class="indicator-change {india_fiscal.get('status', 'neutral')}">
+                        {india_fiscal.get('percent_gdp', 'N/A')}
+                    </div>
+                    <div class="indicator-updated">Updated: {india_fiscal.get('last_updated', 'N/A')}</div>
                 </div>
             </div>
         </section>
@@ -913,15 +1151,17 @@ class ComprehensiveMarketDashboard:
         print("✅ SUCCESS! Dashboard generated: index.html")
         print("="*70)
         print(f"\n📊 Dashboard includes:")
-        print(f"  • 12 Total indicators (8 markets + 4 economic)")
+        print(f"  • 8 Live market indicators")
+        print(f"  • 9 USA economic indicators:")
+        print(f"    - Interest Rate, FOMC, CPI, Core CPI, Inflation")
+        print(f"    - PPI, GDP, Unemployment Rate, NFP")
+        print(f"  • 7 India economic indicators:")
+        print(f"    - Repo Rate, CPI, WPI, IIP, PMI")
+        print(f"    - GDP Growth, Fiscal Deficit")
         print(f"  • ✅ Proper IST timezone: {self.market_data['timestamp']}")
-        print(f"  • ✅ USA Interest Rate (with last updated date)")
-        print(f"  • ✅ USA Inflation Rate (with last updated date)")
-        print(f"  • ✅ India Repo Rate (with last updated date)")
-        print(f"  • ✅ USA CPI Data (with last updated date)")
         total_articles = sum(len(v) for v in self.news_data.values())
         print(f"  • {total_articles} current news articles")
-        print("\n💡 All times now show in IST timezone!")
+        print("\n💡 Total: 24 economic indicators organized by country!")
         print("="*70 + "\n")
 
 if __name__ == "__main__":
