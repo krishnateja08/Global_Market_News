@@ -1,17 +1,22 @@
 #!/usr/bin/env python3
 """
-Global Market News Impact on Indian Stock Market - API Enhanced Version
-Fetches real-time data from various financial APIs
+Comprehensive Global Market News & Indicators Dashboard
+Combines real-time market data with RSS news feeds from multiple sources
 """
 
 import requests
 from datetime import datetime
 import json
-import os
-from typing import Dict, Any
+import sys
 
-# Install required packages:
-# pip install requests yfinance python-dotenv
+# Check and install feedparser if needed
+try:
+    import feedparser
+except ImportError:
+    print("Installing feedparser...")
+    import subprocess
+    subprocess.check_call(['pip', 'install', 'feedparser', '--break-system-packages'])
+    import feedparser
 
 try:
     import yfinance as yf
@@ -20,26 +25,40 @@ except ImportError:
     YFINANCE_AVAILABLE = False
     print("⚠️  yfinance not installed. Install with: pip install yfinance")
 
-class GlobalMarketNewsFetcherAPI:
+class ComprehensiveMarketDashboard:
     def __init__(self):
         self.headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
         }
-        self.news_data = {
+        self.market_data = {
             'gift_nifty': {},
             'us_markets': {},
             'crude_oil': {},
             'dollar_index': {},
-            'major_news': [],
             'timestamp': datetime.now().strftime('%B %d, %Y at %I:%M %p IST')
         }
+        self.news_data = {
+            'economic': [],
+            'corporate': [],
+            'geopolitical': [],
+            'markets': [],
+            'india': []
+        }
+    
+    # ========== MARKET DATA FETCHING ==========
+    
+    def fetch_market_indicators(self):
+        """Fetch all market indicators"""
+        print("\n🚀 Fetching market indicators...")
+        self.fetch_nifty_data()
+        self.fetch_us_markets_data()
+        self.fetch_commodities_data()
     
     def fetch_nifty_data(self):
-        """Fetch Nifty 50 data using yfinance"""
+        """Fetch Nifty 50 data"""
         try:
             if YFINANCE_AVAILABLE:
                 nifty = yf.Ticker("^NSEI")
-                data = nifty.info
                 history = nifty.history(period="2d")
                 
                 if not history.empty:
@@ -48,7 +67,7 @@ class GlobalMarketNewsFetcherAPI:
                     change = current_price - prev_price
                     pct_change = (change / prev_price) * 100
                     
-                    self.news_data['gift_nifty'] = {
+                    self.market_data['gift_nifty'] = {
                         'value': f"{current_price:,.2f}",
                         'change': f"{change:+.2f}",
                         'pchange': f"{pct_change:+.2f}",
@@ -59,10 +78,9 @@ class GlobalMarketNewsFetcherAPI:
                     raise Exception("No history data")
             else:
                 raise Exception("yfinance not available")
-                
         except Exception as e:
             print(f"⚠️  Using fallback Nifty data: {e}")
-            self.news_data['gift_nifty'] = {
+            self.market_data['gift_nifty'] = {
                 'value': '23,500.00',
                 'change': '+125.50',
                 'pchange': '+0.54',
@@ -70,74 +88,61 @@ class GlobalMarketNewsFetcherAPI:
             }
     
     def fetch_us_markets_data(self):
-        """Fetch US market indices using yfinance"""
+        """Fetch US market indices"""
         try:
             if YFINANCE_AVAILABLE:
-                # Dow Jones
-                dow = yf.Ticker("^DJI")
-                dow_data = dow.history(period="1d")
-                
-                # S&P 500
-                sp500 = yf.Ticker("^GSPC")
-                sp500_data = sp500.history(period="1d")
-                
-                # Nasdaq
-                nasdaq = yf.Ticker("^IXIC")
-                nasdaq_data = nasdaq.history(period="1d")
-                
-                def format_market_data(ticker_data, name):
-                    if not ticker_data.empty:
-                        current = ticker_data['Close'].iloc[-1]
-                        open_price = ticker_data['Open'].iloc[-1]
-                        change = current - open_price
-                        pct_change = (change / open_price) * 100
-                        
-                        print(f"✅ {name}: {current:,.2f} ({pct_change:+.2f}%)")
-                        
-                        return {
-                            'value': f"{current:,.2f}",
-                            'change': f"{change:+.2f}",
-                            'pchange': f"{pct_change:+.2f}",
-                            'status': 'positive' if change >= 0 else 'negative'
-                        }
-                    return {'value': 'N/A', 'change': '0.0', 'pchange': '0.0', 'status': 'neutral'}
-                
-                self.news_data['us_markets'] = {
-                    'dow': format_market_data(dow_data, 'Dow Jones'),
-                    'sp500': format_market_data(sp500_data, 'S&P 500'),
-                    'nasdaq': format_market_data(nasdaq_data, 'Nasdaq')
+                indices = {
+                    'dow': '^DJI',
+                    'sp500': '^GSPC',
+                    'nasdaq': '^IXIC'
                 }
+                
+                result = {}
+                for name, ticker in indices.items():
+                    try:
+                        data = yf.Ticker(ticker).history(period="1d")
+                        if not data.empty:
+                            current = data['Close'].iloc[-1]
+                            open_price = data['Open'].iloc[-1]
+                            change = current - open_price
+                            pct_change = (change / open_price) * 100
+                            
+                            result[name] = {
+                                'value': f"{current:,.2f}",
+                                'change': f"{change:+.2f}",
+                                'pchange': f"{pct_change:+.2f}",
+                                'status': 'positive' if change >= 0 else 'negative'
+                            }
+                            print(f"✅ {name.upper()}: {current:,.2f} ({pct_change:+.2f}%)")
+                    except:
+                        result[name] = {'value': 'N/A', 'change': '0.0', 'pchange': '0.0', 'status': 'neutral'}
+                
+                self.market_data['us_markets'] = result
             else:
                 raise Exception("yfinance not available")
-                
         except Exception as e:
-            print(f"⚠️  Using fallback US market data: {e}")
-            self.news_data['us_markets'] = {
+            print(f"⚠️  Using fallback US market data")
+            self.market_data['us_markets'] = {
                 'dow': {'value': '43,500.00', 'change': '+150.00', 'pchange': '+0.35', 'status': 'positive'},
                 'sp500': {'value': '5,875.00', 'change': '+25.50', 'pchange': '+0.44', 'status': 'positive'},
                 'nasdaq': {'value': '18,350.00', 'change': '+75.00', 'pchange': '+0.41', 'status': 'positive'}
             }
     
     def fetch_commodities_data(self):
-        """Fetch commodity prices using yfinance"""
+        """Fetch commodity prices"""
         try:
             if YFINANCE_AVAILABLE:
-                # Crude Oil (WTI)
+                # Crude Oil
                 oil = yf.Ticker("CL=F")
                 oil_data = oil.history(period="1d")
                 
-                # Dollar Index
-                dxy = yf.Ticker("DX-Y.NYB")
-                dxy_data = dxy.history(period="1d")
-                
-                # Process Oil
                 if not oil_data.empty:
                     oil_price = oil_data['Close'].iloc[-1]
                     oil_open = oil_data['Open'].iloc[-1]
                     oil_change = oil_price - oil_open
                     oil_pct = (oil_change / oil_open) * 100
                     
-                    self.news_data['crude_oil'] = {
+                    self.market_data['crude_oil'] = {
                         'value': f"{oil_price:.2f}",
                         'change': f"{oil_change:+.2f}",
                         'pchange': f"{oil_pct:+.2f}",
@@ -145,14 +150,17 @@ class GlobalMarketNewsFetcherAPI:
                     }
                     print(f"✅ Crude Oil: ${oil_price:.2f} ({oil_pct:+.2f}%)")
                 
-                # Process Dollar Index
+                # Dollar Index
+                dxy = yf.Ticker("DX-Y.NYB")
+                dxy_data = dxy.history(period="1d")
+                
                 if not dxy_data.empty:
                     dxy_price = dxy_data['Close'].iloc[-1]
                     dxy_open = dxy_data['Open'].iloc[-1]
                     dxy_change = dxy_price - dxy_open
                     dxy_pct = (dxy_change / dxy_open) * 100
                     
-                    self.news_data['dollar_index'] = {
+                    self.market_data['dollar_index'] = {
                         'value': f"{dxy_price:.2f}",
                         'change': f"{dxy_change:+.2f}",
                         'pchange': f"{dxy_pct:+.2f}",
@@ -161,98 +169,90 @@ class GlobalMarketNewsFetcherAPI:
                     print(f"✅ Dollar Index: {dxy_price:.2f} ({dxy_pct:+.2f}%)")
             else:
                 raise Exception("yfinance not available")
-                
         except Exception as e:
-            print(f"⚠️  Using fallback commodity data: {e}")
-            self.news_data['crude_oil'] = {
+            print(f"⚠️  Using fallback commodity data")
+            self.market_data['crude_oil'] = {
                 'value': '78.50',
                 'change': '+1.25',
                 'pchange': '+1.62',
                 'status': 'positive'
             }
-            self.news_data['dollar_index'] = {
+            self.market_data['dollar_index'] = {
                 'value': '104.25',
                 'change': '-0.15',
                 'pchange': '-0.14',
                 'status': 'negative'
             }
     
-    def fetch_major_news(self):
-        """Fetch major market news and impact factors"""
-        self.news_data['major_news'] = [
-            {
-                'title': 'US Federal Reserve Policy Update',
-                'description': 'Monitor Fed rate decisions and policy statements affecting global liquidity. Current stance impacts FII flows into Indian markets.',
-                'impact': 'high',
-                'category': 'Monetary Policy',
-                'icon': '🏦'
-            },
-            {
-                'title': 'GIFT Nifty Trading Activity',
-                'description': 'Early indicator of Indian market direction based on overnight global developments. Tracks Nifty futures on GIFT City exchange.',
-                'impact': 'high',
-                'category': 'Market Indicators',
-                'icon': '🎯'
-            },
-            {
-                'title': 'Crude Oil Price Movements',
-                'description': 'Oil price changes impact India\'s import bill (85%+ import dependency) and inflation outlook. Key driver for energy sector stocks.',
-                'impact': 'high',
-                'category': 'Commodities',
-                'icon': '🛢️'
-            },
-            {
-                'title': 'Dollar Index Fluctuations',
-                'description': 'USD strength affects FII flows and emerging market investments. Weak dollar typically benefits Indian equities.',
-                'impact': 'medium',
-                'category': 'Currency',
-                'icon': '💵'
-            },
-            {
-                'title': 'US Tech Sector Performance',
-                'description': 'Nasdaq movements impact Indian IT stocks significantly. Many Indian IT companies derive large revenues from US clients.',
-                'impact': 'high',
-                'category': 'Technology',
-                'icon': '💻'
-            },
-            {
-                'title': 'Global Geopolitical Developments',
-                'description': 'Trade policies, conflicts, and international relations affecting market sentiment. Supply chain disruptions and sanctions impact various sectors.',
-                'impact': 'medium',
-                'category': 'Geopolitics',
-                'icon': '🌍'
-            },
-            {
-                'title': 'Foreign Institutional Investment (FII) Flows',
-                'description': 'Net FII buying/selling activity directly impacts market direction. Strong inflows support higher valuations.',
-                'impact': 'high',
-                'category': 'Market Flow',
-                'icon': '💰'
-            },
-            {
-                'title': 'China Economic Data',
-                'description': 'China\'s economic performance affects global commodity demand and emerging market sentiment, impacting Indian exports.',
-                'impact': 'medium',
-                'category': 'Global Economy',
-                'icon': '🇨🇳'
-            }
-        ]
+    # ========== NEWS FETCHING ==========
+    
+    def fetch_rss_feed(self, url, category, source_name):
+        """Fetch and parse RSS feed"""
+        try:
+            feed = feedparser.parse(url)
+            
+            for entry in feed.entries[:8]:  # Get top 8 from each feed
+                self.news_data[category].append({
+                    'title': entry.get('title', 'No title'),
+                    'link': entry.get('link', '#'),
+                    'published': entry.get('published', 'Unknown'),
+                    'summary': entry.get('summary', '')[:250] + '...' if entry.get('summary') else '',
+                    'source': source_name
+                })
+            print(f"  ✅ Fetched {len(feed.entries[:8])} articles from {source_name}")
+        except Exception as e:
+            print(f"  ⚠️  Error fetching {source_name}: {e}")
+    
+    def fetch_all_news(self):
+        """Fetch news from various sources"""
+        print("\n📰 Fetching news from sources...")
+        
+        feeds = {
+            'economic': [
+                ('https://www.reuters.com/rssFeed/businessNews', 'Reuters Business'),
+                ('https://feeds.bloomberg.com/markets/news.rss', 'Bloomberg Markets'),
+            ],
+            'corporate': [
+                ('https://www.reuters.com/rssFeed/companyNews', 'Reuters Companies'),
+                ('https://feeds.finance.yahoo.com/rss/2.0/headline', 'Yahoo Finance'),
+            ],
+            'geopolitical': [
+                ('https://www.reuters.com/rssFeed/worldNews', 'Reuters World'),
+            ],
+            'markets': [
+                ('https://www.cnbc.com/id/100003114/device/rss/rss.html', 'CNBC Markets'),
+                ('https://www.marketwatch.com/rss/topstories', 'MarketWatch'),
+            ],
+            'india': [
+                ('https://www.moneycontrol.com/rss/latestnews.xml', 'MoneyControl'),
+                ('https://economictimes.indiatimes.com/markets/rssfeeds/1977021501.cms', 'Economic Times'),
+            ]
+        }
+        
+        for category, feed_list in feeds.items():
+            print(f"\n📂 Fetching {category.upper()} news:")
+            for url, source in feed_list:
+                self.fetch_rss_feed(url, category, source)
+        
+        total_articles = sum(len(v) for v in self.news_data.values())
+        print(f"\n✅ Total articles fetched: {total_articles}")
+    
+    # ========== HTML GENERATION ==========
     
     def generate_html(self):
-        """Generate beautiful HTML dashboard with real data"""
-        # Get market data with proper formatting
-        gift_nifty = self.news_data['gift_nifty']
-        us_markets = self.news_data['us_markets']
-        crude = self.news_data['crude_oil']
-        dollar = self.news_data['dollar_index']
+        """Generate comprehensive HTML dashboard"""
+        gift_nifty = self.market_data['gift_nifty']
+        us_markets = self.market_data['us_markets']
+        crude = self.market_data['crude_oil']
+        dollar = self.market_data['dollar_index']
         
-        html_content = f"""<!DOCTYPE html>
+        html = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Real-time global market indicators and news impacting Indian stock market - GIFT Nifty, US markets, commodities">
-    <title>Global Market Impact on Indian Stocks | Live Dashboard</title>
+    <meta name="description" content="Comprehensive global market indicators and news impacting Indian stock market">
+    <title>Global Market News & Indicators Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Space+Mono:wght@400;700&family=IBM+Plex+Sans:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         :root {{
@@ -265,6 +265,9 @@ class GlobalMarketNewsFetcherAPI:
             --accent-green: #00ff88;
             --accent-red: #ff4757;
             --accent-yellow: #ffd93d;
+            --accent-purple: #a78bfa;
+            --accent-pink: #f093fb;
+            --accent-cyan: #4facfe;
             --border-color: #2a3a5f;
             --card-shadow: rgba(0, 0, 0, 0.5);
         }}
@@ -304,7 +307,7 @@ class GlobalMarketNewsFetcherAPI:
         }}
         
         .container {{
-            max-width: 1400px;
+            max-width: 1600px;
             margin: 0 auto;
             position: relative;
             z-index: 1;
@@ -312,7 +315,7 @@ class GlobalMarketNewsFetcherAPI:
         
         header {{
             text-align: center;
-            margin-bottom: 60px;
+            margin-bottom: 40px;
             padding: 40px 20px;
             background: rgba(26, 35, 71, 0.5);
             backdrop-filter: blur(10px);
@@ -396,6 +399,18 @@ class GlobalMarketNewsFetcherAPI:
             border-color: var(--accent-blue);
         }}
         
+        .section-title {{
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5em;
+            font-weight: 900;
+            margin-bottom: 30px;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-green));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }}
+        
+        /* Market Indicators Grid */
         .indicators-grid {{
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -482,90 +497,142 @@ class GlobalMarketNewsFetcherAPI:
             background: rgba(168, 178, 209, 0.1);
         }}
         
-        .section-title {{
-            font-family: 'Playfair Display', serif;
-            font-size: 2.5em;
-            font-weight: 900;
-            margin-bottom: 30px;
-            background: linear-gradient(135deg, var(--accent-blue), var(--accent-green));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+        /* News Section */
+        .news-section {{
+            margin-top: 60px;
         }}
         
         .news-grid {{
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 25px;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
         }}
         
-        .news-card {{
+        .news-category-card {{
             background: rgba(26, 35, 71, 0.6);
             backdrop-filter: blur(10px);
-            padding: 25px;
+            padding: 30px;
             border-radius: 15px;
             border: 1px solid var(--border-color);
             box-shadow: 0 10px 30px var(--card-shadow);
             transition: all 0.3s ease;
-            position: relative;
         }}
         
-        .news-card:hover {{
-            transform: translateY(-5px);
+        .news-category-card:hover {{
+            transform: translateY(-3px);
             box-shadow: 0 15px 40px rgba(74, 158, 255, 0.3);
         }}
         
-        .impact-badge {{
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-family: 'Space Mono', monospace;
-            font-size: 0.7em;
-            text-transform: uppercase;
-            font-weight: 700;
+        .category-header {{
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid;
         }}
         
-        .impact-high {{
-            background: rgba(255, 71, 87, 0.2);
-            color: var(--accent-red);
-            border: 1px solid var(--accent-red);
-        }}
-        
-        .impact-medium {{
-            background: rgba(255, 217, 61, 0.2);
-            color: var(--accent-yellow);
-            border: 1px solid var(--accent-yellow);
-        }}
-        
-        .news-icon {{
+        .category-icon {{
             font-size: 2em;
-            margin-bottom: 10px;
         }}
         
-        .news-category {{
-            font-family: 'Space Mono', monospace;
-            font-size: 0.75em;
-            color: var(--accent-green);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 10px;
-        }}
-        
-        .news-title {{
+        .category-title {{
             font-family: 'Playfair Display', serif;
-            font-size: 1.4em;
+            font-size: 1.6em;
             font-weight: 700;
-            color: var(--text-primary);
-            margin-bottom: 12px;
-            line-height: 1.3;
         }}
         
-        .news-description {{
+        .economic .category-header {{ border-color: var(--accent-pink); }}
+        .economic .category-title {{ color: var(--accent-pink); }}
+        
+        .corporate .category-header {{ border-color: var(--accent-cyan); }}
+        .corporate .category-title {{ color: var(--accent-cyan); }}
+        
+        .geopolitical .category-header {{ border-color: var(--accent-green); }}
+        .geopolitical .category-title {{ color: var(--accent-green); }}
+        
+        .markets .category-header {{ border-color: var(--accent-red); }}
+        .markets .category-title {{ color: var(--accent-red); }}
+        
+        .india .category-header {{ border-color: var(--accent-yellow); }}
+        .india .category-title {{ color: var(--accent-yellow); }}
+        
+        .news-item {{
+            padding: 18px;
+            margin-bottom: 15px;
+            background: rgba(10, 14, 39, 0.4);
+            border-radius: 10px;
+            border-left: 3px solid var(--accent-blue);
+            transition: all 0.2s ease;
+        }}
+        
+        .news-item:hover {{
+            background: rgba(10, 14, 39, 0.6);
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(74, 158, 255, 0.2);
+        }}
+        
+        .economic .news-item {{ border-left-color: var(--accent-pink); }}
+        .corporate .news-item {{ border-left-color: var(--accent-cyan); }}
+        .geopolitical .news-item {{ border-left-color: var(--accent-green); }}
+        .markets .news-item {{ border-left-color: var(--accent-red); }}
+        .india .news-item {{ border-left-color: var(--accent-yellow); }}
+        
+        .news-item h3 {{
+            font-size: 1.05em;
+            margin-bottom: 10px;
+            line-height: 1.5;
+            font-weight: 600;
+        }}
+        
+        .news-item a {{
+            color: var(--text-primary);
+            text-decoration: none;
+            transition: color 0.2s;
+        }}
+        
+        .news-item a:hover {{
+            color: var(--accent-blue);
+        }}
+        
+        .news-meta {{
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            margin-top: 8px;
+            font-size: 0.8em;
             color: var(--text-secondary);
+            flex-wrap: wrap;
+        }}
+        
+        .news-source {{
+            display: inline-block;
+            background: var(--accent-blue);
+            color: white;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-family: 'Space Mono', monospace;
+        }}
+        
+        .news-date {{
+            font-family: 'Space Mono', monospace;
+        }}
+        
+        .news-summary {{
+            color: var(--text-secondary);
+            font-size: 0.9em;
+            margin-top: 10px;
             line-height: 1.6;
-            font-size: 0.95em;
+        }}
+        
+        .no-news {{
+            color: var(--text-secondary);
+            font-style: italic;
+            padding: 20px;
+            text-align: center;
+            opacity: 0.7;
         }}
         
         footer {{
@@ -583,18 +650,25 @@ class GlobalMarketNewsFetcherAPI:
             color: var(--text-secondary);
         }}
         
+        @media (max-width: 1024px) {{
+            .news-grid {{
+                grid-template-columns: 1fr;
+            }}
+        }}
+        
         @media (max-width: 768px) {{
             h1 {{ font-size: 2.2em; }}
-            .indicators-grid, .news-grid {{ grid-template-columns: 1fr; }}
+            .indicators-grid {{ grid-template-columns: 1fr; }}
+            .quick-links {{ flex-direction: column; }}
         }}
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>Global Market Impact</h1>
-            <div class="subtitle">On Indian Stock Market</div>
-            <div class="timestamp">📅 Last Updated: {self.news_data['timestamp']}</div>
+            <h1>🌍 Global Market Dashboard</h1>
+            <div class="subtitle">Live Indicators & News Feed</div>
+            <div class="timestamp">📅 Last Updated: {self.market_data['timestamp']}</div>
             
             <div class="quick-links">
                 <a href="https://krishnateja08.github.io/Nifty_option_chain/" class="quick-link" target="_blank">
@@ -660,64 +734,110 @@ class GlobalMarketNewsFetcherAPI:
         </section>
         
         <section class="news-section">
-            <h2 class="section-title">Major Impact Factors</h2>
+            <h2 class="section-title">Global News Feed</h2>
             <div class="news-grid">
 """
         
-        for news in self.news_data['major_news']:
-            impact_class = f"impact-{news['impact']}"
-            html_content += f"""
-                <div class="news-card">
-                    <span class="impact-badge {impact_class}">{news['impact']} impact</span>
-                    <div class="news-icon">{news['icon']}</div>
-                    <div class="news-category">{news['category']}</div>
-                    <h3 class="news-title">{news['title']}</h3>
-                    <p class="news-description">{news['description']}</p>
+        # Add news categories
+        categories = {
+            'india': ('🇮🇳 Indian Markets', 'India-specific market news and developments'),
+            'economic': ('💰 Economic & Policy', 'Interest rates, inflation, GDP, employment'),
+            'corporate': ('🏢 Corporate News', 'Earnings, M&A, executive changes'),
+            'geopolitical': ('🌍 Geopolitical Events', 'Global politics, trade, conflicts'),
+            'markets': ('📊 Market Updates', 'Stock movements, commodities, currencies')
+        }
+        
+        for cat_key, (title, desc) in categories.items():
+            html += f"""
+                <div class="news-category-card {cat_key}">
+                    <div class="category-header">
+                        <h3 class="category-title">{title}</h3>
+                    </div>
+"""
+            
+            if self.news_data[cat_key]:
+                for item in self.news_data[cat_key]:
+                    summary_html = f'<p class="news-summary">{item["summary"]}</p>' if item.get('summary') else ''
+                    html += f"""
+                    <div class="news-item">
+                        <h3><a href="{item['link']}" target="_blank">{item['title']}</a></h3>
+                        <div class="news-meta">
+                            <span class="news-source">{item['source']}</span>
+                            <span class="news-date">{item.get('published', 'Unknown date')}</span>
+                        </div>
+                        {summary_html}
+                    </div>
+"""
+            else:
+                html += '<p class="no-news">No news available in this category</p>'
+            
+            html += """
                 </div>
 """
         
-        html_content += """
+        html += """
             </div>
         </section>
         
         <footer>
-            <p>🔄 Data updates in real-time | Sources: NSE, Yahoo Finance, Market APIs</p>
-            <p style="margin-top: 10px; opacity: 0.6;">Built with Python & yfinance | Hosted on GitHub Pages</p>
+            <p>🔄 Data updates in real-time | Sources: NSE, Yahoo Finance, Reuters, Bloomberg, CNBC, MoneyControl</p>
+            <p style="margin-top: 10px; opacity: 0.6;">Built with Python, yfinance & feedparser | Hosted on GitHub Pages</p>
             <p style="margin-top: 10px; font-size: 0.75em; opacity: 0.5;">⚠️ For informational purposes only. Not financial advice.</p>
         </footer>
     </div>
+    
+    <script>
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
 </body>
 </html>"""
         
-        return html_content
+        return html
     
     def run(self):
         """Main execution"""
-        print("\n🚀 Fetching global market data...")
-        print("=" * 50)
+        print("\n" + "="*60)
+        print("🚀 COMPREHENSIVE MARKET DASHBOARD GENERATOR")
+        print("="*60)
         
-        self.fetch_nifty_data()
-        self.fetch_us_markets_data()
-        self.fetch_commodities_data()
-        self.fetch_major_news()
+        # Fetch market data
+        self.fetch_market_indicators()
         
-        print("\n📝 Generating HTML dashboard...")
+        # Fetch news
+        self.fetch_all_news()
+        
+        # Generate HTML
+        print("\n📝 Generating comprehensive HTML dashboard...")
         html_content = self.generate_html()
         
+        # Save to file
         with open('index.html', 'w', encoding='utf-8') as f:
             f.write(html_content)
         
-        print("\n✅ SUCCESS! HTML file generated: index.html")
-        print("=" * 50)
+        print("\n" + "="*60)
+        print("✅ SUCCESS! Dashboard generated: index.html")
+        print("="*60)
+        print("\n📊 Dashboard includes:")
+        print("  • 6 Live market indicators")
+        total_articles = sum(len(v) for v in self.news_data.values())
+        print(f"  • {total_articles} news articles from multiple sources")
+        print("  • 5 news categories (India, Economic, Corporate, Geopolitical, Markets)")
         print("\n📋 Next Steps:")
         print("1. Open index.html in your browser to preview")
-        print("2. Create/update your GitHub repository")
-        print("3. Upload index.html to the repository")
-        print("4. Enable GitHub Pages in Settings")
-        print("5. Your dashboard will be live!")
-        print("\n💡 Tip: Set up GitHub Actions to auto-update every 5 minutes")
-        print("=" * 50)
+        print("2. Upload to GitHub repository")
+        print("3. Enable GitHub Pages")
+        print("4. Your dashboard will be live!")
+        print("\n💡 Tip: Schedule this script to run every 15 minutes via GitHub Actions")
+        print("="*60 + "\n")
 
 if __name__ == "__main__":
-    fetcher = GlobalMarketNewsFetcherAPI()
-    fetcher.run()
+    dashboard = ComprehensiveMarketDashboard()
+    dashboard.run()
