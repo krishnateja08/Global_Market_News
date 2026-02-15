@@ -12,7 +12,7 @@ jobs:
   update-data:
     runs-on: ubuntu-latest
     
-    # 1. FIXES THE 403 ERROR: Grants explicit write access to the GITHUB_TOKEN
+    # FIXES THE 403 ERROR: Grants explicit write access to the workflow token
     permissions:
       contents: write
       pages: write
@@ -33,7 +33,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          # 2. FIXES THE MISSING MODULE: Directly install core libraries
+          # FIXES THE MISSING MODULE ERROR: Force-install core libraries
           pip install yfinance pandas requests
           if [ -f requirements.txt ]; then
             pip install -r requirements.txt
@@ -48,9 +48,9 @@ jobs:
           git config --local user.email "action@github.com"
           git config --local user.name "github-actions[bot]"
           git add index.html
-          # Only commit if there are actual changes to avoid workflow failure
+          # Only commit if index.html actually changed to avoid empty commit errors
           if git diff --staged --quiet; then
-            echo "No changes to index.html"
+            echo "No changes detected in index.html"
           else
             git commit -m "🔄 Auto-update market data - $(date -u +'%Y-%m-%d %H:%M:%S UTC')"
             git push
