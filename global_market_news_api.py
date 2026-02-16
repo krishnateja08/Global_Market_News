@@ -915,7 +915,7 @@ class ComprehensiveMarketDashboard:
         print("\n📝 Generating HTML dashboard with live data fetching...")
         html_content = self.generate_html_with_live_fetch()
         
-        with open('/mnt/user-data/outputs/index.html', 'w', encoding='utf-8') as f:
+        with open('index.html', 'w', encoding='utf-8') as f:
             f.write(html_content)
         
         print("\n" + "="*70)
