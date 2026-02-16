@@ -487,7 +487,7 @@
             <h1>🌍 Global Market Dashboard</h1>
             <div class="subtitle">Real-Time Market Data & Live News Feed</div>
             <div class="live-badge">🔴 LIVE DATA</div>
-            <div class="timestamp">📅 Last Updated: February 17, 2026 at 01:02 AM IST</div>
+            <div class="timestamp">📅 Last Updated: February 17, 2026 at 01:14 AM IST</div>
         </header>
         
         <section class="indicators-section">
@@ -783,34 +783,531 @@
         
         // Fetch news (simulated)
         async function fetchNews() {
-            const newsHTML = `
+            // Market Updates - 10 sources
+            const marketsHTML = `
                 <div class="news-item">
                     <h3><a href="https://www.bloomberg.com/markets" target="_blank" rel="noopener noreferrer">
-                        Global Markets Update - Real-time coverage
+                        Bloomberg Markets - Live Coverage
                     </a></h3>
                     <div class="news-meta">
                         <span class="news-source">Bloomberg</span>
                         <span class="news-date">Live</span>
                     </div>
-                    <p class="news-summary">Visit Bloomberg Markets for the latest real-time news and market analysis</p>
+                    <p class="news-summary">Real-time global market news, stock quotes, and financial analysis</p>
                 </div>
                 <div class="news-item">
                     <h3><a href="https://www.cnbc.com/markets/" target="_blank" rel="noopener noreferrer">
-                        CNBC Markets - Live coverage
+                        CNBC Markets - Live Updates
                     </a></h3>
                     <div class="news-meta">
                         <span class="news-source">CNBC</span>
                         <span class="news-date">Live</span>
                     </div>
-                    <p class="news-summary">Real-time stock market news, analysis and investing tools</p>
+                    <p class="news-summary">Stock market news, business news, financial news and investing tools</p>
+                </div>
+                <div class="news-item">
+                    <h3><a href="https://www.marketwatch.com/" target="_blank" rel="noopener noreferrer">
+                        MarketWatch - Market News
+                    </a></h3>
+                    <div class="news-meta">
+                        <span class="news-source">MarketWatch</span>
+                        <span class="news-date">Live</span>
+                    </div>
+                    <p class="news-summary">Stock market news and financial insights for investors</p>
+                </div>
+                <div class="news-item">
+                    <h3><a href="https://www.reuters.com/markets/" target="_blank" rel="noopener noreferrer">
+                        Reuters Markets - Breaking News
+                    </a></h3>
+                    <div class="news-meta">
+                        <span class="news-source">Reuters</span>
+                        <span class="news-date">Live</span>
+                    </div>
+                    <p class="news-summary">Latest market news, stock market data and global financial updates</p>
+                </div>
+                <div class="news-item">
+                    <h3><a href="https://finance.yahoo.com/topic/stock-market-news/" target="_blank" rel="noopener noreferrer">
+                        Yahoo Finance - Market News
+                    </a></h3>
+                    <div class="news-meta">
+                        <span class="news-source">Yahoo Finance</span>
+                        <span class="news-date">Live</span>
+                    </div>
+                    <p class="news-summary">Stock market news, quotes, charts and trading analysis</p>
+                </div>
+                <div class="news-item">
+                    <h3><a href="https://www.wsj.com/news/markets" target="_blank" rel="noopener noreferrer">
+                        Wall Street Journal - Markets
+                    </a></h3>
+                    <div class="news-meta">
+                        <span class="news-source">WSJ</span>
+                        <span class="news-date">Live</span>
+                    </div>
+                    <p class="news-summary">Markets news, stock quotes, and financial analysis from WSJ</p>
+                </div>
+                <div class="news-item">
+                    <h3><a href="https://www.ft.com/markets" target="_blank" rel="noopener noreferrer">
+                        Financial Times - Markets
+                    </a></h3>
+                    <div class="news-meta">
+                        <span class="news-source">Financial Times</span>
+                        <span class="news-date">Live</span>
+                    </div>
+                    <p class="news-summary">Global financial markets news and data</p>
+                </div>
+                <div class="news-item">
+                    <h3><a href="https://www.investing.com/news/stock-market-news" target="_blank" rel="noopener noreferrer">
+                        Investing.com - Stock Market News
+                    </a></h3>
+                    <div class="news-meta">
+                        <span class="news-source">Investing.com</span>
+                        <span class="news-date">Live</span>
+                    </div>
+                    <p class="news-summary">Latest stock market news and financial market updates</p>
+                </div>
+                <div class="news-item">
+                    <h3><a href="https://seekingalpha.com/market-news" target="_blank" rel="noopener noreferrer">
+                        Seeking Alpha - Market News
+                    </a></h3>
+                    <div class="news-meta">
+                        <span class="news-source">Seeking Alpha</span>
+                        <span class="news-date">Live</span>
+                    </div>
+                    <p class="news-summary">Stock market analysis and investment research</p>
+                </div>
+                <div class="news-item">
+                    <h3><a href="https://www.barrons.com/market-data" target="_blank" rel="noopener noreferrer">
+                        Barron's - Market Data
+                    </a></h3>
+                    <div class="news-meta">
+                        <span class="news-source">Barron's</span>
+                        <span class="news-date">Live</span>
+                    </div>
+                    <p class="news-summary">Investment news, stock picks and market analysis</p>
                 </div>
             `;
             
-            document.getElementById('news-markets').innerHTML = newsHTML;
-            document.getElementById('news-economic').innerHTML = newsHTML.replace(/Markets/g, 'Economics');
-            document.getElementById('news-india').innerHTML = newsHTML.replace(/Bloomberg/g, 'Economic Times').replace(/CNBC/g, 'MoneyControl');
-            document.getElementById('news-corporate').innerHTML = newsHTML.replace(/Markets/g, 'Business');
-            document.getElementById('news-geopolitical').innerHTML = newsHTML.replace(/Markets/g, 'World News');
+            // Economic & Policy - 10 sources
+            const economicHTML = `
+                <div class="news-item">
+                    <h3><a href="https://www.bloomberg.com/economics" target="_blank" rel="noopener noreferrer">
+                        Bloomberg Economics - Live Coverage
+                    </a></h3>
+                    <div class="news-meta">
+                        <span class="news-source">Bloomberg</span>
+                        <span class="news-date">Live</span>
+                    </div>
+                    <p class="news-summary">Economic news, policy updates and global economic analysis</p>
+                </div>
+                <div class="news-item">
+                    <h3><a href="https://www.cnbc.com/economy/" target="_blank" rel="noopener noreferrer">
+                        CNBC Economy - Latest Updates
+                    </a></h3>
+                    <div class="news-meta">
+                        <span class="news-source">CNBC</span>
+                        <span class="news-date">Live</span>
+                    </div>
+                    <p class="news-summary">Economic news, Federal Reserve updates and policy analysis</p>
+                </div>
+                <div class="news-item">
+                    <h3><a href="https://www.reuters.com/business/economy/" target="_blank" rel="noopener noreferrer">
+                        Reuters Economy News
+                    </a></h3>
+                    <div class="news-meta">
+                        <span class="news-source">Reuters</span>
+                        <span class="news-date">Live</span>
+                    </div>
+                    <p class="news-summary">Global economic news and central bank policy updates</p>
+                </div>
+                <div class="news-item">
+                    <h3><a href="https://www.ft.com/global-economy" target="_blank" rel="noopener noreferrer">
+                        Financial Times - Global Economy
+                    </a></h3>
+                    <div class="news-meta">
+                        <span class="news-source">Financial Times</span>
+                        <span class="news-date">Live</span>
+                    </div>
+                    <p class="news-summary">Global economic news and fiscal policy analysis</p>
+                </div>
+                <div class="news-item">
+                    <h3><a href="https://www.wsj.com/news/economy" target="_blank" rel="noopener noreferrer">
+                        WSJ Economy - Breaking News
+                    </a></h3>
+                    <div class="news-meta">
+                        <span class="news-source">Wall Street Journal</span>
+                        <span class="news-date">Live</span>
+                    </div>
+                    <p class="news-summary">Economic news, GDP updates and inflation reports</p>
+                </div>
+                <div class="news-item">
+                    <h3><a href="https://www.economist.com/finance-and-economics" target="_blank" rel="noopener noreferrer">
+                        The Economist - Finance & Economics
+                    </a></h3>
+                    <div class="news-meta">
+                        <span class="news-source">The Economist</span>
+                        <span class="news-date">Updated Daily</span>
+                    </div>
+                    <p class="news-summary">In-depth economic analysis and policy coverage</p>
+                </div>
+                <div class="news-item">
+                    <h3><a href="https://www.federalreserve.gov/newsevents.htm" target="_blank" rel="noopener noreferrer">
+                        Federal Reserve - News & Events
+                    </a></h3>
+                    <div class="news-meta">
+                        <span class="news-source">Federal Reserve</span>
+                        <span class="news-date">Official</span>
+                    </div>
+                    <p class="news-summary">Official Fed announcements, speeches and policy updates</p>
+                </div>
+                <div class="news-item">
+                    <h3><a href="https://www.imf.org/en/News" target="_blank" rel="noopener noreferrer">
+                        IMF News - Economic Updates
+                    </a></h3>
+                    <div class="news-meta">
+                        <span class="news-source">IMF</span>
+                        <span class="news-date">Official</span>
+                    </div>
+                    <p class="news-summary">International economic news and global policy updates</p>
+                </div>
+                <div class="news-item">
+                    <h3><a href="https://www.worldbank.org/en/news" target="_blank" rel="noopener noreferrer">
+                        World Bank - Latest News
+                    </a></h3>
+                    <div class="news-meta">
+                        <span class="news-source">World Bank</span>
+                        <span class="news-date">Official</span>
+                    </div>
+                    <p class="news-summary">Global development news and economic reports</p>
+                </div>
+                <div class="news-item">
+                    <h3><a href="https://tradingeconomics.com/united-states/news" target="_blank" rel="noopener noreferrer">
+                        Trading Economics - US News
+                    </a></h3>
+                    <div class="news-meta">
+                        <span class="news-source">Trading Economics</span>
+                        <span class="news-date">Live</span>
+                    </div>
+                    <p class="news-summary">Economic indicators, forecasts and news updates</p>
+                </div>
+            `;
+            
+            // Indian Markets - 10 sources
+            const indiaHTML = `
+                <div class="news-item">
+                    <h3><a href="https://economictimes.indiatimes.com/markets" target="_blank" rel="noopener noreferrer">
+                        Economic Times Markets - Live Updates
+                    </a></h3>
+                    <div class="news-meta">
+                        <span class="news-source">Economic Times</span>
+                        <span class="news-date">Live</span>
+                    </div>
+                    <p class="news-summary">Indian stock market news, Sensex, Nifty and market analysis</p>
+                </div>
+                <div class="news-item">
+                    <h3><a href="https://www.moneycontrol.com/news/business/markets/" target="_blank" rel="noopener noreferrer">
+                        MoneyControl Markets - Latest News
+                    </a></h3>
+                    <div class="news-meta">
+                        <span class="news-source">MoneyControl</span>
+                        <span class="news-date">Live</span>
+                    </div>
+                    <p class="news-summary">Stock market updates, trading insights and market trends</p>
+                </div>
+                <div class="news-item">
+                    <h3><a href="https://www.livemint.com/market" target="_blank" rel="noopener noreferrer">
+                        Mint - Market News
+                    </a></h3>
+                    <div class="news-meta">
+                        <span class="news-source">Mint</span>
+                        <span class="news-date">Live</span>
+                    </div>
+                    <p class="news-summary">Indian markets, stock analysis and investment news</p>
+                </div>
+                <div class="news-item">
+                    <h3><a href="https://www.businesstoday.in/markets" target="_blank" rel="noopener noreferrer">
+                        Business Today - Markets
+                    </a></h3>
+                    <div class="news-meta">
+                        <span class="news-source">Business Today</span>
+                        <span class="news-date">Live</span>
+                    </div>
+                    <p class="news-summary">Market news, stock recommendations and trading updates</p>
+                </div>
+                <div class="news-item">
+                    <h3><a href="https://www.business-standard.com/markets" target="_blank" rel="noopener noreferrer">
+                        Business Standard - Markets
+                    </a></h3>
+                    <div class="news-meta">
+                        <span class="news-source">Business Standard</span>
+                        <span class="news-date">Live</span>
+                    </div>
+                    <p class="news-summary">Stock market news, BSE, NSE updates and market analysis</p>
+                </div>
+                <div class="news-item">
+                    <h3><a href="https://www.financialexpress.com/market/" target="_blank" rel="noopener noreferrer">
+                        Financial Express - Market
+                    </a></h3>
+                    <div class="news-meta">
+                        <span class="news-source">Financial Express</span>
+                        <span class="news-date">Live</span>
+                    </div>
+                    <p class="news-summary">Market updates, stock news and investment insights</p>
+                </div>
+                <div class="news-item">
+                    <h3><a href="https://www.ndtv.com/business/market" target="_blank" rel="noopener noreferrer">
+                        NDTV Profit - Market News
+                    </a></h3>
+                    <div class="news-meta">
+                        <span class="news-source">NDTV Profit</span>
+                        <span class="news-date">Live</span>
+                    </div>
+                    <p class="news-summary">Latest stock market news and trading updates</p>
+                </div>
+                <div class="news-item">
+                    <h3><a href="https://www.indiatoday.in/business/markets" target="_blank" rel="noopener noreferrer">
+                        India Today - Markets
+                    </a></h3>
+                    <div class="news-meta">
+                        <span class="news-source">India Today</span>
+                        <span class="news-date">Live</span>
+                    </div>
+                    <p class="news-summary">Market news, stock updates and business analysis</p>
+                </div>
+                <div class="news-item">
+                    <h3><a href="https://www.bloombergquint.com/markets" target="_blank" rel="noopener noreferrer">
+                        Bloomberg Quint - Markets
+                    </a></h3>
+                    <div class="news-meta">
+                        <span class="news-source">Bloomberg Quint</span>
+                        <span class="news-date">Live</span>
+                    </div>
+                    <p class="news-summary">Indian stock market news and financial analysis</p>
+                </div>
+                <div class="news-item">
+                    <h3><a href="https://www.thehindubusinessline.com/markets/" target="_blank" rel="noopener noreferrer">
+                        Hindu Business Line - Markets
+                    </a></h3>
+                    <div class="news-meta">
+                        <span class="news-source">Business Line</span>
+                        <span class="news-date">Live</span>
+                    </div>
+                    <p class="news-summary">Market news, stock analysis and trading insights</p>
+                </div>
+            `;
+            
+            // Corporate News - 10 sources
+            const corporateHTML = `
+                <div class="news-item">
+                    <h3><a href="https://www.bloomberg.com/business" target="_blank" rel="noopener noreferrer">
+                        Bloomberg Business - Live Coverage
+                    </a></h3>
+                    <div class="news-meta">
+                        <span class="news-source">Bloomberg</span>
+                        <span class="news-date">Live</span>
+                    </div>
+                    <p class="news-summary">Corporate news, earnings reports and business updates</p>
+                </div>
+                <div class="news-item">
+                    <h3><a href="https://www.reuters.com/business/" target="_blank" rel="noopener noreferrer">
+                        Reuters Business - Breaking News
+                    </a></h3>
+                    <div class="news-meta">
+                        <span class="news-source">Reuters</span>
+                        <span class="news-date">Live</span>
+                    </div>
+                    <p class="news-summary">Global business news and corporate developments</p>
+                </div>
+                <div class="news-item">
+                    <h3><a href="https://www.cnbc.com/business/" target="_blank" rel="noopener noreferrer">
+                        CNBC Business - Latest Updates
+                    </a></h3>
+                    <div class="news-meta">
+                        <span class="news-source">CNBC</span>
+                        <span class="news-date">Live</span>
+                    </div>
+                    <p class="news-summary">Business news, company earnings and corporate strategy</p>
+                </div>
+                <div class="news-item">
+                    <h3><a href="https://www.ft.com/companies" target="_blank" rel="noopener noreferrer">
+                        Financial Times - Companies
+                    </a></h3>
+                    <div class="news-meta">
+                        <span class="news-source">Financial Times</span>
+                        <span class="news-date">Live</span>
+                    </div>
+                    <p class="news-summary">Corporate news, M&A updates and company analysis</p>
+                </div>
+                <div class="news-item">
+                    <h3><a href="https://www.wsj.com/news/business" target="_blank" rel="noopener noreferrer">
+                        WSJ Business - Corporate News
+                    </a></h3>
+                    <div class="news-meta">
+                        <span class="news-source">Wall Street Journal</span>
+                        <span class="news-date">Live</span>
+                    </div>
+                    <p class="news-summary">Business news, earnings and corporate developments</p>
+                </div>
+                <div class="news-item">
+                    <h3><a href="https://fortune.com/section/fortune500/" target="_blank" rel="noopener noreferrer">
+                        Fortune - Business News
+                    </a></h3>
+                    <div class="news-meta">
+                        <span class="news-source">Fortune</span>
+                        <span class="news-date">Updated Daily</span>
+                    </div>
+                    <p class="news-summary">Corporate leadership, earnings and business strategy</p>
+                </div>
+                <div class="news-item">
+                    <h3><a href="https://www.forbes.com/business/" target="_blank" rel="noopener noreferrer">
+                        Forbes Business - Latest News
+                    </a></h3>
+                    <div class="news-meta">
+                        <span class="news-source">Forbes</span>
+                        <span class="news-date">Live</span>
+                    </div>
+                    <p class="news-summary">Business news, entrepreneurship and corporate updates</p>
+                </div>
+                <div class="news-item">
+                    <h3><a href="https://www.businessinsider.com/" target="_blank" rel="noopener noreferrer">
+                        Business Insider - Corporate News
+                    </a></h3>
+                    <div class="news-meta">
+                        <span class="news-source">Business Insider</span>
+                        <span class="news-date">Live</span>
+                    </div>
+                    <p class="news-summary">Tech, finance and business news updates</p>
+                </div>
+                <div class="news-item">
+                    <h3><a href="https://www.theverge.com/tech" target="_blank" rel="noopener noreferrer">
+                        The Verge - Tech Business
+                    </a></h3>
+                    <div class="news-meta">
+                        <span class="news-source">The Verge</span>
+                        <span class="news-date">Live</span>
+                    </div>
+                    <p class="news-summary">Technology companies and corporate tech news</p>
+                </div>
+                <div class="news-item">
+                    <h3><a href="https://techcrunch.com/" target="_blank" rel="noopener noreferrer">
+                        TechCrunch - Startup News
+                    </a></h3>
+                    <div class="news-meta">
+                        <span class="news-source">TechCrunch</span>
+                        <span class="news-date">Live</span>
+                    </div>
+                    <p class="news-summary">Startup news, venture capital and tech companies</p>
+                </div>
+            `;
+            
+            // Geopolitical - 10 sources
+            const geopoliticalHTML = `
+                <div class="news-item">
+                    <h3><a href="https://www.bloomberg.com/politics" target="_blank" rel="noopener noreferrer">
+                        Bloomberg Politics - Live Coverage
+                    </a></h3>
+                    <div class="news-meta">
+                        <span class="news-source">Bloomberg</span>
+                        <span class="news-date">Live</span>
+                    </div>
+                    <p class="news-summary">Global political news and geopolitical analysis</p>
+                </div>
+                <div class="news-item">
+                    <h3><a href="https://www.reuters.com/world/" target="_blank" rel="noopener noreferrer">
+                        Reuters World News - Breaking
+                    </a></h3>
+                    <div class="news-meta">
+                        <span class="news-source">Reuters</span>
+                        <span class="news-date">Live</span>
+                    </div>
+                    <p class="news-summary">International news and global political developments</p>
+                </div>
+                <div class="news-item">
+                    <h3><a href="https://www.ft.com/world" target="_blank" rel="noopener noreferrer">
+                        Financial Times - World News
+                    </a></h3>
+                    <div class="news-meta">
+                        <span class="news-source">Financial Times</span>
+                        <span class="news-date">Live</span>
+                    </div>
+                    <p class="news-summary">Global affairs, trade and geopolitical analysis</p>
+                </div>
+                <div class="news-item">
+                    <h3><a href="https://www.wsj.com/news/world" target="_blank" rel="noopener noreferrer">
+                        WSJ World - Breaking News
+                    </a></h3>
+                    <div class="news-meta">
+                        <span class="news-source">Wall Street Journal</span>
+                        <span class="news-date">Live</span>
+                    </div>
+                    <p class="news-summary">International news and geopolitical developments</p>
+                </div>
+                <div class="news-item">
+                    <h3><a href="https://www.bbc.com/news/world" target="_blank" rel="noopener noreferrer">
+                        BBC World News - Latest
+                    </a></h3>
+                    <div class="news-meta">
+                        <span class="news-source">BBC</span>
+                        <span class="news-date">Live</span>
+                    </div>
+                    <p class="news-summary">Global news, world affairs and international coverage</p>
+                </div>
+                <div class="news-item">
+                    <h3><a href="https://www.aljazeera.com/economy/" target="_blank" rel="noopener noreferrer">
+                        Al Jazeera - Global Economy
+                    </a></h3>
+                    <div class="news-meta">
+                        <span class="news-source">Al Jazeera</span>
+                        <span class="news-date">Live</span>
+                    </div>
+                    <p class="news-summary">International news and economic developments</p>
+                </div>
+                <div class="news-item">
+                    <h3><a href="https://www.cnbc.com/world/" target="_blank" rel="noopener noreferrer">
+                        CNBC World - Breaking News
+                    </a></h3>
+                    <div class="news-meta">
+                        <span class="news-source">CNBC</span>
+                        <span class="news-date">Live</span>
+                    </div>
+                    <p class="news-summary">Global business and geopolitical news</p>
+                </div>
+                <div class="news-item">
+                    <h3><a href="https://www.politico.com/" target="_blank" rel="noopener noreferrer">
+                        Politico - Politics & Policy
+                    </a></h3>
+                    <div class="news-meta">
+                        <span class="news-source">Politico</span>
+                        <span class="news-date">Live</span>
+                    </div>
+                    <p class="news-summary">Political news, policy updates and global affairs</p>
+                </div>
+                <div class="news-item">
+                    <h3><a href="https://foreignpolicy.com/" target="_blank" rel="noopener noreferrer">
+                        Foreign Policy - Global Analysis
+                    </a></h3>
+                    <div class="news-meta">
+                        <span class="news-source">Foreign Policy</span>
+                        <span class="news-date">Updated Daily</span>
+                    </div>
+                    <p class="news-summary">International relations and geopolitical analysis</p>
+                </div>
+                <div class="news-item">
+                    <h3><a href="https://www.theatlantic.com/world/" target="_blank" rel="noopener noreferrer">
+                        The Atlantic - World News
+                    </a></h3>
+                    <div class="news-meta">
+                        <span class="news-source">The Atlantic</span>
+                        <span class="news-date">Updated Daily</span>
+                    </div>
+                    <p class="news-summary">Global affairs, politics and international analysis</p>
+                </div>
+            `;
+            
+            document.getElementById('news-markets').innerHTML = marketsHTML;
+            document.getElementById('news-economic').innerHTML = economicHTML;
+            document.getElementById('news-india').innerHTML = indiaHTML;
+            document.getElementById('news-corporate').innerHTML = corporateHTML;
+            document.getElementById('news-geopolitical').innerHTML = geopoliticalHTML;
         }
         
         // Initialize
