@@ -36,12 +36,12 @@ class ComprehensiveMarketDashboard:
             'usa_fomc': {'value': 'Hold', 'next_meeting': 'Mar 18-19, 2026', 'last_decision': 'Jan 28, 2026', 'status': 'neutral'},
             
             # India Economic Indicators
-            'india_interest_rate': {'value': '6.50', 'last_updated': 'Dec 06, 2025', 'status': 'neutral'},
+            'india_interest_rate': {'value': '5.25', 'last_updated': 'Dec 05, 2025', 'status': 'neutral'},
             'india_cpi': {'value': '5.2', 'yoy': '+5.2%', 'last_updated': 'Jan 2026', 'status': 'neutral'},
             'india_wpi': {'value': '2.4', 'yoy': '+2.4%', 'last_updated': 'Jan 2026', 'status': 'neutral'},
             'india_iip': {'value': '4.2', 'yoy': '+4.2%', 'last_updated': 'Dec 2025', 'status': 'positive'},
             'india_pmi': {'value': '56.8', 'last_updated': 'Jan 2026', 'status': 'positive'},
-            'india_gdp': {'value': '7.2', 'quarter': 'Q3 FY25', 'last_updated': 'Nov 30, 2025', 'status': 'positive'},
+            'india_gdp': {'value': '7.4', 'quarter': 'FY 2025-26', 'last_updated': 'Dec 30, 2025', 'status': 'positive'},
             'india_fiscal_deficit': {'value': '5.8', 'percent_gdp': '5.8% of GDP', 'last_updated': 'FY 2025-26', 'status': 'neutral'},
             
             'timestamp': ist_time.strftime('%B %d, %Y at %I:%M %p IST')
@@ -692,9 +692,9 @@ class ComprehensiveMarketDashboard:
             <div class="indicators-grid">
                 <div class="indicator-card neutral">
                     <div class="indicator-title">💰 Repo Rate</div>
-                    <div class="indicator-value">6.50%</div>
+                    <div class="indicator-value">5.25%</div>
                     <div class="indicator-change neutral">RBI Policy Rate</div>
-                    <div class="indicator-updated">Updated: Dec 06, 2025</div>
+                    <div class="indicator-updated">Updated: Dec 05, 2025</div>
                 </div>
                 
                 <div class="indicator-card neutral">
@@ -727,9 +727,9 @@ class ComprehensiveMarketDashboard:
                 
                 <div class="indicator-card positive">
                     <div class="indicator-title">💹 GDP Growth</div>
-                    <div class="indicator-value">7.2%</div>
-                    <div class="indicator-change positive">Q3 FY25</div>
-                    <div class="indicator-updated">Updated: Nov 30, 2025</div>
+                    <div class="indicator-value">7.4%</div>
+                    <div class="indicator-change positive">FY 2025-26</div>
+                    <div class="indicator-updated">Updated: Dec 30, 2025</div>
                 </div>
                 
                 <div class="indicator-card neutral">
