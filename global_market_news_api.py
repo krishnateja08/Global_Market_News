@@ -25,15 +25,15 @@ class ComprehensiveMarketDashboard:
             'silver': {'value': 'Loading...', 'change': '...', 'pchange': '...', 'status': 'neutral'},
             
             # USA Economic Indicators
-            'usa_interest_rate': {'value': '4.50', 'range': '4.25-4.50%', 'last_updated': 'Jan 29, 2026', 'status': 'neutral'},
-            'usa_cpi': {'value': '314.2', 'change': '+0.3', 'yoy': '+2.4%', 'last_updated': 'Jan 2026', 'status': 'neutral'},
-            'usa_core_cpi': {'value': '2.2', 'yoy': '+2.2%', 'last_updated': 'Jan 2026', 'status': 'neutral'},
+            'usa_interest_rate': {'value': '3.75', 'range': '3.50-3.75%', 'last_updated': 'Jan 28, 2026', 'status': 'neutral'},
+            'usa_cpi': {'value': '2.4', 'change': '+0.2', 'yoy': '+2.4%', 'last_updated': 'Jan 2026', 'status': 'neutral'},
+            'usa_core_cpi': {'value': '2.5', 'yoy': '+2.5%', 'last_updated': 'Jan 2026', 'status': 'neutral'},
             'usa_ppi': {'value': '1.8', 'yoy': '+1.8%', 'last_updated': 'Jan 2026', 'status': 'neutral'},
-            'usa_inflation': {'value': '2.4', 'change': '+0.1', 'last_updated': 'Jan 2026', 'status': 'neutral'},
+            'usa_inflation': {'value': '2.4', 'change': '+0.2', 'last_updated': 'Jan 2026', 'status': 'neutral'},
             'usa_unemployment': {'value': '3.7', 'last_updated': 'Jan 2026', 'status': 'positive'},
             'usa_gdp': {'value': '2.8', 'quarter': 'Q4 2025', 'last_updated': 'Jan 30, 2026', 'status': 'positive'},
             'usa_nfp': {'value': '+256K', 'last_updated': 'Jan 2026', 'status': 'positive'},
-            'usa_fomc': {'value': 'Hold', 'next_meeting': 'Mar 18-19, 2026', 'last_decision': 'Jan 29, 2026', 'status': 'neutral'},
+            'usa_fomc': {'value': 'Hold', 'next_meeting': 'Mar 18-19, 2026', 'last_decision': 'Jan 28, 2026', 'status': 'neutral'},
             
             # India Economic Indicators
             'india_interest_rate': {'value': '6.50', 'last_updated': 'Dec 06, 2025', 'status': 'neutral'},
@@ -624,36 +624,36 @@ class ComprehensiveMarketDashboard:
             <div class="indicators-grid">
                 <div class="indicator-card neutral">
                     <div class="indicator-title">💵 Interest Rate</div>
-                    <div class="indicator-value">4.25-4.50%</div>
+                    <div class="indicator-value">3.50-3.75%</div>
                     <div class="indicator-change neutral">Fed Funds Rate</div>
-                    <div class="indicator-updated">Updated: Jan 29, 2026</div>
+                    <div class="indicator-updated">Updated: Jan 28, 2026</div>
                 </div>
                 
                 <div class="indicator-card neutral">
                     <div class="indicator-title">🏛️ FOMC</div>
                     <div class="indicator-value">Hold</div>
                     <div class="indicator-change neutral">Next: Mar 18-19, 2026</div>
-                    <div class="indicator-updated">Last: Jan 29, 2026</div>
+                    <div class="indicator-updated">Last: Jan 28, 2026</div>
                 </div>
                 
                 <div class="indicator-card neutral">
                     <div class="indicator-title">📊 CPI</div>
-                    <div class="indicator-value">314.2</div>
-                    <div class="indicator-change neutral">+0.3% MoM | +2.4% YoY</div>
+                    <div class="indicator-value">2.4%</div>
+                    <div class="indicator-change neutral">+0.2% MoM | +2.4% YoY</div>
                     <div class="indicator-updated">Updated: Jan 2026</div>
                 </div>
                 
                 <div class="indicator-card neutral">
                     <div class="indicator-title">📈 Core CPI</div>
-                    <div class="indicator-value">2.2%</div>
-                    <div class="indicator-change neutral">+2.2% YoY</div>
+                    <div class="indicator-value">2.5%</div>
+                    <div class="indicator-change neutral">+2.5% YoY</div>
                     <div class="indicator-updated">Updated: Jan 2026</div>
                 </div>
                 
                 <div class="indicator-card neutral">
                     <div class="indicator-title">📉 Inflation</div>
                     <div class="indicator-value">2.4%</div>
-                    <div class="indicator-change neutral">YoY +0.1%</div>
+                    <div class="indicator-change neutral">YoY +0.2%</div>
                     <div class="indicator-updated">Updated: Jan 2026</div>
                 </div>
                 
