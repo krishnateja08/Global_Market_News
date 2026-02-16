@@ -2,9 +2,9 @@ name: Update Market Data
 
 on:
   schedule:
-    # Run every 15 minutes during Indian market hours (9:15 AM - 3:30 PM IST)
-    # IST is UTC+5:30, so 9:15 AM IST = 3:45 AM UTC, 3:30 PM IST = 10:00 AM UTC
-    - cron: '*/15 3-10 * * 1-5'  # Monday to Friday, 3:45 AM - 10:00 AM UTC
+    # Run every 17 minutes, 24/7, every day
+    # Standard cron: triggers at :00, :17, :34, and :51 of every hour.
+    - cron: '*/17 * * * *'
   
   # Allow manual trigger from Actions tab
   workflow_dispatch:
@@ -62,17 +62,12 @@ jobs:
             python global_market_news.py
           else
             echo "❌ No Python script found!"
-            echo "Please add one of these files to your repository:"
-            echo "  - comprehensive_market_dashboard.py"
-            echo "  - comprehensive_market_dashboard_demo.py"
-            echo "  - global_market_news_api.py"
             exit 1
           fi
           
           # Verify index.html was created
           if [ -f "index.html" ]; then
             echo "✅ index.html generated successfully"
-            ls -lh index.html
           else
             echo "❌ index.html was not created!"
             exit 1
