@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Comprehensive Global Market News & Indicators Dashboard
-FIXED VERSION - 10 Stock Market News per Category
+WITH USA & INDIA FLAG THEMED COLORS
 """
 
 from datetime import datetime, timedelta
@@ -647,7 +647,7 @@ class ComprehensiveMarketDashboard:
         print(f"✅ Generated {total} stock market-related news articles (10 per category)")
     
     def generate_html(self):
-        """Generate comprehensive HTML dashboard"""
+        """Generate comprehensive HTML dashboard with Flag-Themed Colors"""
         gift_nifty = self.market_data['gift_nifty']
         us_markets = self.market_data['us_markets']
         crude = self.market_data['crude_oil']
@@ -699,6 +699,17 @@ class ComprehensiveMarketDashboard:
             --accent-cyan: #4facfe;
             --border-color: #2a3a5f;
             --card-shadow: rgba(0, 0, 0, 0.5);
+            
+            /* USA Flag Colors */
+            --usa-red: #B22234;
+            --usa-white: #FFFFFF;
+            --usa-blue: #3C3B6E;
+            
+            /* India Flag Colors */
+            --india-saffron: #FF9933;
+            --india-white: #FFFFFF;
+            --india-green: #138808;
+            --india-navy: #000080;
         }}
         
         * {{
@@ -806,10 +817,39 @@ class ComprehensiveMarketDashboard:
             font-size: 2.5em;
             font-weight: 900;
             margin-bottom: 30px;
-            background: linear-gradient(135deg, var(--accent-blue), var(--accent-green));
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+            text-shadow: 0 0 30px rgba(74, 158, 255, 0.3);
+        }}
+        
+        /* USA FLAG THEMED SECTION TITLE */
+        .section-title-usa {{
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5em;
+            font-weight: 900;
+            margin-bottom: 30px;
+            background: linear-gradient(135deg, var(--usa-red) 0%, var(--usa-white) 35%, var(--usa-blue) 70%, var(--usa-white) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 30px rgba(178, 34, 52, 0.4);
+            filter: drop-shadow(0 0 20px rgba(60, 59, 110, 0.3));
+        }}
+        
+        /* INDIA FLAG THEMED SECTION TITLE */
+        .section-title-india {{
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5em;
+            font-weight: 900;
+            margin-bottom: 30px;
+            background: linear-gradient(135deg, var(--india-saffron) 0%, var(--india-white) 35%, var(--india-green) 70%, var(--india-navy) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 30px rgba(255, 153, 51, 0.4);
+            filter: drop-shadow(0 0 20px rgba(19, 136, 8, 0.3));
         }}
         
         /* Market Indicators Grid */
@@ -1075,6 +1115,10 @@ class ComprehensiveMarketDashboard:
         @media (max-width: 768px) {{
             h1 {{ font-size: 1.8em; }}
             
+            .section-title, .section-title-usa, .section-title-india {{
+                font-size: 2em;
+            }}
+            
             .indicators-grid {{
                 gap: 10px;
             }}
@@ -1176,7 +1220,7 @@ class ComprehensiveMarketDashboard:
         </section>
         
         <section class="economic-indicators-section">
-            <h2 class="section-title">🇺🇸 USA Economic Indicators</h2>
+            <h2 class="section-title-usa">🇺🇸 USA Economic Indicators</h2>
             <div class="indicators-grid">
                 <div class="indicator-card {usa_rate.get('status', 'neutral')}">
                     <div class="indicator-title">💵 Interest Rate</div>
@@ -1262,7 +1306,7 @@ class ComprehensiveMarketDashboard:
         </section>
         
         <section class="economic-indicators-section">
-            <h2 class="section-title">🇮🇳 India Economic Indicators</h2>
+            <h2 class="section-title-india">🇮🇳 India Economic Indicators</h2>
             <div class="indicators-grid">
                 <div class="indicator-card {india_rate.get('status', 'neutral')}">
                     <div class="indicator-title">💰 Repo Rate</div>
@@ -1389,7 +1433,7 @@ class ComprehensiveMarketDashboard:
     def run(self):
         """Main execution"""
         print("\n" + "="*70)
-        print("🚀 COMPLETE MARKET DASHBOARD - 10 NEWS PER CATEGORY")
+        print("🚀 MARKET DASHBOARD WITH USA & INDIA FLAG COLORS")
         print("="*70)
         
         # Fetch market data
@@ -1411,11 +1455,14 @@ class ComprehensiveMarketDashboard:
         print("="*70)
         print(f"\n📊 Dashboard includes:")
         print(f"  • 8 Live market indicators")
-        print(f"  • 9 USA economic indicators")
-        print(f"  • 7 India economic indicators")
+        print(f"  • 9 USA economic indicators (🇺🇸 USA Flag Colors!)")
+        print(f"  • 7 India economic indicators (🇮🇳 India Flag Colors!)")
         print(f"  • ✅ Proper IST timezone: {self.market_data['timestamp']}")
         total_articles = sum(len(v) for v in self.news_data.values())
         print(f"  • {total_articles} stock market news articles (10 per category)")
+        print("\n🎨 FLAG THEMED SECTION TITLES:")
+        print("  • USA: Red, White, Blue gradient")
+        print("  • India: Saffron, White, Green, Navy gradient")
         print("\n💡 Total: 24 economic indicators + 50 relevant stock market news!")
         print("="*70 + "\n")
 
