@@ -847,10 +847,10 @@ class ComprehensiveMarketDashboard:
                 updateIndicator('dow', '43,828.06', '+126.52', '+0.29');
                 updateIndicator('sp500', '6,025.47', '+21.09', '+0.35');
                 updateIndicator('nasdaq', '19,926.72', '+159.05', '+0.80');
-                updateIndicator('oil', '$77.23', '-1.05', '-1.34');
-                updateIndicator('dollar', '106.52', '+0.12', '+0.11');
-                updateIndicator('gold', '$2,881.20', '+8.50', '+0.30');
-                updateIndicator('silver', '$32.45', '+0.15', '+0.46');
+                updateIndicator('oil', '$62.75', '+0.00', '+0.00');
+                updateIndicator('dollar', '96.88', '-0.04', '-0.04');
+                updateIndicator('gold', '$5,023.48', '+23.48', '+0.47');
+                updateIndicator('silver', '$78.79', '-3.21', '-3.91');
                 
                 // Hide loading overlay
                 document.getElementById('loadingOverlay').classList.add('hidden');
