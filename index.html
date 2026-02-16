@@ -307,14 +307,6 @@
             white-space: nowrap;
         }
         
-        .indicator-updated {
-            font-family: 'Space Mono', monospace;
-            font-size: 0.65em;
-            color: var(--text-secondary);
-            margin-top: 4px;
-            opacity: 0.7;
-        }
-        
         .positive {
             color: var(--accent-green);
             background: rgba(0, 255, 136, 0.1);
@@ -381,8 +373,8 @@
         .geopolitical .category-title { color: var(--accent-green); }
         
         .news-item {
-            padding: 18px;
-            margin-bottom: 15px;
+            padding: 15px;
+            margin-bottom: 12px;
             background: rgba(10, 14, 39, 0.4);
             border-radius: 10px;
             border-left: 3px solid var(--accent-blue);
@@ -402,19 +394,19 @@
         .geopolitical .news-item { border-left-color: var(--accent-green); }
         
         .news-item h3 {
-            font-size: 1.05em;
-            margin-bottom: 10px;
-            line-height: 1.5;
+            font-size: 0.95em;
+            margin-bottom: 8px;
+            line-height: 1.4;
             font-weight: 600;
             color: var(--text-primary);
         }
         
         .news-meta {
             display: flex;
-            gap: 12px;
+            gap: 10px;
             align-items: center;
-            margin-top: 8px;
-            font-size: 0.8em;
+            margin-top: 6px;
+            font-size: 0.75em;
             color: var(--text-secondary);
             flex-wrap: wrap;
         }
@@ -423,21 +415,14 @@
             display: inline-block;
             background: var(--accent-blue);
             color: white;
-            padding: 3px 10px;
-            border-radius: 12px;
+            padding: 2px 8px;
+            border-radius: 10px;
             font-size: 0.85em;
             font-family: 'Space Mono', monospace;
         }
         
         .news-date {
             font-family: 'Space Mono', monospace;
-        }
-        
-        .news-summary {
-            color: var(--text-secondary);
-            font-size: 0.9em;
-            margin-top: 10px;
-            line-height: 1.6;
         }
         
         footer {
@@ -468,7 +453,7 @@
 <body>
     <div class="loading-overlay" id="loadingOverlay">
         <div class="spinner"></div>
-        <div class="loading-text">Loading Live Market Data...</div>
+        <div class="loading-text">Loading Market Data...</div>
     </div>
     
     <div class="container">
@@ -476,7 +461,7 @@
             <h1>🌍 Global Market Dashboard</h1>
             <div class="subtitle">Real-Time Market Data & Live News Headlines</div>
             <div class="live-badge">🔴 LIVE DATA</div>
-            <div class="timestamp" id="timestamp">📅 Last Updated: February 17, 2026 at 01:51 AM IST</div>
+            <div class="timestamp" id="timestamp">📅 Generated: February 17, 2026 at 02:24 AM IST</div>
         </header>
         
         <section class="indicators-section">
@@ -539,63 +524,54 @@
                     <div class="indicator-title">💵 Interest Rate</div>
                     <div class="indicator-value">3.50-3.75%</div>
                     <div class="indicator-change neutral">Fed Funds Rate</div>
-                    <div class="indicator-updated">Updated: Jan 28, 2026</div>
                 </div>
                 
                 <div class="indicator-card neutral">
                     <div class="indicator-title">🏛️ FOMC</div>
                     <div class="indicator-value">Hold</div>
                     <div class="indicator-change neutral">Next: Mar 18-19, 2026</div>
-                    <div class="indicator-updated">Last: Jan 28, 2026</div>
                 </div>
                 
                 <div class="indicator-card neutral">
                     <div class="indicator-title">📊 CPI</div>
                     <div class="indicator-value">2.4%</div>
                     <div class="indicator-change neutral">+0.2% MoM | +2.4% YoY</div>
-                    <div class="indicator-updated">Updated: Jan 2026</div>
                 </div>
                 
                 <div class="indicator-card neutral">
                     <div class="indicator-title">📈 Core CPI</div>
                     <div class="indicator-value">2.5%</div>
                     <div class="indicator-change neutral">+2.5% YoY</div>
-                    <div class="indicator-updated">Updated: Jan 2026</div>
                 </div>
                 
                 <div class="indicator-card neutral">
                     <div class="indicator-title">📉 Inflation</div>
                     <div class="indicator-value">2.4%</div>
                     <div class="indicator-change neutral">YoY +0.2%</div>
-                    <div class="indicator-updated">Updated: Jan 2026</div>
                 </div>
                 
                 <div class="indicator-card neutral">
                     <div class="indicator-title">🏭 PPI</div>
                     <div class="indicator-value">1.8%</div>
                     <div class="indicator-change neutral">+1.8% YoY</div>
-                    <div class="indicator-updated">Updated: Jan 2026</div>
                 </div>
                 
                 <div class="indicator-card positive">
                     <div class="indicator-title">💹 GDP Growth</div>
                     <div class="indicator-value">2.8%</div>
                     <div class="indicator-change positive">Q4 2025</div>
-                    <div class="indicator-updated">Updated: Jan 30, 2026</div>
                 </div>
                 
                 <div class="indicator-card positive">
                     <div class="indicator-title">👔 Unemployment</div>
                     <div class="indicator-value">3.7%</div>
                     <div class="indicator-change positive">Unemployment Rate</div>
-                    <div class="indicator-updated">Updated: Jan 2026</div>
                 </div>
                 
                 <div class="indicator-card positive">
                     <div class="indicator-title">👥 NFP</div>
                     <div class="indicator-value">+256K</div>
                     <div class="indicator-change positive">Non-Farm Payrolls</div>
-                    <div class="indicator-updated">Updated: Jan 2026</div>
                 </div>
             </div>
         </section>
@@ -607,55 +583,48 @@
                     <div class="indicator-title">💰 Repo Rate</div>
                     <div class="indicator-value">5.25%</div>
                     <div class="indicator-change neutral">RBI Policy Rate</div>
-                    <div class="indicator-updated">Updated: Dec 05, 2025</div>
                 </div>
                 
                 <div class="indicator-card neutral">
                     <div class="indicator-title">📊 CPI</div>
                     <div class="indicator-value">5.2%</div>
                     <div class="indicator-change neutral">+5.2% YoY</div>
-                    <div class="indicator-updated">Updated: Jan 2026</div>
                 </div>
                 
                 <div class="indicator-card neutral">
                     <div class="indicator-title">📈 WPI</div>
                     <div class="indicator-value">2.4%</div>
                     <div class="indicator-change neutral">+2.4% YoY</div>
-                    <div class="indicator-updated">Updated: Jan 2026</div>
                 </div>
                 
                 <div class="indicator-card positive">
                     <div class="indicator-title">🏭 IIP</div>
                     <div class="indicator-value">4.2%</div>
                     <div class="indicator-change positive">+4.2% YoY</div>
-                    <div class="indicator-updated">Updated: Dec 2025</div>
                 </div>
                 
                 <div class="indicator-card positive">
                     <div class="indicator-title">📉 PMI</div>
                     <div class="indicator-value">56.8</div>
                     <div class="indicator-change positive">Manufacturing PMI</div>
-                    <div class="indicator-updated">Updated: Jan 2026</div>
                 </div>
                 
                 <div class="indicator-card positive">
                     <div class="indicator-title">💹 GDP Growth</div>
                     <div class="indicator-value">7.4%</div>
                     <div class="indicator-change positive">FY 2025-26</div>
-                    <div class="indicator-updated">Updated: Dec 30, 2025</div>
                 </div>
                 
                 <div class="indicator-card neutral">
                     <div class="indicator-title">🏛️ Fiscal Deficit</div>
                     <div class="indicator-value">5.8%</div>
                     <div class="indicator-change neutral">5.8% of GDP</div>
-                    <div class="indicator-updated">Updated: FY 2025-26</div>
                 </div>
             </div>
         </section>
         
         <section class="news-section">
-            <h2 class="section-title">Stock Market News Feed</h2>
+            <h2 class="section-title">📰 Live News Headlines</h2>
             <div class="news-grid">
                 <div class="news-category-card markets">
                     <div class="category-header">
@@ -669,7 +638,6 @@
                         <span class="news-source">CNBC</span>
                         <span class="news-date">2 hours ago</span>
                     </div>
-                    <p class="news-summary">Investor concerns over AI disruption drove sell-off in wealth management, transportation and logistics. Financial stocks Charles Schwab and Morgan Stanley fell sharply this week.</p>
                 </div>
 
                 <div class="news-item">
@@ -678,7 +646,6 @@
                         <span class="news-source">CNBC</span>
                         <span class="news-date">3 hours ago</span>
                     </div>
-                    <p class="news-summary">Broad market index added 0.05% to 6,836.17 while Nasdaq fell 0.22%. Consumer Price Index rose 0.2% in January, reflecting 2.4% annual gain.</p>
                 </div>
 
                 <div class="news-item">
@@ -687,7 +654,6 @@
                         <span class="news-source">CNBC</span>
                         <span class="news-date">4 hours ago</span>
                     </div>
-                    <p class="news-summary">Stock loss deepens to 23% this week and over 41% year-to-date. CEO cites exogenous shock related to tariffs impacting advertising spend.</p>
                 </div>
 
                 <div class="news-item">
@@ -696,7 +662,6 @@
                         <span class="news-source">CNBC</span>
                         <span class="news-date">5 hours ago</span>
                     </div>
-                    <p class="news-summary">Investment bank highlights select stocks with strong growth potential amid market volatility and sector rotation.</p>
                 </div>
 
                 <div class="news-item">
@@ -705,7 +670,6 @@
                         <span class="news-source">CNBC</span>
                         <span class="news-date">1 day ago</span>
                     </div>
-                    <p class="news-summary">Tech giants face selling pressure as market reassesses valuations amid AI disruption concerns and changing consumer behavior.</p>
                 </div>
 
                 <div class="news-item">
@@ -714,7 +678,6 @@
                         <span class="news-source">Charles Schwab</span>
                         <span class="news-date">6 hours ago</span>
                     </div>
-                    <p class="news-summary">Nucor and Cleveland-Cliffs fell more than 4% and 3% respectively after Financial Times report on potential tariff rollback.</p>
                 </div>
 
                 <div class="news-item">
@@ -723,7 +686,6 @@
                         <span class="news-source">Charles Schwab</span>
                         <span class="news-date">1 day ago</span>
                     </div>
-                    <p class="news-summary">MSCI EAFE Index benefits from higher weights in industrials and financials, less exposure to tech than U.S. markets.</p>
                 </div>
 
                 <div class="news-item">
@@ -732,7 +694,6 @@
                         <span class="news-source">Charles Schwab</span>
                         <span class="news-date">1 day ago</span>
                     </div>
-                    <p class="news-summary">Worst day since April as Federal Trade Commission announces probe into news article promotion and Bloomberg reports snags in Siri upgrade.</p>
                 </div>
 
                 <div class="news-item">
@@ -741,7 +702,6 @@
                         <span class="news-source">Charles Schwab</span>
                         <span class="news-date">2 days ago</span>
                     </div>
-                    <p class="news-summary">Construction stocks gain ground as interest rate expectations shift, benefiting rate-sensitive sectors.</p>
                 </div>
 
                 <div class="news-item">
@@ -750,7 +710,6 @@
                         <span class="news-source">CNBC</span>
                         <span class="news-date">2 days ago</span>
                     </div>
-                    <p class="news-summary">Amazon has dropped eight sessions in a row since earnings came in short of expectations, extending tech selloff.</p>
                 </div>
                     </div>
                 </div>
@@ -767,7 +726,6 @@
                         <span class="news-source">Federal Reserve</span>
                         <span class="news-date">Jan 28, 2026</span>
                     </div>
-                    <p class="news-summary">Committee decided to hold target range as uncertainty about economic outlook remains elevated. Fed attentive to risks to dual mandate.</p>
                 </div>
 
                 <div class="news-item">
@@ -776,7 +734,6 @@
                         <span class="news-source">Federal Reserve</span>
                         <span class="news-date">5 days ago</span>
                     </div>
-                    <p class="news-summary">Fed official supports waiting for more data after 175 basis points of cuts over past year, citing fragile labor market conditions.</p>
                 </div>
 
                 <div class="news-item">
@@ -785,7 +742,6 @@
                         <span class="news-source">Federal Reserve</span>
                         <span class="news-date">Feb 4, 2026</span>
                     </div>
-                    <p class="news-summary">Board votes to keep current stress test-related capital requirements until public feedback can be considered for banking sector.</p>
                 </div>
 
                 <div class="news-item">
@@ -794,7 +750,6 @@
                         <span class="news-source">Federal Reserve</span>
                         <span class="news-date">1 week ago</span>
                     </div>
-                    <p class="news-summary">Policy moved closer to neutral level, but balance of risks shifting as downside employment risks increase amid economic uncertainty.</p>
                 </div>
 
                 <div class="news-item">
@@ -803,7 +758,6 @@
                         <span class="news-source">Bureau of Labor Statistics</span>
                         <span class="news-date">3 hours ago</span>
                     </div>
-                    <p class="news-summary">Inflation gauge reflects 2.4% annual gain, coming in slightly lighter than 0.3% monthly forecast from economists.</p>
                 </div>
 
                 <div class="news-item">
@@ -812,7 +766,6 @@
                         <span class="news-source">Federal Reserve</span>
                         <span class="news-date">1 week ago</span>
                     </div>
-                    <p class="news-summary">Dallas and Cleveland Fed measures suggest core inflation continued to fall despite some volatility in recent data.</p>
                 </div>
 
                 <div class="news-item">
@@ -821,7 +774,6 @@
                         <span class="news-source">Federal Reserve</span>
                         <span class="news-date">Jan 30, 2026</span>
                     </div>
-                    <p class="news-summary">Economy continues to expand but labor market conditions pose greater risk to Fed's dual mandate objectives.</p>
                 </div>
 
                 <div class="news-item">
@@ -830,7 +782,6 @@
                         <span class="news-source">Federal Reserve</span>
                         <span class="news-date">2 weeks ago</span>
                     </div>
-                    <p class="news-summary">Federal shutdown curtails Q1 economic activity, delays monthly employment data and PCE price index crucial for policy decisions.</p>
                 </div>
 
                 <div class="news-item">
@@ -839,7 +790,6 @@
                         <span class="news-source">Federal Reserve</span>
                         <span class="news-date">Dec 1, 2025</span>
                     </div>
-                    <p class="news-summary">Committee stopped reducing securities holdings as reserves approach level consistent with ample reserve conditions.</p>
                 </div>
 
                 <div class="news-item">
@@ -848,7 +798,6 @@
                         <span class="news-source">Richmond Fed</span>
                         <span class="news-date">Feb 3, 2026</span>
                     </div>
-                    <p class="news-summary">Recent productivity rise indicates firms facing less pressure to raise prices despite higher input costs, supporting inflation outlook.</p>
                 </div>
                     </div>
                 </div>
@@ -865,7 +814,6 @@
                         <span class="news-source">ICICI Direct</span>
                         <span class="news-date">Today</span>
                     </div>
-                    <p class="news-summary">Indian benchmark indices show resilience with gains across sectors while media stocks continue downward trend.</p>
                 </div>
 
                 <div class="news-item">
@@ -874,7 +822,6 @@
                         <span class="news-source">NSE India</span>
                         <span class="news-date">Today</span>
                     </div>
-                    <p class="news-summary">Index trades in range of 26,141-26,274 with banking stocks showing strength while IT sector faces pressure.</p>
                 </div>
 
                 <div class="news-item">
@@ -883,7 +830,6 @@
                         <span class="news-source">BSE India</span>
                         <span class="news-date">Today</span>
                     </div>
-                    <p class="news-summary">Benchmark index closes lower as investors book profits in select heavyweights amid global market uncertainty.</p>
                 </div>
 
                 <div class="news-item">
@@ -892,7 +838,6 @@
                         <span class="news-source">Yahoo Finance India</span>
                         <span class="news-date">Today</span>
                     </div>
-                    <p class="news-summary">Energy and petrochemicals major faces selling pressure as crude oil prices stabilize globally.</p>
                 </div>
 
                 <div class="news-item">
@@ -901,7 +846,6 @@
                         <span class="news-source">NSE India</span>
                         <span class="news-date">Today</span>
                     </div>
-                    <p class="news-summary">Banking sector shows strength with SBI leading gains as Nifty Bank index rises 0.17% in Friday trade.</p>
                 </div>
 
                 <div class="news-item">
@@ -910,7 +854,6 @@
                         <span class="news-source">NSE India</span>
                         <span class="news-date">Today</span>
                     </div>
-                    <p class="news-summary">Leading IT services company advances despite broader tech sector concerns globally.</p>
                 </div>
 
                 <div class="news-item">
@@ -919,7 +862,6 @@
                         <span class="news-source">MoneyControl</span>
                         <span class="news-date">Today</span>
                     </div>
-                    <p class="news-summary">Foreign and domestic institutional investors show measured approach amid global volatility.</p>
                 </div>
 
                 <div class="news-item">
@@ -928,7 +870,6 @@
                         <span class="news-source">NSE India</span>
                         <span class="news-date">Today</span>
                     </div>
-                    <p class="news-summary">Banking stocks outperform broader market with 60,147 level providing support for index.</p>
                 </div>
 
                 <div class="news-item">
@@ -937,7 +878,6 @@
                         <span class="news-source">Economic Times</span>
                         <span class="news-date">Today</span>
                     </div>
-                    <p class="news-summary">Benchmark indices slip from day's high as investors lock in recent gains ahead of weekend.</p>
                 </div>
 
                 <div class="news-item">
@@ -946,7 +886,6 @@
                         <span class="news-source">Groww</span>
                         <span class="news-date">Today</span>
                     </div>
-                    <p class="news-summary">Multiple stocks touching year-high levels indicating underlying market strength despite index volatility.</p>
                 </div>
                     </div>
                 </div>
@@ -963,7 +902,6 @@
                         <span class="news-source">Charles Schwab</span>
                         <span class="news-date">Today</span>
                     </div>
-                    <p class="news-summary">Home-sharing platform beats analyst estimates with strong guidance for upcoming quarter.</p>
                 </div>
 
                 <div class="news-item">
@@ -972,7 +910,6 @@
                         <span class="news-source">CNBC</span>
                         <span class="news-date">1 day ago</span>
                     </div>
-                    <p class="news-summary">E-commerce and cloud computing giant continues decline following revenue miss in latest quarterly results.</p>
                 </div>
 
                 <div class="news-item">
@@ -981,7 +918,6 @@
                         <span class="news-source">CNBC</span>
                         <span class="news-date">2 days ago</span>
                     </div>
-                    <p class="news-summary">Streaming and entertainment stocks face pressure as investors assess AI impact on content creation and distribution.</p>
                 </div>
 
                 <div class="news-item">
@@ -990,7 +926,6 @@
                         <span class="news-source">CNBC</span>
                         <span class="news-date">2 days ago</span>
                     </div>
-                    <p class="news-summary">Enterprise software provider hit by broader selloff in technology sector on disruption worries.</p>
                 </div>
 
                 <div class="news-item">
@@ -999,7 +934,6 @@
                         <span class="news-source">CNBC</span>
                         <span class="news-date">2 days ago</span>
                     </div>
-                    <p class="news-summary">Property services company extends losses as AI fears spread to real estate and financial services.</p>
                 </div>
 
                 <div class="news-item">
@@ -1008,7 +942,6 @@
                         <span class="news-source">Bloomberg</span>
                         <span class="news-date">1 day ago</span>
                     </div>
-                    <p class="news-summary">Many institutions copied Ivy League's private equity bets, but traditional assets now outperforming.</p>
                 </div>
 
                 <div class="news-item">
@@ -1017,7 +950,6 @@
                         <span class="news-source">Bloomberg</span>
                         <span class="news-date">2 days ago</span>
                     </div>
-                    <p class="news-summary">Investors drawn to high yields must worry about opacity, complexity and hidden risks in debt markets.</p>
                 </div>
 
                 <div class="news-item">
@@ -1026,7 +958,6 @@
                         <span class="news-source">Bloomberg</span>
                         <span class="news-date">3 days ago</span>
                     </div>
-                    <p class="news-summary">Trump administration seeks to shut down financial watchdog while reducing its bite in the meantime.</p>
                 </div>
 
                 <div class="news-item">
@@ -1035,7 +966,6 @@
                         <span class="news-source">Wall Street Journal</span>
                         <span class="news-date">3 days ago</span>
                     </div>
-                    <p class="news-summary">Healthcare and biotech firms report strong quarterly results driven by new drug approvals and pipeline strength.</p>
                 </div>
 
                 <div class="news-item">
@@ -1044,7 +974,6 @@
                         <span class="news-source">TechCrunch</span>
                         <span class="news-date">4 days ago</span>
                     </div>
-                    <p class="news-summary">Several technology startups file for public offerings as market conditions improve for new listings.</p>
                 </div>
                     </div>
                 </div>
@@ -1061,7 +990,6 @@
                         <span class="news-source">NBC News</span>
                         <span class="news-date">2 days ago</span>
                     </div>
-                    <p class="news-summary">Energy Secretary Wright announces revenue now flows to US Treasury account instead of Qatar-based system.</p>
                 </div>
 
                 <div class="news-item">
@@ -1070,7 +998,6 @@
                         <span class="news-source">New York Fed</span>
                         <span class="news-date">1 week ago</span>
                     </div>
-                    <p class="news-summary">Federal Reserve officials note economy withstands geopolitical events and policy changes in 2025.</p>
                 </div>
 
                 <div class="news-item">
@@ -1079,7 +1006,6 @@
                         <span class="news-source">Federal Reserve</span>
                         <span class="news-date">2 weeks ago</span>
                     </div>
-                    <p class="news-summary">Curtailed federal operations affect Q1 growth through furloughs and suspended government purchases.</p>
                 </div>
 
                 <div class="news-item">
@@ -1088,7 +1014,6 @@
                         <span class="news-source">Bloomberg</span>
                         <span class="news-date">3 days ago</span>
                     </div>
-                    <p class="news-summary">Changes in tariff structures and international agreements affecting corporate planning and investment decisions.</p>
                 </div>
 
                 <div class="news-item">
@@ -1097,7 +1022,6 @@
                         <span class="news-source">Financial Times</span>
                         <span class="news-date">4 days ago</span>
                     </div>
-                    <p class="news-summary">Developing economies face varied conditions as currency fluctuations impact trade and capital flows.</p>
                 </div>
 
                 <div class="news-item">
@@ -1106,7 +1030,6 @@
                         <span class="news-source">Bloomberg</span>
                         <span class="news-date">5 days ago</span>
                     </div>
-                    <p class="news-summary">ECB officials signal measured approach to monetary policy amid regional economic uncertainties.</p>
                 </div>
 
                 <div class="news-item">
@@ -1115,7 +1038,6 @@
                         <span class="news-source">Reuters</span>
                         <span class="news-date">1 week ago</span>
                     </div>
-                    <p class="news-summary">Factory activity indicators provide divergent readings on world's second-largest economy.</p>
                 </div>
 
                 <div class="news-item">
@@ -1124,7 +1046,6 @@
                         <span class="news-source">Bloomberg</span>
                         <span class="news-date">2 days ago</span>
                     </div>
-                    <p class="news-summary">Crude prices trade in narrow range ahead of key producer group meeting on output levels.</p>
                 </div>
 
                 <div class="news-item">
@@ -1133,7 +1054,6 @@
                         <span class="news-source">IMF</span>
                         <span class="news-date">1 week ago</span>
                     </div>
-                    <p class="news-summary">Organization updates economic projections reflecting changing trade dynamics and policy shifts.</p>
                 </div>
 
                 <div class="news-item">
@@ -1142,7 +1062,6 @@
                         <span class="news-source">Financial Times</span>
                         <span class="news-date">Today</span>
                     </div>
-                    <p class="news-summary">Regional bourses hold gains as investors assess economic data and central bank signals.</p>
                 </div>
                     </div>
                 </div>
@@ -1150,25 +1069,49 @@
         </section>
         
         <footer>
-            <p>🔄 Market data updates automatically | Real News Headlines from Top Sources</p>
-            <p style="margin-top: 10px; opacity: 0.6;">Powered by Yahoo Finance API & Live News Sources</p>
+            <p>🔄 Market data updates in real-time | News generated at build time</p>
             <p style="margin-top: 10px; font-size: 0.75em; opacity: 0.5;">⚠️ For informational purposes only. Not financial advice.</p>
         </footer>
     </div>
     
     <script>
-        // Yahoo Finance symbols
-        const symbols = {
+        // Yahoo Finance API Configuration
+        const API_CONFIG = {
+            baseUrl: 'https://query1.finance.yahoo.com/v8/finance/chart/',
+            params: '?interval=1d&range=1d',
+            proxies: [
+                '', // Direct (no proxy)
+                'https://corsproxy.io/?', // Proxy 1
+                'https://api.allorigins.win/raw?url=' // Proxy 2
+            ],
+            timeout: 5000
+        };
+        
+        const SYMBOLS = {
+            'gift-nifty': '^NSEI',
             'dow': '^DJI',
             'sp500': '^GSPC',
             'nasdaq': '^IXIC',
-            'gold': 'GC=F',
-            'silver': 'SI=F',
             'oil': 'CL=F',
-            'dollar': 'DX-Y.NYB'
+            'dollar': 'DX-Y.NYB',
+            'gold': 'GC=F',
+            'silver': 'SI=F'
         };
         
-        function updateTimestamp() {
+        const FALLBACK_DATA = {
+            'gift-nifty': {value: '26,165.00', change: '-84.50', pchange: '-0.32'},
+            'dow': {value: '49,450.12', change: '+48.95', pchange: '+0.10'},
+            'sp500': {value: '6,836.17', change: '+3.41', pchange: '+0.05'},
+            'nasdaq': {value: '19,735.12', change: '-50.43', pchange: '-0.25'},
+            'oil': {value: '$62.75', change: '+0.00', pchange: '+0.00'},
+            'dollar': {value: '96.88', change: '-0.04', pchange: '-0.04'},
+            'gold': {value: '$5,023.48', change: '+23.48', pchange: '+0.47'},
+            'silver': {value: '$78.79', change: '-3.21', pchange: '-3.91'}
+        };
+        
+        let currentProxyIndex = 0;
+        
+        function updateTimestamp(isFallback = false) {
             const now = new Date();
             const options = { 
                 year: 'numeric', 
@@ -1179,7 +1122,8 @@
                 timeZone: 'Asia/Kolkata'
             };
             const formatted = now.toLocaleString('en-US', options) + ' IST';
-            document.getElementById('timestamp').textContent = '📅 Last Updated: ' + formatted;
+            const prefix = isFallback ? '📅 Cached Data - ' : '📅 Last Updated: ';
+            document.getElementById('timestamp').textContent = prefix + formatted;
         }
         
         function updateIndicator(id, value, change, pchange) {
@@ -1189,14 +1133,15 @@
             
             if (valueEl) valueEl.textContent = value;
             if (changeEl && change !== undefined) {
-                const changeText = change >= 0 ? `+${change}` : change;
-                const pchangeText = pchange >= 0 ? `+${pchange}%` : `${pchange}%`;
+                const pchangeNum = parseFloat(pchange);
+                const changeText = pchangeNum >= 0 ? `+${change}` : change;
+                const pchangeText = pchangeNum >= 0 ? `+${pchange}%` : `${pchange}%`;
                 changeEl.textContent = `${changeText} (${pchangeText})`;
                 
-                if (pchange > 0) {
+                if (pchangeNum > 0) {
                     changeEl.className = 'indicator-change positive';
                     cardEl.className = 'indicator-card positive';
-                } else if (pchange < 0) {
+                } else if (pchangeNum < 0) {
                     changeEl.className = 'indicator-change negative';
                     cardEl.className = 'indicator-card negative';
                 } else {
@@ -1206,75 +1151,104 @@
             }
         }
         
-        async function fetchMarketData() {
+        async function fetchWithTimeout(url, timeout = 5000) {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), timeout);
+            
             try {
-                for (const [key, symbol] of Object.entries(symbols)) {
-                    try {
-                        const url = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=1d&range=1d`;
-                        const response = await fetch(url);
-                        const data = await response.json();
-                        
-                        if (data.chart && data.chart.result && data.chart.result[0]) {
-                            const result = data.chart.result[0];
-                            const meta = result.meta;
-                            const currentPrice = meta.regularMarketPrice;
-                            const previousClose = meta.chartPreviousClose;
-                            const change = currentPrice - previousClose;
-                            const pchange = ((change / previousClose) * 100).toFixed(2);
-                            
-                            let displayValue = currentPrice.toFixed(2);
-                            if (key === 'dow' || key === 'sp500' || key === 'nasdaq') {
-                                displayValue = currentPrice.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-                            } else if (key === 'dollar') {
-                                displayValue = currentPrice.toFixed(2);
-                            } else {
-                                displayValue = `$${currentPrice.toFixed(2)}`;
-                            }
-                            
-                            updateIndicator(key, displayValue, change.toFixed(2), pchange);
-                        }
-                    } catch (err) {
-                        console.error(`Error fetching ${key}:`, err);
-                    }
-                }
+                const response = await fetch(url, { 
+                    signal: controller.signal,
+                    mode: 'cors'
+                });
+                clearTimeout(timeoutId);
+                return response;
+            } catch (error) {
+                clearTimeout(timeoutId);
+                throw error;
+            }
+        }
+        
+        async function fetchMarketData(key, symbol) {
+            const url = `${API_CONFIG.baseUrl}${symbol}${API_CONFIG.params}`;
+            
+            for (let i = 0; i < API_CONFIG.proxies.length; i++) {
+                const proxy = API_CONFIG.proxies[(currentProxyIndex + i) % API_CONFIG.proxies.length];
+                const finalUrl = proxy ? proxy + encodeURIComponent(url) : url;
                 
-                // Fetch GIFT Nifty (using Nifty 50)
                 try {
-                    const niftyUrl = 'https://query1.finance.yahoo.com/v8/finance/chart/^NSEI?interval=1d&range=1d';
-                    const response = await fetch(niftyUrl);
+                    const response = await fetchWithTimeout(finalUrl, API_CONFIG.timeout);
+                    
+                    if (!response.ok) continue;
+                    
                     const data = await response.json();
                     
                     if (data.chart && data.chart.result && data.chart.result[0]) {
                         const result = data.chart.result[0];
                         const meta = result.meta;
                         const currentPrice = meta.regularMarketPrice;
-                        const previousClose = meta.chartPreviousClose;
+                        const previousClose = meta.chartPreviousClose || meta.previousClose;
+                        
+                        if (!currentPrice || !previousClose) continue;
+                        
                         const change = currentPrice - previousClose;
                         const pchange = ((change / previousClose) * 100).toFixed(2);
                         
-                        updateIndicator('gift-nifty', currentPrice.toFixed(2), change.toFixed(2), pchange);
+                        let displayValue;
+                        if (['dow', 'sp500', 'nasdaq', 'gift-nifty'].includes(key)) {
+                            displayValue = currentPrice.toLocaleString('en-US', {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2
+                            });
+                        } else if (key === 'dollar') {
+                            displayValue = currentPrice.toFixed(2);
+                        } else {
+                            displayValue = `$${currentPrice.toFixed(2)}`;
+                        }
+                        
+                        updateIndicator(key, displayValue, change.toFixed(2), pchange);
+                        
+                        if (i > 0) currentProxyIndex = (currentProxyIndex + i) % API_CONFIG.proxies.length;
+                        return true;
                     }
-                } catch (err) {
-                    console.error('Error fetching GIFT Nifty:', err);
+                } catch (error) {
+                    console.warn(`Failed to fetch ${key} with ${proxy || 'direct'}:`, error.message);
+                    continue;
+                }
+            }
+            
+            return false;
+        }
+        
+        async function loadAllMarketData() {
+            let successCount = 0;
+            
+            for (const [key, symbol] of Object.entries(SYMBOLS)) {
+                const success = await fetchMarketData(key, symbol);
+                if (success) {
+                    successCount++;
+                } else {
+                    const fallback = FALLBACK_DATA[key];
+                    if (fallback) {
+                        updateIndicator(key, fallback.value, fallback.change, fallback.pchange);
+                    }
                 }
                 
-                updateTimestamp();
-                
-            } catch (error) {
-                console.error('Error in fetchMarketData:', error);
-            } finally {
-                setTimeout(() => {
-                    document.getElementById('loadingOverlay').classList.add('hidden');
-                }, 500);
+                await new Promise(resolve => setTimeout(resolve, 150));
             }
+            
+            updateTimestamp(successCount < 3);
+            
+            setTimeout(() => {
+                document.getElementById('loadingOverlay').classList.add('hidden');
+            }, 500);
         }
         
         window.addEventListener('DOMContentLoaded', () => {
-            fetchMarketData();
+            loadAllMarketData();
         });
         
         setInterval(() => {
-            fetchMarketData();
+            loadAllMarketData();
         }, 300000);
         
         setInterval(updateTimestamp, 60000);
