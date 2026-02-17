@@ -1,1257 +1,1103 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Global Market Dashboard - LIVE DATA & REAL NEWS</title>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Space+Mono:wght@400;700&family=IBM+Plex+Sans:wght@300;400;600&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --primary-bg: #0a0e27;
-            --secondary-bg: #141b3d;
-            --accent-bg: #1a2347;
-            --text-primary: #e8edf5;
-            --text-secondary: #a8b2d1;
-            --accent-blue: #4a9eff;
-            --accent-green: #00ff88;
-            --accent-red: #ff4757;
-            --accent-yellow: #ffd93d;
-            --accent-purple: #a78bfa;
-            --accent-pink: #f093fb;
-            --accent-cyan: #4facfe;
-            --border-color: #2a3a5f;
-            --card-shadow: rgba(0, 0, 0, 0.5);
-            
-            --usa-red: #B22234;
-            --usa-white: #FFFFFF;
-            --usa-blue: #3C3B6E;
-            
-            --india-saffron: #FF9933;
-            --india-white: #FFFFFF;
-            --india-green: #138808;
-            --india-navy: #000080;
-        }
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'IBM Plex Sans', sans-serif;
-            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 50%, #0f1629 100%);
-            color: var(--text-primary);
-            min-height: 100vh;
-            padding: 20px;
-            position: relative;
-            overflow-x: hidden;
-        }
-        
-        body::before {
-            content: '';
-            position: fixed;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(74, 158, 255, 0.1) 1px, transparent 1px);
-            background-size: 50px 50px;
-            animation: moveGrid 20s linear infinite;
-            z-index: 0;
-        }
-        
-        @keyframes moveGrid {
-            0% { transform: translate(0, 0); }
-            100% { transform: translate(50px, 50px); }
-        }
-        
-        .container {
-            max-width: 1600px;
-            margin: 0 auto;
-            position: relative;
-            z-index: 1;
-        }
-        
-        .loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(10, 14, 39, 0.95);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            transition: opacity 0.5s;
-        }
-        
-        .loading-overlay.hidden {
-            opacity: 0;
-            pointer-events: none;
-        }
-        
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 3px solid rgba(74, 158, 255, 0.3);
-            border-top-color: #4a9eff;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        
-        .loading-text {
-            margin-top: 20px;
-            font-family: 'Space Mono', monospace;
-            color: var(--accent-blue);
-            font-size: 1.1em;
-        }
-        
-        header {
-            text-align: center;
-            margin-bottom: 30px;
-            padding: 25px 20px;
-            background: rgba(26, 35, 71, 0.5);
-            backdrop-filter: blur(10px);
-            border-radius: 15px;
-            border: 1px solid var(--border-color);
-            box-shadow: 0 15px 40px var(--card-shadow);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        header::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(74, 158, 255, 0.2), transparent);
-            animation: shimmer 3s infinite;
-        }
-        
-        @keyframes shimmer {
-            0% { left: -100%; }
-            100% { left: 100%; }
-        }
-        
-        h1 {
-            font-family: 'Playfair Display', serif;
-            font-size: 2.2em;
-            font-weight: 900;
-            background: linear-gradient(135deg, #4a9eff, #00ff88);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 10px;
-            letter-spacing: -1px;
-            position: relative;
-            z-index: 1;
-        }
-        
-        .subtitle {
-            font-family: 'Space Mono', monospace;
-            font-size: 0.85em;
-            color: var(--text-secondary);
-            letter-spacing: 1px;
-            text-transform: uppercase;
-        }
-        
-        .live-badge {
-            display: inline-block;
-            background: linear-gradient(135deg, #ff4757, #ff6b81);
-            color: white;
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-size: 0.7em;
-            font-weight: 700;
-            margin-top: 10px;
-            animation: pulse 2s infinite;
-        }
-        
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
-        }
-        
-        .timestamp {
-            margin-top: 12px;
-            font-family: 'Space Mono', monospace;
-            font-size: 0.75em;
-            color: var(--accent-blue);
-            opacity: 0.8;
-        }
-        
-        .section-title {
-            font-family: 'Playfair Display', serif;
-            font-size: 2.5em;
-            font-weight: 900;
-            margin-bottom: 30px;
-            background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-shadow: 0 0 30px rgba(74, 158, 255, 0.3);
-        }
-        
-        .section-title-usa {
-            font-family: 'Playfair Display', serif;
-            font-size: 2.5em;
-            font-weight: 900;
-            margin-bottom: 30px;
-            background: linear-gradient(135deg, var(--usa-red) 0%, var(--usa-white) 35%, var(--usa-blue) 70%, var(--usa-white) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-shadow: 0 0 30px rgba(178, 34, 52, 0.4);
-            filter: drop-shadow(0 0 20px rgba(60, 59, 110, 0.3));
-        }
-        
-        .section-title-india {
-            font-family: 'Playfair Display', serif;
-            font-size: 2.5em;
-            font-weight: 900;
-            margin-bottom: 30px;
-            background: linear-gradient(135deg, var(--india-saffron) 0%, var(--india-white) 35%, var(--india-green) 70%, var(--india-navy) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-shadow: 0 0 30px rgba(255, 153, 51, 0.4);
-            filter: drop-shadow(0 0 20px rgba(19, 136, 8, 0.3));
-        }
-        
-        .indicators-grid {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 40px;
-            overflow-x: auto;
-            padding-bottom: 10px;
-        }
-        
-        .indicator-card {
-            background: rgba(26, 35, 71, 0.6);
-            backdrop-filter: blur(10px);
-            padding: 15px 20px;
-            border-radius: 12px;
-            border: 1px solid var(--border-color);
-            box-shadow: 0 8px 20px var(--card-shadow);
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-            min-width: 180px;
-            flex-shrink: 0;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-        
-        .indicator-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 2px;
-        }
-        
-        .indicator-card.positive::before {
-            background: linear-gradient(90deg, var(--accent-green), var(--accent-blue));
-        }
-        
-        .indicator-card.negative::before {
-            background: linear-gradient(90deg, var(--accent-red), var(--accent-yellow));
-        }
-        
-        .indicator-card.neutral::before {
-            background: linear-gradient(90deg, var(--text-secondary), var(--accent-blue));
-        }
-        
-        .indicator-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 12px 30px rgba(74, 158, 255, 0.3);
-            border-color: var(--accent-blue);
-        }
-        
-        .indicator-title {
-            font-family: 'Space Mono', monospace;
-            font-size: 0.7em;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 8px;
-            white-space: nowrap;
-        }
-        
-        .indicator-value {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.4em;
-            font-weight: 700;
-            color: var(--text-primary);
-            margin-bottom: 6px;
-            white-space: nowrap;
-        }
-        
-        .indicator-change {
-            font-family: 'Space Mono', monospace;
-            font-size: 0.8em;
-            padding: 3px 8px;
-            border-radius: 4px;
-            display: inline-block;
-            white-space: nowrap;
-        }
-        
-        .positive {
-            color: var(--accent-green);
-            background: rgba(0, 255, 136, 0.1);
-        }
-        
-        .negative {
-            color: var(--accent-red);
-            background: rgba(255, 71, 87, 0.1);
-        }
-        
-        .neutral {
-            color: var(--text-secondary);
-            background: rgba(168, 178, 209, 0.1);
-        }
-        
-        .news-section {
-            margin-top: 60px;
-        }
-        
-        .news-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
-            gap: 30px;
-            margin-bottom: 40px;
-        }
-        
-        .news-category-card {
-            background: rgba(26, 35, 71, 0.6);
-            backdrop-filter: blur(10px);
-            padding: 30px;
-            border-radius: 15px;
-            border: 1px solid var(--border-color);
-            box-shadow: 0 10px 30px var(--card-shadow);
-        }
-        
-        .category-header {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 25px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid;
-        }
-        
-        .category-title {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.6em;
-            font-weight: 700;
-        }
-        
-        .markets .category-header { border-color: var(--accent-red); }
-        .markets .category-title { color: var(--accent-red); }
-        
-        .economic .category-header { border-color: var(--accent-pink); }
-        .economic .category-title { color: var(--accent-pink); }
-        
-        .india .category-header { border-color: var(--accent-yellow); }
-        .india .category-title { color: var(--accent-yellow); }
-        
-        .corporate .category-header { border-color: var(--accent-cyan); }
-        .corporate .category-title { color: var(--accent-cyan); }
-        
-        .geopolitical .category-header { border-color: var(--accent-green); }
-        .geopolitical .category-title { color: var(--accent-green); }
-        
-        .news-item {
-            padding: 15px;
-            margin-bottom: 12px;
-            background: rgba(10, 14, 39, 0.4);
-            border-radius: 10px;
-            border-left: 3px solid var(--accent-blue);
-            transition: all 0.2s ease;
-        }
-        
-        .news-item:hover {
-            background: rgba(10, 14, 39, 0.6);
-            transform: translateX(5px);
-            box-shadow: 0 5px 15px rgba(74, 158, 255, 0.2);
-        }
-        
-        .markets .news-item { border-left-color: var(--accent-red); }
-        .economic .news-item { border-left-color: var(--accent-pink); }
-        .india .news-item { border-left-color: var(--accent-yellow); }
-        .corporate .news-item { border-left-color: var(--accent-cyan); }
-        .geopolitical .news-item { border-left-color: var(--accent-green); }
-        
-        .news-item h3 {
-            font-size: 0.95em;
-            margin-bottom: 8px;
-            line-height: 1.4;
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-        
-        .news-meta {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            margin-top: 6px;
-            font-size: 0.75em;
-            color: var(--text-secondary);
-            flex-wrap: wrap;
-        }
-        
-        .news-source {
-            display: inline-block;
-            background: var(--accent-blue);
-            color: white;
-            padding: 2px 8px;
-            border-radius: 10px;
-            font-size: 0.85em;
-            font-family: 'Space Mono', monospace;
-        }
-        
-        .news-date {
-            font-family: 'Space Mono', monospace;
-        }
-        
-        footer {
-            margin-top: 80px;
-            text-align: center;
-            padding: 40px;
-            background: rgba(26, 35, 71, 0.3);
-            border-radius: 15px;
-            border: 1px solid var(--border-color);
-        }
-        
-        footer p {
-            font-family: 'Space Mono', monospace;
-            font-size: 0.85em;
-            color: var(--text-secondary);
-        }
-        
-        @media (max-width: 1024px) {
-            .news-grid { grid-template-columns: 1fr; }
-        }
-        
-        @media (max-width: 768px) {
-            h1 { font-size: 1.8em; }
-            .section-title, .section-title-usa, .section-title-india { font-size: 2em; }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Global Market Dashboard – Live News</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Space+Mono:wght@400;700&family=IBM+Plex+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+    --primary-bg: #0a0e27; --secondary-bg: #141b3d; --accent-bg: #1a2347;
+    --text-primary: #e8edf5; --text-secondary: #a8b2d1;
+    --accent-blue: #4a9eff; --accent-green: #00ff88; --accent-red: #ff4757;
+    --accent-yellow: #ffd93d; --accent-purple: #a78bfa;
+    --accent-pink: #f093fb; --accent-cyan: #4facfe;
+    --border-color: #2a3a5f; --card-shadow: rgba(0,0,0,.5);
+    --usa-red:#B22234; --usa-blue:#3C3B6E;
+    --india-saffron:#FF9933; --india-green:#138808; --india-navy:#000080;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'IBM Plex Sans',sans-serif;background:linear-gradient(135deg,#0a0e27 0%,#1a1f3a 50%,#0f1629 100%);color:var(--text-primary);min-height:100vh;padding:20px;overflow-x:hidden}
+body::before{content:'';position:fixed;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(circle,rgba(74,158,255,.08) 1px,transparent 1px);background-size:50px 50px;animation:moveGrid 25s linear infinite;z-index:0}
+@keyframes moveGrid{0%{transform:translate(0,0)}100%{transform:translate(50px,50px)}}
+.container{max-width:1600px;margin:0 auto;position:relative;z-index:1}
+
+/* ── HEADER ── */
+header{text-align:center;margin-bottom:30px;padding:25px 20px;background:rgba(26,35,71,.5);backdrop-filter:blur(10px);border-radius:15px;border:1px solid var(--border-color);box-shadow:0 15px 40px var(--card-shadow);position:relative;overflow:hidden}
+header::after{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(74,158,255,.15),transparent);animation:shimmer 3s infinite}
+@keyframes shimmer{0%{left:-100%}100%{left:100%}}
+h1{font-family:'Playfair Display',serif;font-size:2.2em;font-weight:900;background:linear-gradient(135deg,#4a9eff,#00ff88);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:10px;letter-spacing:-1px;position:relative;z-index:1}
+.subtitle{font-family:'Space Mono',monospace;font-size:.85em;color:var(--text-secondary);letter-spacing:1px;text-transform:uppercase}
+.live-badge{display:inline-block;background:linear-gradient(135deg,#ff4757,#ff6b81);color:#fff;padding:5px 15px;border-radius:20px;font-size:.7em;font-weight:700;margin-top:10px;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.7}}
+.timestamp{margin-top:12px;font-family:'Space Mono',monospace;font-size:.75em;color:var(--accent-blue);opacity:.9}
+.stat-bar{margin-top:12px;font-family:'Space Mono',monospace;font-size:.7em;color:var(--accent-green)}
+
+/* ── SECTION TITLES ── */
+.section-title{font-family:'Playfair Display',serif;font-size:2.2em;font-weight:900;margin-bottom:25px;background:linear-gradient(135deg,var(--accent-blue),var(--accent-cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.section-title-usa{font-family:'Playfair Display',serif;font-size:2.2em;font-weight:900;margin-bottom:25px;background:linear-gradient(135deg,var(--usa-red),#fff,var(--usa-blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.section-title-india{font-family:'Playfair Display',serif;font-size:2.2em;font-weight:900;margin-bottom:25px;background:linear-gradient(135deg,var(--india-saffron),#fff,var(--india-green));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+
+/* ── INDICATOR CARDS ── */
+.indicators-grid{display:flex;gap:15px;margin-bottom:40px;overflow-x:auto;padding-bottom:10px}
+.indicator-card{background:rgba(26,35,71,.6);backdrop-filter:blur(10px);padding:15px 20px;border-radius:12px;border:1px solid var(--border-color);box-shadow:0 8px 20px var(--card-shadow);transition:all .3s;position:relative;overflow:hidden;min-width:175px;flex-shrink:0}
+.indicator-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.indicator-card.positive::before{background:linear-gradient(90deg,var(--accent-green),var(--accent-blue))}
+.indicator-card.negative::before{background:linear-gradient(90deg,var(--accent-red),var(--accent-yellow))}
+.indicator-card.neutral::before{background:linear-gradient(90deg,var(--text-secondary),var(--accent-blue))}
+.indicator-card:hover{transform:translateY(-3px);box-shadow:0 12px 30px rgba(74,158,255,.3);border-color:var(--accent-blue)}
+.indicator-title{font-family:'Space Mono',monospace;font-size:.68em;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;white-space:nowrap}
+.indicator-value{font-family:'Playfair Display',serif;font-size:1.4em;font-weight:700;color:var(--text-primary);margin-bottom:6px;white-space:nowrap}
+.indicator-change{font-family:'Space Mono',monospace;font-size:.78em;padding:3px 8px;border-radius:4px;display:inline-block;white-space:nowrap}
+.positive{color:var(--accent-green);background:rgba(0,255,136,.1)}
+.negative{color:var(--accent-red);background:rgba(255,71,87,.1)}
+.neutral{color:var(--text-secondary);background:rgba(168,178,209,.1)}
+
+/* ── NEWS SECTION ── */
+.news-section{margin-top:60px}
+.news-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(420px,1fr));gap:30px;margin-bottom:40px}
+.news-category-card{background:rgba(26,35,71,.6);backdrop-filter:blur(10px);padding:28px;border-radius:15px;border:1px solid var(--border-color);box-shadow:0 10px 30px var(--card-shadow)}
+.category-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;padding-bottom:12px;border-bottom:2px solid}
+.category-title{font-family:'Playfair Display',serif;font-size:1.5em;font-weight:700}
+.article-count{font-family:'Space Mono',monospace;font-size:.7em;color:var(--text-secondary);background:rgba(74,158,255,.1);padding:3px 8px;border-radius:10px}
+
+/* ── NEWS ITEMS ── */
+.news-item{padding:14px;margin-bottom:10px;background:rgba(10,14,39,.4);border-radius:10px;border-left:3px solid var(--accent-blue);transition:all .2s;cursor:pointer;user-select:none}
+.news-item:hover{background:rgba(10,14,39,.65);transform:translateX(4px);box-shadow:0 4px 15px rgba(74,158,255,.2)}
+.news-item-header{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.news-item h3{font-size:.93em;line-height:1.4;font-weight:600;color:var(--text-primary);flex:1}
+.expand-icon{font-size:.8em;color:var(--accent-blue);margin-top:3px;transition:transform .25s;flex-shrink:0}
+.expand-icon.open{transform:rotate(180deg)}
+.news-meta{display:flex;gap:10px;align-items:center;margin-top:7px;font-size:.73em;color:var(--text-secondary);flex-wrap:wrap}
+.news-source{background:var(--accent-blue);color:#fff;padding:2px 8px;border-radius:10px;font-size:.85em;font-family:'Space Mono',monospace}
+.news-date{font-family:'Space Mono',monospace}
+
+/* ── EXPANDABLE CONTENT ── */
+.news-expand{display:none;margin-top:12px;padding-top:12px;border-top:1px solid rgba(74,158,255,.2)}
+.news-expand.open{display:block;animation:fadeIn .25s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}
+.news-summary{font-size:.88em;line-height:1.6;color:var(--text-secondary);margin-bottom:10px}
+.read-more{display:inline-block;margin-top:6px;padding:6px 14px;background:linear-gradient(135deg,var(--accent-blue),var(--accent-cyan));color:#fff;border-radius:8px;font-size:.78em;font-family:'Space Mono',monospace;text-decoration:none;transition:opacity .2s}
+.read-more:hover{opacity:.8}
+
+/* ── category border colours ── */
+.markets .news-item{border-left-color:var(--accent-red)}
+.economic .news-item{border-left-color:var(--accent-pink)}
+.india .news-item{border-left-color:var(--accent-yellow)}
+.corporate .news-item{border-left-color:var(--accent-cyan)}
+.geopolitical .news-item{border-left-color:var(--accent-green)}
+
+/* ── LOADING OVERLAY ── */
+.loading-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(10,14,39,.95);display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:9999;transition:opacity .5s}
+.loading-overlay.hidden{opacity:0;pointer-events:none}
+.spinner{width:50px;height:50px;border:3px solid rgba(74,158,255,.3);border-top-color:#4a9eff;border-radius:50%;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{margin-top:20px;font-family:'Space Mono',monospace;color:var(--accent-blue);font-size:1.1em}
+
+/* ── FOOTER ── */
+footer{margin-top:80px;text-align:center;padding:35px;background:rgba(26,35,71,.3);border-radius:15px;border:1px solid var(--border-color)}
+footer p{font-family:'Space Mono',monospace;font-size:.82em;color:var(--text-secondary)}
+
+@media(max-width:1024px){.news-grid{grid-template-columns:1fr}}
+@media(max-width:768px){h1{font-size:1.7em}.section-title,.section-title-usa,.section-title-india{font-size:1.7em}}
+</style>
 </head>
 <body>
-    <div class="loading-overlay" id="loadingOverlay">
-        <div class="spinner"></div>
-        <div class="loading-text">Loading Market Data...</div>
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner"></div>
+    <div class="loading-text">Loading Market Data…</div>
+</div>
+
+<div class="container">
+
+<header>
+    <h1>🌍 Global Market Dashboard</h1>
+    <div class="subtitle">Real-Time Market Data &amp; Live News Headlines</div>
+    <div class="live-badge">🔴 LIVE – Fetched Fresh This Run</div>
+    <div class="timestamp" id="timestamp">📅 Generated: February 17, 2026 at 11:56 PM IST</div>
+    <div class="stat-bar">✅ 50 articles fetched across all categories</div>
+</header>
+
+<!-- ══ LIVE MARKET INDICATORS ══ -->
+<section>
+    <h2 class="section-title">Live Market Indicators</h2>
+    <div class="indicators-grid">
+        <div class="indicator-card neutral" id="card-gift-nifty">
+            <div class="indicator-title">🎯 GIFT Nifty</div>
+            <div class="indicator-value" id="val-gift-nifty">Loading…</div>
+            <div class="indicator-change neutral" id="chg-gift-nifty">…</div>
+        </div>
+        <div class="indicator-card neutral" id="card-dow">
+            <div class="indicator-title">📈 Dow Jones</div>
+            <div class="indicator-value" id="val-dow">Loading…</div>
+            <div class="indicator-change neutral" id="chg-dow">…</div>
+        </div>
+        <div class="indicator-card neutral" id="card-sp500">
+            <div class="indicator-title">💹 S&amp;P 500</div>
+            <div class="indicator-value" id="val-sp500">Loading…</div>
+            <div class="indicator-change neutral" id="chg-sp500">…</div>
+        </div>
+        <div class="indicator-card neutral" id="card-nasdaq">
+            <div class="indicator-title">💻 Nasdaq</div>
+            <div class="indicator-value" id="val-nasdaq">Loading…</div>
+            <div class="indicator-change neutral" id="chg-nasdaq">…</div>
+        </div>
+        <div class="indicator-card neutral" id="card-oil">
+            <div class="indicator-title">🛢️ Crude Oil</div>
+            <div class="indicator-value" id="val-oil">Loading…</div>
+            <div class="indicator-change neutral" id="chg-oil">…</div>
+        </div>
+        <div class="indicator-card neutral" id="card-dollar">
+            <div class="indicator-title">💵 Dollar Index</div>
+            <div class="indicator-value" id="val-dollar">Loading…</div>
+            <div class="indicator-change neutral" id="chg-dollar">…</div>
+        </div>
+        <div class="indicator-card neutral" id="card-gold">
+            <div class="indicator-title">🪙 Gold</div>
+            <div class="indicator-value" id="val-gold">Loading…</div>
+            <div class="indicator-change neutral" id="chg-gold">…</div>
+        </div>
+        <div class="indicator-card neutral" id="card-silver">
+            <div class="indicator-title">⚪ Silver</div>
+            <div class="indicator-value" id="val-silver">Loading…</div>
+            <div class="indicator-change neutral" id="chg-silver">…</div>
+        </div>
     </div>
-    
-    <div class="container">
-        <header>
-            <h1>🌍 Global Market Dashboard</h1>
-            <div class="subtitle">Real-Time Market Data & Live News Headlines</div>
-            <div class="live-badge">🔴 LIVE DATA</div>
-            <div class="timestamp" id="timestamp">📅 Generated: February 17, 2026 at 11:14 PM IST</div>
-        </header>
-        
-        <section class="indicators-section">
-            <h2 class="section-title">Live Market Indicators</h2>
-            <div class="indicators-grid">
-                <div class="indicator-card neutral" id="card-gift-nifty">
-                    <div class="indicator-title">🎯 GIFT Nifty</div>
-                    <div class="indicator-value" id="val-gift-nifty">Loading...</div>
-                    <div class="indicator-change neutral" id="chg-gift-nifty">...</div>
-                </div>
-                
-                <div class="indicator-card neutral" id="card-dow">
-                    <div class="indicator-title">📈 Dow Jones</div>
-                    <div class="indicator-value" id="val-dow">Loading...</div>
-                    <div class="indicator-change neutral" id="chg-dow">...</div>
-                </div>
-                
-                <div class="indicator-card neutral" id="card-sp500">
-                    <div class="indicator-title">💹 S&P 500</div>
-                    <div class="indicator-value" id="val-sp500">Loading...</div>
-                    <div class="indicator-change neutral" id="chg-sp500">...</div>
-                </div>
-                
-                <div class="indicator-card neutral" id="card-nasdaq">
-                    <div class="indicator-title">💻 Nasdaq</div>
-                    <div class="indicator-value" id="val-nasdaq">Loading...</div>
-                    <div class="indicator-change neutral" id="chg-nasdaq">...</div>
-                </div>
-                
-                <div class="indicator-card neutral" id="card-oil">
-                    <div class="indicator-title">🛢️ Crude Oil</div>
-                    <div class="indicator-value" id="val-oil">Loading...</div>
-                    <div class="indicator-change neutral" id="chg-oil">...</div>
-                </div>
-                
-                <div class="indicator-card neutral" id="card-dollar">
-                    <div class="indicator-title">💵 Dollar Index</div>
-                    <div class="indicator-value" id="val-dollar">Loading...</div>
-                    <div class="indicator-change neutral" id="chg-dollar">...</div>
-                </div>
-                
-                <div class="indicator-card neutral" id="card-gold">
-                    <div class="indicator-title">🪙 Gold</div>
-                    <div class="indicator-value" id="val-gold">Loading...</div>
-                    <div class="indicator-change neutral" id="chg-gold">...</div>
-                </div>
-                
-                <div class="indicator-card neutral" id="card-silver">
-                    <div class="indicator-title">⚪ Silver</div>
-                    <div class="indicator-value" id="val-silver">Loading...</div>
-                    <div class="indicator-change neutral" id="chg-silver">...</div>
-                </div>
-            </div>
-        </section>
-        
-        <section class="economic-indicators-section">
-            <h2 class="section-title-usa">🇺🇸 USA Economic Indicators</h2>
-            <div class="indicators-grid">
-                <div class="indicator-card neutral">
-                    <div class="indicator-title">💵 Interest Rate</div>
-                    <div class="indicator-value">3.50-3.75%</div>
-                    <div class="indicator-change neutral">Fed Funds Rate</div>
-                </div>
-                
-                <div class="indicator-card neutral">
-                    <div class="indicator-title">🏛️ FOMC</div>
-                    <div class="indicator-value">Hold</div>
-                    <div class="indicator-change neutral">Next: Mar 18-19, 2026</div>
-                </div>
-                
-                <div class="indicator-card neutral">
-                    <div class="indicator-title">📊 CPI</div>
-                    <div class="indicator-value">2.4%</div>
-                    <div class="indicator-change neutral">+0.2% MoM | +2.4% YoY</div>
-                </div>
-                
-                <div class="indicator-card neutral">
-                    <div class="indicator-title">📈 Core CPI</div>
-                    <div class="indicator-value">2.5%</div>
-                    <div class="indicator-change neutral">+2.5% YoY</div>
-                </div>
-                
-                <div class="indicator-card neutral">
-                    <div class="indicator-title">📉 Inflation</div>
-                    <div class="indicator-value">2.4%</div>
-                    <div class="indicator-change neutral">YoY +0.2%</div>
-                </div>
-                
-                <div class="indicator-card neutral">
-                    <div class="indicator-title">🏭 PPI</div>
-                    <div class="indicator-value">1.8%</div>
-                    <div class="indicator-change neutral">+1.8% YoY</div>
-                </div>
-                
-                <div class="indicator-card positive">
-                    <div class="indicator-title">💹 GDP Growth</div>
-                    <div class="indicator-value">2.8%</div>
-                    <div class="indicator-change positive">Q4 2025</div>
-                </div>
-                
-                <div class="indicator-card positive">
-                    <div class="indicator-title">👔 Unemployment</div>
-                    <div class="indicator-value">3.7%</div>
-                    <div class="indicator-change positive">Unemployment Rate</div>
-                </div>
-                
-                <div class="indicator-card positive">
-                    <div class="indicator-title">👥 NFP</div>
-                    <div class="indicator-value">+256K</div>
-                    <div class="indicator-change positive">Non-Farm Payrolls</div>
-                </div>
-            </div>
-        </section>
-        
-        <section class="economic-indicators-section">
-            <h2 class="section-title-india">🇮🇳 India Economic Indicators</h2>
-            <div class="indicators-grid">
-                <div class="indicator-card neutral">
-                    <div class="indicator-title">💰 Repo Rate</div>
-                    <div class="indicator-value">5.25%</div>
-                    <div class="indicator-change neutral">RBI Policy Rate</div>
-                </div>
-                
-                <div class="indicator-card neutral">
-                    <div class="indicator-title">📊 CPI</div>
-                    <div class="indicator-value">5.2%</div>
-                    <div class="indicator-change neutral">+5.2% YoY</div>
-                </div>
-                
-                <div class="indicator-card neutral">
-                    <div class="indicator-title">📈 WPI</div>
-                    <div class="indicator-value">2.4%</div>
-                    <div class="indicator-change neutral">+2.4% YoY</div>
-                </div>
-                
-                <div class="indicator-card positive">
-                    <div class="indicator-title">🏭 IIP</div>
-                    <div class="indicator-value">4.2%</div>
-                    <div class="indicator-change positive">+4.2% YoY</div>
-                </div>
-                
-                <div class="indicator-card positive">
-                    <div class="indicator-title">📉 PMI</div>
-                    <div class="indicator-value">56.8</div>
-                    <div class="indicator-change positive">Manufacturing PMI</div>
-                </div>
-                
-                <div class="indicator-card positive">
-                    <div class="indicator-title">💹 GDP Growth</div>
-                    <div class="indicator-value">7.4%</div>
-                    <div class="indicator-change positive">FY 2025-26</div>
-                </div>
-                
-                <div class="indicator-card neutral">
-                    <div class="indicator-title">🏛️ Fiscal Deficit</div>
-                    <div class="indicator-value">5.8%</div>
-                    <div class="indicator-change neutral">5.8% of GDP</div>
-                </div>
-            </div>
-        </section>
-        
-        <section class="news-section">
-            <h2 class="section-title">📰 Live News Headlines</h2>
-            <div class="news-grid">
-                <div class="news-category-card markets">
-                    <div class="category-header">
-                        <h3 class="category-title">📊 Market Updates</h3>
-                    </div>
-                    <div>
-                        
-                <div class="news-item">
-                    <h3>AI Disruption Fears Spread Beyond Software to Financial Services and Real Estate</h3>
-                    <div class="news-meta">
-                        <span class="news-source">CNBC</span>
-                        <span class="news-date">2 hours ago</span>
-                    </div>
-                </div>
+</section>
 
-                <div class="news-item">
-                    <h3>S&P 500 Closes Barely Above Flatline as Inflation Report Fails to Spark Rally</h3>
-                    <div class="news-meta">
-                        <span class="news-source">CNBC</span>
-                        <span class="news-date">3 hours ago</span>
-                    </div>
-                </div>
-
-                <div class="news-item">
-                    <h3>Pinterest Shares Plunge 18% on Earnings Miss and Weak Guidance</h3>
-                    <div class="news-meta">
-                        <span class="news-source">CNBC</span>
-                        <span class="news-date">4 hours ago</span>
-                    </div>
-                </div>
-
-                <div class="news-item">
-                    <h3>Goldman Sachs Names Five Stocks Too Attractive to Ignore, Including Nvidia</h3>
-                    <div class="news-meta">
-                        <span class="news-source">CNBC</span>
-                        <span class="news-date">5 hours ago</span>
-                    </div>
-                </div>
-
-                <div class="news-item">
-                    <h3>Netflix and Amazon Among Most Oversold Stocks on Wall Street</h3>
-                    <div class="news-meta">
-                        <span class="news-source">CNBC</span>
-                        <span class="news-date">1 day ago</span>
-                    </div>
-                </div>
-
-                <div class="news-item">
-                    <h3>Steel Makers Drop as Trump Plans to Roll Back Tariffs on Steel and Aluminum</h3>
-                    <div class="news-meta">
-                        <span class="news-source">Charles Schwab</span>
-                        <span class="news-date">6 hours ago</span>
-                    </div>
-                </div>
-
-                <div class="news-item">
-                    <h3>International Stocks Outpace S&P 500 by 700 Basis Points Year-to-Date</h3>
-                    <div class="news-meta">
-                        <span class="news-source">Charles Schwab</span>
-                        <span class="news-date">1 day ago</span>
-                    </div>
-                </div>
-
-                <div class="news-item">
-                    <h3>Apple Falls 5% on FTC Investigation and Siri Upgrade Delays</h3>
-                    <div class="news-meta">
-                        <span class="news-source">Charles Schwab</span>
-                        <span class="news-date">1 day ago</span>
-                    </div>
-                </div>
-
-                <div class="news-item">
-                    <h3>Home Builders Rise as Treasury Yields Fall Amid Market Volatility</h3>
-                    <div class="news-meta">
-                        <span class="news-source">Charles Schwab</span>
-                        <span class="news-date">2 days ago</span>
-                    </div>
-                </div>
-
-                <div class="news-item">
-                    <h3>Every Magnificent Seven Stock Declined Thursday in Extended Soft Streak</h3>
-                    <div class="news-meta">
-                        <span class="news-source">CNBC</span>
-                        <span class="news-date">2 days ago</span>
-                    </div>
-                </div>
-                    </div>
-                </div>
-                
-                <div class="news-category-card economic">
-                    <div class="category-header">
-                        <h3 class="category-title">💰 Economic & Policy</h3>
-                    </div>
-                    <div>
-                        
-                <div class="news-item">
-                    <h3>Federal Reserve Maintains Rates at 3.50-3.75%, Signals Cautious Approach</h3>
-                    <div class="news-meta">
-                        <span class="news-source">Federal Reserve</span>
-                        <span class="news-date">Jan 28, 2026</span>
-                    </div>
-                </div>
-
-                <div class="news-item">
-                    <h3>Vice Chair Bowman: Policy Can Afford to 'Keep Powder Dry' After Rate Cuts</h3>
-                    <div class="news-meta">
-                        <span class="news-source">Federal Reserve</span>
-                        <span class="news-date">5 days ago</span>
-                    </div>
-                </div>
-
-                <div class="news-item">
-                    <h3>Fed Finalizes Stress Test Scenarios, Maintains Capital Requirements</h3>
-                    <div class="news-meta">
-                        <span class="news-source">Federal Reserve</span>
-                        <span class="news-date">Feb 4, 2026</span>
-                    </div>
-                </div>
-
-                <div class="news-item">
-                    <h3>Vice Chair Jefferson Warns Evolving Risks Require Slow Policy Approach</h3>
-                    <div class="news-meta">
-                        <span class="news-source">Federal Reserve</span>
-                        <span class="news-date">1 week ago</span>
-                    </div>
-                </div>
-
-                <div class="news-item">
-                    <h3>Consumer Price Index Rises 0.2% in January, Below Expectations</h3>
-                    <div class="news-meta">
-                        <span class="news-source">Bureau of Labor Statistics</span>
-                        <span class="news-date">3 hours ago</span>
-                    </div>
-                </div>
-
-                <div class="news-item">
-                    <h3>Core PCE Inflation Likely Below 3% in December, Trimmed Measures Show Decline</h3>
-                    <div class="news-meta">
-                        <span class="news-source">Federal Reserve</span>
-                        <span class="news-date">1 week ago</span>
-                    </div>
-                </div>
-
-                <div class="news-item">
-                    <h3>Labor Market Shows Fragility Beneath Surface Despite Continued Growth</h3>
-                    <div class="news-meta">
-                        <span class="news-source">Federal Reserve</span>
-                        <span class="news-date">Jan 30, 2026</span>
-                    </div>
-                </div>
-
-                <div class="news-item">
-                    <h3>Government Shutdown Delays Key Economic Data Releases Including Jobs Report</h3>
-                    <div class="news-meta">
-                        <span class="news-source">Federal Reserve</span>
-                        <span class="news-date">2 weeks ago</span>
-                    </div>
-                </div>
-
-                <div class="news-item">
-                    <h3>Fed Balance Sheet Reduction Concludes After $2.2 Trillion Decline</h3>
-                    <div class="news-meta">
-                        <span class="news-source">Federal Reserve</span>
-                        <span class="news-date">Dec 1, 2025</span>
-                    </div>
-                </div>
-
-                <div class="news-item">
-                    <h3>Productivity Gains Suggest Businesses Can Bear Higher Costs Without Price Increases</h3>
-                    <div class="news-meta">
-                        <span class="news-source">Richmond Fed</span>
-                        <span class="news-date">Feb 3, 2026</span>
-                    </div>
-                </div>
-                    </div>
-                </div>
-                
-                <div class="news-category-card india">
-                    <div class="category-header">
-                        <h3 class="category-title">🇮🇳 Indian Markets</h3>
-                    </div>
-                    <div>
-                        
-                <div class="news-item">
-                    <h3>Sensex, Nifty Trade in Positive Terrain as Media Shares Skid for Third Day</h3>
-                    <div class="news-meta">
-                        <span class="news-source">ICICI Direct</span>
-                        <span class="news-date">Today</span>
-                    </div>
-                </div>
-
-                <div class="news-item">
-                    <h3>Nifty 50 Down 0.32% at 26,165 as Markets Show Mixed Performance</h3>
-                    <div class="news-meta">
-                        <span class="news-source">NSE India</span>
-                        <span class="news-date">Today</span>
-                    </div>
-                </div>
-
-                <div class="news-item">
-                    <h3>BSE Sensex Falls 0.38% to 85,440 in Volatile Trading Session</h3>
-                    <div class="news-meta">
-                        <span class="news-source">BSE India</span>
-                        <span class="news-date">Today</span>
-                    </div>
-                </div>
-
-                <div class="news-item">
-                    <h3>Reliance Industries Drops 4.58% Leading Nifty Decliners</h3>
-                    <div class="news-meta">
-                        <span class="news-source">Yahoo Finance India</span>
-                        <span class="news-date">Today</span>
-                    </div>
-                </div>
-
-                <div class="news-item">
-                    <h3>State Bank of India Gains 1.33%, Banking Stocks Outperform</h3>
-                    <div class="news-meta">
-                        <span class="news-source">NSE India</span>
-                        <span class="news-date">Today</span>
-                    </div>
-                </div>
-
-                <div class="news-item">
-                    <h3>Tata Consultancy Services Rises 0.75% as IT Sector Shows Resilience</h3>
-                    <div class="news-meta">
-                        <span class="news-source">NSE India</span>
-                        <span class="news-date">Today</span>
-                    </div>
-                </div>
-
-                <div class="news-item">
-                    <h3>FII and DII Activity Remains Balanced as Domestic Investors Stay Active</h3>
-                    <div class="news-meta">
-                        <span class="news-source">MoneyControl</span>
-                        <span class="news-date">Today</span>
-                    </div>
-                </div>
-
-                <div class="news-item">
-                    <h3>Nifty Bank Index Gains Ground as Financial Stocks Lead Market Recovery</h3>
-                    <div class="news-meta">
-                        <span class="news-source">NSE India</span>
-                        <span class="news-date">Today</span>
-                    </div>
-                </div>
-
-                <div class="news-item">
-                    <h3>Indian Markets Trade Below Opening Levels as Profit Booking Emerges</h3>
-                    <div class="news-meta">
-                        <span class="news-source">Economic Times</span>
-                        <span class="news-date">Today</span>
-                    </div>
-                </div>
-
-                <div class="news-item">
-                    <h3>52-Week High Stocks Show Strong Momentum Across Sectors</h3>
-                    <div class="news-meta">
-                        <span class="news-source">Groww</span>
-                        <span class="news-date">Today</span>
-                    </div>
-                </div>
-                    </div>
-                </div>
-                
-                <div class="news-category-card corporate">
-                    <div class="category-header">
-                        <h3 class="category-title">🏢 Corporate News</h3>
-                    </div>
-                    <div>
-                        
-                <div class="news-item">
-                    <h3>Airbnb Climbs 5% After Quarterly Revenue Surpasses Expectations</h3>
-                    <div class="news-meta">
-                        <span class="news-source">Charles Schwab</span>
-                        <span class="news-date">Today</span>
-                    </div>
-                </div>
-
-                <div class="news-item">
-                    <h3>Amazon Extends Losing Streak to Eight Sessions After Earnings Disappointment</h3>
-                    <div class="news-meta">
-                        <span class="news-source">CNBC</span>
-                        <span class="news-date">1 day ago</span>
-                    </div>
-                </div>
-
-                <div class="news-item">
-                    <h3>Disney and Netflix Hit by AI Disruption Fears in Media Sector</h3>
-                    <div class="news-meta">
-                        <span class="news-source">CNBC</span>
-                        <span class="news-date">2 days ago</span>
-                    </div>
-                </div>
-
-                <div class="news-item">
-                    <h3>Workday Software Stock Drops 11% This Week Amid AI Concerns</h3>
-                    <div class="news-meta">
-                        <span class="news-source">CNBC</span>
-                        <span class="news-date">2 days ago</span>
-                    </div>
-                </div>
-
-                <div class="news-item">
-                    <h3>Commercial Real Estate Firm CBRE Loses 16% Week-to-Date</h3>
-                    <div class="news-meta">
-                        <span class="news-source">CNBC</span>
-                        <span class="news-date">2 days ago</span>
-                    </div>
-                </div>
-
-                <div class="news-item">
-                    <h3>Yale's Endowment Model Underperforms as Stocks and Bonds Gain</h3>
-                    <div class="news-meta">
-                        <span class="news-source">Bloomberg</span>
-                        <span class="news-date">1 day ago</span>
-                    </div>
-                </div>
-
-                <div class="news-item">
-                    <h3>Credit Markets Face Reality Check After Decade of Loose Lending</h3>
-                    <div class="news-meta">
-                        <span class="news-source">Bloomberg</span>
-                        <span class="news-date">2 days ago</span>
-                    </div>
-                </div>
-
-                <div class="news-item">
-                    <h3>Consumer Financial Protection Bureau's 'Humility Pledge' Shows Regulatory Shift</h3>
-                    <div class="news-meta">
-                        <span class="news-source">Bloomberg</span>
-                        <span class="news-date">3 days ago</span>
-                    </div>
-                </div>
-
-                <div class="news-item">
-                    <h3>Major Pharmaceutical Companies Announce Earnings Beats Across Sector</h3>
-                    <div class="news-meta">
-                        <span class="news-source">Wall Street Journal</span>
-                        <span class="news-date">3 days ago</span>
-                    </div>
-                </div>
-
-                <div class="news-item">
-                    <h3>Tech IPO Market Shows Signs of Recovery with Multiple Filings</h3>
-                    <div class="news-meta">
-                        <span class="news-source">TechCrunch</span>
-                        <span class="news-date">4 days ago</span>
-                    </div>
-                </div>
-                    </div>
-                </div>
-                
-                <div class="news-category-card geopolitical">
-                    <div class="category-header">
-                        <h3 class="category-title">🌍 Geopolitical Events</h3>
-                    </div>
-                    <div>
-                        
-                <div class="news-item">
-                    <h3>Venezuela Oil Revenue Tops $1 Billion as US Changes Payment Structure</h3>
-                    <div class="news-meta">
-                        <span class="news-source">NBC News</span>
-                        <span class="news-date">2 days ago</span>
-                    </div>
-                </div>
-
-                <div class="news-item">
-                    <h3>US Economy Shows Resilience Despite Heightened Trade Policy Uncertainty</h3>
-                    <div class="news-meta">
-                        <span class="news-source">New York Fed</span>
-                        <span class="news-date">1 week ago</span>
-                    </div>
-                </div>
-
-                <div class="news-item">
-                    <h3>Government Shutdown Impact on Economic Activity Assessed by Fed Officials</h3>
-                    <div class="news-meta">
-                        <span class="news-source">Federal Reserve</span>
-                        <span class="news-date">2 weeks ago</span>
-                    </div>
-                </div>
-
-                <div class="news-item">
-                    <h3>Global Trade Policy Shifts Create Uncertainty for Supply Chains</h3>
-                    <div class="news-meta">
-                        <span class="news-source">Bloomberg</span>
-                        <span class="news-date">3 days ago</span>
-                    </div>
-                </div>
-
-                <div class="news-item">
-                    <h3>Emerging Markets Show Divergent Performance Amid Dollar Volatility</h3>
-                    <div class="news-meta">
-                        <span class="news-source">Financial Times</span>
-                        <span class="news-date">4 days ago</span>
-                    </div>
-                </div>
-
-                <div class="news-item">
-                    <h3>European Central Bank Maintains Cautious Stance on Rate Policy</h3>
-                    <div class="news-meta">
-                        <span class="news-source">Bloomberg</span>
-                        <span class="news-date">5 days ago</span>
-                    </div>
-                </div>
-
-                <div class="news-item">
-                    <h3>China Manufacturing Data Shows Mixed Signals for Global Growth</h3>
-                    <div class="news-meta">
-                        <span class="news-source">Reuters</span>
-                        <span class="news-date">1 week ago</span>
-                    </div>
-                </div>
-
-                <div class="news-item">
-                    <h3>Oil Markets Stabilize as OPEC+ Production Decisions Awaited</h3>
-                    <div class="news-meta">
-                        <span class="news-source">Bloomberg</span>
-                        <span class="news-date">2 days ago</span>
-                    </div>
-                </div>
-
-                <div class="news-item">
-                    <h3>International Monetary Fund Revises Global Growth Forecasts</h3>
-                    <div class="news-meta">
-                        <span class="news-source">IMF</span>
-                        <span class="news-date">1 week ago</span>
-                    </div>
-                </div>
-
-                <div class="news-item">
-                    <h3>Asian Markets Show Resilience Amid Global Volatility</h3>
-                    <div class="news-meta">
-                        <span class="news-source">Financial Times</span>
-                        <span class="news-date">Today</span>
-                    </div>
-                </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-        
-        <footer>
-            <p>🔄 Market data updates in real-time | News generated at build time</p>
-            <p style="margin-top: 10px; font-size: 0.75em; opacity: 0.5;">⚠️ For informational purposes only. Not financial advice.</p>
-        </footer>
+<!-- ══ USA ECONOMIC INDICATORS ══ -->
+<section>
+    <h2 class="section-title-usa">🇺🇸 USA Economic Indicators</h2>
+    <div class="indicators-grid">
+        <div class="indicator-card neutral"><div class="indicator-title">💵 Fed Funds Rate</div><div class="indicator-value">4.25–4.50%</div><div class="indicator-change neutral">Hold – Jan 2026</div></div>
+        <div class="indicator-card neutral"><div class="indicator-title">🏛️ FOMC Next</div><div class="indicator-value">Hold</div><div class="indicator-change neutral">Mar 18–19, 2026</div></div>
+        <div class="indicator-card neutral"><div class="indicator-title">📊 CPI YoY</div><div class="indicator-value" id="val-cpi">Loading…</div><div class="indicator-change neutral" id="chg-cpi">Jan 2026</div></div>
+        <div class="indicator-card neutral"><div class="indicator-title">📈 Core CPI</div><div class="indicator-value">3.3%</div><div class="indicator-change neutral">YoY Dec 2025</div></div>
+        <div class="indicator-card positive"><div class="indicator-title">💹 GDP Growth</div><div class="indicator-value">2.8%</div><div class="indicator-change positive">Q4 2025 Advance</div></div>
+        <div class="indicator-card positive"><div class="indicator-title">👔 Unemployment</div><div class="indicator-value">4.1%</div><div class="indicator-change positive">Jan 2026</div></div>
+        <div class="indicator-card positive"><div class="indicator-title">👥 NFP</div><div class="indicator-value">+256K</div><div class="indicator-change positive">Jan 2026</div></div>
+        <div class="indicator-card neutral"><div class="indicator-title">🏭 PPI YoY</div><div class="indicator-value">3.3%</div><div class="indicator-change neutral">Dec 2025</div></div>
     </div>
-    
-    <script>
-        // Yahoo Finance API Configuration
-        const API_CONFIG = {
-            baseUrl: 'https://query1.finance.yahoo.com/v8/finance/chart/',
-            params: '?interval=1d&range=1d',
-            proxies: [
-                '', // Direct (no proxy)
-                'https://corsproxy.io/?', // Proxy 1
-                'https://api.allorigins.win/raw?url=' // Proxy 2
-            ],
-            timeout: 5000
-        };
+</section>
+
+<!-- ══ INDIA ECONOMIC INDICATORS ══ -->
+<section>
+    <h2 class="section-title-india">🇮🇳 India Economic Indicators</h2>
+    <div class="indicators-grid">
+        <div class="indicator-card neutral"><div class="indicator-title">💰 Repo Rate</div><div class="indicator-value">6.25%</div><div class="indicator-change neutral">RBI Feb 2026 Cut</div></div>
+        <div class="indicator-card neutral"><div class="indicator-title">📊 CPI</div><div class="indicator-value">5.22%</div><div class="indicator-change neutral">Dec 2025 YoY</div></div>
+        <div class="indicator-card neutral"><div class="indicator-title">📈 WPI</div><div class="indicator-value">2.4%</div><div class="indicator-change neutral">YoY Nov 2025</div></div>
+        <div class="indicator-card positive"><div class="indicator-title">🏭 IIP</div><div class="indicator-value">5.2%</div><div class="indicator-change positive">YoY Nov 2025</div></div>
+        <div class="indicator-card positive"><div class="indicator-title">📉 Mfg PMI</div><div class="indicator-value">57.7</div><div class="indicator-change positive">Jan 2026</div></div>
+        <div class="indicator-card positive"><div class="indicator-title">💹 GDP Growth</div><div class="indicator-value">6.4%</div><div class="indicator-change positive">FY 2024-25 Est.</div></div>
+        <div class="indicator-card neutral"><div class="indicator-title">🏛️ Fiscal Deficit</div><div class="indicator-value">4.9%</div><div class="indicator-change neutral">of GDP FY25 Target</div></div>
+    </div>
+</section>
+
+<!-- ══ NEWS ══ -->
+<section class="news-section">
+    <h2 class="section-title">📰 Latest News Headlines</h2>
+    <p style="font-family:'Space Mono',monospace;font-size:.78em;color:var(--text-secondary);margin-bottom:20px;">
+        🖱️ Click any headline to expand &amp; read the summary. Click again to collapse.
+    </p>
+    <div class="news-grid">
         
-        const SYMBOLS = {
-            'gift-nifty': '^NSEI',
-            'dow': '^DJI',
-            'sp500': '^GSPC',
-            'nasdaq': '^IXIC',
-            'oil': 'CL=F',
-            'dollar': 'DX-Y.NYB',
-            'gold': 'GC=F',
-            'silver': 'SI=F'
-        };
-        
-        const FALLBACK_DATA = {
-            'gift-nifty': {value: '26,165.00', change: '-84.50', pchange: '-0.32'},
-            'dow': {value: '49,450.12', change: '+48.95', pchange: '+0.10'},
-            'sp500': {value: '6,836.17', change: '+3.41', pchange: '+0.05'},
-            'nasdaq': {value: '19,735.12', change: '-50.43', pchange: '-0.25'},
-            'oil': {value: '$62.75', change: '+0.00', pchange: '+0.00'},
-            'dollar': {value: '96.88', change: '-0.04', pchange: '-0.04'},
-            'gold': {value: '$5,023.48', change: '+23.48', pchange: '+0.47'},
-            'silver': {value: '$78.79', change: '-3.21', pchange: '-3.91'}
-        };
-        
-        let currentProxyIndex = 0;
-        
-        function updateTimestamp(isFallback = false) {
-            const now = new Date();
-            const options = { 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric', 
-                hour: '2-digit', 
-                minute: '2-digit',
-                timeZone: 'Asia/Kolkata'
-            };
-            const formatted = now.toLocaleString('en-US', options) + ' IST';
-            const prefix = isFallback ? '📅 Cached Data - ' : '📅 Last Updated: ';
-            document.getElementById('timestamp').textContent = prefix + formatted;
-        }
-        
-        function updateIndicator(id, value, change, pchange) {
-            const valueEl = document.getElementById(`val-${id}`);
-            const changeEl = document.getElementById(`chg-${id}`);
-            const cardEl = document.getElementById(`card-${id}`);
-            
-            if (valueEl) valueEl.textContent = value;
-            if (changeEl && change !== undefined) {
-                const pchangeNum = parseFloat(pchange);
-                const changeText = pchangeNum >= 0 ? `+${change}` : change;
-                const pchangeText = pchangeNum >= 0 ? `+${pchange}%` : `${pchange}%`;
-                changeEl.textContent = `${changeText} (${pchangeText})`;
-                
-                if (pchangeNum > 0) {
-                    changeEl.className = 'indicator-change positive';
-                    cardEl.className = 'indicator-card positive';
-                } else if (pchangeNum < 0) {
-                    changeEl.className = 'indicator-change negative';
-                    cardEl.className = 'indicator-card negative';
-                } else {
-                    changeEl.className = 'indicator-change neutral';
-                    cardEl.className = 'indicator-card neutral';
-                }
-            }
-        }
-        
-        async function fetchWithTimeout(url, timeout = 5000) {
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), timeout);
-            
-            try {
-                const response = await fetch(url, { 
-                    signal: controller.signal,
-                    mode: 'cors'
-                });
-                clearTimeout(timeoutId);
-                return response;
-            } catch (error) {
-                clearTimeout(timeoutId);
-                throw error;
-            }
-        }
-        
-        async function fetchMarketData(key, symbol) {
-            const url = `${API_CONFIG.baseUrl}${symbol}${API_CONFIG.params}`;
-            
-            for (let i = 0; i < API_CONFIG.proxies.length; i++) {
-                const proxy = API_CONFIG.proxies[(currentProxyIndex + i) % API_CONFIG.proxies.length];
-                const finalUrl = proxy ? proxy + encodeURIComponent(url) : url;
-                
-                try {
-                    const response = await fetchWithTimeout(finalUrl, API_CONFIG.timeout);
-                    
-                    if (!response.ok) continue;
-                    
-                    const data = await response.json();
-                    
-                    if (data.chart && data.chart.result && data.chart.result[0]) {
-                        const result = data.chart.result[0];
-                        const meta = result.meta;
-                        const currentPrice = meta.regularMarketPrice;
-                        const previousClose = meta.chartPreviousClose || meta.previousClose;
-                        
-                        if (!currentPrice || !previousClose) continue;
-                        
-                        const change = currentPrice - previousClose;
-                        const pchange = ((change / previousClose) * 100).toFixed(2);
-                        
-                        let displayValue;
-                        if (['dow', 'sp500', 'nasdaq', 'gift-nifty'].includes(key)) {
-                            displayValue = currentPrice.toLocaleString('en-US', {
-                                minimumFractionDigits: 2,
-                                maximumFractionDigits: 2
-                            });
-                        } else if (key === 'dollar') {
-                            displayValue = currentPrice.toFixed(2);
-                        } else {
-                            displayValue = `$${currentPrice.toFixed(2)}`;
-                        }
-                        
-                        updateIndicator(key, displayValue, change.toFixed(2), pchange);
-                        
-                        if (i > 0) currentProxyIndex = (currentProxyIndex + i) % API_CONFIG.proxies.length;
-                        return true;
-                    }
-                } catch (error) {
-                    console.warn(`Failed to fetch ${key} with ${proxy || 'direct'}:`, error.message);
-                    continue;
-                }
-            }
-            
-            return false;
-        }
-        
-        async function loadAllMarketData() {
-            let successCount = 0;
-            
-            for (const [key, symbol] of Object.entries(SYMBOLS)) {
-                const success = await fetchMarketData(key, symbol);
-                if (success) {
-                    successCount++;
-                } else {
-                    const fallback = FALLBACK_DATA[key];
-                    if (fallback) {
-                        updateIndicator(key, fallback.value, fallback.change, fallback.pchange);
-                    }
-                }
-                
-                await new Promise(resolve => setTimeout(resolve, 150));
-            }
-            
-            updateTimestamp(successCount < 3);
-            
-            setTimeout(() => {
-                document.getElementById('loadingOverlay').classList.add('hidden');
-            }, 500);
-        }
-        
-        window.addEventListener('DOMContentLoaded', () => {
-            loadAllMarketData();
-        });
-        
-        setInterval(() => {
-            loadAllMarketData();
-        }, 300000);
-        
-        setInterval(updateTimestamp, 60000);
-    </script>
+            <div class="news-category-card markets">
+                <div class="category-header" style="border-bottom-color:var(--accent-red)">
+                    <h3 class="category-title" style="color:var(--accent-red)">📊 Market Updates</h3>
+                    <span class="article-count">10 articles</span>
+                </div>
+                <div>
+        <div class="news-item" onclick="toggleNews('news-markets-0')">
+            <div class="news-item-header">
+                <h3>Stock Market Today: Dow Weakens As Nasdaq Lags; Biotech Name Hits Record (Live Coverage)</h3>
+                <span class="expand-icon" id="icon-news-markets-0">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">Yahoo Finance</span>
+                <span class="news-date">9 min ago</span>
+            </div>
+            <div class="news-expand" id="news-markets-0">
+                <p class="news-summary">The Dow Jones Industrial Average and other major stock indexes were negative Tuesday afternoon, ahead of this week&#x27;s key economic data. Tesla fell while Palantir Technologies was indecisive on the stock market today, and a biotech rallied.</p>
+                <a class="read-more" href="https://finance.yahoo.com/m/cffe04bc-cbe6-34c3-8729-3b4213e19aef/stock-market-today%3A-dow.html?.tsrc=rss" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-markets-1')">
+            <div class="news-item-header">
+                <h3>Exchange-Traded Funds Fall as US Equities Decline in Midday Trading</h3>
+                <span class="expand-icon" id="icon-news-markets-1">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">Yahoo Finance</span>
+                <span class="news-date">10 min ago</span>
+            </div>
+            <div class="news-expand" id="news-markets-1">
+                <p class="news-summary">Broad Market Indicators Broad-market exchange-traded funds IWM and IVV were lower. Actively trade</p>
+                <a class="read-more" href="https://finance.yahoo.com/news/exchange-traded-funds-fall-us-181605980.html?.tsrc=rss" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-markets-2')">
+            <div class="news-item-header">
+                <h3>Biotech Exit: $26 Million Arcellx Sale Follows Tepid Stock Performance and Kelonia Competition</h3>
+                <span class="expand-icon" id="icon-news-markets-2">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">Yahoo Finance</span>
+                <span class="news-date">19 min ago</span>
+            </div>
+            <div class="news-expand" id="news-markets-2">
+                <p class="news-summary">Arcellx develops cell-based immunotherapies targeting cancer, with a lead candidate in early-stage trials for multiple myeloma.</p>
+                <a class="read-more" href="https://www.fool.com/coverage/filings/2026/02/17/biotech-exit-usd26-million-arcellx-sale-follows-tepid-stock-performance-and-kelonia-competition/?.tsrc=rss" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-markets-3')">
+            <div class="news-item-header">
+                <h3>Gaia Leads The Charge With 2 Other Promising Penny Stocks</h3>
+                <span class="expand-icon" id="icon-news-markets-3">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">Yahoo Finance</span>
+                <span class="news-date">21 min ago</span>
+            </div>
+            <div class="news-expand" id="news-markets-3">
+                <p class="news-summary">The U.S. stock market kicked off February with a strong performance, as major indexes like the Dow Jones and S&amp;P 500 saw significant gains. Amidst this backdrop of market optimism, investors are increasingly exploring opportunities beyond the well-known giants. Penny stocks, though often considered niche investments, continue to capture interest due to their potential for growth in smaller or newer companies. While the term may seem outdated, these stocks can still present compelling...</p>
+                <a class="read-more" href="https://finance.yahoo.com/news/gaia-leads-charge-2-other-180544370.html?.tsrc=rss" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-markets-4')">
+            <div class="news-item-header">
+                <h3>Stock Market Today, Feb. 17: Stocks fall after long Presidents&#x27; Day weekend</h3>
+                <span class="expand-icon" id="icon-news-markets-4">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">Yahoo Finance</span>
+                <span class="news-date">29 min ago</span>
+            </div>
+            <div class="news-expand" id="news-markets-4">
+                <p class="news-summary">This live blog is refreshed periodically throughout the day with the latest updates from the market.To find the latest Stock Market Today threads, click here. Happy Tuesday. This is TheStreet’s Stock Market Today for Feb. 17, 2026. You can follow the latest updates on the market ...</p>
+                <a class="read-more" href="https://www.thestreet.com/latest-news/stock-market-today-feb-17-stocks-fall-after-long-presidents-day-weekend?.tsrc=rss" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-markets-5')">
+            <div class="news-item-header">
+                <h3>US Equity Indexes, Treasury Yields Mixed in Midday Trading</h3>
+                <span class="expand-icon" id="icon-news-markets-5">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">Yahoo Finance</span>
+                <span class="news-date">30 min ago</span>
+            </div>
+            <div class="news-expand" id="news-markets-5">
+                <p class="news-summary">US equity indexes were mixed with government bond yields, while gold dropped with crude oil after mi</p>
+                <a class="read-more" href="https://finance.yahoo.com/news/us-equity-indexes-treasury-yields-175601235.html?.tsrc=rss" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-markets-6')">
+            <div class="news-item-header">
+                <h3>Exploring 3 Undiscovered Gems In The US Market</h3>
+                <span class="expand-icon" id="icon-news-markets-6">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">Yahoo Finance</span>
+                <span class="news-date">53 min ago</span>
+            </div>
+            <div class="news-expand" id="news-markets-6">
+                <p class="news-summary">As the U.S. stock market kicks off February with a notable upswing, highlighted by the Dow&#x27;s impressive 515-point gain and the S&amp;P 500 nearing record highs, investors are keenly observing how economic indicators like factory activity expansion might influence small-cap stocks. In this dynamic environment, identifying promising yet overlooked opportunities can be crucial for portfolio diversification and potential growth. Exploring lesser-known stocks that align with current economic trends...</p>
+                <a class="read-more" href="https://finance.yahoo.com/news/exploring-3-undiscovered-gems-us-173317476.html?.tsrc=rss" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-markets-7')">
+            <div class="news-item-header">
+                <h3>84-year-old Dividend King tops $1 trillion valuation milestone</h3>
+                <span class="expand-icon" id="icon-news-markets-7">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">Yahoo Finance</span>
+                <span class="news-date">53 min ago</span>
+            </div>
+            <div class="news-expand" id="news-markets-7">
+                <p class="news-summary">Walmartrecently crossed the $1 trillion market cap threshold and is now up an impressive 510% over the past decade. If we adjust for dividend reinvestments, cumulative returns for the Dow Jones 30 member is closer to 630%, since February 2016, according to data from Y-charts. It&#x27;s a remarkable ...</p>
+                <a class="read-more" href="https://www.thestreet.com/investing/stocks/84-year-old-walmart-wmt-stock-dividend-king-tops-1-trillion-valuation?.tsrc=rss" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-markets-8')">
+            <div class="news-item-header">
+                <h3>Stocks Waver as Dollar Strengthens</h3>
+                <span class="expand-icon" id="icon-news-markets-8">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">Yahoo Finance</span>
+                <span class="news-date">1 hour ago</span>
+            </div>
+            <div class="news-expand" id="news-markets-8">
+                <p class="news-summary">STOCKS  Stocks struggled for direction coming out of the long weekend. The Nasdaq composite led early losses, dropping more than 1% in Tuesday morning trading, before reversing course. All three major indexes recently stood modestly higher, building on a recent volatile stretch.</p>
+                <a class="read-more" href="https://finance.yahoo.com/m/9ad86074-bfaa-35cc-99e2-3321d5979b73/stocks-waver-as-dollar.html?.tsrc=rss" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-markets-9')">
+            <div class="news-item-header">
+                <h3>Soros Doubles Down On Big Tech</h3>
+                <span class="expand-icon" id="icon-news-markets-9">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">Yahoo Finance</span>
+                <span class="news-date">1 hour ago</span>
+            </div>
+            <div class="news-expand" id="news-markets-9">
+                <p class="news-summary">AMZN, NVDA lead portfolio shift</p>
+                <a class="read-more" href="https://finance.yahoo.com/news/soros-doubles-down-big-tech-171408072.html?.tsrc=rss" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div></div>
+            </div>
+            <div class="news-category-card economic">
+                <div class="category-header" style="border-bottom-color:var(--accent-pink)">
+                    <h3 class="category-title" style="color:var(--accent-pink)">💰 Economic & Policy</h3>
+                    <span class="article-count">10 articles</span>
+                </div>
+                <div>
+        <div class="news-item" onclick="toggleNews('news-economic-0')">
+            <div class="news-item-header">
+                <h3>Consumer prices rose 2.4% annually in January, less than expected</h3>
+                <span class="expand-icon" id="icon-news-economic-0">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">CNBC</span>
+                <span class="news-date">4 days ago</span>
+            </div>
+            <div class="news-expand" id="news-economic-0">
+                <p class="news-summary">The consumer price index was expected to increase 2.5% from a year ago in January, according to the Dow Jones consensus.</p>
+                <a class="read-more" href="https://www.cnbc.com/2026/02/13/cpi-inflation-report-january-2026.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-economic-1')">
+            <div class="news-item-header">
+                <h3>The January CPI inflation report is due out Friday morning. Here&#x27;s what it&#x27;s expected to show</h3>
+                <span class="expand-icon" id="icon-news-economic-1">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">CNBC</span>
+                <span class="news-date">4 days ago</span>
+            </div>
+            <div class="news-expand" id="news-economic-1">
+                <p class="news-summary">Investors got some good news this week on the state of the labor market, and more may be on the way Friday on inflation.</p>
+                <a class="read-more" href="https://www.cnbc.com/2026/02/12/the-january-cpi-inflation-report-is-due-out-friday-morning-heres-what-its-expected-to-show.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-economic-2')">
+            <div class="news-item-header">
+                <h3>UK economy ekes out 0.1% growth in the fourth quarter</h3>
+                <span class="expand-icon" id="icon-news-economic-2">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">CNBC</span>
+                <span class="news-date">5 days ago</span>
+            </div>
+            <div class="news-expand" id="news-economic-2">
+                <p class="news-summary">The U.K. economy grew a meager 0.1% in the fourth quarter, according to preliminary figures from the Office for National Statistics on Thursday.</p>
+                <a class="read-more" href="https://www.cnbc.com/2026/02/12/uk-q4-gdp-economy.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-economic-3')">
+            <div class="news-item-header">
+                <h3>The jobs picture still looks muddy, even with surprisingly strong January growth</h3>
+                <span class="expand-icon" id="icon-news-economic-3">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">CNBC</span>
+                <span class="news-date">5 days ago</span>
+            </div>
+            <div class="news-expand" id="news-economic-3">
+                <p class="news-summary">January job gains were better than anything the U.S. economy saw in 2025 but not still enough to sound an all-clear.</p>
+                <a class="read-more" href="https://www.cnbc.com/2026/02/11/the-jobs-picture-still-looks-muddy-even-with-surprisingly-strong-january-growth.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-economic-4')">
+            <div class="news-item-header">
+                <h3>Tariff revenue soars more than 300% as U.S. awaits Supreme Court decision</h3>
+                <span class="expand-icon" id="icon-news-economic-4">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">CNBC</span>
+                <span class="news-date">5 days ago</span>
+            </div>
+            <div class="news-expand" id="news-economic-4">
+                <p class="news-summary">The U.S. government in January ran up a smaller deficit than a year ago, while tariff collections surged.</p>
+                <a class="read-more" href="https://www.cnbc.com/2026/02/11/tariff-revenue-soars-more-than-300percent-as-us-awaits-supreme-court-decision.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-economic-5')">
+            <div class="news-item-header">
+                <h3>Here are the five key takeaways from the January jobs report</h3>
+                <span class="expand-icon" id="icon-news-economic-5">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">CNBC</span>
+                <span class="news-date">5 days ago</span>
+            </div>
+            <div class="news-expand" id="news-economic-5">
+                <p class="news-summary">The January nonfarm payrolls report beat Wall Street expectations in both job creation and the unemployment rate.</p>
+                <a class="read-more" href="https://www.cnbc.com/2026/02/11/here-are-the-five-key-takeaways-from-the-january-jobs-report.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-economic-6')">
+            <div class="news-item-header">
+                <h3>U.S. payrolls rose by 130,000 in January, more than expected; unemployment down to 4.3%</h3>
+                <span class="expand-icon" id="icon-news-economic-6">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">CNBC</span>
+                <span class="news-date">5 days ago</span>
+            </div>
+            <div class="news-expand" id="news-economic-6">
+                <p class="news-summary">Job growth was stronger than expected to start 2026, providing some relief to concerns about the state of the U.S. labor market.</p>
+                <a class="read-more" href="https://www.cnbc.com/2026/02/11/jobs-report-january-2026-.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-economic-7')">
+            <div class="news-item-header">
+                <h3>The delayed January jobs report will be released Wednesday. Here&#x27;s what to expect</h3>
+                <span class="expand-icon" id="icon-news-economic-7">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">CNBC</span>
+                <span class="news-date">6 days ago</span>
+            </div>
+            <div class="news-expand" id="news-economic-7">
+                <p class="news-summary">Economists expect that the nonfarm payrolls report should show growth that was nil or not much better during the month.</p>
+                <a class="read-more" href="https://www.cnbc.com/2026/02/10/jobs-report-preview-january-2026.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-economic-8')">
+            <div class="news-item-header">
+                <h3>Disappointing holiday season: December retail sales were flat, falling well short of estimate</h3>
+                <span class="expand-icon" id="icon-news-economic-8">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">CNBC</span>
+                <span class="news-date">Feb 10, 2026</span>
+            </div>
+            <div class="news-expand" id="news-economic-8">
+                <p class="news-summary">Consumer activity slowed sharply for the December holiday shopping season.</p>
+                <a class="read-more" href="https://www.cnbc.com/2026/02/10/december-retail-sales-were-flat-missing-expectations.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-economic-9')">
+            <div class="news-item-header">
+                <h3>Layoffs in January were the highest to start a year since 2009, Challenger says</h3>
+                <span class="expand-icon" id="icon-news-economic-9">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">CNBC</span>
+                <span class="news-date">Feb 05, 2026</span>
+            </div>
+            <div class="news-expand" id="news-economic-9">
+                <p class="news-summary">With the recent narrative centering on a no-hire, no-fire labor market, the data suggests that the layoff part of the equation could be stepping up.</p>
+                <a class="read-more" href="https://www.cnbc.com/2026/02/05/layoff-and-hiring-announcements-hit-their-worst-january-levels-since-2009-challenger-says.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div></div>
+            </div>
+            <div class="news-category-card india">
+                <div class="category-header" style="border-bottom-color:var(--accent-yellow)">
+                    <h3 class="category-title" style="color:var(--accent-yellow)">🇮🇳 Indian Markets</h3>
+                    <span class="article-count">10 articles</span>
+                </div>
+                <div>
+        <div class="news-item" onclick="toggleNews('news-india-0')">
+            <div class="news-item-header">
+                <h3>US Stocks | Wall Street regulator calls for shrinking exec pay disclosure</h3>
+                <span class="expand-icon" id="icon-news-india-0">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">Economic Times</span>
+                <span class="news-date">2 hours ago</span>
+            </div>
+            <div class="news-expand" id="news-india-0">
+                <p class="news-summary">Fewer top corporate executives could be subject to extensive ​investor disclosures about their compensation under ​pending regulatory reforms, Wall Street&#x27;s top regulator said Tuesday.</p>
+                <a class="read-more" href="https://economictimes.indiatimes.com/markets/us-stocks/news/us-stocks-wall-street-regulator-calls-for-shrinking-exec-pay-disclosure/articleshow/128472260.cms" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-india-1')">
+            <div class="news-item-header">
+                <h3>US Stocks | US Fed&#x27;s Goolsbee: &#x27;Several&#x27; rate cuts possible this year if inflation gets on track to 2%</h3>
+                <span class="expand-icon" id="icon-news-india-1">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">Economic Times</span>
+                <span class="news-date">2 hours ago</span>
+            </div>
+            <div class="news-expand" id="news-india-1">
+                <p class="news-summary">The U.S. Federal Reserve could approve &quot;several more&quot; interest rate cuts ​this year if inflation resumes a decline to the central bank&#x27;s 2% target, Chicago Fed President Austan Goolsbee said on Tuesday, downplaying a recent weak consumer price report as masking strong service price increases.</p>
+                <a class="read-more" href="https://economictimes.indiatimes.com/markets/us-stocks/news/us-stocks-us-feds-goolsbee-several-rate-cuts-possible-this-year-if-inflation-gets-on-track-to-2/articleshow/128471979.cms" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-india-2')">
+            <div class="news-item-header">
+                <h3>US stocks | Trading platform eToro beats profit estimates on robust market activity</h3>
+                <span class="expand-icon" id="icon-news-india-2">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">Economic Times</span>
+                <span class="news-date">2 hours ago</span>
+            </div>
+            <div class="news-expand" id="news-india-2">
+                <p class="news-summary">eToro surpassed fourth-quarter profit expectations, driven by robust capital market activity that boosted trading income.  The platform saw a notable shift as crypto-native customers began trading commodities, indicating a convergence of investment strategies.  Despite a dip in net contribution, the company&#x27;s assets under administration grew significantly.</p>
+                <a class="read-more" href="https://economictimes.indiatimes.com/markets/us-stocks/news/us-stocks-trading-platform-etoro-beats-profit-estimates-on-robust-market-activity/articleshow/128471976.cms" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-india-3')">
+            <div class="news-item-header">
+                <h3>Ahead of Market: 10 things that will decide stock market action on Wednesday</h3>
+                <span class="expand-icon" id="icon-news-india-3">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">Economic Times</span>
+                <span class="news-date">2 hours ago</span>
+            </div>
+            <div class="news-expand" id="news-india-3">
+                <p class="news-summary">Indian benchmarks extended gains for a second session, led by IT, consumer and financial stocks. Nifty faced resistance near its 50DMA, while easing volatility supported sentiment. Analysts advise buy-on-dips amid rangebound movement and selective stock activity.</p>
+                <a class="read-more" href="https://economictimes.indiatimes.com/markets/stocks/news/ahead-of-market-10-things-that-will-decide-stock-market-action-on-wednesday/articleshow/128471072.cms" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-india-4')">
+            <div class="news-item-header">
+                <h3>US Stocks | Raspberry Pi shares soar 40% as CEO buys stock, AI chatter builds</h3>
+                <span class="expand-icon" id="icon-news-india-4">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">Economic Times</span>
+                <span class="news-date">3 hours ago</span>
+            </div>
+            <div class="news-expand" id="news-india-4">
+                <p class="news-summary">Shares in Raspberry Pi rose ​as much as ​42% on Tuesday in a record two-day ​rally after CEO Eben Upton bought stock in the beaten-down UK computer hardware firm, halting a months-long slide, as chatter grew that its ‌products ⁠could benefit ⁠from low-cost artificial-intelligence projects.</p>
+                <a class="read-more" href="https://economictimes.indiatimes.com/markets/us-stocks/news/raspberry-pi-soars-40-as-ceo-buys-stock-ai-chatter-builds/articleshow/128470430.cms" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-india-5')">
+            <div class="news-item-header">
+                <h3>US Stocks Today | Nasdaq drops over 1% as AI worries linger; Nvidia, Microsoft down</h3>
+                <span class="expand-icon" id="icon-news-india-5">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">Economic Times</span>
+                <span class="news-date">3 hours ago</span>
+            </div>
+            <div class="news-expand" id="news-india-5">
+                <p class="news-summary">Indian markets saw a dip on Tuesday. Tech giants like Nvidia and Microsoft faced losses. Investors are worried about artificial intelligence impacting businesses. Chinese AI advancements also added to market uncertainty. Financials offered some support. Upcoming inflation data will be key for interest rate decisions.</p>
+                <a class="read-more" href="https://economictimes.indiatimes.com/markets/us-stocks/news/us-stocks-today-sp-500-nasdaq-open-lower-as-ai-disruption-fears-sour-sentiment/articleshow/128469386.cms" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-india-6')">
+            <div class="news-item-header">
+                <h3>Market Trading Guide: LG Electronics, Bank of India among 3 stocks to buy on Wednesday for up to 9% upside</h3>
+                <span class="expand-icon" id="icon-news-india-6">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">Economic Times</span>
+                <span class="news-date">3 hours ago</span>
+            </div>
+            <div class="news-expand" id="news-india-6">
+                <p class="news-summary">Nifty posts consecutive gains led by IT, consumer, and banking stocks, though resistance near 50DMA may trigger minor pullbacks. Analysts recommend LG Electronics, Bank of India, and MRPL for short-term bullish trades.</p>
+                <a class="read-more" href="https://economictimes.indiatimes.com/markets/stocks/news/market-trading-guide-lg-electronics-bank-of-india-among-3-stocks-to-buy-on-wednesday-for-up-to-9-upside/slideshow/128469662.cms" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-india-7')">
+            <div class="news-item-header">
+                <h3>Carlsberg considering listing of India business to unlock shareholders value: Group CEO</h3>
+                <span class="expand-icon" id="icon-news-india-7">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">Economic Times</span>
+                <span class="news-date">4 hours ago</span>
+            </div>
+            <div class="news-expand" id="news-india-7">
+                <p class="news-summary">Danish brewing giant Carlsberg is considering listing its India business, as it looks to unlock shareholder value in the country where it is witnessing strong growth, said its Group CEO Jacob Aarup-Andersen.</p>
+                <a class="read-more" href="https://economictimes.indiatimes.com/markets/stocks/news/carlsberg-considering-listing-of-india-business-to-unlock-shareholders-value-group-ceo/articleshow/128468848.cms" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-india-8')">
+            <div class="news-item-header">
+                <h3>Engineers India board to meet on February 26 to consider dividend. Check record date, dividend yield</h3>
+                <span class="expand-icon" id="icon-news-india-8">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">Economic Times</span>
+                <span class="news-date">4 hours ago</span>
+            </div>
+            <div class="news-expand" id="news-india-8">
+                <p class="news-summary">Engineers India Limited posts over threefold Q3 net profit jump, driven by turnkey project revenue. Board to meet for second interim dividend, with record date set for March. Shares remain volatile amid profit booking.</p>
+                <a class="read-more" href="https://economictimes.indiatimes.com/markets/stocks/news/engineers-india-board-to-meet-on-february-26-to-consider-dividend-check-record-date-dividend-yield/articleshow/128467960.cms" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-india-9')">
+            <div class="news-item-header">
+                <h3>IPO-bound Kissht&#x27;s NBFC arm gets Crisil Rating upgrade on strong growth</h3>
+                <span class="expand-icon" id="icon-news-india-9">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">Economic Times</span>
+                <span class="news-date">4 hours ago</span>
+            </div>
+            <div class="news-expand" id="news-india-9">
+                <p class="news-summary">Digital lending platform Kissht, operated by Onemi Technologies, on Tuesday said its NBFC arm Si Creva Capital Services has received a credit rating upgrade from Crisil Ratings, reflecting strong business momentum and a healthy capital position.</p>
+                <a class="read-more" href="https://economictimes.indiatimes.com/markets/ipos/fpos/ipo-bound-kisshts-nbfc-arm-gets-crisil-rating-upgrade-on-strong-growth/articleshow/128466901.cms" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div></div>
+            </div>
+            <div class="news-category-card corporate">
+                <div class="category-header" style="border-bottom-color:var(--accent-cyan)">
+                    <h3 class="category-title" style="color:var(--accent-cyan)">🏢 Corporate News</h3>
+                    <span class="article-count">10 articles</span>
+                </div>
+                <div>
+        <div class="news-item" onclick="toggleNews('news-corporate-0')">
+            <div class="news-item-header">
+                <h3>Ford to follow Tesla Cybertruck with electrical tech in new EV pickup</h3>
+                <span class="expand-icon" id="icon-news-corporate-0">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">CNBC</span>
+                <span class="news-date">57 min ago</span>
+            </div>
+            <div class="news-expand" id="news-corporate-0">
+                <p class="news-summary">Ford&#x27;s next generation of all-electric vehicles will feature a budding technology commercialized by Tesla in the U.S. on its Cybertruck.</p>
+                <a class="read-more" href="https://www.cnbc.com/2026/02/17/ford-ev-platform-pickup-truck.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-corporate-1')">
+            <div class="news-item-header">
+                <h3>CFTC defends its right to prediction market enforcement as states challenge platforms</h3>
+                <span class="expand-icon" id="icon-news-corporate-1">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">CNBC</span>
+                <span class="news-date">41 min ago</span>
+            </div>
+            <div class="news-expand" id="news-corporate-1">
+                <p class="news-summary">CFTC Chairman Michael Selig said the agency has filed an amicus brief to assert its authority over prediction market enforcement and regulation.</p>
+                <a class="read-more" href="https://www.cnbc.com/2026/02/17/cftc-defends-prediction-market-enforcement-states-challenge.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-corporate-2')">
+            <div class="news-item-header">
+                <h3>Dave&#x27;s Hot Chicken investors bet on birria with national franchise expansion plan</h3>
+                <span class="expand-icon" id="icon-news-corporate-2">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">CNBC</span>
+                <span class="news-date">4 hours ago</span>
+            </div>
+            <div class="news-expand" id="news-corporate-2">
+                <p class="news-summary">Once known as a regional Mexican food, birria now appears on 3.7% of U.S. menus, according to Datassential.</p>
+                <a class="read-more" href="https://www.cnbc.com/2026/02/17/daves-hot-chicken-investors-bet-on-birria-with-new-deal.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-corporate-3')">
+            <div class="news-item-header">
+                <h3>Netflix grants Warner Bros. Discovery 7-day waiver to reopen deal talks with Paramount Skydance</h3>
+                <span class="expand-icon" id="icon-news-corporate-3">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">CNBC</span>
+                <span class="news-date">Just now</span>
+            </div>
+            <div class="news-expand" id="news-corporate-3">
+                <p class="news-summary">Warner Bros. Discovery on Tuesday said it will engage in deal talks with Paramount Skydance under a 7-day waiver from Netflix.</p>
+                <a class="read-more" href="https://www.cnbc.com/2026/02/17/netflix-wbd-waiver-deal-talks-paramount-skydance.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-corporate-4')">
+            <div class="news-item-header">
+                <h3>Lakers governor Jeanie Buss talks year of transition, says father would have supported sale to Mark Walter</h3>
+                <span class="expand-icon" id="icon-news-corporate-4">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">CNBC</span>
+                <span class="news-date">1 hour ago</span>
+            </div>
+            <div class="news-expand" id="news-corporate-4">
+                <p class="news-summary">Los Angeles Lakers governor Jeanie Buss said new majority owner Mark Walter&#x27;s access to capital will help the team best compete with the NBA&#x27;s top franchises.</p>
+                <a class="read-more" href="https://www.cnbc.com/2026/02/17/lakers-jeanie-buss-sale-mark-walter.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-corporate-5')">
+            <div class="news-item-header">
+                <h3>Lunar New Year gives luxury brands a chance to win back big spenders in China</h3>
+                <span class="expand-icon" id="icon-news-corporate-5">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">CNBC</span>
+                <span class="news-date">3 days ago</span>
+            </div>
+            <div class="news-expand" id="news-corporate-5">
+                <p class="news-summary">The Chinese luxury market is expected to turnaround this year, but Western brands can&#x27;t afford to be complacent, analysts said.</p>
+                <a class="read-more" href="https://www.cnbc.com/2026/02/14/lunar-new-year-luxury-china.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-corporate-6')">
+            <div class="news-item-header">
+                <h3>AI disruption could spark a ‘shock to the system’ in credit markets, UBS analyst says</h3>
+                <span class="expand-icon" id="icon-news-corporate-6">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">CNBC</span>
+                <span class="news-date">4 days ago</span>
+            </div>
+            <div class="news-expand" id="news-corporate-6">
+                <p class="news-summary">UBS analyst Matthew Mish told CNBC that the artificial intelligence transformation is happening faster than he and his colleagues had previously anticipated.</p>
+                <a class="read-more" href="https://www.cnbc.com/2026/02/13/ai-credit-markets.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-corporate-7')">
+            <div class="news-item-header">
+                <h3>How packaging and logistics companies are automating their warehouses</h3>
+                <span class="expand-icon" id="icon-news-corporate-7">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">CNBC</span>
+                <span class="news-date">4 days ago</span>
+            </div>
+            <div class="news-expand" id="news-corporate-7">
+                <p class="news-summary">Companies like UPS, FedEx and DHL are increasingly turning to automation in their warehouse processes to work toward greater efficiency and lower costs.</p>
+                <a class="read-more" href="https://www.cnbc.com/2026/02/13/shipping-auotmation-logistics-labor.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-corporate-8')">
+            <div class="news-item-header">
+                <h3>Rivian tops fourth-quarter expectations, targets significant production increase</h3>
+                <span class="expand-icon" id="icon-news-corporate-8">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">CNBC</span>
+                <span class="news-date">4 days ago</span>
+            </div>
+            <div class="news-expand" id="news-corporate-8">
+                <p class="news-summary">Rivian&#x27;s 2026 guidance includes increasing vehicle deliveries to between 62,000 and 67,000 units, which would be up by 47% to 59% compared to 2025.</p>
+                <a class="read-more" href="https://www.cnbc.com/2026/02/12/rivian-automotive-rivn-earnings-q4-2025.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-corporate-9')">
+            <div class="news-item-header">
+                <h3>Spirit Airlines sells more planes, calls back 500 flight attendants from furlough ahead of spring break</h3>
+                <span class="expand-icon" id="icon-news-corporate-9">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">CNBC</span>
+                <span class="news-date">5 days ago</span>
+            </div>
+            <div class="news-expand" id="news-corporate-9">
+                <p class="news-summary">Spirit Airlines said it sold another 20 planes and is calling back 500 flight attendants from furlough.</p>
+                <a class="read-more" href="https://www.cnbc.com/2026/02/12/spirit-airlines-sells-planes-flight-attendants.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div></div>
+            </div>
+            <div class="news-category-card geopolitical">
+                <div class="category-header" style="border-bottom-color:var(--accent-green)">
+                    <h3 class="category-title" style="color:var(--accent-green)">🌍 Geopolitical</h3>
+                    <span class="article-count">10 articles</span>
+                </div>
+                <div>
+        <div class="news-item" onclick="toggleNews('news-geopolitical-0')">
+            <div class="news-item-header">
+                <h3>Iran partially closes Strait of Hormuz, a vital oil choke point, as Tehran holds talks with U.S.</h3>
+                <span class="expand-icon" id="icon-news-geopolitical-0">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">CNBC</span>
+                <span class="news-date">2 hours ago</span>
+            </div>
+            <div class="news-expand" id="news-geopolitical-0">
+                <p class="news-summary">Iranian state media reported the partial closure of the Strait of Hormuz on Tuesday for military drills in the waterway.</p>
+                <a class="read-more" href="https://www.cnbc.com/2026/02/17/iran-us-strait-of-hormuz-oil-nuclear-talks-geneva.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-geopolitical-1')">
+            <div class="news-item-header">
+                <h3>Amazon has lost $450 billion in value during this historic losing streak. Here&#x27;s what&#x27;s dragging it down</h3>
+                <span class="expand-icon" id="icon-news-geopolitical-1">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">CNBC</span>
+                <span class="news-date">10 min ago</span>
+            </div>
+            <div class="news-expand" id="news-geopolitical-1">
+                <p class="news-summary">Amazon expects to spend $200 billion this year on AI initiatives, the company said when it reported earnings.</p>
+                <a class="read-more" href="https://www.cnbc.com/2026/02/17/amazon-stock-losing-streak.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-geopolitical-2')">
+            <div class="news-item-header">
+                <h3>Ford to follow Tesla Cybertruck with electrical tech in new EV pickup</h3>
+                <span class="expand-icon" id="icon-news-geopolitical-2">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">CNBC</span>
+                <span class="news-date">57 min ago</span>
+            </div>
+            <div class="news-expand" id="news-geopolitical-2">
+                <p class="news-summary">Ford&#x27;s next generation of all-electric vehicles will feature a budding technology commercialized by Tesla in the U.S. on its Cybertruck.</p>
+                <a class="read-more" href="https://www.cnbc.com/2026/02/17/ford-ev-platform-pickup-truck.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-geopolitical-3')">
+            <div class="news-item-header">
+                <h3>Netflix grants Warner Bros. Discovery 7-day waiver to reopen deal talks with Paramount Skydance</h3>
+                <span class="expand-icon" id="icon-news-geopolitical-3">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">CNBC</span>
+                <span class="news-date">Just now</span>
+            </div>
+            <div class="news-expand" id="news-geopolitical-3">
+                <p class="news-summary">Warner Bros. Discovery on Tuesday said it will engage in deal talks with Paramount Skydance under a 7-day waiver from Netflix.</p>
+                <a class="read-more" href="https://www.cnbc.com/2026/02/17/netflix-wbd-waiver-deal-talks-paramount-skydance.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-geopolitical-4')">
+            <div class="news-item-header">
+                <h3>Silver miners fall trading as the metal drops 2%</h3>
+                <span class="expand-icon" id="icon-news-geopolitical-4">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">CNBC</span>
+                <span class="news-date">1 hour ago</span>
+            </div>
+            <div class="news-expand" id="news-geopolitical-4">
+                <p class="news-summary">Silver mining companies including Hecla Mining, Endeavor Silver, and First Majestic Silver were down before the market opened.</p>
+                <a class="read-more" href="https://www.cnbc.com/2026/02/17/silver-prices-hecla-mining-endeavour-silver.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-geopolitical-5')">
+            <div class="news-item-header">
+                <h3>India discussing age-based restrictions with social media firms, top minister says</h3>
+                <span class="expand-icon" id="icon-news-geopolitical-5">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">CNBC</span>
+                <span class="news-date">6 hours ago</span>
+            </div>
+            <div class="news-expand" id="news-geopolitical-5">
+                <p class="news-summary">The comments come after Australia in December became the first to ban users under the age of 16 from accessing major social media platforms.</p>
+                <a class="read-more" href="https://www.cnbc.com/2026/02/17/india-age-based-social-media-curbs.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-geopolitical-6')">
+            <div class="news-item-header">
+                <h3>India&#x27;s Adani to invest $100 billion in AI data centers over the next decade</h3>
+                <span class="expand-icon" id="icon-news-geopolitical-6">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">CNBC</span>
+                <span class="news-date">9 hours ago</span>
+            </div>
+            <div class="news-expand" id="news-geopolitical-6">
+                <p class="news-summary">The blockbuster investment comes as India pushes to gain a stronger foothold in the global artificial intelligence race.</p>
+                <a class="read-more" href="https://www.cnbc.com/2026/02/17/india-adani-ai-data-centers-investment.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-geopolitical-7')">
+            <div class="news-item-header">
+                <h3>Sterling falls as UK unemployment hits highest rate in five years</h3>
+                <span class="expand-icon" id="icon-news-geopolitical-7">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">CNBC</span>
+                <span class="news-date">17 min ago</span>
+            </div>
+            <div class="news-expand" id="news-geopolitical-7">
+                <p class="news-summary">European stocks closed broadly higher on Tuesday as investors keep an eye on earnings.</p>
+                <a class="read-more" href="https://www.cnbc.com/2026/02/17/european-markets-stoxx-600-ftse-dax-cac-miner-earnings-data.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-geopolitical-8')">
+            <div class="news-item-header">
+                <h3>Rev. Jesse Jackson, civil rights leader and former presidential candidate, dies at 84</h3>
+                <span class="expand-icon" id="icon-news-geopolitical-8">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">CNBC</span>
+                <span class="news-date">1 hour ago</span>
+            </div>
+            <div class="news-expand" id="news-geopolitical-8">
+                <p class="news-summary">The Rev. Jesse Jackson was a civil rights icon, Baptist minister and two-time Democratic presidential candidate.</p>
+                <a class="read-more" href="https://www.cnbc.com/2026/02/17/jesse-jackson-dead.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-geopolitical-9')">
+            <div class="news-item-header">
+                <h3>Here’s how much athletes at the 2026 Winter Olympics get for winning medals</h3>
+                <span class="expand-icon" id="icon-news-geopolitical-9">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">CNBC</span>
+                <span class="news-date">1 day ago</span>
+            </div>
+            <div class="news-expand" id="news-geopolitical-9">
+                <p class="news-summary">For athletes at the ongoing 2026 Milano-Cortina Winter Olympics, a podium finish can come with six-figure checks.</p>
+                <a class="read-more" href="https://www.cnbc.com/2026/02/16/2026-winter-olympics-medal-bonus-payouts-by-country-athletes-milano-cortina.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div></div>
+            </div>
+    </div>
+</section>
+
+<footer>
+    <p>🔄 News is fetched fresh every time the script runs &nbsp;|&nbsp; Market data updates live in the browser</p>
+    <p style="margin-top:10px;font-size:.72em;opacity:.5">⚠️ For informational purposes only. Not financial advice.</p>
+</footer>
+</div>
+
+<!-- ══ SCRIPTS ══ -->
+<script>
+// ── Expand / collapse news items ──
+function toggleNews(id) {
+    const el = document.getElementById(id);
+    const icon = document.getElementById('icon-' + id);
+    if (!el) return;
+    el.classList.toggle('open');
+    icon.classList.toggle('open');
+}
+
+// ── Yahoo Finance live data ──
+const SYMBOLS = {
+    'gift-nifty':'^NSEI','dow':'^DJI','sp500':'^GSPC',
+    'nasdaq':'^IXIC','oil':'CL=F','dollar':'DX-Y.NYB',
+    'gold':'GC=F','silver':'SI=F'
+};
+const FALLBACK = {
+    'gift-nifty':{value:'23,700',change:'-0.20'},
+    'dow':{value:'44,500',change:'+0.10'},
+    'sp500':{value:'6,050',change:'+0.05'},
+    'nasdaq':{value:'19,700',change:'-0.15'},
+    'oil':{value:'$72.50',change:'+0.30'},
+    'dollar':{value:'107.20',change:'-0.10'},
+    'gold':{value:'$2,920',change:'+0.45'},
+    'silver':{value:'$32.50',change:'-0.80'}
+};
+
+function updateCard(id, value, change, pchange) {
+    const vEl = document.getElementById('val-'+id);
+    const cEl = document.getElementById('chg-'+id);
+    const card = document.getElementById('card-'+id);
+    if (vEl) vEl.textContent = value;
+    if (cEl) {
+        const p = parseFloat(pchange);
+        const sign = p >= 0 ? '+' : '';
+        cEl.textContent = sign+change+' ('+sign+pchange+'%)';
+        const cls = p > 0 ? 'positive' : p < 0 ? 'negative' : 'neutral';
+        cEl.className = 'indicator-change '+cls;
+        card.className = 'indicator-card '+cls;
+    }
+}
+
+async function fetchMarket(key, sym) {
+    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${sym}?interval=1d&range=1d`;
+    const proxies = ['https://corsproxy.io/?'+encodeURIComponent(url), url];
+    for (const u of proxies) {
+        try {
+            const r = await fetch(u, {mode:'cors'});
+            if (!r.ok) continue;
+            const d = await r.json();
+            const meta = d?.chart?.result?.[0]?.meta;
+            if (!meta) continue;
+            const cur = meta.regularMarketPrice;
+            const prev = meta.chartPreviousClose || meta.previousClose;
+            if (!cur || !prev) continue;
+            const chg = (cur - prev).toFixed(2);
+            const pct = (((cur-prev)/prev)*100).toFixed(2);
+            let val = ['dow','sp500','nasdaq','gift-nifty'].includes(key)
+                ? cur.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})
+                : key==='dollar' ? cur.toFixed(2) : '$'+cur.toFixed(2);
+            updateCard(key, val, chg, pct);
+            return;
+        } catch(e) { /* try next */ }
+    }
+    // fallback
+    const fb = FALLBACK[key];
+    if(fb) updateCard(key, fb.value, fb.change, fb.change);
+}
+
+async function loadAll() {
+    for(const [k,s] of Object.entries(SYMBOLS)) {
+        fetchMarket(k,s);
+        await new Promise(r=>setTimeout(r,120));
+    }
+    setTimeout(()=>document.getElementById('loadingOverlay').classList.add('hidden'), 600);
+}
+
+// Live CPI from FRED (public)
+async function fetchCPI() {
+    try {
+        const r = await fetch('https://fred.stlouisfed.org/graph/fredgraph.csv?id=CPIAUCSL');
+        if(!r.ok) return;
+        const text = await r.text();
+        const lines = text.trim().split('\n');
+        const last = lines[lines.length-1].split(',');
+        const prev = lines[lines.length-13].split(','); // ~12 months ago
+        const yoy = (((parseFloat(last[1])-parseFloat(prev[1]))/parseFloat(prev[1]))*100).toFixed(1);
+        document.getElementById('val-cpi').textContent = yoy+'%';
+        document.getElementById('chg-cpi').textContent = 'YoY '+last[0];
+    } catch(e) {}
+}
+
+// Update browser timestamp every minute
+function tick() {
+    const now = new Date();
+    const opts = {year:'numeric',month:'long',day:'numeric',hour:'2-digit',minute:'2-digit',timeZone:'Asia/Kolkata'};
+    document.getElementById('timestamp').textContent =
+        '📅 Page generated: February 17, 2026 at 11:56 PM IST | Browser: '+now.toLocaleString('en-US',opts)+' IST';
+}
+
+window.addEventListener('DOMContentLoaded',()=>{
+    loadAll();
+    fetchCPI();
+    setInterval(loadAll, 5*60*1000);   // refresh market data every 5 min
+    setInterval(tick, 60*1000);
+});
+</script>
 </body>
 </html>
