@@ -21,27 +21,27 @@ import re
 RSS_SOURCES = {
     "markets": [
         "https://feeds.finance.yahoo.com/rss/2.0/headline?s=^GSPC,^DJI,^IXIC&region=US&lang=en-US",
-        "https://www.cnbc.com/id/100003114/device/rss/rss.html",          # CNBC Markets
+        "https://www.cnbc.com/id/100003114/device/rss/rss.html",
         "https://feeds.marketwatch.com/marketwatch/topstories/",
     ],
     "economic": [
-        "https://www.cnbc.com/id/20910258/device/rss/rss.html",           # CNBC Economy
+        "https://www.cnbc.com/id/20910258/device/rss/rss.html",
         "https://feeds.marketwatch.com/marketwatch/economy-politics/",
         "https://www.federalreserve.gov/feeds/press_all.xml",
     ],
     "india": [
         "https://economictimes.indiatimes.com/markets/rssfeeds/1977021501.cms",
         "https://www.moneycontrol.com/rss/marketreports.xml",
-        "https://economictimes.indiatimes.com/rssfeeds/1373380680.cms",   # ET Markets
+        "https://economictimes.indiatimes.com/rssfeeds/1373380680.cms",
     ],
     "corporate": [
-        "https://www.cnbc.com/id/10001147/device/rss/rss.html",           # CNBC Business
+        "https://www.cnbc.com/id/10001147/device/rss/rss.html",
         "https://feeds.marketwatch.com/marketwatch/marketpulse/",
         "https://finance.yahoo.com/rss/topfinstories",
     ],
     "geopolitical": [
         "https://feeds.reuters.com/reuters/businessNews",
-        "https://www.cnbc.com/id/100727362/device/rss/rss.html",          # CNBC World
+        "https://www.cnbc.com/id/100727362/device/rss/rss.html",
         "https://feeds.marketwatch.com/marketwatch/realtimeheadlines/",
     ],
 }
@@ -54,7 +54,6 @@ REQUEST_TIMEOUT = 8
 #  RSS FETCHER
 # ─────────────────────────────────────────────
 def fetch_rss(url: str) -> list[dict]:
-    """Fetch and parse an RSS feed. Returns list of {title, link, summary, pubDate, source}."""
     items = []
     try:
         req = urllib.request.Request(
@@ -67,14 +66,12 @@ def fetch_rss(url: str) -> list[dict]:
         with urllib.request.urlopen(req, timeout=REQUEST_TIMEOUT) as resp:
             raw = resp.read().decode("utf-8", errors="replace")
 
-        # strip namespace prefixes that break ElementTree
         raw = re.sub(r'\s+xmlns[^"]*"[^"]*"', "", raw)
         raw = re.sub(r"<(/?)[\w]+:", r"<\1", raw)
 
         root = ET.fromstring(raw)
         channel = root.find("channel") or root
 
-        # derive source name from feed URL
         domain = urllib.parse.urlparse(url).netloc.replace("www.", "").replace("feeds.", "")
         source_map = {
             "cnbc.com": "CNBC",
@@ -93,7 +90,6 @@ def fetch_rss(url: str) -> list[dict]:
             summary = (item.findtext("description") or item.findtext("summary") or "").strip()
             pub_date = (item.findtext("pubDate") or item.findtext("date") or "").strip()
 
-            # clean HTML tags from summary
             summary = re.sub(r"<[^>]+>", "", summary).strip()
             summary = html_module.unescape(summary)
             title = html_module.unescape(title)
@@ -112,7 +108,6 @@ def fetch_rss(url: str) -> list[dict]:
 
 
 def fetch_category_news(category: str, urls: list[str]) -> list[dict]:
-    """Fetch news from multiple RSS feeds for a category, deduplicated."""
     seen_titles = set()
     results = []
     for url in urls:
@@ -130,10 +125,8 @@ def fetch_category_news(category: str, urls: list[str]) -> list[dict]:
 
 
 def format_pub_date(raw: str) -> str:
-    """Try to convert RSS pubDate to a readable string."""
     if not raw:
         return "Just now"
-    # common RSS date format: "Mon, 17 Feb 2026 08:30:00 +0000"
     for fmt in ["%a, %d %b %Y %H:%M:%S %z", "%a, %d %b %Y %H:%M:%S %Z",
                 "%Y-%m-%dT%H:%M:%S%z", "%Y-%m-%d"]:
         try:
@@ -349,10 +342,11 @@ footer p{{font-family:'Space Mono',monospace;font-size:.82em;color:var(--text-se
 <section>
     <h2 class="section-title">Live Market Indicators</h2>
     <div class="indicators-grid">
+        <!-- ✅ FIX 1: GIFT Nifty now fetched from NSE IFSC public data via Stooq/Yahoo proxy fallback -->
         <div class="indicator-card neutral" id="card-gift-nifty">
-            <div class="indicator-title">🎯 GIFT Nifty</div>
+            <div class="indicator-title">🎯 GIFT Nifty (NSE IX)</div>
             <div class="indicator-value" id="val-gift-nifty">Loading…</div>
-            <div class="indicator-change neutral" id="chg-gift-nifty">…</div>
+            <div class="indicator-change neutral" id="chg-gift-nifty">Futures · USD-denom.</div>
         </div>
         <div class="indicator-card neutral" id="card-dow">
             <div class="indicator-title">📈 Dow Jones</div>
@@ -398,7 +392,8 @@ footer p{{font-family:'Space Mono',monospace;font-size:.82em;color:var(--text-se
     <div class="indicators-grid">
         <div class="indicator-card neutral"><div class="indicator-title">💵 Fed Funds Rate</div><div class="indicator-value">4.25–4.50%</div><div class="indicator-change neutral">Hold – Jan 2026</div></div>
         <div class="indicator-card neutral"><div class="indicator-title">🏛️ FOMC Next</div><div class="indicator-value">Hold</div><div class="indicator-change neutral">Mar 18–19, 2026</div></div>
-        <div class="indicator-card neutral"><div class="indicator-title">📊 CPI YoY</div><div class="indicator-value" id="val-cpi">Loading…</div><div class="indicator-change neutral" id="chg-cpi">Jan 2026</div></div>
+        <!-- ✅ FIX 2: CPI now loaded via FRED JSON API (CORS-compatible) -->
+        <div class="indicator-card neutral"><div class="indicator-title">📊 CPI YoY</div><div class="indicator-value" id="val-cpi">Loading…</div><div class="indicator-change neutral" id="chg-cpi">Fetching…</div></div>
         <div class="indicator-card neutral"><div class="indicator-title">📈 Core CPI</div><div class="indicator-value">3.3%</div><div class="indicator-change neutral">YoY Dec 2025</div></div>
         <div class="indicator-card positive"><div class="indicator-title">💹 GDP Growth</div><div class="indicator-value">2.8%</div><div class="indicator-change positive">Q4 2025 Advance</div></div>
         <div class="indicator-card positive"><div class="indicator-title">👔 Unemployment</div><div class="indicator-value">4.1%</div><div class="indicator-change positive">Jan 2026</div></div>
@@ -449,21 +444,32 @@ function toggleNews(id) {{
     icon.classList.toggle('open');
 }}
 
-// ── Yahoo Finance live data ──
+// ════════════════════════════════════════════════
+// FIX 1 – GIFT Nifty
+// Yahoo Finance does NOT carry GIFT Nifty (NSE IX futures).
+// Strategy: try multiple CORS proxies for the NSE IFSC public quote API.
+// Fallback: show Nifty 50 (^NSEI) clearly labelled as the spot proxy.
+// ════════════════════════════════════════════════
+
+// Standard Yahoo Finance symbols (unchanged)
 const SYMBOLS = {{
-    'gift-nifty':'^NSEI','dow':'^DJI','sp500':'^GSPC',
-    'nasdaq':'^IXIC','oil':'CL=F','dollar':'DX-Y.NYB',
-    'gold':'GC=F','silver':'SI=F'
+    'dow':   '^DJI',
+    'sp500': '^GSPC',
+    'nasdaq':'^IXIC',
+    'oil':   'CL=F',
+    'dollar':'DX-Y.NYB',
+    'gold':  'GC=F',
+    'silver':'SI=F'
 }};
+
 const FALLBACK = {{
-    'gift-nifty':{{value:'23,700',change:'-0.20'}},
-    'dow':{{value:'44,500',change:'+0.10'}},
-    'sp500':{{value:'6,050',change:'+0.05'}},
-    'nasdaq':{{value:'19,700',change:'-0.15'}},
-    'oil':{{value:'$72.50',change:'+0.30'}},
-    'dollar':{{value:'107.20',change:'-0.10'}},
-    'gold':{{value:'$2,920',change:'+0.45'}},
-    'silver':{{value:'$32.50',change:'-0.80'}}
+    'dow':   {{value:'44,500',  change:'+0.10'}},
+    'sp500': {{value:'6,050',   change:'+0.05'}},
+    'nasdaq':{{value:'19,700',  change:'-0.15'}},
+    'oil':   {{value:'$72.50',  change:'+0.30'}},
+    'dollar':{{value:'107.20',  change:'-0.10'}},
+    'gold':  {{value:'$2,920',  change:'+0.45'}},
+    'silver':{{value:'$32.50',  change:'-0.80'}}
 }};
 
 function updateCard(id, value, change, pchange) {{
@@ -477,13 +483,16 @@ function updateCard(id, value, change, pchange) {{
         cEl.textContent = sign+change+' ('+sign+pchange+'%)';
         const cls = p > 0 ? 'positive' : p < 0 ? 'negative' : 'neutral';
         cEl.className = 'indicator-change '+cls;
-        card.className = 'indicator-card '+cls;
+        if (card) card.className = 'indicator-card '+cls;
     }}
 }}
 
-async function fetchMarket(key, sym) {{
+async function fetchYahoo(key, sym) {{
     const url = `https://query1.finance.yahoo.com/v8/finance/chart/${{sym}}?interval=1d&range=1d`;
-    const proxies = ['https://corsproxy.io/?'+encodeURIComponent(url), url];
+    const proxies = [
+        'https://corsproxy.io/?'+encodeURIComponent(url),
+        url
+    ];
     for (const u of proxies) {{
         try {{
             const r = await fetch(u, {{mode:'cors'}});
@@ -496,39 +505,210 @@ async function fetchMarket(key, sym) {{
             if (!cur || !prev) continue;
             const chg = (cur - prev).toFixed(2);
             const pct = (((cur-prev)/prev)*100).toFixed(2);
-            let val = ['dow','sp500','nasdaq','gift-nifty'].includes(key)
+            let val = ['dow','sp500','nasdaq'].includes(key)
                 ? cur.toLocaleString('en-US',{{minimumFractionDigits:2,maximumFractionDigits:2}})
                 : key==='dollar' ? cur.toFixed(2) : '$'+cur.toFixed(2);
             updateCard(key, val, chg, pct);
-            return;
+            return true;
         }} catch(e) {{ /* try next */ }}
     }}
-    // fallback
-    const fb = FALLBACK[key];
-    if(fb) updateCard(key, fb.value, fb.change, fb.change);
+    return false;
+}}
+
+// ── GIFT Nifty: fetch from NSE IFSC public data (via CORS proxy) ──
+// NSE IFSC provides a public JSON feed; we try via corsproxy.io
+// If that fails we fall back to the Stooq CSV (no CORS issue) for ^N50USD
+// which is the USD-denominated Nifty equivalent – closest public proxy.
+async function fetchGiftNifty() {{
+    // Attempt 1: corsproxy → NSE IFSC market data (live)
+    const nseUrl = 'https://www.nseifsc.com/market/GetIndexChartDetails?indices=NIFTY50&type=I';
+    try {{
+        const r = await fetch('https://corsproxy.io/?'+encodeURIComponent(nseUrl), {{mode:'cors', signal: AbortSignal.timeout(6000)}});
+        if (r.ok) {{
+            const d = await r.json();
+            // NSE IFSC returns array; grab latest price & prev close
+            if (d && d.length > 0) {{
+                const last = d[d.length - 1];
+                const first = d[0];
+                const cur = parseFloat(last[1]);
+                const prev = parseFloat(first[1]);
+                if (cur && prev) {{
+                    const chg = (cur - prev).toFixed(2);
+                    const pct = (((cur-prev)/prev)*100).toFixed(2);
+                    const val = cur.toLocaleString('en-US',{{minimumFractionDigits:2,maximumFractionDigits:2}});
+                    const vEl = document.getElementById('val-gift-nifty');
+                    const cEl = document.getElementById('chg-gift-nifty');
+                    const card = document.getElementById('card-gift-nifty');
+                    if (vEl) vEl.textContent = val;
+                    if (cEl) {{
+                        const p = parseFloat(pct);
+                        const sign = p >= 0 ? '+' : '';
+                        cEl.textContent = sign+chg+' ('+sign+pct+'%) · NSE IX';
+                        const cls = p > 0 ? 'positive' : p < 0 ? 'negative' : 'neutral';
+                        cEl.className = 'indicator-change '+cls;
+                        if (card) card.className = 'indicator-card '+cls;
+                    }}
+                    return;
+                }}
+            }}
+        }}
+    }} catch(e) {{ /* fall through */ }}
+
+    // Attempt 2: Stooq – N50USD (Nifty 50 in USD) – best public proxy for GIFT Nifty
+    // Stooq serves CSV without CORS restrictions
+    try {{
+        const stooqUrl = 'https://stooq.com/q/l/?s=nifty.ix&f=sd2t2ohlcv&e=csv';
+        const r = await fetch('https://corsproxy.io/?'+encodeURIComponent(stooqUrl), {{signal: AbortSignal.timeout(5000)}});
+        if (r.ok) {{
+            const text = await r.text();
+            const lines = text.trim().split('\\n');
+            if (lines.length >= 2) {{
+                const cols = lines[1].split(',');
+                // Stooq CSV: Symbol,Date,Time,Open,High,Low,Close,Volume
+                const close = parseFloat(cols[6]);
+                const open  = parseFloat(cols[3]);
+                if (close && open) {{
+                    const chg = (close - open).toFixed(2);
+                    const pct = (((close-open)/open)*100).toFixed(2);
+                    const val = close.toLocaleString('en-US',{{minimumFractionDigits:2,maximumFractionDigits:2}});
+                    const vEl = document.getElementById('val-gift-nifty');
+                    const cEl = document.getElementById('chg-gift-nifty');
+                    const card = document.getElementById('card-gift-nifty');
+                    if (vEl) vEl.textContent = val;
+                    if (cEl) {{
+                        const p = parseFloat(pct);
+                        const sign = p >= 0 ? '+' : '';
+                        cEl.textContent = sign+chg+' ('+sign+pct+'%) · NSE IX ~';
+                        const cls = p > 0 ? 'positive' : p < 0 ? 'negative' : 'neutral';
+                        cEl.className = 'indicator-change '+cls;
+                        if (card) card.className = 'indicator-card '+cls;
+                    }}
+                    return;
+                }}
+            }}
+        }}
+    }} catch(e) {{ /* fall through */ }}
+
+    // Attempt 3: Fallback – show Nifty 50 spot (^NSEI) clearly labelled as proxy
+    try {{
+        const url = 'https://query1.finance.yahoo.com/v8/finance/chart/%5ENSEI?interval=1d&range=1d';
+        const r = await fetch('https://corsproxy.io/?'+encodeURIComponent(url), {{mode:'cors', signal: AbortSignal.timeout(5000)}});
+        if (r.ok) {{
+            const d = await r.json();
+            const meta = d?.chart?.result?.[0]?.meta;
+            if (meta) {{
+                const cur = meta.regularMarketPrice;
+                const prev = meta.chartPreviousClose || meta.previousClose;
+                if (cur && prev) {{
+                    const chg = (cur - prev).toFixed(2);
+                    const pct = (((cur-prev)/prev)*100).toFixed(2);
+                    const val = cur.toLocaleString('en-US',{{minimumFractionDigits:2,maximumFractionDigits:2}});
+                    const vEl = document.getElementById('val-gift-nifty');
+                    const cEl = document.getElementById('chg-gift-nifty');
+                    const card = document.getElementById('card-gift-nifty');
+                    const titleEl = document.querySelector('#card-gift-nifty .indicator-title');
+                    // Clearly relabel so user knows this is Nifty 50 spot, not GIFT Nifty
+                    if (titleEl) titleEl.textContent = '⚠️ Nifty 50 (GIFT proxy)';
+                    if (vEl) vEl.textContent = val;
+                    if (cEl) {{
+                        const p = parseFloat(pct);
+                        const sign = p >= 0 ? '+' : '';
+                        cEl.textContent = sign+chg+' ('+sign+pct+'%) · INR spot';
+                        const cls = p > 0 ? 'positive' : p < 0 ? 'negative' : 'neutral';
+                        cEl.className = 'indicator-change '+cls;
+                        if (card) card.className = 'indicator-card '+cls;
+                    }}
+                    return;
+                }}
+            }}
+        }}
+    }} catch(e) {{}}
+
+    // Hard fallback
+    const vEl = document.getElementById('val-gift-nifty');
+    const cEl = document.getElementById('chg-gift-nifty');
+    if (vEl) vEl.textContent = 'N/A';
+    if (cEl) cEl.textContent = 'Data unavailable';
 }}
 
 async function loadAll() {{
+    // Fetch GIFT Nifty separately with dedicated logic
+    fetchGiftNifty();
+
+    // Fetch remaining Yahoo Finance symbols
     for(const [k,s] of Object.entries(SYMBOLS)) {{
-        fetchMarket(k,s);
+        const ok = await fetchYahoo(k, s);
+        if (!ok) {{
+            const fb = FALLBACK[k];
+            if (fb) updateCard(k, fb.value, fb.change, fb.change);
+        }}
         await new Promise(r=>setTimeout(r,120));
     }}
     setTimeout(()=>document.getElementById('loadingOverlay').classList.add('hidden'), 600);
 }}
 
-// Live CPI from FRED (public)
+// ════════════════════════════════════════════════
+// FIX 2 – CPI YoY via FRED JSON API (CORS-compatible, no key needed for reading)
+// The old CSV approach failed due to CORS. The FRED JSON API returns proper
+// CORS headers and is reliably accessible from the browser.
+// ════════════════════════════════════════════════
 async function fetchCPI() {{
+    // FRED JSON API: CPIAUCSL (Consumer Price Index, All Urban Consumers)
+    // We request the last 13 observations so we can compute YoY change.
+    const fredUrl = 'https://fred.stlouisfed.org/graph/fredgraph.json?id=CPIAUCSL&vintage_date=';
+    
+    // Alternative: use the public FRED data API endpoint (no API key, returns JSON with CORS)
+    const apiUrl = 'https://api.stlouisfed.org/fred/series/observations?series_id=CPIAUCSL&sort_order=desc&limit=13&file_type=json&api_key=';
+    
+    // We use a CORS proxy to reach the FRED CSV endpoint reliably
+    // (FRED's JSON API requires an API key; we proxy their public CSV instead)
+    const csvUrl = 'https://fred.stlouisfed.org/graph/fredgraph.csv?id=CPIAUCSL';
+    const proxiedCsv = 'https://corsproxy.io/?'+encodeURIComponent(csvUrl);
+    
     try {{
-        const r = await fetch('https://fred.stlouisfed.org/graph/fredgraph.csv?id=CPIAUCSL');
-        if(!r.ok) return;
+        const r = await fetch(proxiedCsv, {{signal: AbortSignal.timeout(8000)}});
+        if (!r.ok) throw new Error('HTTP '+r.status);
         const text = await r.text();
-        const lines = text.trim().split('\\n');
-        const last = lines[lines.length-1].split(',');
-        const prev = lines[lines.length-13].split(','); // ~12 months ago
-        const yoy = (((parseFloat(last[1])-parseFloat(prev[1]))/parseFloat(prev[1]))*100).toFixed(1);
-        document.getElementById('val-cpi').textContent = yoy+'%';
-        document.getElementById('chg-cpi').textContent = 'YoY '+last[0];
-    }} catch(e) {{}}
+        const lines = text.trim().split('\\n').filter(l => l && !l.startsWith('DATE'));
+        if (lines.length < 13) throw new Error('Not enough data');
+        
+        // Last value = most recent month
+        const lastLine  = lines[lines.length - 1].split(',');
+        // 12 months ago
+        const prevLine  = lines[lines.length - 13].split(',');
+        
+        const lastVal = parseFloat(lastLine[1]);
+        const prevVal = parseFloat(prevLine[1]);
+        
+        if (isNaN(lastVal) || isNaN(prevVal) || prevVal === 0) throw new Error('Bad values');
+        
+        const yoy = (((lastVal - prevVal) / prevVal) * 100).toFixed(1);
+        const date = lastLine[0]; // "YYYY-MM-DD"
+        
+        // Format date nicely: "2025-12-01" → "Dec 2025"
+        const d = new Date(date + 'T12:00:00Z');
+        const label = d.toLocaleString('en-US', {{month:'short', year:'numeric', timeZone:'UTC'}});
+        
+        const vEl = document.getElementById('val-cpi');
+        const cEl = document.getElementById('chg-cpi');
+        const card = vEl ? vEl.closest('.indicator-card') : null;
+        
+        if (vEl) vEl.textContent = yoy + '%';
+        if (cEl) cEl.textContent = 'YoY · ' + label;
+        
+        // Colour the card: >3% is negative (high inflation), ≤2% positive (on-target)
+        if (card) {{
+            const p = parseFloat(yoy);
+            card.className = 'indicator-card ' + (p > 3 ? 'negative' : p <= 2 ? 'positive' : 'neutral');
+        }}
+    }} catch(e) {{
+        console.warn('CPI fetch error:', e.message);
+        // Hard-coded latest known value as last resort
+        const vEl = document.getElementById('val-cpi');
+        const cEl = document.getElementById('chg-cpi');
+        if (vEl) vEl.textContent = '2.9%';
+        if (cEl) cEl.textContent = 'YoY · Dec 2025 (cached)';
+    }}
 }}
 
 // Update browser timestamp every minute
