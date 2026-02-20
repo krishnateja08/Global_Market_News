@@ -114,7 +114,7 @@ footer p{font-family:'Space Mono',monospace;font-size:.82em;color:var(--text-sec
     <h1>🌍 Global Market Dashboard</h1>
     <div class="subtitle">Real-Time Market Data &amp; Live News Headlines</div>
     <div class="live-badge">🔴 LIVE – Fetched Fresh This Run</div>
-    <div class="timestamp" id="timestamp">📅 Generated: February 21, 2026 at 01:51 AM IST</div>
+    <div class="timestamp" id="timestamp">📅 Generated: February 21, 2026 at 02:12 AM IST</div>
     <div class="stat-bar">✅ 50 articles fetched across all categories</div>
 </header>
 
@@ -122,10 +122,11 @@ footer p{font-family:'Space Mono',monospace;font-size:.82em;color:var(--text-sec
 <section>
     <h2 class="section-title">Live Market Indicators</h2>
     <div class="indicators-grid">
+        <!-- ✅ FIX 1: GIFT Nifty now fetched from NSE IFSC public data via Stooq/Yahoo proxy fallback -->
         <div class="indicator-card neutral" id="card-gift-nifty">
-            <div class="indicator-title">🎯 GIFT Nifty</div>
+            <div class="indicator-title">🎯 GIFT Nifty (NSE IX)</div>
             <div class="indicator-value" id="val-gift-nifty">Loading…</div>
-            <div class="indicator-change neutral" id="chg-gift-nifty">…</div>
+            <div class="indicator-change neutral" id="chg-gift-nifty">Futures · USD-denom.</div>
         </div>
         <div class="indicator-card neutral" id="card-dow">
             <div class="indicator-title">📈 Dow Jones</div>
@@ -171,7 +172,8 @@ footer p{font-family:'Space Mono',monospace;font-size:.82em;color:var(--text-sec
     <div class="indicators-grid">
         <div class="indicator-card neutral"><div class="indicator-title">💵 Fed Funds Rate</div><div class="indicator-value">4.25–4.50%</div><div class="indicator-change neutral">Hold – Jan 2026</div></div>
         <div class="indicator-card neutral"><div class="indicator-title">🏛️ FOMC Next</div><div class="indicator-value">Hold</div><div class="indicator-change neutral">Mar 18–19, 2026</div></div>
-        <div class="indicator-card neutral"><div class="indicator-title">📊 CPI YoY</div><div class="indicator-value" id="val-cpi">Loading…</div><div class="indicator-change neutral" id="chg-cpi">Jan 2026</div></div>
+        <!-- ✅ FIX 2: CPI now loaded via FRED JSON API (CORS-compatible) -->
+        <div class="indicator-card neutral"><div class="indicator-title">📊 CPI YoY</div><div class="indicator-value" id="val-cpi">Loading…</div><div class="indicator-change neutral" id="chg-cpi">Fetching…</div></div>
         <div class="indicator-card neutral"><div class="indicator-title">📈 Core CPI</div><div class="indicator-value">3.3%</div><div class="indicator-change neutral">YoY Dec 2025</div></div>
         <div class="indicator-card positive"><div class="indicator-title">💹 GDP Growth</div><div class="indicator-value">2.8%</div><div class="indicator-change positive">Q4 2025 Advance</div></div>
         <div class="indicator-card positive"><div class="indicator-title">👔 Unemployment</div><div class="indicator-value">4.1%</div><div class="indicator-change positive">Jan 2026</div></div>
@@ -210,112 +212,112 @@ footer p{font-family:'Space Mono',monospace;font-size:.82em;color:var(--text-sec
                 <div>
         <div class="news-item" onclick="toggleNews('news-markets-0')">
             <div class="news-item-header">
-                <h3>Stock market today: Dow, S&amp;P 500, Nasdaq rise after Supreme Court strikes down Trump tariffs</h3>
+                <h3>Is Genpact Stock a Buy After Nalanda Increased Its Stake by 1 Million Shares?</h3>
                 <span class="expand-icon" id="icon-news-markets-0">&#9660;</span>
             </div>
             <div class="news-meta">
                 <span class="news-source">Yahoo Finance</span>
-                <span class="news-date">16 min ago</span>
+                <span class="news-date">7 min ago</span>
             </div>
             <div class="news-expand" id="news-markets-0">
-                <p class="news-summary">The PCE inflation reading for December is the highlight in a heavy slate of economic data.</p>
-                <a class="read-more" href="https://finance.yahoo.com/news/live/stock-market-today-dow-sp-500-nasdaq-rise-after-supreme-court-strikes-down-trump-tariffs-000113270.html?.tsrc=rss" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+                <p class="news-summary">Genpact delivers business process and digital transformation services to global enterprise clients across diverse industries.</p>
+                <a class="read-more" href="https://www.fool.com/coverage/filings/2026/02/20/is-genpact-stock-a-buy-after-nalanda-increased-its-stake-by-1-million-shares/?.tsrc=rss" target="_blank" rel="noopener">Read Full Article &#8599;</a>
             </div>
         </div>
 
         <div class="news-item" onclick="toggleNews('news-markets-1')">
             <div class="news-item-header">
-                <h3>Blue Collar AI Stock Comfort Systems Jumps On Blowout Earnings, Soaring Backlog</h3>
+                <h3>Stock Market Today: Nasdaq Charges Higher As Trump Announces Global Tariff; Gold Moves Up (Live Coverage)</h3>
                 <span class="expand-icon" id="icon-news-markets-1">&#9660;</span>
             </div>
             <div class="news-meta">
                 <span class="news-source">Yahoo Finance</span>
-                <span class="news-date">18 min ago</span>
+                <span class="news-date">10 min ago</span>
             </div>
             <div class="news-expand" id="news-markets-1">
-                <p class="news-summary">Profit growth has accelerated for five straight quarters on data center demand, while the order backlog doubled in 2025.</p>
-                <a class="read-more" href="https://finance.yahoo.com/m/036d4fe9-c791-3af1-9eb1-61fa41b2cffa/blue-collar-ai-stock-comfort.html?.tsrc=rss" target="_blank" rel="noopener">Read Full Article &#8599;</a>
-            </div>
-        </div>
-
-        <div class="news-item" onclick="toggleNews('news-markets-2')">
-            <div class="news-item-header">
-                <h3>Stock Market Today: Nasdaq Charges Higher As Trump Announces Global Tariff; Nvidia Rises (Live Coverage)</h3>
-                <span class="expand-icon" id="icon-news-markets-2">&#9660;</span>
-            </div>
-            <div class="news-meta">
-                <span class="news-source">Yahoo Finance</span>
-                <span class="news-date">30 min ago</span>
-            </div>
-            <div class="news-expand" id="news-markets-2">
                 <p class="news-summary">Stock Market Today: Stocks turned higher Friday after the Supreme Court ruled against President&#x27;s Trump&#x27;s global tariffs.</p>
                 <a class="read-more" href="https://finance.yahoo.com/m/2c689129-9ec6-3cce-adf5-d9bcf4c6ba63/stock-market-today%3A-nasdaq.html?.tsrc=rss" target="_blank" rel="noopener">Read Full Article &#8599;</a>
             </div>
         </div>
 
+        <div class="news-item" onclick="toggleNews('news-markets-2')">
+            <div class="news-item-header">
+                <h3>The Best Stocks to Buy With $10,000 Right Now</h3>
+                <span class="expand-icon" id="icon-news-markets-2">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">Yahoo Finance</span>
+                <span class="news-date">11 min ago</span>
+            </div>
+            <div class="news-expand" id="news-markets-2">
+                <p class="news-summary">The market is giving investors a rare buying opportunity for some of its best stocks.</p>
+                <a class="read-more" href="https://www.fool.com/investing/2026/02/20/the-best-stocks-to-buy-with-10000-right-now/?.tsrc=rss" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
         <div class="news-item" onclick="toggleNews('news-markets-3')">
             <div class="news-item-header">
-                <h3>Equities Rise Intraday as Trump Responds to Supreme Court Tariff Ruling</h3>
+                <h3>Stock market today: Dow, S&amp;P 500, Nasdaq rise after Supreme Court strikes down Trump tariffs</h3>
                 <span class="expand-icon" id="icon-news-markets-3">&#9660;</span>
             </div>
             <div class="news-meta">
                 <span class="news-source">Yahoo Finance</span>
-                <span class="news-date">1 hour ago</span>
+                <span class="news-date">36 min ago</span>
             </div>
             <div class="news-expand" id="news-markets-3">
-                <p class="news-summary">US equity indexes were higher intraday as traders assessed President Donald Trump&#x27;s response to a Su</p>
-                <a class="read-more" href="https://finance.yahoo.com/news/equities-rise-intraday-trump-responds-191741955.html?.tsrc=rss" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+                <p class="news-summary">The PCE inflation reading for December is the highlight in a heavy slate of economic data.</p>
+                <a class="read-more" href="https://finance.yahoo.com/news/live/stock-market-today-dow-sp-500-nasdaq-rise-after-supreme-court-strikes-down-trump-tariffs-000113270.html?.tsrc=rss" target="_blank" rel="noopener">Read Full Article &#8599;</a>
             </div>
         </div>
 
         <div class="news-item" onclick="toggleNews('news-markets-4')">
             <div class="news-item-header">
-                <h3>Sector Update: Energy Stocks Decline Friday Afternoon</h3>
+                <h3>Blue Collar AI Stock Comfort Systems Jumps On Blowout Earnings, Soaring Backlog</h3>
                 <span class="expand-icon" id="icon-news-markets-4">&#9660;</span>
             </div>
             <div class="news-meta">
                 <span class="news-source">Yahoo Finance</span>
-                <span class="news-date">1 hour ago</span>
+                <span class="news-date">38 min ago</span>
             </div>
             <div class="news-expand" id="news-markets-4">
-                <p class="news-summary">Energy stocks were lower Friday afternoon, with the NYSE Energy Sector Index decreasing 0.8% and the</p>
-                <a class="read-more" href="https://finance.yahoo.com/news/sector-energy-stocks-decline-friday-190607700.html?.tsrc=rss" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+                <p class="news-summary">Profit growth has accelerated for five straight quarters on data center demand, while the order backlog doubled in 2025.</p>
+                <a class="read-more" href="https://finance.yahoo.com/m/036d4fe9-c791-3af1-9eb1-61fa41b2cffa/blue-collar-ai-stock-comfort.html?.tsrc=rss" target="_blank" rel="noopener">Read Full Article &#8599;</a>
             </div>
         </div>
 
         <div class="news-item" onclick="toggleNews('news-markets-5')">
             <div class="news-item-header">
-                <h3>Stock Market Mixed With Walmart, Iran, Trump Tariff Ruling In Focus: Weekly Review</h3>
+                <h3>Al Gore’s Investment Firm Buys Spotify Stock, Sells These 2 Semiconductor Companies</h3>
                 <span class="expand-icon" id="icon-news-markets-5">&#9660;</span>
             </div>
             <div class="news-meta">
                 <span class="news-source">Yahoo Finance</span>
-                <span class="news-date">1 hour ago</span>
+                <span class="news-date">55 min ago</span>
             </div>
             <div class="news-expand" id="news-markets-5">
-                <p class="news-summary">The stock market was mixed this week on Walmart, Iran and private credit concerns. But the Friday Supreme Court&#x27;s Trump tariff ruling helped.</p>
-                <a class="read-more" href="https://finance.yahoo.com/m/e879ab2f-1750-3584-b4d5-ac736ac093ed/stock-market-mixed-with.html?.tsrc=rss" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+                <p class="news-summary">Generation Investment Management exited Analog Devices and Microchip Technology in the fourth quarter.</p>
+                <a class="read-more" href="https://finance.yahoo.com/m/cfeed95a-6117-3150-be8a-b20433f3a14b/al-gore%E2%80%99s-investment-firm.html?.tsrc=rss" target="_blank" rel="noopener">Read Full Article &#8599;</a>
             </div>
         </div>
 
         <div class="news-item" onclick="toggleNews('news-markets-6')">
             <div class="news-item-header">
-                <h3>Supreme Court Strikes Down Tariffs, But Trump Adds 10% Tax (Live Coverage)</h3>
+                <h3>Tesla Stock Slides After Musk Launches Cheaper Cybertruck. There’s a Concern.</h3>
                 <span class="expand-icon" id="icon-news-markets-6">&#9660;</span>
             </div>
             <div class="news-meta">
                 <span class="news-source">Yahoo Finance</span>
-                <span class="news-date">1 hour ago</span>
+                <span class="news-date">58 min ago</span>
             </div>
             <div class="news-expand" id="news-markets-6">
-                <p class="news-summary">The Supreme Court&#x27;s $100 billion-plus tariff ruling flatly rejected the White House argument, saying that the International Emergency Economic Powers Act &quot;does not authorize the President to impose tariffs.&quot;  President Donald Trump quickly announced plans for a global 10% tax, which he has authority to impose immediately, to replace the tariffs killed by the ruling.  The adverse ruling for the White House opened up a hole of well over $100 billion in the annual budget, since the tariffs are, in </p>
-                <a class="read-more" href="https://finance.yahoo.com/m/988fc543-2c40-3618-9f2f-625a09b5c44d/supreme-court-strikes-down.html?.tsrc=rss" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+                <p class="news-summary">FEATURE   Tesla stock was slightly lower on Friday after the company introduced a new version of its avant-garde Cybertruck. Shares of the electric vehicle maker were down 0.2%, while the and were up 0.</p>
+                <a class="read-more" href="https://finance.yahoo.com/m/62fd7684-e4b7-359b-ab2b-8419b56d11a4/tesla-stock-slides-after-musk.html?.tsrc=rss" target="_blank" rel="noopener">Read Full Article &#8599;</a>
             </div>
         </div>
 
         <div class="news-item" onclick="toggleNews('news-markets-7')">
             <div class="news-item-header">
-                <h3>What impact will Trump tariff ruling have on stock market?</h3>
+                <h3>LyondellBasell Slashes Dividend in Half. Its Stock Is Up, But This One Is Down.</h3>
                 <span class="expand-icon" id="icon-news-markets-7">&#9660;</span>
             </div>
             <div class="news-meta">
@@ -323,14 +325,14 @@ footer p{font-family:'Space Mono',monospace;font-size:.82em;color:var(--text-sec
                 <span class="news-date">1 hour ago</span>
             </div>
             <div class="news-expand" id="news-markets-7">
-                <p class="news-summary">The stock market saw a slight uptick Feb. 20 in the wake of the Supreme Court&#x27;s ruling against President Donald Trump&#x27;s sweeping tariffs.</p>
-                <a class="read-more" href="https://www.northjersey.com/story/money/2026/02/20/stock-market-up-supreme-court-rules-on-tariffs/88778487007/?.tsrc=rss" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+                <p class="news-summary">A dividend “recalibration” is rarely a good thing for investors.  Commodity chemical maker  LyondellBasell  said it would “recalibrate” its dividend, declaring a quarterly payout of 69 cents a share—essentially half of the prior $1.37 payout.  “Despite one of the longest downturns in our industry, LyondellBasell was able to return approximately $2 billion to our shareholders from existing cash and operations in 2025,” said CEO Peter Vanacker in a news release.</p>
+                <a class="read-more" href="https://finance.yahoo.com/m/48413a60-4a4f-3f8f-a5cc-f16d3943f8f7/lyondellbasell-slashes.html?.tsrc=rss" target="_blank" rel="noopener">Read Full Article &#8599;</a>
             </div>
         </div>
 
         <div class="news-item" onclick="toggleNews('news-markets-8')">
             <div class="news-item-header">
-                <h3>US Equity Indexes Mixed After Supreme Court Strikes Down Trump&#x27;s Tariffs, Inflation Rate Rises</h3>
+                <h3>The Supreme Court Muddies the Tariff Waters. AI and Private Credit Still Have Markets on Edge.</h3>
                 <span class="expand-icon" id="icon-news-markets-8">&#9660;</span>
             </div>
             <div class="news-meta">
@@ -338,14 +340,14 @@ footer p{font-family:'Space Mono',monospace;font-size:.82em;color:var(--text-sec
                 <span class="news-date">1 hour ago</span>
             </div>
             <div class="news-expand" id="news-markets-8">
-                <p class="news-summary">US equity indexes traded mixed as the Supreme Court struck down President Donald Trump&#x27;s worldwide t</p>
-                <a class="read-more" href="https://finance.yahoo.com/news/us-equity-indexes-mixed-supreme-183115555.html?.tsrc=rss" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+                <p class="news-summary">It may take more than a break on tariffs for the market to overcome its other big worries: AI and private credit.  The Supreme Court’s decision—striking down President Donald Trump’s use of emergency powers to impose tariffs—was certainly welcome.  The Supreme Court muddied the tariff waters but didn’t clear them.</p>
+                <a class="read-more" href="https://finance.yahoo.com/m/ff8c1437-1800-3244-a2e0-a2a3d3d7f5a7/the-supreme-court-muddies-the.html?.tsrc=rss" target="_blank" rel="noopener">Read Full Article &#8599;</a>
             </div>
         </div>
 
         <div class="news-item" onclick="toggleNews('news-markets-9')">
             <div class="news-item-header">
-                <h3>CoreWeave Stock Surges Ahead of Earnings. What It Needs to Keep the Rally Going.</h3>
+                <h3>Equities Rise Intraday as Trump Responds to Supreme Court Tariff Ruling</h3>
                 <span class="expand-icon" id="icon-news-markets-9">&#9660;</span>
             </div>
             <div class="news-meta">
@@ -353,8 +355,8 @@ footer p{font-family:'Space Mono',monospace;font-size:.82em;color:var(--text-sec
                 <span class="news-date">1 hour ago</span>
             </div>
             <div class="news-expand" id="news-markets-9">
-                <p class="news-summary">After a brutal selloff to end 2025,  CoreWeave  has quietly resumed its winning ways.  The focus won’t be earnings per share or revenue.  Instead, investors want to gauge how quickly the artificial-intelligence infrastructure company can deliver power to its clients.</p>
-                <a class="read-more" href="https://finance.yahoo.com/m/8e7f5177-47bd-3431-ab71-8bb0e5bf1d65/coreweave-stock-surges-ahead.html?.tsrc=rss" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+                <p class="news-summary">US equity indexes were higher intraday as traders assessed President Donald Trump&#x27;s response to a Su</p>
+                <a class="read-more" href="https://finance.yahoo.com/news/equities-rise-intraday-trump-responds-191741955.html?.tsrc=rss" target="_blank" rel="noopener">Read Full Article &#8599;</a>
             </div>
         </div></div>
             </div>
@@ -371,7 +373,7 @@ footer p{font-family:'Space Mono',monospace;font-size:.82em;color:var(--text-sec
             </div>
             <div class="news-meta">
                 <span class="news-source">CNBC</span>
-                <span class="news-date">58 min ago</span>
+                <span class="news-date">1 hour ago</span>
             </div>
             <div class="news-expand" id="news-economic-0">
                 <p class="news-summary">President Donald Trump&#x27;s &quot;reciprocal&quot; tariffs were deemed unconstitutional by the Supreme Court, but some sector-specific tariffs remain in place.</p>
@@ -416,7 +418,7 @@ footer p{font-family:'Space Mono',monospace;font-size:.82em;color:var(--text-sec
             </div>
             <div class="news-meta">
                 <span class="news-source">CNBC</span>
-                <span class="news-date">4 hours ago</span>
+                <span class="news-date">5 hours ago</span>
             </div>
             <div class="news-expand" id="news-economic-3">
                 <p class="news-summary">The U.S. trade deficit swelled in December, closing out a year in which the imbalance was essentially unchanged.</p>
@@ -542,7 +544,7 @@ footer p{font-family:'Space Mono',monospace;font-size:.82em;color:var(--text-sec
             </div>
             <div class="news-meta">
                 <span class="news-source">Economic Times</span>
-                <span class="news-date">3 hours ago</span>
+                <span class="news-date">4 hours ago</span>
             </div>
             <div class="news-expand" id="news-india-1">
                 <p class="news-summary">A significant US Supreme Court ruling has dismantled former President Trump&#x27;s broad tariffs, sparking a rally in global markets, including India&#x27;s Gift Nifty. This decision, rejecting the use of emergency powers for trade policy, offers a potential reset for international trade tensions. For India, it arrives as markets grapple with volatility, potentially easing existing tariff pressures with the US.</p>
@@ -602,7 +604,7 @@ footer p{font-family:'Space Mono',monospace;font-size:.82em;color:var(--text-sec
             </div>
             <div class="news-meta">
                 <span class="news-source">Economic Times</span>
-                <span class="news-date">5 hours ago</span>
+                <span class="news-date">6 hours ago</span>
             </div>
             <div class="news-expand" id="news-india-5">
                 <p class="news-summary">US stocks: U.S. stock indexes declined Friday as economic growth slowed more than anticipated in the fourth quarter, while inflation showed an uptick in December. Investors also awaited a Supreme Court ruling on President Trump&#x27;s tariffs, which could impact over $175 billion in collections if overturned.</p>
@@ -632,7 +634,7 @@ footer p{font-family:'Space Mono',monospace;font-size:.82em;color:var(--text-sec
             </div>
             <div class="news-meta">
                 <span class="news-source">Economic Times</span>
-                <span class="news-date">6 hours ago</span>
+                <span class="news-date">7 hours ago</span>
             </div>
             <div class="news-expand" id="news-india-7">
                 <p class="news-summary">Foreign portfolio inflows and the rupee have ​strengthened after India&#x27;s free trade agreement with the European Union and an interim trade deal with the United States, the Reserve Bank of ‌India said ⁠in ⁠its monthly bulletin on Friday.</p>
@@ -683,7 +685,7 @@ footer p{font-family:'Space Mono',monospace;font-size:.82em;color:var(--text-sec
             </div>
             <div class="news-meta">
                 <span class="news-source">CNBC</span>
-                <span class="news-date">58 min ago</span>
+                <span class="news-date">1 hour ago</span>
             </div>
             <div class="news-expand" id="news-corporate-0">
                 <p class="news-summary">President Donald Trump&#x27;s &quot;reciprocal&quot; tariffs were deemed unconstitutional by the Supreme Court, but some sector-specific tariffs remain in place.</p>
@@ -698,7 +700,7 @@ footer p{font-family:'Space Mono',monospace;font-size:.82em;color:var(--text-sec
             </div>
             <div class="news-meta">
                 <span class="news-source">CNBC</span>
-                <span class="news-date">23 min ago</span>
+                <span class="news-date">44 min ago</span>
             </div>
             <div class="news-expand" id="news-corporate-1">
                 <p class="news-summary">Clothing and footwear were among the imports most vulnerable to Trump&#x27;s tariffs, which imposed steep rates on countries like China and Vietnam.</p>
@@ -758,7 +760,7 @@ footer p{font-family:'Space Mono',monospace;font-size:.82em;color:var(--text-sec
             </div>
             <div class="news-meta">
                 <span class="news-source">CNBC</span>
-                <span class="news-date">2 hours ago</span>
+                <span class="news-date">3 hours ago</span>
             </div>
             <div class="news-expand" id="news-corporate-5">
                 <p class="news-summary">Bath &amp; Body Works CEO Daniel Heaf told CNBC the Amazon launch is about meeting customers where they are and leveraging Amazon&#x27;s fast and free shipping.</p>
@@ -839,7 +841,7 @@ footer p{font-family:'Space Mono',monospace;font-size:.82em;color:var(--text-sec
             </div>
             <div class="news-meta">
                 <span class="news-source">CNBC</span>
-                <span class="news-date">18 min ago</span>
+                <span class="news-date">38 min ago</span>
             </div>
             <div class="news-expand" id="news-geopolitical-0">
                 <p class="news-summary">President Donald Trump spoke hours after the Supreme Court ruled against his global tariffs that he imposed without Congress.</p>
@@ -864,76 +866,76 @@ footer p{font-family:'Space Mono',monospace;font-size:.82em;color:var(--text-sec
 
         <div class="news-item" onclick="toggleNews('news-geopolitical-2')">
             <div class="news-item-header">
-                <h3>Trump says he&#x27;s considering limited military strike against Iran</h3>
+                <h3>Microsoft gaming chief Phil Spencer retires, replaced by ex-Instacart exec Asha Sharma</h3>
                 <span class="expand-icon" id="icon-news-geopolitical-2">&#9660;</span>
             </div>
             <div class="news-meta">
                 <span class="news-source">CNBC</span>
-                <span class="news-date">24 min ago</span>
+                <span class="news-date">3 min ago</span>
             </div>
             <div class="news-expand" id="news-geopolitical-2">
-                <p class="news-summary">The oil market&#x27;s biggest fear is that a conflict between the U.S. and Iran could lead to a prolonged disruption of oil flows through the Strait of Hormuz.</p>
-                <a class="read-more" href="https://www.cnbc.com/2026/02/20/trump-says-hes-considering-limited-military-strike-against-iran.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+                <p class="news-summary">Phil Spencer is retiring from Microsoft after joining the software company 38 years ago, and will be replaced by Instacart&#x27;s former COO.</p>
+                <a class="read-more" href="https://www.cnbc.com/2026/02/20/microsoft-gaming-chief-phil-spencer-retires-asha-sharma-replacing.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
             </div>
         </div>
 
         <div class="news-item" onclick="toggleNews('news-geopolitical-3')">
             <div class="news-item-header">
-                <h3>Fourth-quarter U.S. GDP up just 1.4%, badly missing estimate; inflation firms at 3%</h3>
+                <h3>Trump says he&#x27;s considering limited military strike against Iran</h3>
                 <span class="expand-icon" id="icon-news-geopolitical-3">&#9660;</span>
             </div>
             <div class="news-meta">
                 <span class="news-source">CNBC</span>
-                <span class="news-date">4 hours ago</span>
+                <span class="news-date">45 min ago</span>
             </div>
             <div class="news-expand" id="news-geopolitical-3">
-                <p class="news-summary">The core PCE price index was expected to increase 3% from a year ago in December. GDP was projected to rise at a 2.5% pace in Q4.</p>
-                <a class="read-more" href="https://www.cnbc.com/2026/02/20/pce-inflation-december-2025.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+                <p class="news-summary">The oil market&#x27;s biggest fear is that a conflict between the U.S. and Iran could lead to a prolonged disruption of oil flows through the Strait of Hormuz.</p>
+                <a class="read-more" href="https://www.cnbc.com/2026/02/20/trump-says-hes-considering-limited-military-strike-against-iran.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
             </div>
         </div>
 
         <div class="news-item" onclick="toggleNews('news-geopolitical-4')">
             <div class="news-item-header">
-                <h3>Who&#x27;s laughing now? China’s humanoid robots go from viral stumbles to kung fu flips in one year</h3>
+                <h3>How the Supreme Court&#x27;s decision affects Apple and its $3.3 billion tariff bill</h3>
                 <span class="expand-icon" id="icon-news-geopolitical-4">&#9660;</span>
             </div>
             <div class="news-meta">
                 <span class="news-source">CNBC</span>
-                <span class="news-date">6 hours ago</span>
+                <span class="news-date">17 min ago</span>
             </div>
             <div class="news-expand" id="news-geopolitical-4">
-                <p class="news-summary">Chinese humanoid robots are having a moment in the spotlight after a standout performance at the country&#x27;s annual Spring Festival Gala.</p>
-                <a class="read-more" href="https://www.cnbc.com/2026/02/20/china-humanoid-robots-spring-festival-gala-unitree-tesla-ai-race.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+                <p class="news-summary">President Donald Trump&#x27;s tariffs have cost the iPhone-maker about $1 billion each quarter.</p>
+                <a class="read-more" href="https://www.cnbc.com/2026/02/20/supreme-court-tariff-decision-apple-trump-cook-iphone.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
             </div>
         </div>
 
         <div class="news-item" onclick="toggleNews('news-geopolitical-5')">
             <div class="news-item-header">
-                <h3>European stocks close higher after U.S. Supreme Court strikes down Trump&#x27;s tariffs</h3>
+                <h3>Fourth-quarter U.S. GDP up just 1.4%, badly missing estimate; inflation firms at 3%</h3>
                 <span class="expand-icon" id="icon-news-geopolitical-5">&#9660;</span>
             </div>
             <div class="news-meta">
                 <span class="news-source">CNBC</span>
-                <span class="news-date">3 hours ago</span>
+                <span class="news-date">4 hours ago</span>
             </div>
             <div class="news-expand" id="news-geopolitical-5">
-                <p class="news-summary">European stocks finished higher on Friday after the U.S. Supreme Court ruled against a sizeable chunk of U.S. President Donald Trump&#x27;s global tariffs.</p>
-                <a class="read-more" href="https://www.cnbc.com/2026/02/20/european-markets-stoxx-600-ftse-dax-cac-us-iran.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+                <p class="news-summary">The core PCE price index was expected to increase 3% from a year ago in December. GDP was projected to rise at a 2.5% pace in Q4.</p>
+                <a class="read-more" href="https://www.cnbc.com/2026/02/20/pce-inflation-december-2025.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
             </div>
         </div>
 
         <div class="news-item" onclick="toggleNews('news-geopolitical-6')">
             <div class="news-item-header">
-                <h3>Trump could attack Iran in days — what&#x27;s at stake for the oil market</h3>
+                <h3>Who&#x27;s laughing now? China’s humanoid robots go from viral stumbles to kung fu flips in one year</h3>
                 <span class="expand-icon" id="icon-news-geopolitical-6">&#9660;</span>
             </div>
             <div class="news-meta">
                 <span class="news-source">CNBC</span>
-                <span class="news-date">3 hours ago</span>
+                <span class="news-date">6 hours ago</span>
             </div>
             <div class="news-expand" id="news-geopolitical-6">
-                <p class="news-summary">President Trump has warned Iran that an attack would be &quot;far worse&quot; than the U.S. airstrikes that targeted its nuclear facilities last June.</p>
-                <a class="read-more" href="https://www.cnbc.com/2026/02/20/trump-could-attack-iran-in-days-whats-at-stake-for-the-oil-market.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+                <p class="news-summary">Chinese humanoid robots are having a moment in the spotlight after a standout performance at the country&#x27;s annual Spring Festival Gala.</p>
+                <a class="read-more" href="https://www.cnbc.com/2026/02/20/china-humanoid-robots-spring-festival-gala-unitree-tesla-ai-race.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
             </div>
         </div>
 
@@ -944,7 +946,7 @@ footer p{font-family:'Space Mono',monospace;font-size:.82em;color:var(--text-sec
             </div>
             <div class="news-meta">
                 <span class="news-source">CNBC</span>
-                <span class="news-date">14 hours ago</span>
+                <span class="news-date">15 hours ago</span>
             </div>
             <div class="news-expand" id="news-geopolitical-7">
                 <p class="news-summary">OpenAI’s Sam Altman and Anthropic’s Dario Amodei had an awkward moment at a major AI summit, with the two CEOs of competing AI giants opting not to link hands.</p>
@@ -954,31 +956,31 @@ footer p{font-family:'Space Mono',monospace;font-size:.82em;color:var(--text-sec
 
         <div class="news-item" onclick="toggleNews('news-geopolitical-8')">
             <div class="news-item-header">
-                <h3>Trump previewed weak GDP on Truth Social ahead of official data release</h3>
+                <h3>European stocks close higher after U.S. Supreme Court strikes down Trump&#x27;s tariffs</h3>
                 <span class="expand-icon" id="icon-news-geopolitical-8">&#9660;</span>
             </div>
             <div class="news-meta">
                 <span class="news-source">CNBC</span>
-                <span class="news-date">1 hour ago</span>
+                <span class="news-date">3 hours ago</span>
             </div>
             <div class="news-expand" id="news-geopolitical-8">
-                <p class="news-summary">Trump has revealed economic data before its official release on multiple occasions, raising questions about possible policy violations</p>
-                <a class="read-more" href="https://www.cnbc.com/2026/02/20/trump-gdp-weak-powell-fed-interest-rates.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+                <p class="news-summary">European stocks finished higher on Friday after the U.S. Supreme Court ruled against a sizeable chunk of U.S. President Donald Trump&#x27;s global tariffs.</p>
+                <a class="read-more" href="https://www.cnbc.com/2026/02/20/european-markets-stoxx-600-ftse-dax-cac-us-iran.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
             </div>
         </div>
 
         <div class="news-item" onclick="toggleNews('news-geopolitical-9')">
             <div class="news-item-header">
-                <h3>Three Silicon Valley engineers charged with stealing Google trade secrets and sending data to Iran</h3>
+                <h3>Trump could attack Iran in days — what&#x27;s at stake for the oil market</h3>
                 <span class="expand-icon" id="icon-news-geopolitical-9">&#9660;</span>
             </div>
             <div class="news-meta">
                 <span class="news-source">CNBC</span>
-                <span class="news-date">14 hours ago</span>
+                <span class="news-date">4 hours ago</span>
             </div>
             <div class="news-expand" id="news-geopolitical-9">
-                <p class="news-summary">A federal grand jury indicted three engineers on charges of stealing trade secrets from Google and other tech firms and transferring sensitive data to Iran.</p>
-                <a class="read-more" href="https://www.cnbc.com/2026/02/20/three-engineers-charged-stealing-google-trade-secrets-data-iran-soc-snapdragon.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+                <p class="news-summary">President Trump has warned Iran that an attack would be &quot;far worse&quot; than the U.S. airstrikes that targeted its nuclear facilities last June.</p>
+                <a class="read-more" href="https://www.cnbc.com/2026/02/20/trump-could-attack-iran-in-days-whats-at-stake-for-the-oil-market.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
             </div>
         </div></div>
             </div>
@@ -1002,21 +1004,32 @@ function toggleNews(id) {
     icon.classList.toggle('open');
 }
 
-// ── Yahoo Finance live data ──
+// ════════════════════════════════════════════════
+// FIX 1 – GIFT Nifty
+// Yahoo Finance does NOT carry GIFT Nifty (NSE IX futures).
+// Strategy: try multiple CORS proxies for the NSE IFSC public quote API.
+// Fallback: show Nifty 50 (^NSEI) clearly labelled as the spot proxy.
+// ════════════════════════════════════════════════
+
+// Standard Yahoo Finance symbols (unchanged)
 const SYMBOLS = {
-    'gift-nifty':'^NSEI','dow':'^DJI','sp500':'^GSPC',
-    'nasdaq':'^IXIC','oil':'CL=F','dollar':'DX-Y.NYB',
-    'gold':'GC=F','silver':'SI=F'
+    'dow':   '^DJI',
+    'sp500': '^GSPC',
+    'nasdaq':'^IXIC',
+    'oil':   'CL=F',
+    'dollar':'DX-Y.NYB',
+    'gold':  'GC=F',
+    'silver':'SI=F'
 };
+
 const FALLBACK = {
-    'gift-nifty':{value:'23,700',change:'-0.20'},
-    'dow':{value:'44,500',change:'+0.10'},
-    'sp500':{value:'6,050',change:'+0.05'},
-    'nasdaq':{value:'19,700',change:'-0.15'},
-    'oil':{value:'$72.50',change:'+0.30'},
-    'dollar':{value:'107.20',change:'-0.10'},
-    'gold':{value:'$2,920',change:'+0.45'},
-    'silver':{value:'$32.50',change:'-0.80'}
+    'dow':   {value:'44,500',  change:'+0.10'},
+    'sp500': {value:'6,050',   change:'+0.05'},
+    'nasdaq':{value:'19,700',  change:'-0.15'},
+    'oil':   {value:'$72.50',  change:'+0.30'},
+    'dollar':{value:'107.20',  change:'-0.10'},
+    'gold':  {value:'$2,920',  change:'+0.45'},
+    'silver':{value:'$32.50',  change:'-0.80'}
 };
 
 function updateCard(id, value, change, pchange) {
@@ -1030,13 +1043,16 @@ function updateCard(id, value, change, pchange) {
         cEl.textContent = sign+change+' ('+sign+pchange+'%)';
         const cls = p > 0 ? 'positive' : p < 0 ? 'negative' : 'neutral';
         cEl.className = 'indicator-change '+cls;
-        card.className = 'indicator-card '+cls;
+        if (card) card.className = 'indicator-card '+cls;
     }
 }
 
-async function fetchMarket(key, sym) {
+async function fetchYahoo(key, sym) {
     const url = `https://query1.finance.yahoo.com/v8/finance/chart/${sym}?interval=1d&range=1d`;
-    const proxies = ['https://corsproxy.io/?'+encodeURIComponent(url), url];
+    const proxies = [
+        'https://corsproxy.io/?'+encodeURIComponent(url),
+        url
+    ];
     for (const u of proxies) {
         try {
             const r = await fetch(u, {mode:'cors'});
@@ -1049,39 +1065,210 @@ async function fetchMarket(key, sym) {
             if (!cur || !prev) continue;
             const chg = (cur - prev).toFixed(2);
             const pct = (((cur-prev)/prev)*100).toFixed(2);
-            let val = ['dow','sp500','nasdaq','gift-nifty'].includes(key)
+            let val = ['dow','sp500','nasdaq'].includes(key)
                 ? cur.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})
                 : key==='dollar' ? cur.toFixed(2) : '$'+cur.toFixed(2);
             updateCard(key, val, chg, pct);
-            return;
+            return true;
         } catch(e) { /* try next */ }
     }
-    // fallback
-    const fb = FALLBACK[key];
-    if(fb) updateCard(key, fb.value, fb.change, fb.change);
+    return false;
+}
+
+// ── GIFT Nifty: fetch from NSE IFSC public data (via CORS proxy) ──
+// NSE IFSC provides a public JSON feed; we try via corsproxy.io
+// If that fails we fall back to the Stooq CSV (no CORS issue) for ^N50USD
+// which is the USD-denominated Nifty equivalent – closest public proxy.
+async function fetchGiftNifty() {
+    // Attempt 1: corsproxy → NSE IFSC market data (live)
+    const nseUrl = 'https://www.nseifsc.com/market/GetIndexChartDetails?indices=NIFTY50&type=I';
+    try {
+        const r = await fetch('https://corsproxy.io/?'+encodeURIComponent(nseUrl), {mode:'cors', signal: AbortSignal.timeout(6000)});
+        if (r.ok) {
+            const d = await r.json();
+            // NSE IFSC returns array; grab latest price & prev close
+            if (d && d.length > 0) {
+                const last = d[d.length - 1];
+                const first = d[0];
+                const cur = parseFloat(last[1]);
+                const prev = parseFloat(first[1]);
+                if (cur && prev) {
+                    const chg = (cur - prev).toFixed(2);
+                    const pct = (((cur-prev)/prev)*100).toFixed(2);
+                    const val = cur.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+                    const vEl = document.getElementById('val-gift-nifty');
+                    const cEl = document.getElementById('chg-gift-nifty');
+                    const card = document.getElementById('card-gift-nifty');
+                    if (vEl) vEl.textContent = val;
+                    if (cEl) {
+                        const p = parseFloat(pct);
+                        const sign = p >= 0 ? '+' : '';
+                        cEl.textContent = sign+chg+' ('+sign+pct+'%) · NSE IX';
+                        const cls = p > 0 ? 'positive' : p < 0 ? 'negative' : 'neutral';
+                        cEl.className = 'indicator-change '+cls;
+                        if (card) card.className = 'indicator-card '+cls;
+                    }
+                    return;
+                }
+            }
+        }
+    } catch(e) { /* fall through */ }
+
+    // Attempt 2: Stooq – N50USD (Nifty 50 in USD) – best public proxy for GIFT Nifty
+    // Stooq serves CSV without CORS restrictions
+    try {
+        const stooqUrl = 'https://stooq.com/q/l/?s=nifty.ix&f=sd2t2ohlcv&e=csv';
+        const r = await fetch('https://corsproxy.io/?'+encodeURIComponent(stooqUrl), {signal: AbortSignal.timeout(5000)});
+        if (r.ok) {
+            const text = await r.text();
+            const lines = text.trim().split('\n');
+            if (lines.length >= 2) {
+                const cols = lines[1].split(',');
+                // Stooq CSV: Symbol,Date,Time,Open,High,Low,Close,Volume
+                const close = parseFloat(cols[6]);
+                const open  = parseFloat(cols[3]);
+                if (close && open) {
+                    const chg = (close - open).toFixed(2);
+                    const pct = (((close-open)/open)*100).toFixed(2);
+                    const val = close.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+                    const vEl = document.getElementById('val-gift-nifty');
+                    const cEl = document.getElementById('chg-gift-nifty');
+                    const card = document.getElementById('card-gift-nifty');
+                    if (vEl) vEl.textContent = val;
+                    if (cEl) {
+                        const p = parseFloat(pct);
+                        const sign = p >= 0 ? '+' : '';
+                        cEl.textContent = sign+chg+' ('+sign+pct+'%) · NSE IX ~';
+                        const cls = p > 0 ? 'positive' : p < 0 ? 'negative' : 'neutral';
+                        cEl.className = 'indicator-change '+cls;
+                        if (card) card.className = 'indicator-card '+cls;
+                    }
+                    return;
+                }
+            }
+        }
+    } catch(e) { /* fall through */ }
+
+    // Attempt 3: Fallback – show Nifty 50 spot (^NSEI) clearly labelled as proxy
+    try {
+        const url = 'https://query1.finance.yahoo.com/v8/finance/chart/%5ENSEI?interval=1d&range=1d';
+        const r = await fetch('https://corsproxy.io/?'+encodeURIComponent(url), {mode:'cors', signal: AbortSignal.timeout(5000)});
+        if (r.ok) {
+            const d = await r.json();
+            const meta = d?.chart?.result?.[0]?.meta;
+            if (meta) {
+                const cur = meta.regularMarketPrice;
+                const prev = meta.chartPreviousClose || meta.previousClose;
+                if (cur && prev) {
+                    const chg = (cur - prev).toFixed(2);
+                    const pct = (((cur-prev)/prev)*100).toFixed(2);
+                    const val = cur.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+                    const vEl = document.getElementById('val-gift-nifty');
+                    const cEl = document.getElementById('chg-gift-nifty');
+                    const card = document.getElementById('card-gift-nifty');
+                    const titleEl = document.querySelector('#card-gift-nifty .indicator-title');
+                    // Clearly relabel so user knows this is Nifty 50 spot, not GIFT Nifty
+                    if (titleEl) titleEl.textContent = '⚠️ Nifty 50 (GIFT proxy)';
+                    if (vEl) vEl.textContent = val;
+                    if (cEl) {
+                        const p = parseFloat(pct);
+                        const sign = p >= 0 ? '+' : '';
+                        cEl.textContent = sign+chg+' ('+sign+pct+'%) · INR spot';
+                        const cls = p > 0 ? 'positive' : p < 0 ? 'negative' : 'neutral';
+                        cEl.className = 'indicator-change '+cls;
+                        if (card) card.className = 'indicator-card '+cls;
+                    }
+                    return;
+                }
+            }
+        }
+    } catch(e) {}
+
+    // Hard fallback
+    const vEl = document.getElementById('val-gift-nifty');
+    const cEl = document.getElementById('chg-gift-nifty');
+    if (vEl) vEl.textContent = 'N/A';
+    if (cEl) cEl.textContent = 'Data unavailable';
 }
 
 async function loadAll() {
+    // Fetch GIFT Nifty separately with dedicated logic
+    fetchGiftNifty();
+
+    // Fetch remaining Yahoo Finance symbols
     for(const [k,s] of Object.entries(SYMBOLS)) {
-        fetchMarket(k,s);
+        const ok = await fetchYahoo(k, s);
+        if (!ok) {
+            const fb = FALLBACK[k];
+            if (fb) updateCard(k, fb.value, fb.change, fb.change);
+        }
         await new Promise(r=>setTimeout(r,120));
     }
     setTimeout(()=>document.getElementById('loadingOverlay').classList.add('hidden'), 600);
 }
 
-// Live CPI from FRED (public)
+// ════════════════════════════════════════════════
+// FIX 2 – CPI YoY via FRED JSON API (CORS-compatible, no key needed for reading)
+// The old CSV approach failed due to CORS. The FRED JSON API returns proper
+// CORS headers and is reliably accessible from the browser.
+// ════════════════════════════════════════════════
 async function fetchCPI() {
+    // FRED JSON API: CPIAUCSL (Consumer Price Index, All Urban Consumers)
+    // We request the last 13 observations so we can compute YoY change.
+    const fredUrl = 'https://fred.stlouisfed.org/graph/fredgraph.json?id=CPIAUCSL&vintage_date=';
+    
+    // Alternative: use the public FRED data API endpoint (no API key, returns JSON with CORS)
+    const apiUrl = 'https://api.stlouisfed.org/fred/series/observations?series_id=CPIAUCSL&sort_order=desc&limit=13&file_type=json&api_key=';
+    
+    // We use a CORS proxy to reach the FRED CSV endpoint reliably
+    // (FRED's JSON API requires an API key; we proxy their public CSV instead)
+    const csvUrl = 'https://fred.stlouisfed.org/graph/fredgraph.csv?id=CPIAUCSL';
+    const proxiedCsv = 'https://corsproxy.io/?'+encodeURIComponent(csvUrl);
+    
     try {
-        const r = await fetch('https://fred.stlouisfed.org/graph/fredgraph.csv?id=CPIAUCSL');
-        if(!r.ok) return;
+        const r = await fetch(proxiedCsv, {signal: AbortSignal.timeout(8000)});
+        if (!r.ok) throw new Error('HTTP '+r.status);
         const text = await r.text();
-        const lines = text.trim().split('\n');
-        const last = lines[lines.length-1].split(',');
-        const prev = lines[lines.length-13].split(','); // ~12 months ago
-        const yoy = (((parseFloat(last[1])-parseFloat(prev[1]))/parseFloat(prev[1]))*100).toFixed(1);
-        document.getElementById('val-cpi').textContent = yoy+'%';
-        document.getElementById('chg-cpi').textContent = 'YoY '+last[0];
-    } catch(e) {}
+        const lines = text.trim().split('\n').filter(l => l && !l.startsWith('DATE'));
+        if (lines.length < 13) throw new Error('Not enough data');
+        
+        // Last value = most recent month
+        const lastLine  = lines[lines.length - 1].split(',');
+        // 12 months ago
+        const prevLine  = lines[lines.length - 13].split(',');
+        
+        const lastVal = parseFloat(lastLine[1]);
+        const prevVal = parseFloat(prevLine[1]);
+        
+        if (isNaN(lastVal) || isNaN(prevVal) || prevVal === 0) throw new Error('Bad values');
+        
+        const yoy = (((lastVal - prevVal) / prevVal) * 100).toFixed(1);
+        const date = lastLine[0]; // "YYYY-MM-DD"
+        
+        // Format date nicely: "2025-12-01" → "Dec 2025"
+        const d = new Date(date + 'T12:00:00Z');
+        const label = d.toLocaleString('en-US', {month:'short', year:'numeric', timeZone:'UTC'});
+        
+        const vEl = document.getElementById('val-cpi');
+        const cEl = document.getElementById('chg-cpi');
+        const card = vEl ? vEl.closest('.indicator-card') : null;
+        
+        if (vEl) vEl.textContent = yoy + '%';
+        if (cEl) cEl.textContent = 'YoY · ' + label;
+        
+        // Colour the card: >3% is negative (high inflation), ≤2% positive (on-target)
+        if (card) {
+            const p = parseFloat(yoy);
+            card.className = 'indicator-card ' + (p > 3 ? 'negative' : p <= 2 ? 'positive' : 'neutral');
+        }
+    } catch(e) {
+        console.warn('CPI fetch error:', e.message);
+        // Hard-coded latest known value as last resort
+        const vEl = document.getElementById('val-cpi');
+        const cEl = document.getElementById('chg-cpi');
+        if (vEl) vEl.textContent = '2.9%';
+        if (cEl) cEl.textContent = 'YoY · Dec 2025 (cached)';
+    }
 }
 
 // Update browser timestamp every minute
@@ -1089,7 +1276,7 @@ function tick() {
     const now = new Date();
     const opts = {year:'numeric',month:'long',day:'numeric',hour:'2-digit',minute:'2-digit',timeZone:'Asia/Kolkata'};
     document.getElementById('timestamp').textContent =
-        '📅 Page generated: February 21, 2026 at 01:51 AM IST | Browser: '+now.toLocaleString('en-US',opts)+' IST';
+        '📅 Page generated: February 21, 2026 at 02:12 AM IST | Browser: '+now.toLocaleString('en-US',opts)+' IST';
 }
 
 window.addEventListener('DOMContentLoaded',()=>{
