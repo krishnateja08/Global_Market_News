@@ -445,10 +445,9 @@ function toggleNews(id) {{
 }}
 
 // ════════════════════════════════════════════════
-// FIX 1 – GIFT Nifty
-// Yahoo Finance does NOT carry GIFT Nifty (NSE IX futures).
-// Strategy: try multiple CORS proxies for the NSE IFSC public quote API.
-// Fallback: show Nifty 50 (^NSEI) clearly labelled as the spot proxy.
+// GIFT NIFTY – fetched from MoneyControl priceapi (GIFTIFTY symbol)
+// MoneyControl is the most reliable free public source for GIFT Nifty.
+// Falls back to NSE IX official API and Groww widget API.
 // ════════════════════════════════════════════════
 
 // Standard Yahoo Finance symbols (unchanged)
@@ -515,136 +514,93 @@ async function fetchYahoo(key, sym) {{
     return false;
 }}
 
-// ── GIFT Nifty: fetch from NSE IFSC public data (via CORS proxy) ──
-// NSE IFSC provides a public JSON feed; we try via corsproxy.io
-// If that fails we fall back to the Stooq CSV (no CORS issue) for ^N50USD
-// which is the USD-denominated Nifty equivalent – closest public proxy.
 async function fetchGiftNifty() {{
-    // Attempt 1: corsproxy → NSE IFSC market data (live)
-    const nseUrl = 'https://www.nseifsc.com/market/GetIndexChartDetails?indices=NIFTY50&type=I';
-    try {{
-        const r = await fetch('https://corsproxy.io/?'+encodeURIComponent(nseUrl), {{mode:'cors', signal: AbortSignal.timeout(6000)}});
-        if (r.ok) {{
-            const d = await r.json();
-            // NSE IFSC returns array; grab latest price & prev close
-            if (d && d.length > 0) {{
-                const last = d[d.length - 1];
-                const first = d[0];
-                const cur = parseFloat(last[1]);
-                const prev = parseFloat(first[1]);
-                if (cur && prev) {{
-                    const chg = (cur - prev).toFixed(2);
-                    const pct = (((cur-prev)/prev)*100).toFixed(2);
-                    const val = cur.toLocaleString('en-US',{{minimumFractionDigits:2,maximumFractionDigits:2}});
-                    const vEl = document.getElementById('val-gift-nifty');
-                    const cEl = document.getElementById('chg-gift-nifty');
-                    const card = document.getElementById('card-gift-nifty');
-                    if (vEl) vEl.textContent = val;
-                    if (cEl) {{
-                        const p = parseFloat(pct);
-                        const sign = p >= 0 ? '+' : '';
-                        cEl.textContent = sign+chg+' ('+sign+pct+'%) · NSE IX';
-                        const cls = p > 0 ? 'positive' : p < 0 ? 'negative' : 'neutral';
-                        cEl.className = 'indicator-change '+cls;
-                        if (card) card.className = 'indicator-card '+cls;
-                    }}
-                    return;
-                }}
-            }}
-        }}
-    }} catch(e) {{ /* fall through */ }}
-
-    // Attempt 2: Stooq – N50USD (Nifty 50 in USD) – best public proxy for GIFT Nifty
-    // Stooq serves CSV without CORS restrictions
-    try {{
-        const stooqUrl = 'https://stooq.com/q/l/?s=nifty.ix&f=sd2t2ohlcv&e=csv';
-        const r = await fetch('https://corsproxy.io/?'+encodeURIComponent(stooqUrl), {{signal: AbortSignal.timeout(5000)}});
-        if (r.ok) {{
-            const text = await r.text();
-            const lines = text.trim().split('\\n');
-            if (lines.length >= 2) {{
-                const cols = lines[1].split(',');
-                // Stooq CSV: Symbol,Date,Time,Open,High,Low,Close,Volume
-                const close = parseFloat(cols[6]);
-                const open  = parseFloat(cols[3]);
-                if (close && open) {{
-                    const chg = (close - open).toFixed(2);
-                    const pct = (((close-open)/open)*100).toFixed(2);
-                    const val = close.toLocaleString('en-US',{{minimumFractionDigits:2,maximumFractionDigits:2}});
-                    const vEl = document.getElementById('val-gift-nifty');
-                    const cEl = document.getElementById('chg-gift-nifty');
-                    const card = document.getElementById('card-gift-nifty');
-                    if (vEl) vEl.textContent = val;
-                    if (cEl) {{
-                        const p = parseFloat(pct);
-                        const sign = p >= 0 ? '+' : '';
-                        cEl.textContent = sign+chg+' ('+sign+pct+'%) · NSE IX ~';
-                        const cls = p > 0 ? 'positive' : p < 0 ? 'negative' : 'neutral';
-                        cEl.className = 'indicator-change '+cls;
-                        if (card) card.className = 'indicator-card '+cls;
-                    }}
-                    return;
-                }}
-            }}
-        }}
-    }} catch(e) {{ /* fall through */ }}
-
-    // Attempt 3: Fallback – show Nifty 50 spot (^NSEI) clearly labelled as proxy
-    try {{
-        const url = 'https://query1.finance.yahoo.com/v8/finance/chart/%5ENSEI?interval=1d&range=1d';
-        const r = await fetch('https://corsproxy.io/?'+encodeURIComponent(url), {{mode:'cors', signal: AbortSignal.timeout(5000)}});
-        if (r.ok) {{
-            const d = await r.json();
-            const meta = d?.chart?.result?.[0]?.meta;
-            if (meta) {{
-                const cur = meta.regularMarketPrice;
-                const prev = meta.chartPreviousClose || meta.previousClose;
-                if (cur && prev) {{
-                    const chg = (cur - prev).toFixed(2);
-                    const pct = (((cur-prev)/prev)*100).toFixed(2);
-                    const val = cur.toLocaleString('en-US',{{minimumFractionDigits:2,maximumFractionDigits:2}});
-                    const vEl = document.getElementById('val-gift-nifty');
-                    const cEl = document.getElementById('chg-gift-nifty');
-                    const card = document.getElementById('card-gift-nifty');
-                    const titleEl = document.querySelector('#card-gift-nifty .indicator-title');
-                    // Clearly relabel so user knows this is Nifty 50 spot, not GIFT Nifty
-                    if (titleEl) titleEl.textContent = '⚠️ Nifty 50 (GIFT proxy)';
-                    if (vEl) vEl.textContent = val;
-                    if (cEl) {{
-                        const p = parseFloat(pct);
-                        const sign = p >= 0 ? '+' : '';
-                        cEl.textContent = sign+chg+' ('+sign+pct+'%) · INR spot';
-                        const cls = p > 0 ? 'positive' : p < 0 ? 'negative' : 'neutral';
-                        cEl.className = 'indicator-change '+cls;
-                        if (card) card.className = 'indicator-card '+cls;
-                    }}
-                    return;
-                }}
-            }}
-        }}
-    }} catch(e) {{}}
-
-    // Hard fallback
     const vEl = document.getElementById('val-gift-nifty');
     const cEl = document.getElementById('chg-gift-nifty');
-    if (vEl) vEl.textContent = 'N/A';
-    if (cEl) cEl.textContent = 'Data unavailable';
-}}
+    const card = document.getElementById('card-gift-nifty');
+    const titleEl = document.querySelector('#card-gift-nifty .indicator-title');
 
-async function loadAll() {{
-    // Fetch GIFT Nifty separately with dedicated logic
-    fetchGiftNifty();
-
-    // Fetch remaining Yahoo Finance symbols
-    for(const [k,s] of Object.entries(SYMBOLS)) {{
-        const ok = await fetchYahoo(k, s);
-        if (!ok) {{
-            const fb = FALLBACK[k];
-            if (fb) updateCard(k, fb.value, fb.change, fb.change);
+    function setGiftNifty(price, change, pct, source) {{
+        const val = parseFloat(price).toLocaleString('en-US', {{minimumFractionDigits:2, maximumFractionDigits:2}});
+        const p = parseFloat(pct);
+        const sign = p >= 0 ? '+' : '';
+        if (vEl) vEl.textContent = val;
+        if (cEl) {{
+            cEl.textContent = sign + parseFloat(change).toFixed(2) + ' (' + sign + p.toFixed(2) + '%) · ' + source;
+            const cls = p > 0 ? 'positive' : p < 0 ? 'negative' : 'neutral';
+            cEl.className = 'indicator-change ' + cls;
+            if (card) card.className = 'indicator-card ' + cls;
         }}
-        await new Promise(r=>setTimeout(r,120));
+        if (titleEl) titleEl.textContent = '🎯 GIFT Nifty (NSE IX)';
     }}
-    setTimeout(()=>document.getElementById('loadingOverlay').classList.add('hidden'), 600);
+
+    // ── Attempt 1: MoneyControl priceapi – GIFTIFTY symbol ──
+    // This is the most reliable free public source for GIFT Nifty live data.
+    // The symbol used by MoneyControl for GIFT Nifty futures is "GIFTIFTY".
+    for (const proxy of [
+        'https://corsproxy.io/?',
+        'https://api.allorigins.win/raw?url='
+    ]) {{
+        try {{
+            const mcUrl = 'https://priceapi.moneycontrol.com/pricefeed/notissglobalmkt/ifuture/GIFTIFTY';
+            const r = await fetch(proxy + encodeURIComponent(mcUrl), {{signal: AbortSignal.timeout(7000)}});
+            if (!r.ok) continue;
+            const d = await r.json();
+            const data = d?.data;
+            if (data && data.pricecurrent) {{
+                const price = parseFloat(data.pricecurrent);
+                const prev  = parseFloat(data.previousclose || data.open || price);
+                const chg   = parseFloat(data.pricechange) || (price - prev);
+                const pct   = parseFloat(data.pricepercentchange) || ((chg / prev) * 100);
+                setGiftNifty(price, chg, pct, 'MoneyControl');
+                return;
+            }}
+        }} catch(e) {{ /* try next proxy */ }}
+    }}
+
+    // ── Attempt 2: NSE IX official market data endpoint ──
+    try {{
+        const nseUrl = 'https://www.nseix.com/nseixcms/api/v1/marketdata/indices';
+        const r = await fetch('https://corsproxy.io/?' + encodeURIComponent(nseUrl), {{signal: AbortSignal.timeout(6000)}});
+        if (r.ok) {{
+            const dn = await r.json();
+            const nd = Array.isArray(dn)
+                ? dn.find(x => x.indexName && x.indexName.toUpperCase().includes('NIFTY 50'))
+                : null;
+            if (nd) {{
+                const price = parseFloat(nd.lastPrice || nd.currentValue);
+                const prev  = parseFloat(nd.previousClose || nd.openValue || price);
+                const chg = price - prev;
+                const pct = (chg / prev) * 100;
+                setGiftNifty(price, chg, pct, 'NSE IX');
+                return;
+            }}
+        }}
+    }} catch(e) {{ /* try next */ }}
+
+    // ── Attempt 3: Groww index widget API ──
+    try {{
+        const growwUrl = 'https://groww.in/v1/api/stocks_data/v1/accord_points/exchange/NSE/segment/INDICES/indices/NIFTY%2050/by_indices_in_range?startTimeInMillis=0&endTimeInMillis=9999999999999&intervalInMinutes=1440';
+        const r = await fetch('https://corsproxy.io/?' + encodeURIComponent(growwUrl), {{signal: AbortSignal.timeout(6000)}});
+        if (r.ok) {{
+            const dg = await r.json();
+            if (dg?.pointsData?.length > 1) {{
+                const pts = dg.pointsData;
+                const price = pts[pts.length-1][1];
+                const prev  = pts[pts.length-2][1];
+                const chg = price - prev;
+                const pct = (chg / prev) * 100;
+                // Label clearly as approximate since Groww shows Nifty 50 index (highly correlated)
+                setGiftNifty(price, chg, pct, 'Groww (approx)');
+                return;
+            }}
+        }}
+    }} catch(e) {{ /* try next */ }}
+
+    // ── Hard fallback ──
+    if (vEl) vEl.textContent = 'N/A';
+    if (cEl) {{ cEl.textContent = 'Data unavailable'; cEl.className = 'indicator-change neutral'; }}
+    if (titleEl) titleEl.textContent = '⚠️ GIFT Nifty (N/A)';
 }}
 
 // ════════════════════════════════════════════════
