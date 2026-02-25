@@ -675,21 +675,21 @@ async function loadAll() {{
             }}
         }})
     );
-    updateRefreshTime();   // ← ADD THIS LINE HERE (after all data is fetched)
+    updateRefreshTime();
 
-    
- function updateRefreshTime() {{
-    const now = new Date();
-    const opts = {{hour:'2-digit', minute:'2-digit', second:'2-digit', timeZone:'Asia/Kolkata'}};
-    const istTime = now.toLocaleString('en-US', opts);
-    const el = document.getElementById('lastRefresh');
-    if (el) el.textContent = '🔄 Last Refresh: ' + istTime + ' IST  |  🕐 IST Now: ' + istTime;
-}}
     // Only show/hide the overlay on the very first load
     if (isFirstLoad) {{
         setTimeout(() => document.getElementById('loadingOverlay').classList.remove('visible'), 600);
         isFirstLoad = false;
     }}
+}}
+
+function updateRefreshTime() {{
+    const now = new Date();
+    const opts = {{hour:'2-digit', minute:'2-digit', second:'2-digit', timeZone:'Asia/Kolkata'}};
+    const istTime = now.toLocaleString('en-US', opts);
+    const el = document.getElementById('lastRefresh');
+    if (el) el.textContent = '🔄 Last Refresh: ' + istTime + ' IST  |  🕐 IST Now: ' + istTime;
 }}
 
 // ════════════════════════════════════════════════
