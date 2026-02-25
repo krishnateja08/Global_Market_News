@@ -35,9 +35,9 @@ RSS_SOURCES = {
         "https://economictimes.indiatimes.com/rssfeeds/1373380680.cms",
     ],
     "google_trending": [
-        "https://news.google.com/rss/search?q=stock+market+trending&hl=en-IN&gl=IN&ceid=IN:en",
-        "https://news.google.com/rss/search?q=NSE+BSE+stocks&hl=en-IN&gl=IN&ceid=IN:en",
-        "https://news.google.com/rss/search?q=top+gaining+stocks+india&hl=en-IN&gl=IN&ceid=IN:en",
+        "https://news.google.com/rss/search?q=NSE+BSE+stock+market+when:1d&hl=en-IN&gl=IN&ceid=IN:en",
+        "https://news.google.com/rss/search?q=Nifty+Sensex+today+when:1d&hl=en-IN&gl=IN&ceid=IN:en",
+        "https://news.google.com/rss/search?q=india+stocks+trending+today+when:1d&hl=en-IN&gl=IN&ceid=IN:en",
     ],
     "corporate": [
         "https://www.cnbc.com/id/10001147/device/rss/rss.html",
@@ -115,13 +115,32 @@ def fetch_rss(url: str) -> list[dict]:
 def fetch_category_news(category: str, urls: list[str]) -> list[dict]:
     seen_titles = set()
     results = []
+    cutoff = datetime.utcnow() - timedelta(hours=24)  # ← 24hr cutoff
+
     for url in urls:
         print(f"  Fetching {url[:60]}...")
         for item in fetch_rss(url):
             key = item["title"].lower()[:60]
-            if key not in seen_titles:
-                seen_titles.add(key)
-                results.append(item)
+            if key in seen_titles:
+                continue
+
+            # ── Filter old articles for google_trending only ──
+            if category == "google_trending" and item.get("pubDate"):
+                try:
+                    for fmt in ["%a, %d %b %Y %H:%M:%S %z", "%a, %d %b %Y %H:%M:%S %Z"]:
+                        try:
+                            pub = datetime.strptime(item["pubDate"].strip(), fmt)
+                            pub_utc = pub.replace(tzinfo=None) if pub.tzinfo else pub
+                            if pub_utc < cutoff:
+                                continue  # skip old articles
+                            break
+                        except ValueError:
+                            continue
+                except Exception:
+                    pass
+
+            seen_titles.add(key)
+            results.append(item)
             if len(results) >= MAX_NEWS_PER_CATEGORY:
                 break
         if len(results) >= MAX_NEWS_PER_CATEGORY:
