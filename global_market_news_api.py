@@ -491,7 +491,7 @@ const SYMBOLS = {{
     'dollar': 'DX-Y.NYB',
     'gold':   'GC=F',
     'silver': 'SI=F',
-    'usdinr': 'INR=X'
+    'usdinr': 'INR=X',
 }};
 
 
