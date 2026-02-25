@@ -490,7 +490,7 @@ const SYMBOLS = {{
     'oil':   'CL=F',
     'dollar':'DX-Y.NYB',
     'gold':  'GC=F',
-    'silver':'SI=F'
+    'silver':'SI=F',
     'usdinr': 'INR=X'
 }};
 
