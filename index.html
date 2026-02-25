@@ -11,7 +11,7 @@
     --text-primary: #e8edf5; --text-secondary: #a8b2d1;
     --accent-blue: #4a9eff; --accent-green: #00ff88; --accent-red: #ff4757;
     --accent-yellow: #ffd93d; --accent-purple: #a78bfa;
-    --accent-pink: #f093fb; --accent-cyan: #4facfe;
+    --accent-pink: #f093fb; --accent-cyan: #4facfe; --accent-orange: #ff9f43;
     --border-color: #2a3a5f; --card-shadow: rgba(0,0,0,.5);
     --usa-red:#B22234; --usa-blue:#3C3B6E;
     --india-saffron:#FF9933; --india-green:#138808; --india-navy:#000080;
@@ -86,6 +86,7 @@ h1{font-family:'Playfair Display',serif;font-size:2.2em;font-weight:900;backgrou
 .india .news-item{border-left-color:var(--accent-yellow)}
 .corporate .news-item{border-left-color:var(--accent-cyan)}
 .geopolitical .news-item{border-left-color:var(--accent-green)}
+.google_trending .news-item{border-left-color:var(--accent-orange)}
 
 /* ── LOADING OVERLAY ── */
 .loading-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(10,14,39,.95);display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:9999;opacity:0;pointer-events:none;transition:opacity .5s}
@@ -115,9 +116,9 @@ footer p{font-family:'Space Mono',monospace;font-size:.82em;color:var(--text-sec
     <h1>🌍 Global Market Dashboard</h1>
     <div class="subtitle">Real-Time Market Data &amp; Live News Headlines</div>
     <div class="live-badge">🔴 LIVE – Fetched Fresh This Run</div>
-    <div class="timestamp" id="timestamp">📅 Generated: February 26, 2026 at 04:03 AM IST</div>
+    <div class="timestamp" id="timestamp">📅 Generated: February 26, 2026 at 04:06 AM IST</div>
 <div class="timestamp" id="lastRefresh" style="margin-top:4px;">🔄 Last Refresh: -- | 🕐 IST Now: --</div>
-<div class="stat-bar">✅ 50 articles fetched across all categories</div>
+<div class="stat-bar">✅ 60 articles fetched across all categories</div>
 </header>
 
 <!-- ══ LIVE MARKET INDICATORS ══ -->
@@ -219,7 +220,7 @@ footer p{font-family:'Space Mono',monospace;font-size:.82em;color:var(--text-sec
             </div>
             <div class="news-meta">
                 <span class="news-source">Yahoo Finance</span>
-                <span class="news-date">10 min ago</span>
+                <span class="news-date">13 min ago</span>
             </div>
             <div class="news-expand" id="news-markets-0">
                 <p class="news-summary">Nvidia popped late on strong earnings and guidance, good news for the AI sector. The S&amp;P 500 is back above its 50-day line.</p>
@@ -234,7 +235,7 @@ footer p{font-family:'Space Mono',monospace;font-size:.82em;color:var(--text-sec
             </div>
             <div class="news-meta">
                 <span class="news-source">Yahoo Finance</span>
-                <span class="news-date">26 min ago</span>
+                <span class="news-date">29 min ago</span>
             </div>
             <div class="news-expand" id="news-markets-1">
                 <p class="news-summary">On Feb. 25, 2026, streaming&#x27;s standout dealmaker faces a high-stakes Warner Bros. bidding war and rising antitrust scrutiny.</p>
@@ -249,7 +250,7 @@ footer p{font-family:'Space Mono',monospace;font-size:.82em;color:var(--text-sec
             </div>
             <div class="news-meta">
                 <span class="news-source">Yahoo Finance</span>
-                <span class="news-date">30 min ago</span>
+                <span class="news-date">33 min ago</span>
             </div>
             <div class="news-expand" id="news-markets-2">
                 <p class="news-summary">All eyes are on Nvidia&#x27;s fourth quarter results, due after the closing bell on Wednesday, as AI concerns continue to grip markets.</p>
@@ -264,7 +265,7 @@ footer p{font-family:'Space Mono',monospace;font-size:.82em;color:var(--text-sec
             </div>
             <div class="news-meta">
                 <span class="news-source">Yahoo Finance</span>
-                <span class="news-date">36 min ago</span>
+                <span class="news-date">39 min ago</span>
             </div>
             <div class="news-expand" id="news-markets-3">
                 <p class="news-summary">Jensen Huang delivered a 73% revenue surge while quietly dumping $12.8 billion into Groq, proving that when you own the factories of the industrial revolution, you set the price for everyone else</p>
@@ -279,7 +280,7 @@ footer p{font-family:'Space Mono',monospace;font-size:.82em;color:var(--text-sec
             </div>
             <div class="news-meta">
                 <span class="news-source">Yahoo Finance</span>
-                <span class="news-date">40 min ago</span>
+                <span class="news-date">43 min ago</span>
             </div>
             <div class="news-expand" id="news-markets-4">
                 <p class="news-summary">Snowflake  stock was falling, reversing an initial pop, after the company’s earnings beat Wall Street estimates.  Snowflake  posted fourth-quarter adjusted earnings of 32 cents a share on revenue of $1.28 billion.  Analysts surveyed by FactSet had expected the vendor of data warehouse and cloud data management solutions to post adjusted earnings of 27 cents a share on revenue of $1.26 billion.</p>
@@ -294,7 +295,7 @@ footer p{font-family:'Space Mono',monospace;font-size:.82em;color:var(--text-sec
             </div>
             <div class="news-meta">
                 <span class="news-source">Yahoo Finance</span>
-                <span class="news-date">41 min ago</span>
+                <span class="news-date">44 min ago</span>
             </div>
             <div class="news-expand" id="news-markets-5">
                 <p class="news-summary">Stock Market Today: The Dow Jones index rises Wednesday ahead of Nvidia earnings. First Solar stock sinks on downbeat revenue guidance.</p>
@@ -309,7 +310,7 @@ footer p{font-family:'Space Mono',monospace;font-size:.82em;color:var(--text-sec
             </div>
             <div class="news-meta">
                 <span class="news-source">Yahoo Finance</span>
-                <span class="news-date">56 min ago</span>
+                <span class="news-date">59 min ago</span>
             </div>
             <div class="news-expand" id="news-markets-6">
                 <p class="news-summary">The Dow Jones Industrial Average added 0.6%, and the Nasdaq composite climbed 1.3%.  Stock indexes rose in Europe and Asia, while Treasury yields held steady.  The Nasdaq composite rose 288.40 points, or 1.3%, to 23,152.08.</p>
@@ -324,7 +325,7 @@ footer p{font-family:'Space Mono',monospace;font-size:.82em;color:var(--text-sec
             </div>
             <div class="news-meta">
                 <span class="news-source">Yahoo Finance</span>
-                <span class="news-date">57 min ago</span>
+                <span class="news-date">1 hour ago</span>
             </div>
             <div class="news-expand" id="news-markets-7">
                 <p class="news-summary">Joby  Aviation is getting close to flying passengers in its electric air taxis.  It’s still trying to certify its aircraft, which are low-cost to operate and quiet, opening up urban air taxi markets for commercial service.  Wall Street projects more than $1 billion in sales by 2029, with positive operating profit forecasted for 2030.</p>
@@ -606,7 +607,7 @@ footer p{font-family:'Space Mono',monospace;font-size:.82em;color:var(--text-sec
             </div>
             <div class="news-meta">
                 <span class="news-source">Economic Times</span>
-                <span class="news-date">7 hours ago</span>
+                <span class="news-date">8 hours ago</span>
             </div>
             <div class="news-expand" id="news-india-5">
                 <p class="news-summary">Wall ​Street&#x27;s main ​indexes opened higher ​on Wednesday after volatile sessions earlier this ‌week ⁠as investors assessed ⁠risks to ​the AI trade and ​growing tariff doubts heading into Nvidia&#x27;s earnings ​due later ⁠in ‌the day.</p>
@@ -671,6 +672,162 @@ footer p{font-family:'Space Mono',monospace;font-size:.82em;color:var(--text-sec
             <div class="news-expand" id="news-india-9">
                 <p class="news-summary">India’s merchant bankers have urged SEBI to allow borrowing against bonds to boost underwriting capacity and better manage risks when debt sales see weak demand. They also sought access to wider funding sources and an anonymous bond-trading platform, arguing these changes would deepen liquidity and strengthen India’s corporate bond market.</p>
                 <a class="read-more" href="https://economictimes.indiatimes.com/markets/bonds/indias-bond-bankers-push-regulator-for-more-funding-flexibility/articleshow/128784066.cms" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div></div>
+            </div>
+            <div class="news-category-card google_trending">
+                <div class="category-header" style="border-bottom-color:var(--accent-orange)">
+                    <h3 class="category-title" style="color:var(--accent-orange)">🔥 Google Trending Stocks</h3>
+                    <span class="article-count">10 articles</span>
+                </div>
+                <div>
+        <div class="news-item" onclick="toggleNews('news-google_trending-0')">
+            <div class="news-item-header">
+                <h3>The 5 Best Stocks To Buy And Watch Right Now - Investor&#x27;s Business Daily</h3>
+                <span class="expand-icon" id="icon-news-google_trending-0">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">news.google.com</span>
+                <span class="news-date">2 days ago</span>
+            </div>
+            <div class="news-expand" id="news-google_trending-0">
+                <p class="news-summary">The 5 Best Stocks To Buy And Watch Right Now  Investor&#x27;s Business Daily</p>
+                <a class="read-more" href="https://news.google.com/rss/articles/CBMiakFVX3lxTE1tLV93b2FIV0wteHhQcDVTXzJCeE5pbG1GUm51TWtER3p6a2c1TGhoV1NZVUtwVGJyeGdfa01pbEpIa2N4M1lOMEZhMWVva2RaUTJWVEUxdm1fZW5yQVpfM2huOXYyWUVMQUE?oc=5" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-google_trending-1')">
+            <div class="news-item-header">
+                <h3>Understanding Trending Markets: Key Concepts and Analysis - Investopedia</h3>
+                <span class="expand-icon" id="icon-news-google_trending-1">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">news.google.com</span>
+                <span class="news-date">Nov 02, 2025</span>
+            </div>
+            <div class="news-expand" id="news-google_trending-1">
+                <p class="news-summary">Understanding Trending Markets: Key Concepts and Analysis  Investopedia</p>
+                <a class="read-more" href="https://news.google.com/rss/articles/CBMiZ0FVX3lxTE9zVjBld3dQbVUyUXVHNDQzek12Rkhobk1qQ2taTlp0TWJkQjl3MXpLUkRqMkgwVDRwUEZGM0ZvMGR5XzVOd0owM05say1kbDY2eTA4WkdOM1NKTGk1d0JvYWtpcVZtNUU?oc=5" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-google_trending-2')">
+            <div class="news-item-header">
+                <h3>Dow closes nearly 500 points higher after Fed cuts rates: Live updates - CNBC</h3>
+                <span class="expand-icon" id="icon-news-google_trending-2">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">news.google.com</span>
+                <span class="news-date">Dec 10, 2025</span>
+            </div>
+            <div class="news-expand" id="news-google_trending-2">
+                <p class="news-summary">Dow closes nearly 500 points higher after Fed cuts rates: Live updates  CNBC</p>
+                <a class="read-more" href="https://news.google.com/rss/articles/CBMid0FVX3lxTE94VXBzT3c5Y3BMV24xcVowY3pLbHJhTk50SFlNcGlDM21xR0RnbzhxYkZXMl9TUHVtelNENFdPaU5wQUlsbkNkSmYwLWROcmFjSHVDcUROWklsNDhWeEJqVXplWjdUelRwUzVVTkZCaF9HckRadTQw0gF8QVVfeXFMT2R0TEJvR3RIRFVxYjBNZEZvdWl3U1VlRkp6TFJ0aVJUWmRJLXR3czU2M2s1ak1zQldzekhvV3VTUXZPcVpmejdUbEFwUGtWVl9mQWRvbG1JZU5Oa09KYzZmNzlJX0pBR01SaklGMHNRY3Y3VlRqX205X3RjUQ?oc=5" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-google_trending-3')">
+            <div class="news-item-header">
+                <h3>What is the Future of the Indian Stock Market? Expert Insights, Trends &amp; Predictions for 2025 &amp; Beyond - Samco</h3>
+                <span class="expand-icon" id="icon-news-google_trending-3">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">news.google.com</span>
+                <span class="news-date">Aug 31, 2025</span>
+            </div>
+            <div class="news-expand" id="news-google_trending-3">
+                <p class="news-summary">What is the Future of the Indian Stock Market? Expert Insights, Trends &amp; Predictions for 2025 &amp; Beyond  Samco</p>
+                <a class="read-more" href="https://news.google.com/rss/articles/CBMiiAFBVV95cUxOUkt2bTI2Zm1TTUI4NHJ6YVMtS1lweHlzaG9UQnViUVJvT2hEMWZGbkhFZnZGc2R6U3lqNnhwOUhlcDl2R3RZelJzLXJhM1NSSi1NcmNYbTZkUXRMX1FtZ05ZY2ExanFjdHVkdVZPUTFFdTM3RkdRS0VON0N0YTNoMEl2UkJDNnVF?oc=5" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-google_trending-4')">
+            <div class="news-item-header">
+                <h3>Muhurat Trading Over the Last Decade - Key Trends &amp; Historical Insights - Groww</h3>
+                <span class="expand-icon" id="icon-news-google_trending-4">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">news.google.com</span>
+                <span class="news-date">Oct 19, 2025</span>
+            </div>
+            <div class="news-expand" id="news-google_trending-4">
+                <p class="news-summary">Muhurat Trading Over the Last Decade - Key Trends &amp; Historical Insights  Groww</p>
+                <a class="read-more" href="https://news.google.com/rss/articles/CBMiakFVX3lxTE5oZkJ1RHgwV1k4R21CM0EwZjl5OUtiYXM5VnlLcGdFb3d0N0lXcnBicjJ5UDFWcGZDeFM1SmhMaXFRLVRleTd4V1ZjajN3Wkx4N2NfbElaTWRWcmM5RkJYY0xONFpLV0JKY3c?oc=5" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-google_trending-5')">
+            <div class="news-item-header">
+                <h3>Stock market trend prediction using deep neural network via chart analysis: a practical method or a myth? - Nature</h3>
+                <span class="expand-icon" id="icon-news-google_trending-5">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">news.google.com</span>
+                <span class="news-date">May 13, 2025</span>
+            </div>
+            <div class="news-expand" id="news-google_trending-5">
+                <p class="news-summary">Stock market trend prediction using deep neural network via chart analysis: a practical method or a myth?  Nature</p>
+                <a class="read-more" href="https://news.google.com/rss/articles/CBMiX0FVX3lxTFBFWXdLdXkzN21NSW5kMDZBU0MyRkxiTjFHZGNzbWtVelpRQXpUSi1VR2hzQ3c3T0FRMjBqYnRlLVRqM1Jla185WUxHTll6azdLZU5lZ1dZY25aamhKejFz?oc=5" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-google_trending-6')">
+            <div class="news-item-header">
+                <h3>Global Private Markets Report 2026 Private equity: Clearer view, tougher terrain - McKinsey &amp; Company</h3>
+                <span class="expand-icon" id="icon-news-google_trending-6">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">news.google.com</span>
+                <span class="news-date">Feb 10, 2026</span>
+            </div>
+            <div class="news-expand" id="news-google_trending-6">
+                <p class="news-summary">Global Private Markets Report 2026 Private equity: Clearer view, tougher terrain  McKinsey &amp; Company</p>
+                <a class="read-more" href="https://news.google.com/rss/articles/CBMimgFBVV95cUxNXzZQUzRxU2Y0aXI1dmFUWWZqYTFTTlphVXpYZWR1OXQ1NVJHQVkzQmRsYk1sTmZENmNLbUdKa2doQ3VDcG11RWNLd2FpTFdPV08zZjA2MGFGRUExcXpUN0N3R3JadHB1SlItdlZWVzBWc29PTWVnVlQ4TXJ6eWtfVWozT2RfZF9icV95MnpPUlRFVll3X2hiWm93?oc=5" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-google_trending-7')">
+            <div class="news-item-header">
+                <h3>Market Highlights: Sensex settles 436 pts lower, Nifty below 25,850; TechM, HCL Tech drop 2% each - The Economic Times</h3>
+                <span class="expand-icon" id="icon-news-google_trending-7">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">news.google.com</span>
+                <span class="news-date">Dec 10, 2025</span>
+            </div>
+            <div class="news-expand" id="news-google_trending-7">
+                <p class="news-summary">Market Highlights: Sensex settles 436 pts lower, Nifty below 25,850; TechM, HCL Tech drop 2% each  The Economic Times</p>
+                <a class="read-more" href="https://news.google.com/rss/articles/CBMi2AFBVV95cUxQYnlNTHpJUEY4ZFlsaWFOQ2tta1BGRzF2U3o1Y3EwTkZSaDRVTHMwM3FTdXVDeTFSbnM0cXVHY0tsSWlGaVhtTFg3ODNCSnZGUHJQQV9JUXBja1o4aXplNnJhWjl1S1hwcXJhV3UzUjh1Z2pZSldBd0hEby1KczVOWF91NUkycEg3SjItaDdHMDJiMmx4d2d5UnlES0hfUU96ZTJJTVBqbFd1OVNSRnlvaUlVVmQzd1NOcVU5SEthQm1FV0RxN19Ta0lKdVBPcG5qeDBZZi1MamjSAd4BQVVfeXFMTXJLU19HZHRaZUZfMzFBeTZ2cm5XSjRZemE3dXFlSnlHNFFCT1FtTHJnbXExZHJsdmxFWkxMQ0pWN1o3dXJYb1doOTd0R0R6YnNsNHB0TXZhaF9QOGt4blZIWWtHS3VkVi16bzFqRExnajFWZUpTeEJ2X0ZfYW5tMlY1aFAtb2hFV1l1bmVCa1NPWFh4NlI2MjVIbFZTN3JHUjFNYUdfRW9tLURhTVdxRUtuYTc4UkNDeUdsQ29qdU9ydFlIQjJNX2l2NXZKZklTTjV2d2dDY2d5SldET1BR?oc=5" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-google_trending-8')">
+            <div class="news-item-header">
+                <h3>Global M&amp;A industry trends: 2026 outlook - PwC</h3>
+                <span class="expand-icon" id="icon-news-google_trending-8">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">news.google.com</span>
+                <span class="news-date">Jan 27, 2026</span>
+            </div>
+            <div class="news-expand" id="news-google_trending-8">
+                <p class="news-summary">Global M&amp;A industry trends: 2026 outlook  PwC</p>
+                <a class="read-more" href="https://news.google.com/rss/articles/CBMiYkFVX3lxTE1Obkt3bkhPaHN5RXNNS0o3LWVSS2F5ZDh4dEhnLVZkNzlkWExlZGp0cTJNd2VBejZxT1VFREFfV1FiQ2xnX2hLU05tdTBMX0RROVViY0xCVFprQTRFZ1dyR1VR?oc=5" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-google_trending-9')">
+            <div class="news-item-header">
+                <h3>Best Growth Stocks to Buy in 2026 - The Motley Fool</h3>
+                <span class="expand-icon" id="icon-news-google_trending-9">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">news.google.com</span>
+                <span class="news-date">Feb 13, 2026</span>
+            </div>
+            <div class="news-expand" id="news-google_trending-9">
+                <p class="news-summary">Best Growth Stocks to Buy in 2026  The Motley Fool</p>
+                <a class="read-more" href="https://news.google.com/rss/articles/CBMif0FVX3lxTE9pT09kTllPOXQ1TFdJSmJqN25TV040MENyNDR6V2k3X0pNakZOaFJwWXRsRUNZcmVNSUU3c1NvZ0hJRk1ZVkFWRXREZElkM05SN2dNdGFYWmNIbWNZOXZMcXdzVzdsVEtLUW1iTF94OXU0WExleGR2TDBIUmlJY28?oc=5" target="_blank" rel="noopener">Read Full Article &#8599;</a>
             </div>
         </div></div>
             </div>
@@ -1295,7 +1452,7 @@ function tick() {
     const now = new Date();
     const opts = {year:'numeric',month:'long',day:'numeric',hour:'2-digit',minute:'2-digit',timeZone:'Asia/Kolkata'};
     document.getElementById('timestamp').textContent =
-        '📅 Page generated: February 26, 2026 at 04:03 AM IST | Browser: '+now.toLocaleString('en-US',opts)+' IST';
+        '📅 Page generated: February 26, 2026 at 04:06 AM IST | Browser: '+now.toLocaleString('en-US',opts)+' IST';
 }
 
 window.addEventListener('DOMContentLoaded',()=>{
