@@ -631,20 +631,28 @@ async function fetchGiftNifty() {{
     if (cEl) cEl.textContent = 'Data unavailable';
 }}
 
+let isFirstLoad = true;
+
 async function loadAll() {{
     // Fetch GIFT Nifty separately with dedicated logic
     fetchGiftNifty();
 
-    // Fetch remaining Yahoo Finance symbols
-    for(const [k,s] of Object.entries(SYMBOLS)) {{
-        const ok = await fetchYahoo(k, s);
-        if (!ok) {{
-            const fb = FALLBACK[k];
-            if (fb) updateCard(k, fb.value, fb.change, fb.change);
-        }}
-        await new Promise(r=>setTimeout(r,120));
+    // Fetch all Yahoo Finance symbols in parallel (no flicker/delay)
+    await Promise.all(
+        Object.entries(SYMBOLS).map(async ([k, s]) => {{
+            const ok = await fetchYahoo(k, s);
+            if (!ok) {{
+                const fb = FALLBACK[k];
+                if (fb) updateCard(k, fb.value, fb.change, fb.change);
+            }}
+        }})
+    );
+
+    // Only show/hide the overlay on the very first load
+    if (isFirstLoad) {{
+        setTimeout(() => document.getElementById('loadingOverlay').classList.add('hidden'), 600);
+        isFirstLoad = false;
     }}
-    setTimeout(()=>document.getElementById('loadingOverlay').classList.add('hidden'), 600);
 }}
 
 // ════════════════════════════════════════════════
