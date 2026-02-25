@@ -651,12 +651,7 @@ async function loadAll() {{
     );
     updateRefreshTime();   // ← ADD THIS LINE HERE (after all data is fetched)
 
-    // Only show/hide the overlay on the very first load
-    if (isFirstLoad) {{
-        setTimeout(() => document.getElementById('loadingOverlay').classList.remove('visible'), 600);
-        isFirstLoad = false;
-    }}
-}}
+    
  function updateRefreshTime() {{
     const now = new Date();
     const opts = {{hour:'2-digit', minute:'2-digit', second:'2-digit', timeZone:'Asia/Kolkata'}};
