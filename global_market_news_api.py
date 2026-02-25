@@ -441,6 +441,9 @@ footer p{{font-family:'Space Mono',monospace;font-size:.82em;color:var(--text-se
         <div class="indicator-card positive"><div class="indicator-title">📉 Mfg PMI</div><div class="indicator-value">57.7</div><div class="indicator-change positive">Jan 2026</div></div>
         <div class="indicator-card positive"><div class="indicator-title">💹 GDP Growth</div><div class="indicator-value">6.4%</div><div class="indicator-change positive">FY 2024-25 Est.</div></div>
         <div class="indicator-card neutral"><div class="indicator-title">🏛️ Fiscal Deficit</div><div class="indicator-value">4.9%</div><div class="indicator-change neutral">of GDP FY25 Target</div></div>
+<div class="indicator-card neutral" id="card-usdinr"><div class="indicator-title">💱 USD/INR</div><div class="indicator-value" id="val-usdinr">Loading…</div><div class="indicator-change neutral" id="chg-usdinr">…</div></div>
+    </div>
+</section>
     </div>
 </section>
 
