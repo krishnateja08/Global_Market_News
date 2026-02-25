@@ -88,7 +88,8 @@ h1{font-family:'Playfair Display',serif;font-size:2.2em;font-weight:900;backgrou
 .geopolitical .news-item{border-left-color:var(--accent-green)}
 
 /* ── LOADING OVERLAY ── */
-.loading-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(10,14,39,.95);display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:9999;transition:opacity .5s}
+.loading-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(10,14,39,.95);display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:9999;opacity:0;pointer-events:none;transition:opacity .5s}
+.loading-overlay.visible{opacity:1;pointer-events:all}
 .loading-overlay.hidden{opacity:0;pointer-events:none}
 .spinner{width:50px;height:50px;border:3px solid rgba(74,158,255,.3);border-top-color:#4a9eff;border-radius:50%;animation:spin 1s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -114,7 +115,7 @@ footer p{font-family:'Space Mono',monospace;font-size:.82em;color:var(--text-sec
     <h1>🌍 Global Market Dashboard</h1>
     <div class="subtitle">Real-Time Market Data &amp; Live News Headlines</div>
     <div class="live-badge">🔴 LIVE – Fetched Fresh This Run</div>
-    <div class="timestamp" id="timestamp">📅 Generated: February 26, 2026 at 03:38 AM IST</div>
+    <div class="timestamp" id="timestamp">📅 Generated: February 26, 2026 at 03:45 AM IST</div>
     <div class="stat-bar">✅ 50 articles fetched across all categories</div>
 </header>
 
@@ -212,151 +213,151 @@ footer p{font-family:'Space Mono',monospace;font-size:.82em;color:var(--text-sec
                 <div>
         <div class="news-item" onclick="toggleNews('news-markets-0')">
             <div class="news-item-header">
-                <h3>Tech stocks today: Nvidia stock rises as guidance signals AI boom alive and well</h3>
+                <h3>Stock Market Today, Feb. 25: Netflix Jumps After Warner Bros. Bid Fuels Investor Optimism</h3>
                 <span class="expand-icon" id="icon-news-markets-0">&#9660;</span>
             </div>
             <div class="news-meta">
                 <span class="news-source">Yahoo Finance</span>
-                <span class="news-date">5 min ago</span>
+                <span class="news-date">8 min ago</span>
             </div>
             <div class="news-expand" id="news-markets-0">
-                <p class="news-summary">All eyes are on Nvidia&#x27;s fourth quarter results, due after the closing bell on Wednesday, as AI concerns continue to grip markets.</p>
-                <a class="read-more" href="https://finance.yahoo.com/news/live/tech-stocks-today-nvidia-stock-rises-as-guidance-signals-ai-boom-alive-and-well-220259696.html?.tsrc=rss" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+                <p class="news-summary">On Feb. 25, 2026, streaming&#x27;s standout dealmaker faces a high-stakes Warner Bros. bidding war and rising antitrust scrutiny.</p>
+                <a class="read-more" href="https://www.fool.com/coverage/stock-market-today/2026/02/25/stock-market-today-feb-25-netflix-jumps-after-warner-bros-bid-fuels-investor-optimism/?.tsrc=rss" target="_blank" rel="noopener">Read Full Article &#8599;</a>
             </div>
         </div>
 
         <div class="news-item" onclick="toggleNews('news-markets-1')">
             <div class="news-item-header">
-                <h3>Snowflake Stock Loses Steam After Earnings Beat</h3>
+                <h3>Tech stocks today: Nvidia stock rises as guidance signals AI boom alive and well</h3>
                 <span class="expand-icon" id="icon-news-markets-1">&#9660;</span>
             </div>
             <div class="news-meta">
                 <span class="news-source">Yahoo Finance</span>
-                <span class="news-date">15 min ago</span>
+                <span class="news-date">12 min ago</span>
             </div>
             <div class="news-expand" id="news-markets-1">
-                <p class="news-summary">Snowflake  stock was falling, reversing an initial pop, after the company’s earnings beat Wall Street estimates.  Snowflake  posted fourth-quarter adjusted earnings of 32 cents a share on revenue of $1.28 billion.  Analysts surveyed by FactSet had expected the vendor of data warehouse and cloud data management solutions to post adjusted earnings of 27 cents a share on revenue of $1.26 billion.</p>
-                <a class="read-more" href="https://finance.yahoo.com/m/eee87f7a-1265-397d-a111-d32a8dcd9642/snowflake-stock-loses-steam.html?.tsrc=rss" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+                <p class="news-summary">All eyes are on Nvidia&#x27;s fourth quarter results, due after the closing bell on Wednesday, as AI concerns continue to grip markets.</p>
+                <a class="read-more" href="https://finance.yahoo.com/news/live/tech-stocks-today-nvidia-stock-rises-as-guidance-signals-ai-boom-alive-and-well-220259696.html?.tsrc=rss" target="_blank" rel="noopener">Read Full Article &#8599;</a>
             </div>
         </div>
 
         <div class="news-item" onclick="toggleNews('news-markets-2')">
             <div class="news-item-header">
-                <h3>Stock Market Today: Nasdaq Jumps Ahead Of Nvidia Earnings; Goldman Leads Bank Bounce (Live Coverage)</h3>
+                <h3>Nvidia’s Q4 Earnings Reveal a $68B Monopoly Tax on the Modern Internet</h3>
                 <span class="expand-icon" id="icon-news-markets-2">&#9660;</span>
             </div>
             <div class="news-meta">
                 <span class="news-source">Yahoo Finance</span>
-                <span class="news-date">16 min ago</span>
+                <span class="news-date">18 min ago</span>
             </div>
             <div class="news-expand" id="news-markets-2">
-                <p class="news-summary">Stock Market Today: The Dow Jones index rises Wednesday ahead of Nvidia earnings. First Solar stock sinks on downbeat revenue guidance.</p>
-                <a class="read-more" href="https://finance.yahoo.com/m/5b90976a-8f3d-3863-a51d-f6e0f9208f98/stock-market-today%3A-nasdaq.html?.tsrc=rss" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+                <p class="news-summary">Jensen Huang delivered a 73% revenue surge while quietly dumping $12.8 billion into Groq, proving that when you own the factories of the industrial revolution, you set the price for everyone else</p>
+                <a class="read-more" href="https://app.moby.co/home/news/news-nvidias-q4-earnings-reveal-a-68b-monopoly-tax-on-the-modern-internet?utm_source=yahoo_finance&amp;utm_medium=rss&amp;.tsrc=rss" target="_blank" rel="noopener">Read Full Article &#8599;</a>
             </div>
         </div>
 
         <div class="news-item" onclick="toggleNews('news-markets-3')">
             <div class="news-item-header">
-                <h3>How major US stock indexes fared Wednesday, 2/25/2026</h3>
+                <h3>Snowflake Stock Loses Steam After Earnings Beat</h3>
                 <span class="expand-icon" id="icon-news-markets-3">&#9660;</span>
             </div>
             <div class="news-meta">
                 <span class="news-source">Yahoo Finance</span>
-                <span class="news-date">31 min ago</span>
+                <span class="news-date">22 min ago</span>
             </div>
             <div class="news-expand" id="news-markets-3">
-                <p class="news-summary">The Dow Jones Industrial Average added 0.6%, and the Nasdaq composite climbed 1.3%.  Stock indexes rose in Europe and Asia, while Treasury yields held steady.  The Nasdaq composite rose 288.40 points, or 1.3%, to 23,152.08.</p>
-                <a class="read-more" href="https://finance.yahoo.com/news/major-us-stock-indexes-fared-213649961.html?.tsrc=rss" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+                <p class="news-summary">Snowflake  stock was falling, reversing an initial pop, after the company’s earnings beat Wall Street estimates.  Snowflake  posted fourth-quarter adjusted earnings of 32 cents a share on revenue of $1.28 billion.  Analysts surveyed by FactSet had expected the vendor of data warehouse and cloud data management solutions to post adjusted earnings of 27 cents a share on revenue of $1.26 billion.</p>
+                <a class="read-more" href="https://finance.yahoo.com/m/eee87f7a-1265-397d-a111-d32a8dcd9642/snowflake-stock-loses-steam.html?.tsrc=rss" target="_blank" rel="noopener">Read Full Article &#8599;</a>
             </div>
         </div>
 
         <div class="news-item" onclick="toggleNews('news-markets-4')">
             <div class="news-item-header">
-                <h3>Stock markets strike record highs as AI concerns ease</h3>
+                <h3>Stock Market Today: Nasdaq Jumps Ahead Of Nvidia Earnings; Goldman Leads Bank Bounce (Live Coverage)</h3>
                 <span class="expand-icon" id="icon-news-markets-4">&#9660;</span>
             </div>
             <div class="news-meta">
                 <span class="news-source">Yahoo Finance</span>
-                <span class="news-date">41 min ago</span>
+                <span class="news-date">23 min ago</span>
             </div>
             <div class="news-expand" id="news-markets-4">
-                <p class="news-summary">Stock markets in Asia and Europe reached record highs Wednesday while Wall Street indices continued to advance on easing worries about the AI sector and ahead of chip behemoth Nvidia releasing its earnings.Hopes are also elevated ahead of an earnings report from Nvidia later Wednesday.</p>
-                <a class="read-more" href="https://finance.yahoo.com/news/tech-firms-lead-asian-markets-020826819.html?.tsrc=rss" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+                <p class="news-summary">Stock Market Today: The Dow Jones index rises Wednesday ahead of Nvidia earnings. First Solar stock sinks on downbeat revenue guidance.</p>
+                <a class="read-more" href="https://finance.yahoo.com/m/5b90976a-8f3d-3863-a51d-f6e0f9208f98/stock-market-today%3A-nasdaq.html?.tsrc=rss" target="_blank" rel="noopener">Read Full Article &#8599;</a>
             </div>
         </div>
 
         <div class="news-item" onclick="toggleNews('news-markets-5')">
             <div class="news-item-header">
-                <h3>Stock Market Crash: The Best Dividend Stocks to Buy Right Now</h3>
+                <h3>How major US stock indexes fared Wednesday, 2/25/2026</h3>
                 <span class="expand-icon" id="icon-news-markets-5">&#9660;</span>
             </div>
             <div class="news-meta">
                 <span class="news-source">Yahoo Finance</span>
-                <span class="news-date">43 min ago</span>
+                <span class="news-date">38 min ago</span>
             </div>
             <div class="news-expand" id="news-markets-5">
-                <p class="news-summary">Dividend stocks generate passive income even when the market is falling.</p>
-                <a class="read-more" href="https://www.fool.com/investing/2026/02/25/stock-market-crash-the-best-dividend-stocks-to-buy/?.tsrc=rss" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+                <p class="news-summary">The Dow Jones Industrial Average added 0.6%, and the Nasdaq composite climbed 1.3%.  Stock indexes rose in Europe and Asia, while Treasury yields held steady.  The Nasdaq composite rose 288.40 points, or 1.3%, to 23,152.08.</p>
+                <a class="read-more" href="https://finance.yahoo.com/news/major-us-stock-indexes-fared-213649961.html?.tsrc=rss" target="_blank" rel="noopener">Read Full Article &#8599;</a>
             </div>
         </div>
 
         <div class="news-item" onclick="toggleNews('news-markets-6')">
             <div class="news-item-header">
-                <h3>US Equity Indexes Advance as Technology Jumps Ahead of Nvidia&#x27;s Results</h3>
+                <h3>Joby Reported a Larger Loss Than Expected. The Stock Is Up.</h3>
                 <span class="expand-icon" id="icon-news-markets-6">&#9660;</span>
             </div>
             <div class="news-meta">
                 <span class="news-source">Yahoo Finance</span>
-                <span class="news-date">45 min ago</span>
+                <span class="news-date">39 min ago</span>
             </div>
             <div class="news-expand" id="news-markets-6">
-                <p class="news-summary">US equity indexes rose on Wednesday as technology topped sector charts ahead of AI bellwether Nvidia</p>
-                <a class="read-more" href="https://finance.yahoo.com/news/us-equity-indexes-advance-technology-212256743.html?.tsrc=rss" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+                <p class="news-summary">Joby  Aviation is getting close to flying passengers in its electric air taxis.  It’s still trying to certify its aircraft, which are low-cost to operate and quiet, opening up urban air taxi markets for commercial service.  Wall Street projects more than $1 billion in sales by 2029, with positive operating profit forecasted for 2030.</p>
+                <a class="read-more" href="https://finance.yahoo.com/m/7f59fe63-dc86-3bd6-b1b7-272601250acc/joby-reported-a-larger-loss.html?.tsrc=rss" target="_blank" rel="noopener">Read Full Article &#8599;</a>
             </div>
         </div>
 
         <div class="news-item" onclick="toggleNews('news-markets-7')">
             <div class="news-item-header">
-                <h3>Nasdaq extends gains as AI takes center stage with Nvidia, Salesforce earnings due</h3>
+                <h3>How Japan Can Stop the Yen’s Slide</h3>
                 <span class="expand-icon" id="icon-news-markets-7">&#9660;</span>
             </div>
             <div class="news-meta">
                 <span class="news-source">Yahoo Finance</span>
-                <span class="news-date">46 min ago</span>
+                <span class="news-date">42 min ago</span>
             </div>
             <div class="news-expand" id="news-markets-7">
-                <p class="news-summary">Attention now turns to Nvidia, Salesforce and Snowflake, all due to report after today’s close</p>
-                <a class="read-more" href="https://www.proactiveinvestors.com/companies/news/1087910/nasdaq-tipped-to-lead-gains-ahead-of-nvidia-and-salesforce-earnings-1087910.html?.tsrc=rss" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+                <p class="news-summary">Politics have helped dragged the Japanese yen to its lowest in two weeks, but investors shouldn’t count on that continuing.  The yen fell 0.25% against the dollar on Wednesday, following a 0.79% decline on Tuesday.  A weaker yen makes Japanese goods, such as cars and tech, cheap in the U.S., while making U.S. exports more expensive in Japan.</p>
+                <a class="read-more" href="https://finance.yahoo.com/m/a7950d07-329e-3cad-a489-fac6598fc878/how-japan-can-stop-the-yen%E2%80%99s.html?.tsrc=rss" target="_blank" rel="noopener">Read Full Article &#8599;</a>
             </div>
         </div>
 
         <div class="news-item" onclick="toggleNews('news-markets-8')">
             <div class="news-item-header">
-                <h3>These Stocks Are Today’s Movers: Nvidia, Circle Internet, Coinbase, GoDaddy, Lowe’s, Axon, First Solar, and More</h3>
+                <h3>Stock markets strike record highs as AI concerns ease</h3>
                 <span class="expand-icon" id="icon-news-markets-8">&#9660;</span>
             </div>
             <div class="news-meta">
                 <span class="news-source">Yahoo Finance</span>
-                <span class="news-date">46 min ago</span>
+                <span class="news-date">48 min ago</span>
             </div>
             <div class="news-expand" id="news-markets-8">
-                <p class="news-summary">Investors are gearing up for Nvidia’s fourth-quarter earnings, which could put an end to a series of AI-linked selloffs.</p>
-                <a class="read-more" href="https://finance.yahoo.com/m/733d337f-6b03-3df2-a18a-5bf6d9fbf923/these-stocks-are-today%E2%80%99s.html?.tsrc=rss" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+                <p class="news-summary">Stock markets in Asia and Europe reached record highs Wednesday while Wall Street indices continued to advance on easing worries about the AI sector and ahead of chip behemoth Nvidia releasing its earnings.Hopes are also elevated ahead of an earnings report from Nvidia later Wednesday.</p>
+                <a class="read-more" href="https://finance.yahoo.com/news/tech-firms-lead-asian-markets-020826819.html?.tsrc=rss" target="_blank" rel="noopener">Read Full Article &#8599;</a>
             </div>
         </div>
 
         <div class="news-item" onclick="toggleNews('news-markets-9')">
             <div class="news-item-header">
-                <h3>Technology Leads US Equities Higher Ahead of Nvidia&#x27;s Results</h3>
+                <h3>Stock Market Crash: The Best Dividend Stocks to Buy Right Now</h3>
                 <span class="expand-icon" id="icon-news-markets-9">&#9660;</span>
             </div>
             <div class="news-meta">
                 <span class="news-source">Yahoo Finance</span>
-                <span class="news-date">49 min ago</span>
+                <span class="news-date">50 min ago</span>
             </div>
             <div class="news-expand" id="news-markets-9">
-                <p class="news-summary">US equities rose for the second straight day on Wednesday, with technology outperforming other secto</p>
-                <a class="read-more" href="https://finance.yahoo.com/news/technology-leads-us-equities-higher-211903658.html?.tsrc=rss" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+                <p class="news-summary">Dividend stocks generate passive income even when the market is falling.</p>
+                <a class="read-more" href="https://www.fool.com/investing/2026/02/25/stock-market-crash-the-best-dividend-stocks-to-buy/?.tsrc=rss" target="_blank" rel="noopener">Read Full Article &#8599;</a>
             </div>
         </div></div>
             </div>
@@ -544,7 +545,7 @@ footer p{font-family:'Space Mono',monospace;font-size:.82em;color:var(--text-sec
             </div>
             <div class="news-meta">
                 <span class="news-source">Economic Times</span>
-                <span class="news-date">5 hours ago</span>
+                <span class="news-date">6 hours ago</span>
             </div>
             <div class="news-expand" id="news-india-1">
                 <p class="news-summary">The Reserve Bank of India will conduct a Rs 25,000 crore switch auction of government securities on March 2. This operation aims to reduce redemption pressure in FY27 by replacing near-term maturing bonds with long-term instruments maturing after FY32. This move helps manage repayment obligations amidst significant gross market borrowing.</p>
@@ -836,12 +837,12 @@ footer p{font-family:'Space Mono',monospace;font-size:.82em;color:var(--text-sec
                 <div>
         <div class="news-item" onclick="toggleNews('news-geopolitical-0')">
             <div class="news-item-header">
-                <h3>Nvidia reports earnings beat as AI boom pushes data center revenue up 75%</h3>
+                <h3>Nvidia reports earnings and guidance beat as AI boom pushes data center revenue up 75%</h3>
                 <span class="expand-icon" id="icon-news-geopolitical-0">&#9660;</span>
             </div>
             <div class="news-meta">
                 <span class="news-source">CNBC</span>
-                <span class="news-date">3 min ago</span>
+                <span class="news-date">2 min ago</span>
             </div>
             <div class="news-expand" id="news-geopolitical-0">
                 <p class="news-summary">Nvidia has been the best performer on Wall Street this year among tech&#x27;s megacap companies.</p>
@@ -946,7 +947,7 @@ footer p{font-family:'Space Mono',monospace;font-size:.82em;color:var(--text-sec
             </div>
             <div class="news-meta">
                 <span class="news-source">CNBC</span>
-                <span class="news-date">22 hours ago</span>
+                <span class="news-date">23 hours ago</span>
             </div>
             <div class="news-expand" id="news-geopolitical-7">
                 <p class="news-summary">CNBC and Statista chart the top fintech players from around the world, ranging from startups to Big Tech names.</p>
@@ -1210,7 +1211,7 @@ async function loadAll() {
 
     // Only show/hide the overlay on the very first load
     if (isFirstLoad) {
-        setTimeout(() => document.getElementById('loadingOverlay').classList.add('hidden'), 600);
+        setTimeout(() => document.getElementById('loadingOverlay').classList.remove('visible'), 600);
         isFirstLoad = false;
     }
 }
@@ -1284,13 +1285,17 @@ function tick() {
     const now = new Date();
     const opts = {year:'numeric',month:'long',day:'numeric',hour:'2-digit',minute:'2-digit',timeZone:'Asia/Kolkata'};
     document.getElementById('timestamp').textContent =
-        '📅 Page generated: February 26, 2026 at 03:38 AM IST | Browser: '+now.toLocaleString('en-US',opts)+' IST';
+        '📅 Page generated: February 26, 2026 at 03:45 AM IST | Browser: '+now.toLocaleString('en-US',opts)+' IST';
 }
 
 window.addEventListener('DOMContentLoaded',()=>{
+    if (!sessionStorage.getItem('visited')) {
+        document.getElementById('loadingOverlay').classList.add('visible');
+        sessionStorage.setItem('visited', '1');
+    }
     loadAll();
     fetchCPI();
-    setInterval(loadAll, 5*60*1000);   // refresh market data every 5 min
+    setInterval(loadAll, 5*60*1000);
     setInterval(tick, 60*1000);
 });
 </script>
