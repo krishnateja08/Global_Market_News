@@ -522,13 +522,15 @@ async function fetchYahoo(key, sym) {{
     const url = `https://query1.finance.yahoo.com/v8/finance/chart/${{sym}}?interval=1d&range=1d`;
     const proxies = [
         'https://corsproxy.io/?'+encodeURIComponent(url),
+        'https://api.allorigins.win/get?url='+encodeURIComponent(url),
         url
     ];
     for (const u of proxies) {{
         try {{
             const r = await fetch(u, {{mode:'cors'}});
             if (!r.ok) continue;
-            const d = await r.json();
+            let d = await r.json();
+            if (d.contents) d = JSON.parse(d.contents);  // allorigins wrapper
             const meta = d?.chart?.result?.[0]?.meta;
             if (!meta) continue;
             const cur = meta.regularMarketPrice;
@@ -538,14 +540,15 @@ async function fetchYahoo(key, sym) {{
             const pct = (((cur-prev)/prev)*100).toFixed(2);
             let val = ['dow','sp500','nasdaq'].includes(key)
                 ? cur.toLocaleString('en-US',{{minimumFractionDigits:2,maximumFractionDigits:2}})
-                : key==='dollar' ? cur.toFixed(2) : '$'+cur.toFixed(2);
+                : key==='dollar' ? cur.toFixed(2)
+                : key==='usdinr' ? '₹'+cur.toFixed(2)
+                : '$'+cur.toFixed(2);
             updateCard(key, val, chg, pct);
             return true;
         }} catch(e) {{ /* try next */ }}
     }}
     return false;
 }}
-
 // ── GIFT Nifty: fetch from NSE IFSC public data (via CORS proxy) ──
 // NSE IFSC provides a public JSON feed; we try via corsproxy.io
 // If that fails we fall back to the Stooq CSV (no CORS issue) for ^N50USD
