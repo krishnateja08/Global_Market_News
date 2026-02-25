@@ -308,7 +308,8 @@ h1{{font-family:'Playfair Display',serif;font-size:2.2em;font-weight:900;backgro
 .geopolitical .news-item{{border-left-color:var(--accent-green)}}
 
 /* ── LOADING OVERLAY ── */
-.loading-overlay{{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(10,14,39,.95);display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:9999;transition:opacity .5s}}
+.loading-overlay{{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(10,14,39,.95);display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:9999;opacity:0;pointer-events:none;transition:opacity .5s}}
+.loading-overlay.visible{{opacity:1;pointer-events:all}}
 .loading-overlay.hidden{{opacity:0;pointer-events:none}}
 .spinner{{width:50px;height:50px;border:3px solid rgba(74,158,255,.3);border-top-color:#4a9eff;border-radius:50%;animation:spin 1s linear infinite}}
 @keyframes spin{{to{{transform:rotate(360deg)}}}}
@@ -650,7 +651,7 @@ async function loadAll() {{
 
     // Only show/hide the overlay on the very first load
     if (isFirstLoad) {{
-        setTimeout(() => document.getElementById('loadingOverlay').classList.add('hidden'), 600);
+        setTimeout(() => document.getElementById('loadingOverlay').classList.remove('visible'), 600);
         isFirstLoad = false;
     }}
 }}
@@ -728,9 +729,13 @@ function tick() {{
 }}
 
 window.addEventListener('DOMContentLoaded',()=>{{
+    if (!sessionStorage.getItem('visited')) {{
+        document.getElementById('loadingOverlay').classList.add('visible');
+        sessionStorage.setItem('visited', '1');
+    }}
     loadAll();
     fetchCPI();
-    setInterval(loadAll, 5*60*1000);   // refresh market data every 5 min
+    setInterval(loadAll, 5*60*1000);
     setInterval(tick, 60*1000);
 }});
 </script>
