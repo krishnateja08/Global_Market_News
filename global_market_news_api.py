@@ -491,17 +491,10 @@ const SYMBOLS = {{
     'dollar':'DX-Y.NYB',
     'gold':  'GC=F',
     'silver':'SI=F'
+    'usdinr': 'INR=X'
 }};
 
-const FALLBACK = {{
-    'dow':   {{value:'44,500',  change:'+0.10'}},
-    'sp500': {{value:'6,050',   change:'+0.05'}},
-    'nasdaq':{{value:'19,700',  change:'-0.15'}},
-    'oil':   {{value:'$72.50',  change:'+0.30'}},
-    'dollar':{{value:'107.20',  change:'-0.10'}},
-    'gold':  {{value:'$2,920',  change:'+0.45'}},
-    'silver':{{value:'$32.50',  change:'-0.80'}}
-}};
+
 
 function updateCard(id, value, change, pchange) {{
     const vEl = document.getElementById('val-'+id);
@@ -674,11 +667,13 @@ async function loadAll() {{
     // Fetch all Yahoo Finance symbols in parallel (no flicker/delay)
     await Promise.all(
         Object.entries(SYMBOLS).map(async ([k, s]) => {{
-            const ok = await fetchYahoo(k, s);
+const ok = await fetchYahoo(k, s);
             if (!ok) {{
-                const fb = FALLBACK[k];
-                if (fb) updateCard(k, fb.value, fb.change, fb.change);
-            }}
+    const vEl = document.getElementById('val-'+k);
+    const cEl = document.getElementById('chg-'+k);
+    if (vEl) vEl.textContent = 'N/A';
+    if (cEl) cEl.textContent = 'Data unavailable';
+}}
         }})
     );
     updateRefreshTime();
