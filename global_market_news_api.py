@@ -34,6 +34,11 @@ RSS_SOURCES = {
         "https://www.moneycontrol.com/rss/marketreports.xml",
         "https://economictimes.indiatimes.com/rssfeeds/1373380680.cms",
     ],
+    "google_trending": [
+        "https://news.google.com/rss/search?q=stock+market+trending&hl=en-IN&gl=IN&ceid=IN:en",
+        "https://news.google.com/rss/search?q=NSE+BSE+stocks&hl=en-IN&gl=IN&ceid=IN:en",
+        "https://news.google.com/rss/search?q=top+gaining+stocks+india&hl=en-IN&gl=IN&ceid=IN:en",
+    ],
     "corporate": [
         "https://www.cnbc.com/id/10001147/device/rss/rss.html",
         "https://feeds.marketwatch.com/marketwatch/marketpulse/",
@@ -200,8 +205,9 @@ def generate_complete_html(all_news: dict) -> str:
     categories = {
         "markets":     ("📊 Market Updates",     "markets",     "var(--accent-red)"),
         "economic":    ("💰 Economic & Policy",  "economic",    "var(--accent-pink)"),
-        "india":       ("🇮🇳 Indian Markets",    "india",       "var(--accent-yellow)"),
-        "corporate":   ("🏢 Corporate News",     "corporate",   "var(--accent-cyan)"),
+        "india":           ("🇮🇳 Indian Markets",        "india",           "var(--accent-yellow)"),
+        "google_trending": ("🔥 Google Trending Stocks", "google_trending", "var(--accent-orange)"),
+        "corporate":       ("🏢 Corporate News",         "corporate",       "var(--accent-cyan)"),
         "geopolitical":("🌍 Geopolitical",       "geopolitical","var(--accent-green)"),
     }
 
@@ -231,7 +237,7 @@ def generate_complete_html(all_news: dict) -> str:
     --text-primary: #e8edf5; --text-secondary: #a8b2d1;
     --accent-blue: #4a9eff; --accent-green: #00ff88; --accent-red: #ff4757;
     --accent-yellow: #ffd93d; --accent-purple: #a78bfa;
-    --accent-pink: #f093fb; --accent-cyan: #4facfe;
+    --accent-pink: #f093fb; --accent-cyan: #4facfe; --accent-orange: #ff9f43;
     --border-color: #2a3a5f; --card-shadow: rgba(0,0,0,.5);
     --usa-red:#B22234; --usa-blue:#3C3B6E;
     --india-saffron:#FF9933; --india-green:#138808; --india-navy:#000080;
@@ -306,6 +312,7 @@ h1{{font-family:'Playfair Display',serif;font-size:2.2em;font-weight:900;backgro
 .india .news-item{{border-left-color:var(--accent-yellow)}}
 .corporate .news-item{{border-left-color:var(--accent-cyan)}}
 .geopolitical .news-item{{border-left-color:var(--accent-green)}}
+.google_trending .news-item{{border-left-color:var(--accent-orange)}}
 
 /* ── LOADING OVERLAY ── */
 .loading-overlay{{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(10,14,39,.95);display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:9999;opacity:0;pointer-events:none;transition:opacity .5s}}
