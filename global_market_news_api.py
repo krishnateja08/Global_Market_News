@@ -484,13 +484,13 @@ function toggleNews(id) {{
 
 // Standard Yahoo Finance symbols (unchanged)
 const SYMBOLS = {{
-    'dow':   '^DJI',
-    'sp500': '^GSPC',
-    'nasdaq':'^IXIC',
-    'oil':   'CL=F',
-    'dollar':'DX-Y.NYB',
-    'gold':  'GC=F',
-    'silver':'SI=F'
+    'dow':    '^DJI',
+    'sp500':  '^GSPC',
+    'nasdaq': '^IXIC',
+    'oil':    'CL=F',
+    'dollar': 'DX-Y.NYB',
+    'gold':   'GC=F',
+    'silver': 'SI=F',
     'usdinr': 'INR=X'
 }};
 
@@ -551,9 +551,10 @@ async function fetchGiftNifty() {{
     // Attempt 1: corsproxy → NSE IFSC market data (live)
     const nseUrl = 'https://www.nseifsc.com/market/GetIndexChartDetails?indices=NIFTY50&type=I';
     try {{
-        const r = await fetch('https://corsproxy.io/?'+encodeURIComponent(nseUrl), {{mode:'cors', signal: AbortSignal.timeout(6000)}});
+        const r = await fetch(''https://api.allorigins.win/get?url='+encodeURIComponent(nseUrl), {{mode:'cors', signal: AbortSignal.timeout(6000)}});
         if (r.ok) {{
-            const d = await r.json();
+            let d = await r.json();
+            if (d.contents) d = JSON.parse(d.contents);
             // NSE IFSC returns array; grab latest price & prev close
             if (d && d.length > 0) {{
                 const last = d[d.length - 1];
@@ -588,7 +589,8 @@ async function fetchGiftNifty() {{
         const stooqUrl = 'https://stooq.com/q/l/?s=nifty.ix&f=sd2t2ohlcv&e=csv';
         const r = await fetch('https://corsproxy.io/?'+encodeURIComponent(stooqUrl), {{signal: AbortSignal.timeout(5000)}});
         if (r.ok) {{
-            const text = await r.text();
+            let text = await r.text();
+            try {{ const j = JSON.parse(text); if (j.contents) text = j.contents; }} catch(e) {{}}
             const lines = text.trim().split('\\n');
             if (lines.length >= 2) {{
                 const cols = lines[1].split(',');
