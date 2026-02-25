@@ -514,31 +514,32 @@ function updateCard(id, value, change, pchange) {{
 async function fetchYahoo(key, sym) {{
     const url = `https://query1.finance.yahoo.com/v8/finance/chart/${{sym}}?interval=1d&range=1d`;
     const proxies = [
-        'https://corsproxy.io/?'+encodeURIComponent(url),
-        'https://api.allorigins.win/get?url='+encodeURIComponent(url),
-        url
+        `https://corsproxy.io/?${{encodeURIComponent(url)}}`,
+        `https://api.allorigins.win/get?url=${{encodeURIComponent(url)}}`,
+        `https://cors-anywhere.herokuapp.com/${{url}}`,
+        `https://thingproxy.freeboard.io/fetch/${{url}}`
     ];
     for (const u of proxies) {{
         try {{
-            const r = await fetch(u, {{mode:'cors'}});
+            const r = await fetch(u, {{signal: AbortSignal.timeout(7000)}});
             if (!r.ok) continue;
             let d = await r.json();
-            if (d.contents) d = JSON.parse(d.contents);  // allorigins wrapper
+            if (d.contents) d = JSON.parse(d.contents);
             const meta = d?.chart?.result?.[0]?.meta;
             if (!meta) continue;
             const cur = meta.regularMarketPrice;
             const prev = meta.chartPreviousClose || meta.previousClose;
             if (!cur || !prev) continue;
             const chg = (cur - prev).toFixed(2);
-            const pct = (((cur-prev)/prev)*100).toFixed(2);
+            const pct = (((cur - prev) / prev) * 100).toFixed(2);
             let val = ['dow','sp500','nasdaq'].includes(key)
-                ? cur.toLocaleString('en-US',{{minimumFractionDigits:2,maximumFractionDigits:2}})
-                : key==='dollar' ? cur.toFixed(2)
-                : key==='usdinr' ? '₹'+cur.toFixed(2)
-                : '$'+cur.toFixed(2);
+                ? cur.toLocaleString('en-US', {{minimumFractionDigits:2, maximumFractionDigits:2}})
+                : key === 'dollar' ? cur.toFixed(2)
+                : key === 'usdinr' ? '₹' + cur.toFixed(2)
+                : '$' + cur.toFixed(2);
             updateCard(key, val, chg, pct);
             return true;
-        }} catch(e) {{ /* try next */ }}
+        }} catch(e) {{ /* try next proxy */ }}
     }}
     return false;
 }}
