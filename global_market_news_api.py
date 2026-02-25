@@ -336,7 +336,8 @@ footer p{{font-family:'Space Mono',monospace;font-size:.82em;color:var(--text-se
     <div class="subtitle">Real-Time Market Data &amp; Live News Headlines</div>
     <div class="live-badge">🔴 LIVE – Fetched Fresh This Run</div>
     <div class="timestamp" id="timestamp">📅 Generated: {current_time}</div>
-    <div class="stat-bar">✅ {total_articles} articles fetched across all categories</div>
+<div class="timestamp" id="lastRefresh" style="margin-top:4px;">🔄 Last Refresh: -- | 🕐 IST Now: --</div>
+<div class="stat-bar">✅ {total_articles} articles fetched across all categories</div>
 </header>
 
 <!-- ══ LIVE MARKET INDICATORS ══ -->
@@ -648,7 +649,21 @@ async function loadAll() {{
             }}
         }})
     );
+    updateRefreshTime();   // ← ADD THIS LINE HERE (after all data is fetched)
 
+    // Only show/hide the overlay on the very first load
+    if (isFirstLoad) {{
+        setTimeout(() => document.getElementById('loadingOverlay').classList.remove('visible'), 600);
+        isFirstLoad = false;
+    }}
+}}
+ function updateRefreshTime() {{
+    const now = new Date();
+    const opts = {{hour:'2-digit', minute:'2-digit', second:'2-digit', timeZone:'Asia/Kolkata'}};
+    const istTime = now.toLocaleString('en-US', opts);
+    const el = document.getElementById('lastRefresh');
+    if (el) el.textContent = '🔄 Last Refresh: ' + istTime + ' IST  |  🕐 IST Now: ' + istTime;
+}}
     // Only show/hide the overlay on the very first load
     if (isFirstLoad) {{
         setTimeout(() => document.getElementById('loadingOverlay').classList.remove('visible'), 600);
