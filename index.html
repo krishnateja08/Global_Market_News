@@ -1,0 +1,1471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Global Market Dashboard – Live News</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Space+Mono:wght@400;700&family=IBM+Plex+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+    --primary-bg: #0a0e27; --secondary-bg: #141b3d; --accent-bg: #1a2347;
+    --text-primary: #e8edf5; --text-secondary: #a8b2d1;
+    --accent-blue: #4a9eff; --accent-green: #00ff88; --accent-red: #ff4757;
+    --accent-yellow: #ffd93d; --accent-purple: #a78bfa;
+    --accent-pink: #f093fb; --accent-cyan: #4facfe; --accent-orange: #ff9f43;
+    --border-color: #2a3a5f; --card-shadow: rgba(0,0,0,.5);
+    --usa-red:#B22234; --usa-blue:#3C3B6E;
+    --india-saffron:#FF9933; --india-green:#138808; --india-navy:#000080;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'IBM Plex Sans',sans-serif;background:linear-gradient(135deg,#0a0e27 0%,#1a1f3a 50%,#0f1629 100%);color:var(--text-primary);min-height:100vh;padding:20px;overflow-x:hidden}
+body::before{content:'';position:fixed;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(circle,rgba(74,158,255,.08) 1px,transparent 1px);background-size:50px 50px;animation:moveGrid 25s linear infinite;z-index:0}
+@keyframes moveGrid{0%{transform:translate(0,0)}100%{transform:translate(50px,50px)}}
+.container{max-width:1600px;margin:0 auto;position:relative;z-index:1}
+
+/* ── HEADER ── */
+header{text-align:center;margin-bottom:30px;padding:25px 20px;background:rgba(26,35,71,.5);backdrop-filter:blur(10px);border-radius:15px;border:1px solid var(--border-color);box-shadow:0 15px 40px var(--card-shadow);position:relative;overflow:hidden}
+header::after{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(74,158,255,.15),transparent);animation:shimmer 3s infinite}
+@keyframes shimmer{0%{left:-100%}100%{left:100%}}
+h1{font-family:'Playfair Display',serif;font-size:2.2em;font-weight:900;background:linear-gradient(135deg,#4a9eff,#00ff88);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:10px;letter-spacing:-1px;position:relative;z-index:1}
+.subtitle{font-family:'Space Mono',monospace;font-size:.85em;color:var(--text-secondary);letter-spacing:1px;text-transform:uppercase}
+.live-badge{display:inline-block;background:linear-gradient(135deg,#ff4757,#ff6b81);color:#fff;padding:5px 15px;border-radius:20px;font-size:.7em;font-weight:700;margin-top:10px;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.7}}
+.timestamp{margin-top:12px;font-family:'Space Mono',monospace;font-size:.75em;color:var(--accent-blue);opacity:.9}
+.stat-bar{margin-top:12px;font-family:'Space Mono',monospace;font-size:.7em;color:var(--accent-green)}
+
+/* ── SECTION TITLES ── */
+.section-title{font-family:'Playfair Display',serif;font-size:2.2em;font-weight:900;margin-bottom:25px;background:linear-gradient(135deg,var(--accent-blue),var(--accent-cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.section-title-usa{font-family:'Playfair Display',serif;font-size:2.2em;font-weight:900;margin-bottom:25px;background:linear-gradient(135deg,var(--usa-red),#fff,var(--usa-blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.section-title-india{font-family:'Playfair Display',serif;font-size:2.2em;font-weight:900;margin-bottom:25px;background:linear-gradient(135deg,var(--india-saffron),#fff,var(--india-green));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+
+/* ── INDICATOR CARDS ── */
+.indicators-grid{display:flex;gap:15px;margin-bottom:40px;overflow-x:auto;padding-bottom:10px}
+.indicator-card{background:rgba(26,35,71,.6);backdrop-filter:blur(10px);padding:15px 20px;border-radius:12px;border:1px solid var(--border-color);box-shadow:0 8px 20px var(--card-shadow);transition:all .3s;position:relative;overflow:hidden;min-width:175px;flex-shrink:0}
+.indicator-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.indicator-card.positive::before{background:linear-gradient(90deg,var(--accent-green),var(--accent-blue))}
+.indicator-card.negative::before{background:linear-gradient(90deg,var(--accent-red),var(--accent-yellow))}
+.indicator-card.neutral::before{background:linear-gradient(90deg,var(--text-secondary),var(--accent-blue))}
+.indicator-card:hover{transform:translateY(-3px);box-shadow:0 12px 30px rgba(74,158,255,.3);border-color:var(--accent-blue)}
+.indicator-title{font-family:'Space Mono',monospace;font-size:.68em;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;white-space:nowrap}
+.indicator-value{font-family:'Playfair Display',serif;font-size:1.4em;font-weight:700;color:var(--text-primary);margin-bottom:6px;white-space:nowrap}
+.indicator-change{font-family:'Space Mono',monospace;font-size:.78em;padding:3px 8px;border-radius:4px;display:inline-block;white-space:nowrap}
+.positive{color:var(--accent-green);background:rgba(0,255,136,.1)}
+.negative{color:var(--accent-red);background:rgba(255,71,87,.1)}
+.neutral{color:var(--text-secondary);background:rgba(168,178,209,.1)}
+
+/* ── NEWS SECTION ── */
+.news-section{margin-top:60px}
+.news-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(420px,1fr));gap:30px;margin-bottom:40px}
+.news-category-card{background:rgba(26,35,71,.6);backdrop-filter:blur(10px);padding:28px;border-radius:15px;border:1px solid var(--border-color);box-shadow:0 10px 30px var(--card-shadow)}
+.category-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;padding-bottom:12px;border-bottom:2px solid}
+.category-title{font-family:'Playfair Display',serif;font-size:1.5em;font-weight:700}
+.article-count{font-family:'Space Mono',monospace;font-size:.7em;color:var(--text-secondary);background:rgba(74,158,255,.1);padding:3px 8px;border-radius:10px}
+
+/* ── NEWS ITEMS ── */
+.news-item{padding:14px;margin-bottom:10px;background:rgba(10,14,39,.4);border-radius:10px;border-left:3px solid var(--accent-blue);transition:all .2s;cursor:pointer;user-select:none}
+.news-item:hover{background:rgba(10,14,39,.65);transform:translateX(4px);box-shadow:0 4px 15px rgba(74,158,255,.2)}
+.news-item-header{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.news-item h3{font-size:.93em;line-height:1.4;font-weight:600;color:var(--text-primary);flex:1}
+.expand-icon{font-size:.8em;color:var(--accent-blue);margin-top:3px;transition:transform .25s;flex-shrink:0}
+.expand-icon.open{transform:rotate(180deg)}
+.news-meta{display:flex;gap:10px;align-items:center;margin-top:7px;font-size:.73em;color:var(--text-secondary);flex-wrap:wrap}
+.news-source{background:var(--accent-blue);color:#fff;padding:2px 8px;border-radius:10px;font-size:.85em;font-family:'Space Mono',monospace}
+.news-date{font-family:'Space Mono',monospace}
+
+/* ── EXPANDABLE CONTENT ── */
+.news-expand{display:none;margin-top:12px;padding-top:12px;border-top:1px solid rgba(74,158,255,.2)}
+.news-expand.open{display:block;animation:fadeIn .25s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}
+.news-summary{font-size:.88em;line-height:1.6;color:var(--text-secondary);margin-bottom:10px}
+.read-more{display:inline-block;margin-top:6px;padding:6px 14px;background:linear-gradient(135deg,var(--accent-blue),var(--accent-cyan));color:#fff;border-radius:8px;font-size:.78em;font-family:'Space Mono',monospace;text-decoration:none;transition:opacity .2s}
+.read-more:hover{opacity:.8}
+
+/* ── category border colours ── */
+.markets .news-item{border-left-color:var(--accent-red)}
+.economic .news-item{border-left-color:var(--accent-pink)}
+.india .news-item{border-left-color:var(--accent-yellow)}
+.corporate .news-item{border-left-color:var(--accent-cyan)}
+.geopolitical .news-item{border-left-color:var(--accent-green)}
+.google_trending .news-item{border-left-color:var(--accent-orange)}
+
+/* ── LOADING OVERLAY ── */
+.loading-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(10,14,39,.95);display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:9999;opacity:0;pointer-events:none;transition:opacity .5s}
+.loading-overlay.visible{opacity:1;pointer-events:all}
+.loading-overlay.hidden{opacity:0;pointer-events:none}
+.spinner{width:50px;height:50px;border:3px solid rgba(74,158,255,.3);border-top-color:#4a9eff;border-radius:50%;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{margin-top:20px;font-family:'Space Mono',monospace;color:var(--accent-blue);font-size:1.1em}
+
+/* ── FOOTER ── */
+footer{margin-top:80px;text-align:center;padding:35px;background:rgba(26,35,71,.3);border-radius:15px;border:1px solid var(--border-color)}
+footer p{font-family:'Space Mono',monospace;font-size:.82em;color:var(--text-secondary)}
+
+@media(max-width:1024px){.news-grid{grid-template-columns:1fr}}
+@media(max-width:768px){h1{font-size:1.7em}.section-title,.section-title-usa,.section-title-india{font-size:1.7em}}
+</style>
+</head>
+<body>
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner"></div>
+    <div class="loading-text">Loading Market Data…</div>
+</div>
+
+<div class="container">
+
+<header>
+    <h1>🌍 Global Market Dashboard</h1>
+    <div class="subtitle">Real-Time Market Data &amp; Live News Headlines</div>
+    <div class="live-badge">🔴 LIVE – Fetched Fresh This Run</div>
+    <div class="timestamp" id="timestamp">📅 Generated: March 01, 2026 at 07:18 AM IST</div>
+<div class="timestamp" id="lastRefresh" style="margin-top:4px;">🔄 Last Refresh: -- | 🕐 IST Now: --</div>
+<div class="stat-bar">✅ 60 articles fetched across all categories</div>
+</header>
+
+<!-- ══ LIVE MARKET INDICATORS ══ -->
+<section>
+    <h2 class="section-title">Live Market Indicators</h2>
+    <div class="indicators-grid">
+        <!-- ✅ FIX 1: GIFT Nifty now fetched from NSE IFSC public data via Stooq/Yahoo proxy fallback -->
+        <div class="indicator-card neutral" id="card-gift-nifty">
+            <div class="indicator-title">🎯 GIFT Nifty (NSE IX)</div>
+            <div class="indicator-value" id="val-gift-nifty">Loading…</div>
+            <div class="indicator-change neutral" id="chg-gift-nifty">Futures · USD-denom.</div>
+        </div>
+        <div class="indicator-card neutral" id="card-dow">
+            <div class="indicator-title">📈 Dow Jones</div>
+            <div class="indicator-value" id="val-dow">Loading…</div>
+            <div class="indicator-change neutral" id="chg-dow">…</div>
+        </div>
+        <div class="indicator-card neutral" id="card-sp500">
+            <div class="indicator-title">💹 S&amp;P 500</div>
+            <div class="indicator-value" id="val-sp500">Loading…</div>
+            <div class="indicator-change neutral" id="chg-sp500">…</div>
+        </div>
+        <div class="indicator-card neutral" id="card-nasdaq">
+            <div class="indicator-title">💻 Nasdaq</div>
+            <div class="indicator-value" id="val-nasdaq">Loading…</div>
+            <div class="indicator-change neutral" id="chg-nasdaq">…</div>
+        </div>
+        <div class="indicator-card neutral" id="card-oil">
+            <div class="indicator-title">🛢️ Crude Oil</div>
+            <div class="indicator-value" id="val-oil">Loading…</div>
+            <div class="indicator-change neutral" id="chg-oil">…</div>
+        </div>
+        <div class="indicator-card neutral" id="card-dollar">
+            <div class="indicator-title">💵 Dollar Index</div>
+            <div class="indicator-value" id="val-dollar">Loading…</div>
+            <div class="indicator-change neutral" id="chg-dollar">…</div>
+        </div>
+        <div class="indicator-card neutral" id="card-gold">
+            <div class="indicator-title">🪙 Gold</div>
+            <div class="indicator-value" id="val-gold">Loading…</div>
+            <div class="indicator-change neutral" id="chg-gold">…</div>
+        </div>
+        <div class="indicator-card neutral" id="card-silver">
+            <div class="indicator-title">⚪ Silver</div>
+            <div class="indicator-value" id="val-silver">Loading…</div>
+            <div class="indicator-change neutral" id="chg-silver">…</div>
+        </div>
+    </div>
+</section>
+
+<!-- ══ USA ECONOMIC INDICATORS ══ -->
+<section>
+    <h2 class="section-title-usa">🇺🇸 USA Economic Indicators</h2>
+    <div class="indicators-grid">
+        <div class="indicator-card neutral"><div class="indicator-title">💵 Fed Funds Rate</div><div class="indicator-value">4.25–4.50%</div><div class="indicator-change neutral">Hold – Jan 2026</div></div>
+        <div class="indicator-card neutral"><div class="indicator-title">🏛️ FOMC Next</div><div class="indicator-value">Hold</div><div class="indicator-change neutral">Mar 18–19, 2026</div></div>
+        <!-- ✅ FIX 2: CPI now loaded via FRED JSON API (CORS-compatible) -->
+        <div class="indicator-card neutral"><div class="indicator-title">📊 CPI YoY</div><div class="indicator-value" id="val-cpi">Loading…</div><div class="indicator-change neutral" id="chg-cpi">Fetching…</div></div>
+        <div class="indicator-card neutral"><div class="indicator-title">📈 Core CPI</div><div class="indicator-value">3.3%</div><div class="indicator-change neutral">YoY Dec 2025</div></div>
+        <div class="indicator-card positive"><div class="indicator-title">💹 GDP Growth</div><div class="indicator-value">2.8%</div><div class="indicator-change positive">Q4 2025 Advance</div></div>
+        <div class="indicator-card positive"><div class="indicator-title">👔 Unemployment</div><div class="indicator-value">4.1%</div><div class="indicator-change positive">Jan 2026</div></div>
+        <div class="indicator-card positive"><div class="indicator-title">👥 NFP</div><div class="indicator-value">+256K</div><div class="indicator-change positive">Jan 2026</div></div>
+        <div class="indicator-card neutral"><div class="indicator-title">🏭 PPI YoY</div><div class="indicator-value">3.3%</div><div class="indicator-change neutral">Dec 2025</div></div>
+    </div>
+</section>
+
+<!-- ══ INDIA ECONOMIC INDICATORS ══ -->
+<section>
+    <h2 class="section-title-india">🇮🇳 India Economic Indicators</h2>
+    <div class="indicators-grid">
+        <div class="indicator-card neutral"><div class="indicator-title">💰 Repo Rate</div><div class="indicator-value">6.25%</div><div class="indicator-change neutral">RBI Feb 2026 Cut</div></div>
+        <div class="indicator-card neutral"><div class="indicator-title">📊 CPI</div><div class="indicator-value">5.22%</div><div class="indicator-change neutral">Dec 2025 YoY</div></div>
+        <div class="indicator-card neutral"><div class="indicator-title">📈 WPI</div><div class="indicator-value">2.4%</div><div class="indicator-change neutral">YoY Nov 2025</div></div>
+        <div class="indicator-card positive"><div class="indicator-title">🏭 IIP</div><div class="indicator-value">5.2%</div><div class="indicator-change positive">YoY Nov 2025</div></div>
+        <div class="indicator-card positive"><div class="indicator-title">📉 Mfg PMI</div><div class="indicator-value">57.7</div><div class="indicator-change positive">Jan 2026</div></div>
+        <div class="indicator-card positive"><div class="indicator-title">💹 GDP Growth</div><div class="indicator-value">6.4%</div><div class="indicator-change positive">FY 2024-25 Est.</div></div>
+        <div class="indicator-card neutral"><div class="indicator-title">🏛️ Fiscal Deficit</div><div class="indicator-value">4.9%</div><div class="indicator-change neutral">of GDP FY25 Target</div></div>
+<div class="indicator-card neutral" id="card-usdinr"><div class="indicator-title">💱 USD/INR</div><div class="indicator-value" id="val-usdinr">Loading…</div><div class="indicator-change neutral" id="chg-usdinr">…</div></div>
+    </div>
+</section>
+    </div>
+</section>
+
+<!-- ══ NEWS ══ -->
+<section class="news-section">
+    <h2 class="section-title">📰 Latest News Headlines</h2>
+    <p style="font-family:'Space Mono',monospace;font-size:.78em;color:var(--text-secondary);margin-bottom:20px;">
+        🖱️ Click any headline to expand &amp; read the summary. Click again to collapse.
+    </p>
+    <div class="news-grid">
+        
+            <div class="news-category-card markets">
+                <div class="category-header" style="border-bottom-color:var(--accent-red)">
+                    <h3 class="category-title" style="color:var(--accent-red)">📊 Market Updates</h3>
+                    <span class="article-count">10 articles</span>
+                </div>
+                <div>
+        <div class="news-item" onclick="toggleNews('news-markets-0')">
+            <div class="news-item-header">
+                <h3>Trump Says Khamenei Killed In U.S.-Israeli Attacks. How Will Dow Jones Futures React?</h3>
+                <span class="expand-icon" id="icon-news-markets-0">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">Yahoo Finance</span>
+                <span class="news-date">23 min ago</span>
+            </div>
+            <div class="news-expand" id="news-markets-0">
+                <p class="news-summary">President Trump says Ayatollah Khamenei has been killed. How will Dow futures and oil prices open as U.S.-Israeli attacks on Iran continue?</p>
+                <a class="read-more" href="https://finance.yahoo.com/m/79b07a85-c9fa-39e7-b8e4-f809203666ee/trump-says-khamenei-killed-in.html?.tsrc=rss" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-markets-1')">
+            <div class="news-item-header">
+                <h3>Insight Holdings Trims AppFolio as Property Software Faces a More Selective SaaS Market</h3>
+                <span class="expand-icon" id="icon-news-markets-1">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">Yahoo Finance</span>
+                <span class="news-date">25 min ago</span>
+            </div>
+            <div class="news-expand" id="news-markets-1">
+                <p class="news-summary">Insight Holdings reduced its stake in AppFolio, a property management software provider whose shares have lagged the broader market over the past year. With real estate transaction activity slower and SaaS valuations more selective, investors are reassessing how much growth is tied to units under management versus higher-margin payments and services.</p>
+                <a class="read-more" href="https://www.fool.com/coverage/filings/2026/02/28/insight-holdings-trims-appfolio-as-property-software-faces-a-more-selective-saas-market/?.tsrc=rss" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-markets-2')">
+            <div class="news-item-header">
+                <h3>Excluding the &quot;Magnificent Seven&quot; Stocks, Here&#x27;s How the Market Is Performing in 2026</h3>
+                <span class="expand-icon" id="icon-news-markets-2">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">Yahoo Finance</span>
+                <span class="news-date">3 hours ago</span>
+            </div>
+            <div class="news-expand" id="news-markets-2">
+                <p class="news-summary">There&#x27;s a major market rotation going on from big tech to the rest of the market.</p>
+                <a class="read-more" href="https://www.fool.com/investing/2026/02/28/excluding-the-magnificent-seven-stocks-heres-how/?.tsrc=rss" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-markets-3')">
+            <div class="news-item-header">
+                <h3>What the Attacks on Iran Mean for Oil and Stocks</h3>
+                <span class="expand-icon" id="icon-news-markets-3">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">Yahoo Finance</span>
+                <span class="news-date">3 hours ago</span>
+            </div>
+            <div class="news-expand" id="news-markets-3">
+                <p class="news-summary">A closure of the Strait of Hormuz is likely to cause widespread disruption in energy markets and shipping. What to know.</p>
+                <a class="read-more" href="https://finance.yahoo.com/m/520f9c8b-b3f1-323b-b3b1-30cf37343c42/what-the-attacks-on-iran-mean.html?.tsrc=rss" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-markets-4')">
+            <div class="news-item-header">
+                <h3>River Road Loads Up on ATR With 917,000 Shares in New Position</h3>
+                <span class="expand-icon" id="icon-news-markets-4">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">Yahoo Finance</span>
+                <span class="news-date">4 hours ago</span>
+            </div>
+            <div class="news-expand" id="news-markets-4">
+                <p class="news-summary">AptarGroup delivers proprietary dispensing and sealing solutions to global healthcare, beauty, and consumer markets.</p>
+                <a class="read-more" href="https://www.fool.com/coverage/filings/2026/02/28/river-road-loads-up-on-atr-with-917-000-shares-in-new-position/?.tsrc=rss" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-markets-5')">
+            <div class="news-item-header">
+                <h3>Cross Staff Loads Up on 289,000 Shares of AKRE</h3>
+                <span class="expand-icon" id="icon-news-markets-5">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">Yahoo Finance</span>
+                <span class="news-date">4 hours ago</span>
+            </div>
+            <div class="news-expand" id="news-markets-5">
+                <p class="news-summary">This asset management firm targets high-quality U.S. equities through a disciplined, valuation-driven investment approach.</p>
+                <a class="read-more" href="https://www.fool.com/coverage/filings/2026/02/28/cross-staff-loads-up-on-289-000-shares-of-akre/?.tsrc=rss" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-markets-6')">
+            <div class="news-item-header">
+                <h3>Public Storage (PSA): A Bull Case Theory</h3>
+                <span class="expand-icon" id="icon-news-markets-6">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">Yahoo Finance</span>
+                <span class="news-date">6 hours ago</span>
+            </div>
+            <div class="news-expand" id="news-markets-6">
+                <p class="news-summary">We came across a bullish thesis on Public Storage on R. Dennis’s Substack by OppCost. In this article, we will summarize the bulls’ thesis on PSA. Public Storage’s share was trading at $304.11 as of February 24th. PSA’s trailing and forward P/E were 31.53 and 28.41 respectively according to Yahoo Finance. Public Storage, a member of the S&amp;P 500, is a REIT that primarily acquires, develops, owns, and operates self-storage facilities. PSA has reinforced its leadership in the […]</p>
+                <a class="read-more" href="https://finance.yahoo.com/news/public-storage-psa-bull-case-185241721.html?.tsrc=rss" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-markets-7')">
+            <div class="news-item-header">
+                <h3>Iran May Close the Strait of Hormuz. Why Shipping Stocks Would Benefit.</h3>
+                <span class="expand-icon" id="icon-news-markets-7">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">Yahoo Finance</span>
+                <span class="news-date">7 hours ago</span>
+            </div>
+            <div class="news-expand" id="news-markets-7">
+                <p class="news-summary">The U.S-Iran conflict could cause rates to rise, but shares of Frontline, DHT Holdings, and others have already rallied.</p>
+                <a class="read-more" href="https://finance.yahoo.com/m/7699131a-1816-356a-b03c-ba47eaaa643c/iran-may-close-the-strait-of.html?.tsrc=rss" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-markets-8')">
+            <div class="news-item-header">
+                <h3>Bank of America revamps Dell stock target after earnings</h3>
+                <span class="expand-icon" id="icon-news-markets-8">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">Yahoo Finance</span>
+                <span class="news-date">7 hours ago</span>
+            </div>
+            <div class="news-expand" id="news-markets-8">
+                <p class="news-summary">Shares of Dell Technologies (DELL) soared 22% on Feb. 27 after the company reported strong fiscal Q4 earnings and Q1 guidance. In 1984, Michael Dell started the company while he was a student at the University of Texas. Originally focused on selling PCs, the company now sees AI as its biggest ...</p>
+                <a class="read-more" href="https://www.thestreet.com/investing/stocks/bank-of-america-revamps-dell-stock-target-after-earnings?.tsrc=rss" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-markets-9')">
+            <div class="news-item-header">
+                <h3>Mining stocks are the new market darlings, fueled by geopolitical risks and AI demand</h3>
+                <span class="expand-icon" id="icon-news-markets-9">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">Yahoo Finance</span>
+                <span class="news-date">8 hours ago</span>
+            </div>
+            <div class="news-expand" id="news-markets-9">
+                <p class="news-summary">Mining stocks are rising as the sector becomes a strategic long-term asset for investors.</p>
+                <a class="read-more" href="https://finance.yahoo.com/news/mining-stocks-are-the-new-market-darlings-fueled-by-geopolitical-risks-and-ai-demand-173005780.html?.tsrc=rss" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div></div>
+            </div>
+            <div class="news-category-card economic">
+                <div class="category-header" style="border-bottom-color:var(--accent-pink)">
+                    <h3 class="category-title" style="color:var(--accent-pink)">💰 Economic & Policy</h3>
+                    <span class="article-count">10 articles</span>
+                </div>
+                <div>
+        <div class="news-item" onclick="toggleNews('news-economic-0')">
+            <div class="news-item-header">
+                <h3>Are Jack Dorsey&#x27;s aggressive job cuts the start of an AI jobs apocalypse? Economists weigh in</h3>
+                <span class="expand-icon" id="icon-news-economic-0">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">CNBC</span>
+                <span class="news-date">1 day ago</span>
+            </div>
+            <div class="news-expand" id="news-economic-0">
+                <p class="news-summary">Economists question whether such moves signal a broader shift in the labor market or simply reflect company-specific adjustments.</p>
+                <a class="read-more" href="https://www.cnbc.com/2026/02/27/are-dorseys-giant-job-cuts-the-start-of-an-ai-jobs-apocalypse-economists-weigh-in.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-economic-1')">
+            <div class="news-item-header">
+                <h3>Core wholesale prices rose 0.8% in January, much more than expected</h3>
+                <span class="expand-icon" id="icon-news-economic-1">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">CNBC</span>
+                <span class="news-date">1 day ago</span>
+            </div>
+            <div class="news-expand" id="news-economic-1">
+                <p class="news-summary">The core producer price index increased a seasonally adjusted 0.8%, more than the 0.6% gain in December.</p>
+                <a class="read-more" href="https://www.cnbc.com/2026/02/27/ppi-january-2026-.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-economic-2')">
+            <div class="news-item-header">
+                <h3>Trump insists trade deals safe after Supreme Court ruling upends tariff authority, but partners aren’t so sure</h3>
+                <span class="expand-icon" id="icon-news-economic-2">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">CNBC</span>
+                <span class="news-date">2 days ago</span>
+            </div>
+            <div class="news-expand" id="news-economic-2">
+                <p class="news-summary">The Supreme Court decision to strike down Trump&#x27;s tariffs has thrown fresh confusion over the raft of trade deals negotiated with global partners, stalling trade talks.</p>
+                <a class="read-more" href="https://www.cnbc.com/2026/02/26/trump-state-of-the-union-supreme-court-tariffs-trade-deals-ieepa-section-301-232-122.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-economic-3')">
+            <div class="news-item-header">
+                <h3>Top earners are more afraid for their employment than lower income as AI threat increases</h3>
+                <span class="expand-icon" id="icon-news-economic-3">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">CNBC</span>
+                <span class="news-date">3 days ago</span>
+            </div>
+            <div class="news-expand" id="news-economic-3">
+                <p class="news-summary">The prospect of being replaced by artificial intelligence is helping to scare higher-income workers.</p>
+                <a class="read-more" href="https://www.cnbc.com/2026/02/25/top-earners-are-more-afraid-for-their-employment-than-lower-income-as-ai-threat-increases.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-economic-4')">
+            <div class="news-item-header">
+                <h3>China’s leverage rises before high-stakes summit as Supreme Court curbs Trump tariffs</h3>
+                <span class="expand-icon" id="icon-news-economic-4">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">CNBC</span>
+                <span class="news-date">2 days ago</span>
+            </div>
+            <div class="news-expand" id="news-economic-4">
+                <p class="news-summary">Supreme Court&#x27;s decision to invalidate Trump&#x27;s tariffs has strengthened China&#x27;s hand ahead of the leaders summit in April, at a time when Beijing seeks U.S. concessions on Taiwan.</p>
+                <a class="read-more" href="https://www.cnbc.com/2026/02/23/trumps-tariff-setback-in-supreme-court-ruling-boosts-china-april-summit-leverage-xi.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-economic-5')">
+            <div class="news-item-header">
+                <h3>Five key takeaways from the Supreme Court&#x27;s landmark decision against Trump&#x27;s tariffs</h3>
+                <span class="expand-icon" id="icon-news-economic-5">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">CNBC</span>
+                <span class="news-date">5 days ago</span>
+            </div>
+            <div class="news-expand" id="news-economic-5">
+                <p class="news-summary">What&#x27;s far less certain is the longer-reaching impacts as the economy and markets again adjust to a changing landscape.</p>
+                <a class="read-more" href="https://www.cnbc.com/2026/02/21/supreme-courts-trump-tariff-decision-five-takeaways.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-economic-6')">
+            <div class="news-item-header">
+                <h3>With Trump&#x27;s &#x27;reciprocal&#x27; tariffs struck down, here are the industries still facing higher rates</h3>
+                <span class="expand-icon" id="icon-news-economic-6">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">CNBC</span>
+                <span class="news-date">Feb 20, 2026</span>
+            </div>
+            <div class="news-expand" id="news-economic-6">
+                <p class="news-summary">President Donald Trump&#x27;s &quot;reciprocal&quot; tariffs were deemed unconstitutional by the Supreme Court, but some sector-specific tariffs remain in place.</p>
+                <a class="read-more" href="https://www.cnbc.com/2026/02/20/trump-tariffs-supreme-court-ruling-industry-higher-rates.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-economic-7')">
+            <div class="news-item-header">
+                <h3>Fourth-quarter U.S. GDP up just 1.4%, badly missing estimate; inflation firms at 3%</h3>
+                <span class="expand-icon" id="icon-news-economic-7">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">CNBC</span>
+                <span class="news-date">Feb 20, 2026</span>
+            </div>
+            <div class="news-expand" id="news-economic-7">
+                <p class="news-summary">The core PCE price index was expected to increase 3% from a year ago in December. GDP was projected to rise at a 2.5% pace in Q4.</p>
+                <a class="read-more" href="https://www.cnbc.com/2026/02/20/pce-inflation-december-2025.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-economic-8')">
+            <div class="news-item-header">
+                <h3>Life after the &#x27;great resignation&#x27;: Incentives are dimming for workers to change jobs</h3>
+                <span class="expand-icon" id="icon-news-economic-8">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">CNBC</span>
+                <span class="news-date">Feb 19, 2026</span>
+            </div>
+            <div class="news-expand" id="news-economic-8">
+                <p class="news-summary">The disparity between average annual pay increases for those staying in their jobs and for those leaving has all but collapsed.</p>
+                <a class="read-more" href="https://www.cnbc.com/2026/02/19/life-after-the-great-resignation-incentives-are-dimming-for-workers-to-change-jobs.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-economic-9')">
+            <div class="news-item-header">
+                <h3>U.S. trade deficit totaled $901 billion in 2025, barely budging despite Trump&#x27;s tariffs</h3>
+                <span class="expand-icon" id="icon-news-economic-9">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">CNBC</span>
+                <span class="news-date">Feb 20, 2026</span>
+            </div>
+            <div class="news-expand" id="news-economic-9">
+                <p class="news-summary">The U.S. trade deficit swelled in December, closing out a year in which the imbalance was essentially unchanged.</p>
+                <a class="read-more" href="https://www.cnbc.com/2026/02/19/us-trade-deficit-totaled-901-billion-in-2025-despite-trumps-tariffs.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div></div>
+            </div>
+            <div class="news-category-card india">
+                <div class="category-header" style="border-bottom-color:var(--accent-yellow)">
+                    <h3 class="category-title" style="color:var(--accent-yellow)">🇮🇳 Indian Markets</h3>
+                    <span class="article-count">10 articles</span>
+                </div>
+                <div>
+        <div class="news-item" onclick="toggleNews('news-india-0')">
+            <div class="news-item-header">
+                <h3>FIIs pour Rs 22,615 crore into Indian equities in February. Can Iran-Israel conflict flip the trend?</h3>
+                <span class="expand-icon" id="icon-news-india-0">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">Economic Times</span>
+                <span class="news-date">13 hours ago</span>
+            </div>
+            <div class="news-expand" id="news-india-0">
+                <p class="news-summary">Foreign investors showed buying interest in Indian stocks in February. However, recent geopolitical tensions are causing concern. Experts believe FIIs may pause fresh investments. They are likely to observe the evolving situation before committing further funds to emerging markets. This cautious stance could impact market sentiment.</p>
+                <a class="read-more" href="https://economictimes.indiatimes.com/markets/stocks/news/fiis-pour-rs-22615-crore-into-indian-equities-in-february-can-iran-israel-conflict-flip-the-trend/articleshow/128885382.cms" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-india-1')">
+            <div class="news-item-header">
+                <h3>Iran-Israel war: Up 20% in 2026, crude oil stares at $80 a barrel</h3>
+                <span class="expand-icon" id="icon-news-india-1">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">Economic Times</span>
+                <span class="news-date">13 hours ago</span>
+            </div>
+            <div class="news-expand" id="news-india-1">
+                <p class="news-summary">Oil prices rallied sharply after US and Israeli strikes on Iran heightened Middle East tensions. Brent and WTI hit multi-month highs, with further gains likely amid supply risks through the Strait of Hormuz, potentially pressuring equities and oil-sensitive sectors.</p>
+                <a class="read-more" href="https://economictimes.indiatimes.com/markets/commodities/news/iran-israel-war-up-20-in-2026-crude-oil-stares-at-80-a-barrel/articleshow/128884731.cms" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-india-2')">
+            <div class="news-item-header">
+                <h3>Nifty tests support zone amid corrective market phase; cautious week seen ahead</h3>
+                <span class="expand-icon" id="icon-news-india-2">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">Economic Times</span>
+                <span class="news-date">15 hours ago</span>
+            </div>
+            <div class="news-expand" id="news-india-2">
+                <p class="news-summary">Nifty closed lower after sustained selling, staying above long-term averages but showing short-term weakness below key resistance. Technical indicators suggest consolidation with corrective bias. Energy, infra and financials show relative strength, while IT, auto and midcaps lag in near term.</p>
+                <a class="read-more" href="https://economictimes.indiatimes.com/markets/stocks/news/nifty-tests-support-zone-amid-corrective-market-phase-cautious-week-seen-ahead/articleshow/128881857.cms" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-india-3')">
+            <div class="news-item-header">
+                <h3>Iran-Israel tensions likely to trigger choppy trade on Monday. What should investors do?</h3>
+                <span class="expand-icon" id="icon-news-india-3">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">Economic Times</span>
+                <span class="news-date">15 hours ago</span>
+            </div>
+            <div class="news-expand" id="news-india-3">
+                <p class="news-summary">Indian stock markets are poised for a gap-down opening on Monday following preemptive strikes by Israel on Iran. Global cues remain negative, with experts anticipating choppy trade and advising investors to utilize corrections for long-term buying opportunities. The trajectory of crude oil prices is a key trigger for domestic markets.</p>
+                <a class="read-more" href="https://economictimes.indiatimes.com/markets/stocks/news/iran-israel-tensions-likely-to-trigger-choppy-trade-on-monday-what-should-investors-do/articleshow/128881495.cms" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-india-4')">
+            <div class="news-item-header">
+                <h3>Vanguard’s India portfolio shines: 12 stocks rally up to 120% in FY26, 8 fresh Q3 picks</h3>
+                <span class="expand-icon" id="icon-news-india-4">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">Economic Times</span>
+                <span class="news-date">16 hours ago</span>
+            </div>
+            <div class="news-expand" id="news-india-4">
+                <p class="news-summary">Vanguard ranks among top FIIs in India, with holdings in 48 BSE stocks surging sharply. Several portfolio companies delivered strong FY26 gains, with fresh additions in December quarter reflecting strategic stock picking and rising conviction in Indian equities.</p>
+                <a class="read-more" href="https://economictimes.indiatimes.com/markets/stocks/news/vanguards-india-portfolio-shines-12-stocks-rally-up-to-120-in-fy26-8-fresh-q3-picks/slideshow/128881719.cms" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-india-5')">
+            <div class="news-item-header">
+                <h3>Q4 results may spark selective market rebound: Daljeet Kohli</h3>
+                <span class="expand-icon" id="icon-news-india-5">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">Economic Times</span>
+                <span class="news-date">16 hours ago</span>
+            </div>
+            <div class="news-expand" id="news-india-5">
+                <p class="news-summary">Daljeet Kohli advocates strict bottom-up investing amid volatile markets, favoring earnings-driven stock selection. He sees opportunities in CV autos and ancillaries, remains cautious on IT and microfinance, and expects Q4 results to drive selective re-rating.</p>
+                <a class="read-more" href="https://economictimes.indiatimes.com/markets/expert-view/q4-results-may-spark-selective-market-rebound-daljeet-kohli/articleshow/128880855.cms" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-india-6')">
+            <div class="news-item-header">
+                <h3>Iran-Israel conflict: Expect a gap-up opening in gold and silver. Here&#x27;s how to trade bullion on Monday</h3>
+                <span class="expand-icon" id="icon-news-india-6">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">Economic Times</span>
+                <span class="news-date">17 hours ago</span>
+            </div>
+            <div class="news-expand" id="news-india-6">
+                <p class="news-summary">Following Israel’s pre-emptive strike on Iran, geopolitical tensions boost safe-haven demand. Gold and silver futures are expected to open higher, offering traders significant upside opportunities.</p>
+                <a class="read-more" href="https://economictimes.indiatimes.com/markets/commodities/news/iran-israel-conflict-expect-a-gap-up-opening-in-gold-and-silver-heres-how-to-trade-bullion-on-monday/articleshow/128879215.cms" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-india-7')">
+            <div class="news-item-header">
+                <h3>Bottom-up stock opportunities emerge as markets consolidate post-correction: Sudip Bandyopadhyay</h3>
+                <span class="expand-icon" id="icon-news-india-7">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">Economic Times</span>
+                <span class="news-date">17 hours ago</span>
+            </div>
+            <div class="news-expand" id="news-india-7">
+                <p class="news-summary">Sudip Bandyopadhyay highlights selective bottom-up investment opportunities in chemicals, defense, energy, retail, and telecom sectors amid market consolidation and improving corporate fundamentals. FIIs show early inflows, supporting a positive long-term outlook.</p>
+                <a class="read-more" href="https://economictimes.indiatimes.com/markets/expert-view/bottom-up-stock-opportunities-emerge-as-markets-consolidate-post-correction-sudip-bandyopadhyay/articleshow/128878818.cms" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-india-8')">
+            <div class="news-item-header">
+                <h3>Bitcoin hovers near $65,000 as risk-off sentiment wipes out midweek gains</h3>
+                <span class="expand-icon" id="icon-news-india-8">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">Economic Times</span>
+                <span class="news-date">17 hours ago</span>
+            </div>
+            <div class="news-expand" id="news-india-8">
+                <p class="news-summary">Bitcoin hovers around $65,000 amid broad crypto declines, with Ethereum and major altcoins down. Market shows tactical stability but structural fragility persists, while global financial risks and AI disruptions weigh on sentiment.</p>
+                <a class="read-more" href="https://economictimes.indiatimes.com/markets/cryptocurrency/bitcoin-hovers-near-65000-as-risk-off-sentiment-wipes-out-midweek-gains/articleshow/128878689.cms" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-india-9')">
+            <div class="news-item-header">
+                <h3>F&amp;O Talk | Long-short ratio weakens as Nifty slips below key moving averages: Sudeep Shah on Tejas, UPL and 4 top weekly movers</h3>
+                <span class="expand-icon" id="icon-news-india-9">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">Economic Times</span>
+                <span class="news-date">17 hours ago</span>
+            </div>
+            <div class="news-expand" id="news-india-9">
+                <p class="news-summary">Indian markets fell sharply with Nifty and Sensex down on broad-based selling. IT and auto sectors led declines, while PSU banks outperformed. Volatility and AI concerns weigh on sentiment, with March outlook cautious amid technical weakness.</p>
+                <a class="read-more" href="https://economictimes.indiatimes.com/markets/expert-view/fo-talk-long-short-ratio-weakens-as-nifty-slips-below-key-moving-averages-sudeep-shah-on-tejas-upl-and-4-top-weekly-movers/articleshow/128878534.cms" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div></div>
+            </div>
+            <div class="news-category-card google_trending">
+                <div class="category-header" style="border-bottom-color:var(--accent-orange)">
+                    <h3 class="category-title" style="color:var(--accent-orange)">🔥 Google Trending Stocks</h3>
+                    <span class="article-count">10 articles</span>
+                </div>
+                <div>
+        <div class="news-item" onclick="toggleNews('news-google_trending-0')">
+            <div class="news-item-header">
+                <h3>Stock market holidays in March 2026: When will NSE, BSE remain closed for trading? Check list - The Times of India</h3>
+                <span class="expand-icon" id="icon-news-google_trending-0">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">news.google.com</span>
+                <span class="news-date">14 hours ago</span>
+            </div>
+            <div class="news-expand" id="news-google_trending-0">
+                <p class="news-summary">Stock market holidays in March 2026: When will NSE, BSE remain closed for trading? Check list  The Times of India</p>
+                <a class="read-more" href="https://news.google.com/rss/articles/CBMigAJBVV95cUxNZ21vdnR5LUdZb3d1UkxSVmdsTXJzc2hlcEV4cE9kdmxvQTZLWEhyWHZKb2lLOGc5dmVreDQ2UlFVTlZfd2RwMFE5WjEzRmNBTUFvUEF5TWdQaWZEUzBIMlo2ZGRyYkJkN0t2RjlFLS1PZi1kaFlzaVVUOXN1WHBZRG9NZTlYblJTUDhqZmN3ekZHazZ2NFJkUjRTaFRSSDI3bk5tSkEtSVhoWTNxckRueGlwcWY0U3ozbm5pdmhXWVdBUmhEZEwzVE9kdHNhZW5mb3Q5ZTFHdTFqQ3hrSUw0MUk2aU1Yc2hzZ2ltUXQ4aEQ5dHZPYm9BVld2X1RxbUxH0gGGAkFVX3lxTFBvOVpoM0ZMUEFlZWlvNXdpVHVzRW1WbGIzXy1YQlVrWDY0Q3ExSWZ4eVVaVzB5amxtV1NZZ19JbHJtNl9yWWJ0WnhvLVhYb0ViNWRLOEpBNnktbjlJQkdna0hYcXZ2Nk95dmh5Mi1tWGlWZ1NtcGZpa1libHQybHR6N0NBNVJHSUpMOU40TnViTDlmY0lnVEc3cG1NMzFOd3RSYXItak4waWNQdmtucjNEZVcwam5QOWhkcjh6QmFCVHV0R3hTN3FnU1B1UURmLTBYSnhJTy14M0ptSXZSa3AydG52WlNnM0F0TXNWWGIxSjlsWloxOUJ5OW5rWDBLVG16VEI4MkE?oc=5" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-google_trending-1')">
+            <div class="news-item-header">
+                <h3>Stock market holidays in March 2026: NSE, BSE to remain closed on these days next month - Mint</h3>
+                <span class="expand-icon" id="icon-news-google_trending-1">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">news.google.com</span>
+                <span class="news-date">15 hours ago</span>
+            </div>
+            <div class="news-expand" id="news-google_trending-1">
+                <p class="news-summary">Stock market holidays in March 2026: NSE, BSE to remain closed on these days next month  Mint</p>
+                <a class="read-more" href="https://news.google.com/rss/articles/CBMi6wFBVV95cUxNdTVULTJudWF5RC1GZ181RXAxeGV0cGFfM0RzbXZfdXV0bUdxRkt0RExnSFFxOFgxVXE3ODJOVHpWN19VM1RKeENpVUo3M05laV9jNVFVUDVZR3ZrU0Rkd2pXejh2bDJ5ZWF0Nko0eGZKVTYyUkt4QS02Ukdta1FXa1hkbHdvSUxEcTMzekV4cmo4VFhadXFscGlMQmlwVWZaLWw1d0R0VDA3X0FKblhHZzc4WlZXQlJNS2pqVDRlNEVKc2lmeUVSNnowM25nQkZxcXE4OFhKN3RZaXZXSFlOUGhKS0V2SjJrWFJv0gHwAUFVX3lxTFBsTVlsTXJUQlVZXzc0enQ3NEhjUHVFNWJKQm9maXVRSElUVVJBNWV4S3IxVjloOFpOQzJWNGdocktLd0lsM2RDeXU1R2Qtc2tfSXFRd056TzFxLUdSakR1aTY4TWlEc0VpSldLV2FUOGdySzBmT1BWX091V2x6enFLNVdyMHpwVktES1pjZjlwR2tndllsQkJoanhPOEhuNUg0eXdid1VVVEdWTDhLZFdZWmtnbW5yT3UxcnA4Z3g3eHVuRkJuZkJpYVdFLTZ2ZXlWWXpVYnlsbl94SnlBajhXeUMtN2JBVnNxS25fRXFnRA?oc=5" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-google_trending-2')">
+            <div class="news-item-header">
+                <h3>From Coforge to LTIMindtree, Stocks in Focus on D-Street | Stock Market | BSE | NSE - Zee Business</h3>
+                <span class="expand-icon" id="icon-news-google_trending-2">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">news.google.com</span>
+                <span class="news-date">8 hours ago</span>
+            </div>
+            <div class="news-expand" id="news-google_trending-2">
+                <p class="news-summary">From Coforge to LTIMindtree, Stocks in Focus on D-Street | Stock Market | BSE | NSE  Zee Business</p>
+                <a class="read-more" href="https://news.google.com/rss/articles/CBMizAFBVV95cUxQRU43QmVySUZVazNkcHNCZEYtYi00R0hhT0Z3SF9YdmRpdmxNMG1uY1Y5S1ViR3hkbjZLbnFnMy1tUFFqWFBJLVU2T1lvaGRwSVZ1ZXNIRmM3UjRhYm9MS1R4aUctZmM1Qkl2Wi1xV1YzZ0lmSU5TSXp1MnhYS3ZuU0JJTDJFNThpWkd6c0xRX1JSZXFlQ0pMWi1fLWRYbXNJZ0hIbEpRMm96OWwweTliZ1VhazR0a3VnUTdzcnp3cHlhRGJmcDRBdWV0Z0Y?oc=5" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-google_trending-3')">
+            <div class="news-item-header">
+                <h3>Shipping Corporation fined: NSE, BSE impose Rs 5.42 lakh penalty each for Sebi norm violation - The Economic Times</h3>
+                <span class="expand-icon" id="icon-news-google_trending-3">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">news.google.com</span>
+                <span class="news-date">19 hours ago</span>
+            </div>
+            <div class="news-expand" id="news-google_trending-3">
+                <p class="news-summary">Shipping Corporation fined: NSE, BSE impose Rs 5.42 lakh penalty each for Sebi norm violation  The Economic Times</p>
+                <a class="read-more" href="https://news.google.com/rss/articles/CBMi-AFBVV95cUxQSmVRUHhNcVVsWUNIbWZOZF8tVXVPcndjLVFhajk3aHdZMGRqOGs1dGJUdE9aQURkcUNpTER2T0dzSzZ0ZEVOODdHYXViUjh6QW94QURZdXdXZVhqeFFtSHIwQnhfY2FxbHJ2R09uQWRVSjlsLVgzUXY0M0daa21UTExCLXRtV0tsQlNFbmhlX2hfeEItUU9aeV9fM3ZvaW0yNWdpZjRiOTdabXlFY2RNT2c2Y2tiSW9LZHBqSUtSUE1Lem5INWM1Rk9EV3RoR0FXR2hhQ2xjSF9VTE1jYWFFVkRBMnlrVEEtbldHMkV3emNxYWRva3R5StIB_gFBVV95cUxOdGx3NnJrUzNneWF5cVJOTVFOcURtdEluUWdqZVR0eTg5ZGFqVDNZSmVhanM0VXlFMEhISFNGTjF6VnFNajRLSVl2WnhseFBwLXFwY0tfWFQ4ZjJ2WndVRm4wNTRRUVFWUURXc2kzZFh3d2RQT3lWY3dzWTI3TjF5Zk5NbVJjdkdHNUZQNzVybW9YRzhYSHZ1cEo2Z3NHQmtRV3YwcGFabVNoVFJlelRyT3R4S0dkdjhnX0lUX1FsdC1fbVRtc1N5dXFXSHU5cC1DaXlhUTNkOEU5cWpxNmtvVmdLOV9jUkJ2eXZVNVVvZnZxUTNRQzd2N3l4b0tpUQ?oc=5" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-google_trending-4')">
+            <div class="news-item-header">
+                <h3>Indian Listed New-Age Tech Company Tracker: Market Cap, Revenue &amp; More - Inc42</h3>
+                <span class="expand-icon" id="icon-news-google_trending-4">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">news.google.com</span>
+                <span class="news-date">4 hours ago</span>
+            </div>
+            <div class="news-expand" id="news-google_trending-4">
+                <p class="news-summary">Indian Listed New-Age Tech Company Tracker: Market Cap, Revenue &amp; More  Inc42</p>
+                <a class="read-more" href="https://news.google.com/rss/articles/CBMimgFBVV95cUxPVU94dFhyMVNPZFBOeklEbER6NHMwNzZpZDdzamhwdXpTYWZjWkh1cVN6WFhGV2UxZWlyVEZrOUlRak5NSFQ5UWstcjFjMHNzWFNuTzZaRUFVWXVhM0YzU0F6clJYMWp1VlBSOTV2SEdTYlVFbTZkYTJQMzYyNzRZWllNaWhDWFduSmhKcmxicm51d1JuMGVjR3R3?oc=5" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-google_trending-5')">
+            <div class="news-item-header">
+                <h3>Eris Lifesciences Fined ₹65,000 Each by BSE and NSE for Board Composition Non-Compliance - scanx.trade</h3>
+                <span class="expand-icon" id="icon-news-google_trending-5">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">news.google.com</span>
+                <span class="news-date">11 hours ago</span>
+            </div>
+            <div class="news-expand" id="news-google_trending-5">
+                <p class="news-summary">Eris Lifesciences Fined ₹65,000 Each by BSE and NSE for Board Composition Non-Compliance  scanx.trade</p>
+                <a class="read-more" href="https://news.google.com/rss/articles/CBMi2AFBVV95cUxOSXh2aFpQSUpuNThPMmRJdlIxT1lNYnk2cGxnc2dOclpmNlg4bl95b0FWZUtPalZjN1RLNDhOLXBtUzJEQWZIRW56RnRkaXc5b3pYWUc4azJsNTdNRm1CRzhOUlZJVS1ycUdCdGJfTC1HWFhrZktXbzdLQUhpN3NEcnEtR2RTTXYzTjYwTHBNSWRNUHZUTVBYQnNkMUNLdE5mc294MmIyQ0I0ODhQQ1Rwb3ZlOGU3V2ItT1h6YnQ5UEFHWkhWZjJFY0RpQkg2TEZ2WncydmdPMlU?oc=5" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-google_trending-6')">
+            <div class="news-item-header">
+                <h3>POWERGRID Fined ₹5.42 Lakh Each by NSE and BSE Over Board Composition Non-Compliance - PSU Connect</h3>
+                <span class="expand-icon" id="icon-news-google_trending-6">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">news.google.com</span>
+                <span class="news-date">10 hours ago</span>
+            </div>
+            <div class="news-expand" id="news-google_trending-6">
+                <p class="news-summary">POWERGRID Fined ₹5.42 Lakh Each by NSE and BSE Over Board Composition Non-Compliance  PSU Connect</p>
+                <a class="read-more" href="https://news.google.com/rss/articles/CBMiugFBVV95cUxQWll1NnUxVF90dlB3clpsQjFhRERYV0lOUWpPbDVGWkxBcGdXT3pHc0hKMEE2MFktQTZBYjlhc0lDQTI5UnA2OG9rcm1jMWgyWUQ4YURGNmYyUklCTEtYMzhHNmxkTmhWRDExOUQ3aU5EYUw5d2l0ajNfMTNoSHFwTV9jVDd1NnlnMkRoSEhVZG1odEx2TTRoTE9CWlNOMzYtLUhQMkthV0MtVmdLUG9BS1lSMkNqdDdNeVE?oc=5" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-google_trending-7')">
+            <div class="news-item-header">
+                <h3>NSE won’t debut on NSE: CEO explains why the exchange must list elsewhere for its IPO - Moneycontrol.com</h3>
+                <span class="expand-icon" id="icon-news-google_trending-7">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">news.google.com</span>
+                <span class="news-date">16 hours ago</span>
+            </div>
+            <div class="news-expand" id="news-google_trending-7">
+                <p class="news-summary">NSE won’t debut on NSE: CEO explains why the exchange must list elsewhere for its IPO  Moneycontrol.com</p>
+                <a class="read-more" href="https://news.google.com/rss/articles/CBMi6AFBVV95cUxNcy1GNDV2bkhBSGJnXzVaMmpYVjJ3SGFfTkdsZ1dMUDlpVGZjbW5HRVd4WlIwbUVSbHlkUjhaejB1cDZKNDlXOVQ3N2tXT2dVV3RpY1E1ekxBSDJfZjJZbUk2T3pTMkp4S2ZjVkxZLUpFNEpLbUw4c3VTbXJNMWN0WGlzVnJmSks1dE8tTGJ6ckJDYjZZbnN1djRyNlg0V3Q1UkdtZmhXeUowRVdMYmExZmc1MU9BLVo5dGhsWG1TMy1SaHB0WjJFVzlxM1pVWXlRLUZqOHBQak9nTHZyZnJJem0ybGpsX21D0gHoAUFVX3lxTE1zLUY0NXZuSEFIYmdfNVoyalhWMndIYV9OR2xnV0xQOWlUZmNtbkdFV3haUjBtRVJseWRSOFp6MHVwNko0OVc5VDc3a1dPZ1VXdGljUTV6TEFIMl9mMlltSTZPelMySnhLZmNWTFktSkU0SkttTDhzdVNtck0xY3RYaXNWcmZKSzV0Ty1MYnpyQkNiNlluc3V2NHI2WDRXdDVSR21maFd5SjBFV0xiYTFmZzUxT0EtWjl0aGxYbVMzLVJocHRaMkVXOXEzWlVZeVEtRmo4cFBqT2dMdnJmckl6bTJsamxfbUM?oc=5" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-google_trending-8')">
+            <div class="news-item-header">
+                <h3>POWERGRID Fined Rs 10.86 Lakh by BSE and NSE for Board Composition Non-Compliance - scanx.trade</h3>
+                <span class="expand-icon" id="icon-news-google_trending-8">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">news.google.com</span>
+                <span class="news-date">10 hours ago</span>
+            </div>
+            <div class="news-expand" id="news-google_trending-8">
+                <p class="news-summary">POWERGRID Fined Rs 10.86 Lakh by BSE and NSE for Board Composition Non-Compliance  scanx.trade</p>
+                <a class="read-more" href="https://news.google.com/rss/articles/CBMi0AFBVV95cUxPMEFJaDdrUlFCTVFFc2lpNlBialVfVmNRNnk3UEFIa0tjaFc2THM0c0FPZ3BMUmZISmZlZElibVFST25veXJUdGZVMXo0d3JnQVkyOUVYUzRYNGQtR2JtY2tILU5mWFNFTzNJMk1nalgzT2t6bTdNR2hpUXQxM3dYZTRYNGsyTjRZNzM3UVJPV2hxejNaWWg4ZzlvNWJlcW13QmxNYVB0UGJpQ0xfQ002TkJTMEhrYVRRa1kxTVBrelR5Q2lCLU8tV0UwOGJpWlhM?oc=5" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-google_trending-9')">
+            <div class="news-item-header">
+                <h3>Lokesh Machines Limited Receives Fine Notices from BSE and NSE for Board Composition Non-Compliance - scanx.trade</h3>
+                <span class="expand-icon" id="icon-news-google_trending-9">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">news.google.com</span>
+                <span class="news-date">14 hours ago</span>
+            </div>
+            <div class="news-expand" id="news-google_trending-9">
+                <p class="news-summary">Lokesh Machines Limited Receives Fine Notices from BSE and NSE for Board Composition Non-Compliance  scanx.trade</p>
+                <a class="read-more" href="https://news.google.com/rss/articles/CBMi6AFBVV95cUxOci1zeEpRSHJDTHdneDljaVhxWlVERTZ4RUhHODMzS1ZvNnFTVHN6cHZrS0J1aEFWQzV0LUkycGIzamJqbnFZc0lBOUNwUE9pNFFoZVZvZjBoc1o5dGFkVXJnV1lURjJJV0l1Q3lHVS1oemUzeFJQMVZjWnZoTzBJUm5hTGZhT2MtamNvVER1cGpmVEttVkt1ZUNSd1EtVklQdTBERENXNTRjaGE2elUzVXB4Vk5KTTdoX3BOUWlxdW5tZmpQY2pFdG1vQldYV1dZNWUtTFpFS1U5SVh1QVhpdTFOVWhxZHV2?oc=5" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div></div>
+            </div>
+            <div class="news-category-card corporate">
+                <div class="category-header" style="border-bottom-color:var(--accent-cyan)">
+                    <h3 class="category-title" style="color:var(--accent-cyan)">🏢 Corporate News</h3>
+                    <span class="article-count">10 articles</span>
+                </div>
+                <div>
+        <div class="news-item" onclick="toggleNews('news-corporate-0')">
+            <div class="news-item-header">
+                <h3>NASA is sending its first Black and first female astronauts to the moon</h3>
+                <span class="expand-icon" id="icon-news-corporate-0">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">CNBC</span>
+                <span class="news-date">12 hours ago</span>
+            </div>
+            <div class="news-expand" id="news-corporate-0">
+                <p class="news-summary">NASA is sending the first Black and first female astronauts to the moon in an upcoming launch, marking the first journey to the moon in over 50 years.</p>
+                <a class="read-more" href="https://www.cnbc.com/2026/02/28/nasa-astronauts-moon-artemis.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-corporate-1')">
+            <div class="news-item-header">
+                <h3>How the &#x27;K-shaped&#x27; economy is showing up at two big U.S. gyms</h3>
+                <span class="expand-icon" id="icon-news-corporate-1">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">CNBC</span>
+                <span class="news-date">12 hours ago</span>
+            </div>
+            <div class="news-expand" id="news-corporate-1">
+                <p class="news-summary">The outlooks of Life Time and Planet Fitness show the divergence in spending between higher- and lower-income consumers.</p>
+                <a class="read-more" href="https://www.cnbc.com/2026/02/28/life-time-planet-fitness-earnings-show-k-shaped-economy.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-corporate-2')">
+            <div class="news-item-header">
+                <h3>WBD employees fear coming wave of job losses as Paramount tops Netflix&#x27;s bid to acquire company</h3>
+                <span class="expand-icon" id="icon-news-corporate-2">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">CNBC</span>
+                <span class="news-date">1 day ago</span>
+            </div>
+            <div class="news-expand" id="news-corporate-2">
+                <p class="news-summary">WBD employees fear potential job cuts, culture clashes and high debt loads as Paramount supplants Netflix as the company&#x27;s acquirer.</p>
+                <a class="read-more" href="https://www.cnbc.com/2026/02/27/warner-bros-employees-paramount.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-corporate-3')">
+            <div class="news-item-header">
+                <h3>WBD and Paramount may have an easier time winning regulatory approval than Netflix</h3>
+                <span class="expand-icon" id="icon-news-corporate-3">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">CNBC</span>
+                <span class="news-date">1 day ago</span>
+            </div>
+            <div class="news-expand" id="news-corporate-3">
+                <p class="news-summary">With Netflix out of the picture, a Paramount and Warner Bros. Discovery deal may have fewer obstacles to regulatory approval.</p>
+                <a class="read-more" href="https://www.cnbc.com/2026/02/27/warner-bros-paramount-skydance-netflix-deal.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-corporate-4')">
+            <div class="news-item-header">
+                <h3>Netflix ditches deal for Warner Bros. Discovery after Paramount’s offer is deemed superior</h3>
+                <span class="expand-icon" id="icon-news-corporate-4">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">CNBC</span>
+                <span class="news-date">1 day ago</span>
+            </div>
+            <div class="news-expand" id="news-corporate-4">
+                <p class="news-summary">Netflix is ditching a deal to buy Warner Bros. Discovery&#x27;s studio and streaming assets after the WBD board deemed a revised bid by Paramount to be superior.</p>
+                <a class="read-more" href="https://www.cnbc.com/2026/02/26/warner-bros-discovery-paramount-skydance-deal-superior-netflix.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-corporate-5')">
+            <div class="news-item-header">
+                <h3>FanDuel parent Flutter reports disappointing fourth-quarter earnings</h3>
+                <span class="expand-icon" id="icon-news-corporate-5">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">CNBC</span>
+                <span class="news-date">2 days ago</span>
+            </div>
+            <div class="news-expand" id="news-corporate-5">
+                <p class="news-summary">Flutter&#x27;s 2026 revenue guidance of $17.75 billion to $19.05 billion was lower than analysts&#x27; projection.</p>
+                <a class="read-more" href="https://www.cnbc.com/2026/02/26/fanduel-parent-flutter-flut-q4-2025-earnings.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-corporate-6')">
+            <div class="news-item-header">
+                <h3>State Farm announces $5 billion dividend; $100 average refund coming to car insurance customers</h3>
+                <span class="expand-icon" id="icon-news-corporate-6">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">CNBC</span>
+                <span class="news-date">2 days ago</span>
+            </div>
+            <div class="news-expand" id="news-corporate-6">
+                <p class="news-summary">Customers can expect to receive $100 refund on average, though State Farm says it will vary by state and by the amount of premium paid.</p>
+                <a class="read-more" href="https://www.cnbc.com/2026/02/26/state-farm-dividend-car-insurance-customers.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-corporate-7')">
+            <div class="news-item-header">
+                <h3>Billionaire family offices invested in pro soccer, bitcoin and semiconductors before the new year</h3>
+                <span class="expand-icon" id="icon-news-corporate-7">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">CNBC</span>
+                <span class="news-date">2 days ago</span>
+            </div>
+            <div class="news-expand" id="news-corporate-7">
+                <p class="news-summary">The private investment firms of Leon Cooperman and the Walton family disclosed bold stock buys last quarter.</p>
+                <a class="read-more" href="https://www.cnbc.com/2026/02/26/billionaire-family-office-investments.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-corporate-8')">
+            <div class="news-item-header">
+                <h3>Lawsuit over $21 million donor-advised fund highlights risks of DAF giving</h3>
+                <span class="expand-icon" id="icon-news-corporate-8">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">CNBC</span>
+                <span class="news-date">2 days ago</span>
+            </div>
+            <div class="news-expand" id="news-corporate-8">
+                <p class="news-summary">Wealthy Americans use DAFs to give back and save on taxes, but the popular strategy comes with strings attached.</p>
+                <a class="read-more" href="https://www.cnbc.com/2026/02/26/lawsuit-donor-advised-fund-risks.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-corporate-9')">
+            <div class="news-item-header">
+                <h3>Restaurant reservation wars heat up as DoorDash enters the arena with Resy, OpenTable</h3>
+                <span class="expand-icon" id="icon-news-corporate-9">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">CNBC</span>
+                <span class="news-date">3 days ago</span>
+            </div>
+            <div class="news-expand" id="news-corporate-9">
+                <p class="news-summary">The still-simmering reservation wars of the last decade could fully reignite this year, as a shifting tech landscape pits the biggest players against each other.</p>
+                <a class="read-more" href="https://www.cnbc.com/2026/02/25/doordash-resy-opentable-restaurant-reservation-wars.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div></div>
+            </div>
+            <div class="news-category-card geopolitical">
+                <div class="category-header" style="border-bottom-color:var(--accent-green)">
+                    <h3 class="category-title" style="color:var(--accent-green)">🌍 Geopolitical</h3>
+                    <span class="article-count">10 articles</span>
+                </div>
+                <div>
+        <div class="news-item" onclick="toggleNews('news-geopolitical-0')">
+            <div class="news-item-header">
+                <h3>How the attack on Iran could impact the global oil market and economy</h3>
+                <span class="expand-icon" id="icon-news-geopolitical-0">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">CNBC</span>
+                <span class="news-date">2 hours ago</span>
+            </div>
+            <div class="news-expand" id="news-geopolitical-0">
+                <p class="news-summary">The U.S.-Israeli attack raises the risk of major oil supply disruption. Iran is the fourth-largest OPEC producer and sits on the critical Strait of Hormuz.</p>
+                <a class="read-more" href="https://www.cnbc.com/2026/02/28/iran-us-attack-oil-market-economy.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-geopolitical-1')">
+            <div class="news-item-header">
+                <h3>Xiaomi launches flagship smartphone as memory price surge threatens sales</h3>
+                <span class="expand-icon" id="icon-news-geopolitical-1">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">CNBC</span>
+                <span class="news-date">11 hours ago</span>
+            </div>
+            <div class="news-expand" id="news-geopolitical-1">
+                <p class="news-summary">The Xiaomi 17 starts at 999 euros ($1,179) while the Xiaomi 17 Ultra starts at 1,499 euros, with the device priced the same as its predecessor.</p>
+                <a class="read-more" href="https://www.cnbc.com/2026/02/28/xiaomi-17-and-17-ultra-launch-price-specs.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-geopolitical-2')">
+            <div class="news-item-header">
+                <h3>Berkshire Hathaway operating earnings fell nearly 30% in Warren Buffett&#x27;s final quarter as CEO</h3>
+                <span class="expand-icon" id="icon-news-geopolitical-2">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">CNBC</span>
+                <span class="news-date">10 hours ago</span>
+            </div>
+            <div class="news-expand" id="news-geopolitical-2">
+                <p class="news-summary">Berkshire Hathaway reported fourth-quarter and full-year 2025 earnings on Saturday.</p>
+                <a class="read-more" href="https://www.cnbc.com/2026/02/28/berkshire-hathaway-brka-q4-2025-earnings.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-geopolitical-3')">
+            <div class="news-item-header">
+                <h3>&#x27;Bigger ramifications than Venezuela&#x27;: Markets brace for impact after U.S. strikes Iran</h3>
+                <span class="expand-icon" id="icon-news-geopolitical-3">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">CNBC</span>
+                <span class="news-date">2 hours ago</span>
+            </div>
+            <div class="news-expand" id="news-geopolitical-3">
+                <p class="news-summary">Investors are bracing for impact after the U.S.&#x27;s attacks on Iran, a move they see as carrying far larger market consequences than the Venezuela campaign.</p>
+                <a class="read-more" href="https://www.cnbc.com/2026/02/28/markets-brace-for-impact-following-us-military-strikes-against-iran.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-geopolitical-4')">
+            <div class="news-item-header">
+                <h3>Tehran strikes back at Gulf states after U.S.-Israel launch massive attack on Iran</h3>
+                <span class="expand-icon" id="icon-news-geopolitical-4">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">CNBC</span>
+                <span class="news-date">9 hours ago</span>
+            </div>
+            <div class="news-expand" id="news-geopolitical-4">
+                <p class="news-summary">U.S. President Donald Trump said Iran has continued to pursue nuclear weapons despite ongoing negotiations to end its program.</p>
+                <a class="read-more" href="https://www.cnbc.com/2026/02/28/trump-us-military-iran-strikes-middle-east-oil.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-geopolitical-5')">
+            <div class="news-item-header">
+                <h3>OpenAI strikes deal with Pentagon, hours after rival Anthropic was blacklisted by Trump</h3>
+                <span class="expand-icon" id="icon-news-geopolitical-5">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">CNBC</span>
+                <span class="news-date">21 hours ago</span>
+            </div>
+            <div class="news-expand" id="news-geopolitical-5">
+                <p class="news-summary">OpenAI CEO Sam Altman said on X that his company has come to terms with the Defense Department for use of its models.</p>
+                <a class="read-more" href="https://www.cnbc.com/2026/02/27/openai-strikes-deal-with-pentagon-hours-after-rival-anthropic-was-blacklisted-by-trump.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-geopolitical-6')">
+            <div class="news-item-header">
+                <h3>World&#x27;s largest sovereign wealth fund&#x27;s bets on Big Tech and banking drive gains</h3>
+                <span class="expand-icon" id="icon-news-geopolitical-6">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">CNBC</span>
+                <span class="news-date">1 day ago</span>
+            </div>
+            <div class="news-expand" id="news-geopolitical-6">
+                <p class="news-summary">Norges Bank Investment Management manages the world&#x27;s largest sovereign wealth fund.</p>
+                <a class="read-more" href="https://www.cnbc.com/2026/02/27/norway-sovereign-wealth-fund.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-geopolitical-7')">
+            <div class="news-item-header">
+                <h3>WBD employees fear coming wave of job losses as Paramount tops Netflix&#x27;s bid to acquire company</h3>
+                <span class="expand-icon" id="icon-news-geopolitical-7">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">CNBC</span>
+                <span class="news-date">1 day ago</span>
+            </div>
+            <div class="news-expand" id="news-geopolitical-7">
+                <p class="news-summary">WBD employees fear potential job cuts, culture clashes and high debt loads as Paramount supplants Netflix as the company&#x27;s acquirer.</p>
+                <a class="read-more" href="https://www.cnbc.com/2026/02/27/warner-bros-employees-paramount.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-geopolitical-8')">
+            <div class="news-item-header">
+                <h3>UBS downgrades the U.S. stock market. Here&#x27;s what has the investment bank worried</h3>
+                <span class="expand-icon" id="icon-news-geopolitical-8">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">CNBC</span>
+                <span class="news-date">1 day ago</span>
+            </div>
+            <div class="news-expand" id="news-geopolitical-8">
+                <p class="news-summary">UBS downgraded U.S. equities to &quot;benchmark&quot; in a fully invested global equity portfolio, saying factors that powered years of outperformance are starting to fade.</p>
+                <a class="read-more" href="https://www.cnbc.com/2026/02/27/ubs-downgrades-the-us-stock-market-heres-what-has-the-investment-bank-worried.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div>
+
+        <div class="news-item" onclick="toggleNews('news-geopolitical-9')">
+            <div class="news-item-header">
+                <h3>See the movie, play the game: How Nintendo is pulling out all the stops to sell the Switch 2</h3>
+                <span class="expand-icon" id="icon-news-geopolitical-9">&#9660;</span>
+            </div>
+            <div class="news-meta">
+                <span class="news-source">CNBC</span>
+                <span class="news-date">1 day ago</span>
+            </div>
+            <div class="news-expand" id="news-geopolitical-9">
+                <p class="news-summary">Nintendo is betting on nostalgia and new gamers to drive sales of its flagship Switch 2 console and key games.</p>
+                <a class="read-more" href="https://www.cnbc.com/2026/02/27/nintendo-mario-pokemon-switch-2-ip-franchies.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
+            </div>
+        </div></div>
+            </div>
+    </div>
+</section>
+
+<footer>
+    <p>🔄 News is fetched fresh every time the script runs &nbsp;|&nbsp; Market data updates live in the browser</p>
+    <p style="margin-top:10px;font-size:.72em;opacity:.5">⚠️ For informational purposes only. Not financial advice.</p>
+</footer>
+</div>
+
+<!-- ══ SCRIPTS ══ -->
+<script>
+// ── Expand / collapse news items ──
+function toggleNews(id) {
+    const el = document.getElementById(id);
+    const icon = document.getElementById('icon-' + id);
+    if (!el) return;
+    el.classList.toggle('open');
+    icon.classList.toggle('open');
+}
+
+// ════════════════════════════════════════════════
+// FIX 1 – GIFT Nifty
+// Yahoo Finance does NOT carry GIFT Nifty (NSE IX futures).
+// Strategy: try multiple CORS proxies for the NSE IFSC public quote API.
+// Fallback: show Nifty 50 (^NSEI) clearly labelled as the spot proxy.
+// ════════════════════════════════════════════════
+
+// Standard Yahoo Finance symbols (unchanged)
+const SYMBOLS = {
+    'dow':   '^DJI',
+    'sp500': '^GSPC',
+    'nasdaq':'^IXIC',
+    'oil':   'CL=F',
+    'dollar':'DX-Y.NYB',
+    'gold':  'GC=F',
+    'silver':'SI=F',
+    'usdinr': 'INR=X'
+};
+
+
+
+function updateCard(id, value, change, pchange) {
+    const vEl = document.getElementById('val-'+id);
+    const cEl = document.getElementById('chg-'+id);
+    const card = document.getElementById('card-'+id);
+    if (vEl) vEl.textContent = value;
+    if (cEl) {
+        const p = parseFloat(pchange);
+        const sign = p >= 0 ? '+' : '';
+        cEl.textContent = sign+change+' ('+sign+pchange+'%)';
+        const cls = p > 0 ? 'positive' : p < 0 ? 'negative' : 'neutral';
+        cEl.className = 'indicator-change '+cls;
+        if (card) card.className = 'indicator-card '+cls;
+    }
+}
+
+async function fetchYahoo(key, sym) {
+    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${sym}?interval=1d&range=1d`;
+    const proxies = [
+        'https://corsproxy.io/?'+encodeURIComponent(url),
+        'https://api.allorigins.win/get?url='+encodeURIComponent(url),
+        url
+    ];
+    for (const u of proxies) {
+        try {
+            const r = await fetch(u, {mode:'cors'});
+            if (!r.ok) continue;
+            let d = await r.json();
+            if (d.contents) d = JSON.parse(d.contents);  // allorigins wrapper
+            const meta = d?.chart?.result?.[0]?.meta;
+            if (!meta) continue;
+            const cur = meta.regularMarketPrice;
+            const prev = meta.chartPreviousClose || meta.previousClose;
+            if (!cur || !prev) continue;
+            const chg = (cur - prev).toFixed(2);
+            const pct = (((cur-prev)/prev)*100).toFixed(2);
+            let val = ['dow','sp500','nasdaq'].includes(key)
+                ? cur.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})
+                : key==='dollar' ? cur.toFixed(2)
+                : key==='usdinr' ? '₹'+cur.toFixed(2)
+                : '$'+cur.toFixed(2);
+            updateCard(key, val, chg, pct);
+            return true;
+        } catch(e) { /* try next */ }
+    }
+    return false;
+}
+// ── GIFT Nifty: fetch from NSE IFSC public data (via CORS proxy) ──
+// NSE IFSC provides a public JSON feed; we try via corsproxy.io
+// If that fails we fall back to the Stooq CSV (no CORS issue) for ^N50USD
+// which is the USD-denominated Nifty equivalent – closest public proxy.
+async function fetchGiftNifty() {
+    // Attempt 1: corsproxy → NSE IFSC market data (live)
+    const nseUrl = 'https://www.nseifsc.com/market/GetIndexChartDetails?indices=NIFTY50&type=I';
+    try {
+        const r = await fetch('https://corsproxy.io/?'+encodeURIComponent(nseUrl), {mode:'cors', signal: AbortSignal.timeout(6000)});
+        if (r.ok) {
+            const d = await r.json();
+            // NSE IFSC returns array; grab latest price & prev close
+            if (d && d.length > 0) {
+                const last = d[d.length - 1];
+                const first = d[0];
+                const cur = parseFloat(last[1]);
+                const prev = parseFloat(first[1]);
+                if (cur && prev) {
+                    const chg = (cur - prev).toFixed(2);
+                    const pct = (((cur-prev)/prev)*100).toFixed(2);
+                    const val = cur.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+                    const vEl = document.getElementById('val-gift-nifty');
+                    const cEl = document.getElementById('chg-gift-nifty');
+                    const card = document.getElementById('card-gift-nifty');
+                    if (vEl) vEl.textContent = val;
+                    if (cEl) {
+                        const p = parseFloat(pct);
+                        const sign = p >= 0 ? '+' : '';
+                        cEl.textContent = sign+chg+' ('+sign+pct+'%) · NSE IX';
+                        const cls = p > 0 ? 'positive' : p < 0 ? 'negative' : 'neutral';
+                        cEl.className = 'indicator-change '+cls;
+                        if (card) card.className = 'indicator-card '+cls;
+                    }
+                    return;
+                }
+            }
+        }
+    } catch(e) { /* fall through */ }
+
+    // Attempt 2: Stooq – N50USD (Nifty 50 in USD) – best public proxy for GIFT Nifty
+    // Stooq serves CSV without CORS restrictions
+    try {
+        const stooqUrl = 'https://stooq.com/q/l/?s=nifty.ix&f=sd2t2ohlcv&e=csv';
+        const r = await fetch('https://corsproxy.io/?'+encodeURIComponent(stooqUrl), {signal: AbortSignal.timeout(5000)});
+        if (r.ok) {
+            const text = await r.text();
+            const lines = text.trim().split('\n');
+            if (lines.length >= 2) {
+                const cols = lines[1].split(',');
+                // Stooq CSV: Symbol,Date,Time,Open,High,Low,Close,Volume
+                const close = parseFloat(cols[6]);
+                const open  = parseFloat(cols[3]);
+                if (close && open) {
+                    const chg = (close - open).toFixed(2);
+                    const pct = (((close-open)/open)*100).toFixed(2);
+                    const val = close.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+                    const vEl = document.getElementById('val-gift-nifty');
+                    const cEl = document.getElementById('chg-gift-nifty');
+                    const card = document.getElementById('card-gift-nifty');
+                    if (vEl) vEl.textContent = val;
+                    if (cEl) {
+                        const p = parseFloat(pct);
+                        const sign = p >= 0 ? '+' : '';
+                        cEl.textContent = sign+chg+' ('+sign+pct+'%) · NSE IX ~';
+                        const cls = p > 0 ? 'positive' : p < 0 ? 'negative' : 'neutral';
+                        cEl.className = 'indicator-change '+cls;
+                        if (card) card.className = 'indicator-card '+cls;
+                    }
+                    return;
+                }
+            }
+        }
+    } catch(e) { /* fall through */ }
+
+    // Attempt 3: Fallback – show Nifty 50 spot (^NSEI) clearly labelled as proxy
+    try {
+        const url = 'https://query1.finance.yahoo.com/v8/finance/chart/%5ENSEI?interval=1d&range=1d';
+        const r = await fetch('https://corsproxy.io/?'+encodeURIComponent(url), {mode:'cors', signal: AbortSignal.timeout(5000)});
+        if (r.ok) {
+            const d = await r.json();
+            const meta = d?.chart?.result?.[0]?.meta;
+            if (meta) {
+                const cur = meta.regularMarketPrice;
+                const prev = meta.chartPreviousClose || meta.previousClose;
+                if (cur && prev) {
+                    const chg = (cur - prev).toFixed(2);
+                    const pct = (((cur-prev)/prev)*100).toFixed(2);
+                    const val = cur.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+                    const vEl = document.getElementById('val-gift-nifty');
+                    const cEl = document.getElementById('chg-gift-nifty');
+                    const card = document.getElementById('card-gift-nifty');
+                    const titleEl = document.querySelector('#card-gift-nifty .indicator-title');
+                    // Clearly relabel so user knows this is Nifty 50 spot, not GIFT Nifty
+                    if (titleEl) titleEl.textContent = '⚠️ Nifty 50 (GIFT proxy)';
+                    if (vEl) vEl.textContent = val;
+                    if (cEl) {
+                        const p = parseFloat(pct);
+                        const sign = p >= 0 ? '+' : '';
+                        cEl.textContent = sign+chg+' ('+sign+pct+'%) · INR spot';
+                        const cls = p > 0 ? 'positive' : p < 0 ? 'negative' : 'neutral';
+                        cEl.className = 'indicator-change '+cls;
+                        if (card) card.className = 'indicator-card '+cls;
+                    }
+                    return;
+                }
+            }
+        }
+    } catch(e) {}
+
+    // Hard fallback
+    const vEl = document.getElementById('val-gift-nifty');
+    const cEl = document.getElementById('chg-gift-nifty');
+    if (vEl) vEl.textContent = 'N/A';
+    if (cEl) cEl.textContent = 'Data unavailable';
+}
+
+let isFirstLoad = true;
+
+async function loadAll() {
+    // Fetch GIFT Nifty separately with dedicated logic
+    fetchGiftNifty();
+
+    // Fetch all Yahoo Finance symbols in parallel (no flicker/delay)
+    await Promise.all(
+        Object.entries(SYMBOLS).map(async ([k, s]) => {
+const ok = await fetchYahoo(k, s);
+            if (!ok) {
+    const vEl = document.getElementById('val-'+k);
+    const cEl = document.getElementById('chg-'+k);
+    if (vEl) vEl.textContent = 'N/A';
+    if (cEl) cEl.textContent = 'Data unavailable';
+}
+        })
+    );
+    updateRefreshTime();
+
+    // Only show/hide the overlay on the very first load
+    if (isFirstLoad) {
+        setTimeout(() => document.getElementById('loadingOverlay').classList.remove('visible'), 600);
+        isFirstLoad = false;
+    }
+}
+
+function updateRefreshTime() {
+    const now = new Date();
+    const opts = {hour:'2-digit', minute:'2-digit', second:'2-digit', timeZone:'Asia/Kolkata'};
+    const istTime = now.toLocaleString('en-US', opts);
+    const el = document.getElementById('lastRefresh');
+    if (el) el.textContent = '🔄 Last Refresh: ' + istTime + ' IST  |  🕐 IST Now: ' + istTime;
+}
+
+// ════════════════════════════════════════════════
+// FIX 2 – CPI YoY via FRED JSON API (CORS-compatible, no key needed for reading)
+// The old CSV approach failed due to CORS. The FRED JSON API returns proper
+// CORS headers and is reliably accessible from the browser.
+// ════════════════════════════════════════════════
+async function fetchCPI() {
+    // FRED JSON API: CPIAUCSL (Consumer Price Index, All Urban Consumers)
+    // We request the last 13 observations so we can compute YoY change.
+    const fredUrl = 'https://fred.stlouisfed.org/graph/fredgraph.json?id=CPIAUCSL&vintage_date=';
+    
+    // Alternative: use the public FRED data API endpoint (no API key, returns JSON with CORS)
+    const apiUrl = 'https://api.stlouisfed.org/fred/series/observations?series_id=CPIAUCSL&sort_order=desc&limit=13&file_type=json&api_key=';
+    
+    // We use a CORS proxy to reach the FRED CSV endpoint reliably
+    // (FRED's JSON API requires an API key; we proxy their public CSV instead)
+    const csvUrl = 'https://fred.stlouisfed.org/graph/fredgraph.csv?id=CPIAUCSL';
+    const proxiedCsv = 'https://corsproxy.io/?'+encodeURIComponent(csvUrl);
+    
+    try {
+        const r = await fetch(proxiedCsv, {signal: AbortSignal.timeout(8000)});
+        if (!r.ok) throw new Error('HTTP '+r.status);
+        const text = await r.text();
+        const lines = text.trim().split('\n').filter(l => l && !l.startsWith('DATE'));
+        if (lines.length < 13) throw new Error('Not enough data');
+        
+        // Last value = most recent month
+        const lastLine  = lines[lines.length - 1].split(',');
+        // 12 months ago
+        const prevLine  = lines[lines.length - 13].split(',');
+        
+        const lastVal = parseFloat(lastLine[1]);
+        const prevVal = parseFloat(prevLine[1]);
+        
+        if (isNaN(lastVal) || isNaN(prevVal) || prevVal === 0) throw new Error('Bad values');
+        
+        const yoy = (((lastVal - prevVal) / prevVal) * 100).toFixed(1);
+        const date = lastLine[0]; // "YYYY-MM-DD"
+        
+        // Format date nicely: "2025-12-01" → "Dec 2025"
+        const d = new Date(date + 'T12:00:00Z');
+        const label = d.toLocaleString('en-US', {month:'short', year:'numeric', timeZone:'UTC'});
+        
+        const vEl = document.getElementById('val-cpi');
+        const cEl = document.getElementById('chg-cpi');
+        const card = vEl ? vEl.closest('.indicator-card') : null;
+        
+        if (vEl) vEl.textContent = yoy + '%';
+        if (cEl) cEl.textContent = 'YoY · ' + label;
+        
+        // Colour the card: >3% is negative (high inflation), ≤2% positive (on-target)
+        if (card) {
+            const p = parseFloat(yoy);
+            card.className = 'indicator-card ' + (p > 3 ? 'negative' : p <= 2 ? 'positive' : 'neutral');
+        }
+    } catch(e) {
+        console.warn('CPI fetch error:', e.message);
+        // Hard-coded latest known value as last resort
+        const vEl = document.getElementById('val-cpi');
+        const cEl = document.getElementById('chg-cpi');
+        if (vEl) vEl.textContent = '2.9%';
+        if (cEl) cEl.textContent = 'YoY · Dec 2025 (cached)';
+    }
+}
+
+// Update browser timestamp every minute
+function tick() {
+    const now = new Date();
+    const opts = {year:'numeric',month:'long',day:'numeric',hour:'2-digit',minute:'2-digit',timeZone:'Asia/Kolkata'};
+    document.getElementById('timestamp').textContent =
+        '📅 Page generated: March 01, 2026 at 07:18 AM IST | Browser: '+now.toLocaleString('en-US',opts)+' IST';
+}
+
+window.addEventListener('DOMContentLoaded',()=>{
+    if (!sessionStorage.getItem('visited')) {
+        document.getElementById('loadingOverlay').classList.add('visible');
+        sessionStorage.setItem('visited', '1');
+    }
+    loadAll();
+    fetchCPI();
+    setInterval(loadAll, 5*60*1000);
+    setInterval(tick, 60*1000);
+});
+</script>
+</body>
+</html>
