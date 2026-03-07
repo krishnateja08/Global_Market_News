@@ -404,13 +404,7 @@ body {{
 .main::-webkit-scrollbar {{ width:4px; }}
 .main::-webkit-scrollbar-thumb {{ background:var(--border); border-radius:2px; }}
 
-/* ── INDICATORS PANEL ── */
-.ind-panel {{
-  background: #101010;
-  border-bottom: 1px solid var(--border);
-  padding: 14px 16px;
-  flex-shrink: 0;
-}}
+/* ── INDICATORS / ECON PANELS ── */
 .ind-panel-hdr {{
   color: var(--orange);
   font-size: 11px;
@@ -798,51 +792,16 @@ body {{
   <!-- ═══ MAIN ═══ -->
   <div class="main">
 
-    <!-- ── LIVE MARKET INDICATORS ── -->
-    <div class="ind-panel">
-      <div class="ind-panel-hdr">▶ LIVE MARKET INDICATORS</div>
-      <div class="ind-row">
-        <div class="ind-cell neu" id="card-gift-nifty">
-          <div class="ind-name">GIFT NIFTY (NSE IX)</div>
-          <div class="ind-val" id="val-gift-nifty">Loading…</div>
-          <div class="ind-chg neu" id="chg-gift-nifty">Futures · USD-denom.</div>
-        </div>
-        <div class="ind-cell neu" id="card-dow">
-          <div class="ind-name">DOW JONES</div>
-          <div class="ind-val" id="val-dow">Loading…</div>
-          <div class="ind-chg neu" id="chg-dow">…</div>
-        </div>
-        <div class="ind-cell neu" id="card-sp500">
-          <div class="ind-name">S&amp;P 500</div>
-          <div class="ind-val" id="val-sp500">Loading…</div>
-          <div class="ind-chg neu" id="chg-sp500">…</div>
-        </div>
-        <div class="ind-cell neu" id="card-nasdaq">
-          <div class="ind-name">NASDAQ</div>
-          <div class="ind-val" id="val-nasdaq">Loading…</div>
-          <div class="ind-chg neu" id="chg-nasdaq">…</div>
-        </div>
-        <div class="ind-cell neu" id="card-oil">
-          <div class="ind-name">CRUDE OIL</div>
-          <div class="ind-val" id="val-oil">Loading…</div>
-          <div class="ind-chg neu" id="chg-oil">…</div>
-        </div>
-        <div class="ind-cell neu" id="card-dollar">
-          <div class="ind-name">USD INDEX</div>
-          <div class="ind-val" id="val-dollar">Loading…</div>
-          <div class="ind-chg neu" id="chg-dollar">…</div>
-        </div>
-        <div class="ind-cell neu" id="card-gold">
-          <div class="ind-name">GOLD</div>
-          <div class="ind-val" id="val-gold">Loading…</div>
-          <div class="ind-chg neu" id="chg-gold">…</div>
-        </div>
-        <div class="ind-cell neu" id="card-silver">
-          <div class="ind-name">SILVER</div>
-          <div class="ind-val" id="val-silver">Loading…</div>
-          <div class="ind-chg neu" id="chg-silver">…</div>
-        </div>
-      </div>
+    <!-- Hidden elements kept for JS ticker/sidebar updates (panel removed – prices shown in sidebar + ticker) -->
+    <div style="display:none">
+      <span id="card-gift-nifty"></span><span id="val-gift-nifty"></span><span id="chg-gift-nifty"></span>
+      <span id="card-dow"></span><span id="val-dow"></span><span id="chg-dow"></span>
+      <span id="card-sp500"></span><span id="val-sp500"></span><span id="chg-sp500"></span>
+      <span id="card-nasdaq"></span><span id="val-nasdaq"></span><span id="chg-nasdaq"></span>
+      <span id="card-oil"></span><span id="val-oil"></span><span id="chg-oil"></span>
+      <span id="card-dollar"></span><span id="val-dollar"></span><span id="chg-dollar"></span>
+      <span id="card-gold"></span><span id="val-gold"></span><span id="chg-gold"></span>
+      <span id="card-silver"></span><span id="val-silver"></span><span id="chg-silver"></span>
     </div>
 
     <!-- ── USA ECONOMIC INDICATORS ── -->
