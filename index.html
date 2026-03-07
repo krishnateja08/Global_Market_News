@@ -4,1467 +4,1075 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Global Market Dashboard – Live News</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Space+Mono:wght@400;700&family=IBM+Plex+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;600;700&family=IBM+Plex+Sans:wght@300;400;600&display=swap" rel="stylesheet">
 <style>
+/* ══════════════════════════════════════════
+   BLOOMBERG TERMINAL THEME
+   ══════════════════════════════════════════ */
 :root {
-    --primary-bg: #0a0e27; --secondary-bg: #141b3d; --accent-bg: #1a2347;
-    --text-primary: #e8edf5; --text-secondary: #a8b2d1;
-    --accent-blue: #4a9eff; --accent-green: #00ff88; --accent-red: #ff4757;
-    --accent-yellow: #ffd93d; --accent-purple: #a78bfa;
-    --accent-pink: #f093fb; --accent-cyan: #4facfe; --accent-orange: #ff9f43;
-    --border-color: #2a3a5f; --card-shadow: rgba(0,0,0,.5);
-    --usa-red:#B22234; --usa-blue:#3C3B6E;
-    --india-saffron:#FF9933; --india-green:#138808; --india-navy:#000080;
+  --bg: #0d0d0d;
+  --panel: #111111;
+  --panel2: #161616;
+  --border: #2a2a2a;
+  --border2: #1e1e1e;
+  --orange: #ff6600;
+  --orange-dim: rgba(255,102,0,0.08);
+  --orange-mid: rgba(255,102,0,0.18);
+  --green: #00ff41;
+  --green-dim: rgba(0,255,65,0.08);
+  --red: #ff2244;
+  --red-dim: rgba(255,34,68,0.08);
+  --yellow: #ffd700;
+  --blue: #00aaff;
+  --muted: #555;
+  --muted2: #3a3a3a;
+  --text: #cccccc;
+  --white: #eeeeee;
 }
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'IBM Plex Sans',sans-serif;background:linear-gradient(135deg,#0a0e27 0%,#1a1f3a 50%,#0f1629 100%);color:var(--text-primary);min-height:100vh;padding:20px;overflow-x:hidden}
-body::before{content:'';position:fixed;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(circle,rgba(74,158,255,.08) 1px,transparent 1px);background-size:50px 50px;animation:moveGrid 25s linear infinite;z-index:0}
-@keyframes moveGrid{0%{transform:translate(0,0)}100%{transform:translate(50px,50px)}}
-.container{max-width:1600px;margin:0 auto;position:relative;z-index:1}
 
-/* ── HEADER ── */
-header{text-align:center;margin-bottom:30px;padding:25px 20px;background:rgba(26,35,71,.5);backdrop-filter:blur(10px);border-radius:15px;border:1px solid var(--border-color);box-shadow:0 15px 40px var(--card-shadow);position:relative;overflow:hidden}
-header::after{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(74,158,255,.15),transparent);animation:shimmer 3s infinite}
-@keyframes shimmer{0%{left:-100%}100%{left:100%}}
-h1{font-family:'Playfair Display',serif;font-size:2.2em;font-weight:900;background:linear-gradient(135deg,#4a9eff,#00ff88);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:10px;letter-spacing:-1px;position:relative;z-index:1}
-.subtitle{font-family:'Space Mono',monospace;font-size:.85em;color:var(--text-secondary);letter-spacing:1px;text-transform:uppercase}
-.live-badge{display:inline-block;background:linear-gradient(135deg,#ff4757,#ff6b81);color:#fff;padding:5px 15px;border-radius:20px;font-size:.7em;font-weight:700;margin-top:10px;animation:pulse 2s infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.7}}
-.timestamp{margin-top:12px;font-family:'Space Mono',monospace;font-size:.75em;color:var(--accent-blue);opacity:.9}
-.stat-bar{margin-top:12px;font-family:'Space Mono',monospace;font-size:.7em;color:var(--accent-green)}
+* { margin:0; padding:0; box-sizing:border-box; }
 
-/* ── SECTION TITLES ── */
-.section-title{font-family:'Playfair Display',serif;font-size:2.2em;font-weight:900;margin-bottom:25px;background:linear-gradient(135deg,var(--accent-blue),var(--accent-cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.section-title-usa{font-family:'Playfair Display',serif;font-size:2.2em;font-weight:900;margin-bottom:25px;background:linear-gradient(135deg,var(--usa-red),#fff,var(--usa-blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.section-title-india{font-family:'Playfair Display',serif;font-size:2.2em;font-weight:900;margin-bottom:25px;background:linear-gradient(135deg,var(--india-saffron),#fff,var(--india-green));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
 
-/* ── INDICATOR CARDS ── */
-.indicators-grid{display:flex;gap:15px;margin-bottom:40px;overflow-x:auto;padding-bottom:10px}
-.indicator-card{background:rgba(26,35,71,.6);backdrop-filter:blur(10px);padding:15px 20px;border-radius:12px;border:1px solid var(--border-color);box-shadow:0 8px 20px var(--card-shadow);transition:all .3s;position:relative;overflow:hidden;min-width:175px;flex-shrink:0}
-.indicator-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
-.indicator-card.positive::before{background:linear-gradient(90deg,var(--accent-green),var(--accent-blue))}
-.indicator-card.negative::before{background:linear-gradient(90deg,var(--accent-red),var(--accent-yellow))}
-.indicator-card.neutral::before{background:linear-gradient(90deg,var(--text-secondary),var(--accent-blue))}
-.indicator-card:hover{transform:translateY(-3px);box-shadow:0 12px 30px rgba(74,158,255,.3);border-color:var(--accent-blue)}
-.indicator-title{font-family:'Space Mono',monospace;font-size:.68em;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;white-space:nowrap}
-.indicator-value{font-family:'Playfair Display',serif;font-size:1.4em;font-weight:700;color:var(--text-primary);margin-bottom:6px;white-space:nowrap}
-.indicator-change{font-family:'Space Mono',monospace;font-size:.78em;padding:3px 8px;border-radius:4px;display:inline-block;white-space:nowrap}
-.positive{color:var(--accent-green);background:rgba(0,255,136,.1)}
-.negative{color:var(--accent-red);background:rgba(255,71,87,.1)}
-.neutral{color:var(--text-secondary);background:rgba(168,178,209,.1)}
+/* ── TOP BAR ── */
+.topbar {
+  background: var(--orange);
+  color: #000;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 5px 16px;
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 2px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.topbar-left { display:flex; align-items:center; gap:16px; }
+.topbar-right { display:flex; gap: 20px; font-weight: 400; font-size: 10px; }
+.topbar-dot { width:8px; height:8px; border-radius:50%; background:#000; animation: blink 1.5s step-end infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
 
-/* ── NEWS SECTION ── */
-.news-section{margin-top:60px}
-.news-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(420px,1fr));gap:30px;margin-bottom:40px}
-.news-category-card{background:rgba(26,35,71,.6);backdrop-filter:blur(10px);padding:28px;border-radius:15px;border:1px solid var(--border-color);box-shadow:0 10px 30px var(--card-shadow)}
-.category-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;padding-bottom:12px;border-bottom:2px solid}
-.category-title{font-family:'Playfair Display',serif;font-size:1.5em;font-weight:700}
-.article-count{font-family:'Space Mono',monospace;font-size:.7em;color:var(--text-secondary);background:rgba(74,158,255,.1);padding:3px 8px;border-radius:10px}
+/* ── TICKER STRIP ── */
+.ticker {
+  background: #1a1a1a;
+  border-bottom: 1px solid var(--border);
+  padding: 5px 0;
+  overflow: hidden;
+  white-space: nowrap;
+}
+.ticker-track {
+  display: inline-flex;
+  gap: 0;
+  animation: scroll-ticker 60s linear infinite;
+}
+.ticker-track:hover { animation-play-state: paused; }
+.ticker-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 24px;
+  border-right: 1px solid var(--border);
+  font-size: 11px;
+  letter-spacing: 0.3px;
+}
+.t-sym { color: var(--orange); font-weight: 700; }
+.t-val { color: var(--white); }
+.t-pos { color: var(--green); }
+.t-neg { color: var(--red); }
+.t-neu { color: var(--muted); }
+@keyframes scroll-ticker {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
 
-/* ── NEWS ITEMS ── */
-.news-item{padding:14px;margin-bottom:10px;background:rgba(10,14,39,.4);border-radius:10px;border-left:3px solid var(--accent-blue);transition:all .2s;cursor:pointer;user-select:none}
-.news-item:hover{background:rgba(10,14,39,.65);transform:translateX(4px);box-shadow:0 4px 15px rgba(74,158,255,.2)}
-.news-item-header{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
-.news-item h3{font-size:.93em;line-height:1.4;font-weight:600;color:var(--text-primary);flex:1}
-.expand-icon{font-size:.8em;color:var(--accent-blue);margin-top:3px;transition:transform .25s;flex-shrink:0}
-.expand-icon.open{transform:rotate(180deg)}
-.news-meta{display:flex;gap:10px;align-items:center;margin-top:7px;font-size:.73em;color:var(--text-secondary);flex-wrap:wrap}
-.news-source{background:var(--accent-blue);color:#fff;padding:2px 8px;border-radius:10px;font-size:.85em;font-family:'Space Mono',monospace}
-.news-date{font-family:'Space Mono',monospace}
+/* ── MAIN SHELL ── */
+.shell {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  height: calc(100vh - 52px);
+}
 
-/* ── EXPANDABLE CONTENT ── */
-.news-expand{display:none;margin-top:12px;padding-top:12px;border-top:1px solid rgba(74,158,255,.2)}
-.news-expand.open{display:block;animation:fadeIn .25s ease}
-@keyframes fadeIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}
-.news-summary{font-size:.88em;line-height:1.6;color:var(--text-secondary);margin-bottom:10px}
-.read-more{display:inline-block;margin-top:6px;padding:6px 14px;background:linear-gradient(135deg,var(--accent-blue),var(--accent-cyan));color:#fff;border-radius:8px;font-size:.78em;font-family:'Space Mono',monospace;text-decoration:none;transition:opacity .2s}
-.read-more:hover{opacity:.8}
+/* ── SIDEBAR ── */
+.sidebar {
+  background: var(--panel);
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  padding: 16px 0 40px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+.sidebar::-webkit-scrollbar { width:4px; }
+.sidebar::-webkit-scrollbar-track { background:transparent; }
+.sidebar::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
 
-/* ── category border colours ── */
-.markets .news-item{border-left-color:var(--accent-red)}
-.economic .news-item{border-left-color:var(--accent-pink)}
-.india .news-item{border-left-color:var(--accent-yellow)}
-.corporate .news-item{border-left-color:var(--accent-cyan)}
-.geopolitical .news-item{border-left-color:var(--accent-green)}
-.google_trending .news-item{border-left-color:var(--accent-orange)}
+.sb-section { margin-bottom: 22px; }
+.sb-label {
+  color: var(--orange);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  padding: 4px 14px 7px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.sb-item {
+  padding: 7px 14px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-left: 3px solid transparent;
+  transition: all 0.12s;
+  font-size: 11px;
+}
+.sb-item:hover { background: var(--orange-dim); border-left-color: rgba(255,102,0,0.4); }
+.sb-item.active { background: var(--orange-dim); border-left-color: var(--orange); }
+.sb-item .sb-name { color: var(--white); }
+.sb-item .sb-count {
+  color: var(--muted);
+  font-size: 10px;
+  background: var(--border2);
+  padding: 1px 6px;
+  border-radius: 2px;
+}
+.sb-item.active .sb-count { background: var(--orange-mid); color: var(--orange); }
+
+.sb-ind-row {
+  padding: 6px 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 10px;
+  border-bottom: 1px solid var(--border2);
+}
+.sb-ind-row:last-child { border-bottom: none; }
+.sb-ind-name { color: var(--text); }
+.sb-ind-val { font-weight: 700; font-size: 10px; }
+.sb-ind-val.pos { color: var(--green); }
+.sb-ind-val.neg { color: var(--red); }
+.sb-ind-val.neu { color: var(--muted); }
+
+/* ── MAIN CONTENT ── */
+.main { overflow-y: auto; display: flex; flex-direction: column; scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
+.main::-webkit-scrollbar { width:4px; }
+.main::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
+
+/* ── INDICATORS PANEL ── */
+.ind-panel {
+  background: #0f0f0f;
+  border-bottom: 1px solid var(--border);
+  padding: 14px 16px;
+  flex-shrink: 0;
+}
+.ind-panel-hdr {
+  color: var(--orange);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ind-panel-hdr::after { content:''; flex:1; height:1px; background: linear-gradient(90deg, rgba(255,102,0,0.4), transparent); }
+
+.ind-row { display: flex; gap: 2px; flex-wrap: wrap; }
+
+.ind-cell {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  padding: 9px 13px;
+  min-width: 130px;
+  flex: 1;
+  position: relative;
+  transition: border-color 0.2s;
+}
+.ind-cell::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+}
+.ind-cell.pos::after { background: var(--green); }
+.ind-cell.neg::after { background: var(--red); }
+.ind-cell.neu::after { background: var(--muted); }
+.ind-cell:hover { border-color: var(--orange); }
+
+.ind-name {
+  color: var(--muted);
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.ind-val {
+  color: var(--white);
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 3px;
+  white-space: nowrap;
+  letter-spacing: -0.5px;
+}
+.ind-chg {
+  font-size: 10px;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+.ind-chg.pos { color: var(--green); }
+.ind-chg.neg { color: var(--red); }
+.ind-chg.neu { color: var(--muted); }
+
+/* ── USA / INDIA ECON PANELS ── */
+.econ-section {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+  background: #0f0f0f;
+  flex-shrink: 0;
+}
+.econ-hdr {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.econ-hdr.usa { color: #B22234; }
+.econ-hdr.usa::after { content:''; flex:1; height:1px; background: linear-gradient(90deg, rgba(178,34,52,0.5), transparent); }
+.econ-hdr.india { color: #FF9933; }
+.econ-hdr.india::after { content:''; flex:1; height:1px; background: linear-gradient(90deg, rgba(255,153,51,0.5), transparent); }
+
+/* ── CATEGORY TABS ── */
+.cat-tabs {
+  display: flex;
+  gap: 0;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--border);
+  background: #0f0f0f;
+  overflow-x: auto;
+  flex-shrink: 0;
+  scrollbar-width: none;
+}
+.cat-tabs::-webkit-scrollbar { display:none; }
+.cat-tab {
+  padding: 7px 16px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+.cat-tab:hover { color: var(--white); }
+.cat-tab.active {
+  color: var(--orange);
+  border-bottom-color: var(--orange);
+}
+
+/* ── NEWS AREA ── */
+.news-area { flex: 1; padding: 14px 16px; overflow-y: auto; }
+.news-hdr {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.news-hdr-title {
+  color: var(--orange);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+.news-hdr-meta { color: var(--muted); font-size: 10px; }
+
+/* ── NEWS TABLE ── */
+.news-table { width: 100%; border-collapse: collapse; }
+.news-table tbody tr {
+  border-bottom: 1px solid var(--border2);
+  cursor: pointer;
+  transition: background 0.1s;
+}
+.news-table tbody tr:hover td { background: rgba(255,102,0,0.04); }
+.news-table tbody tr.open td { background: rgba(255,102,0,0.06); }
+
+.td-num {
+  color: var(--muted);
+  font-size: 9px;
+  padding: 10px 8px 10px 4px;
+  width: 28px;
+  text-align: right;
+  vertical-align: top;
+  padding-top: 11px;
+}
+.td-time {
+  color: var(--muted);
+  font-size: 10px;
+  width: 76px;
+  white-space: nowrap;
+  padding: 10px 8px;
+  vertical-align: top;
+  padding-top: 11px;
+}
+.td-src {
+  width: 96px;
+  padding: 10px 8px;
+  vertical-align: top;
+  padding-top: 11px;
+}
+.src-badge {
+  display: inline-block;
+  background: var(--orange-dim);
+  color: var(--orange);
+  border: 1px solid rgba(255,102,0,0.25);
+  font-size: 9px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 2px;
+  white-space: nowrap;
+  letter-spacing: 0.5px;
+}
+.td-title { padding: 10px 8px; vertical-align: top; }
+.td-title .headline {
+  font-size: 12px;
+  color: var(--white);
+  line-height: 1.5;
+  letter-spacing: 0.2px;
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-weight: 400;
+}
+.td-title .expand-body {
+  display: none;
+  margin-top: 10px;
+  padding: 10px 12px;
+  background: rgba(255,102,0,0.04);
+  border-left: 2px solid var(--orange);
+}
+.news-table tbody tr.open .td-title .expand-body { display: block; }
+.expand-summary {
+  font-size: 11px;
+  color: var(--text);
+  line-height: 1.7;
+  font-family: 'IBM Plex Sans', sans-serif;
+  margin-bottom: 8px;
+}
+.expand-link {
+  display: inline-block;
+  color: var(--orange);
+  font-size: 10px;
+  text-decoration: none;
+  letter-spacing: 1px;
+  border-bottom: 1px solid rgba(255,102,0,0.3);
+  padding-bottom: 1px;
+  transition: opacity 0.15s;
+}
+.expand-link:hover { opacity: 0.7; }
+.td-arrow {
+  width: 24px;
+  padding: 10px 4px;
+  vertical-align: top;
+  padding-top: 11px;
+  text-align: center;
+}
+.arrow-icon {
+  color: var(--orange);
+  font-size: 10px;
+  display: inline-block;
+  transition: transform 0.2s;
+  opacity: 0.5;
+}
+.news-table tbody tr.open .arrow-icon {
+  transform: rotate(180deg);
+  opacity: 1;
+}
+.no-news {
+  color: var(--muted);
+  font-size: 11px;
+  padding: 20px 4px;
+  font-style: italic;
+}
 
 /* ── LOADING OVERLAY ── */
-.loading-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(10,14,39,.95);display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:9999;opacity:0;pointer-events:none;transition:opacity .5s}
-.loading-overlay.visible{opacity:1;pointer-events:all}
-.loading-overlay.hidden{opacity:0;pointer-events:none}
-.spinner{width:50px;height:50px;border:3px solid rgba(74,158,255,.3);border-top-color:#4a9eff;border-radius:50%;animation:spin 1s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-.loading-text{margin-top:20px;font-family:'Space Mono',monospace;color:var(--accent-blue);font-size:1.1em}
+.loading-overlay {
+  position: fixed; top:0; left:0; width:100%; height:100%;
+  background: rgba(10,10,10,0.96);
+  display: flex; flex-direction: column;
+  justify-content: center; align-items: center;
+  z-index: 9999; opacity: 0; pointer-events: none;
+  transition: opacity 0.4s;
+}
+.loading-overlay.visible { opacity:1; pointer-events:all; }
+.spinner {
+  width: 36px; height: 36px;
+  border: 2px solid rgba(255,102,0,0.2);
+  border-top-color: var(--orange);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-text {
+  margin-top: 16px;
+  font-size: 11px;
+  letter-spacing: 3px;
+  color: var(--orange);
+  text-transform: uppercase;
+}
 
-/* ── FOOTER ── */
-footer{margin-top:80px;text-align:center;padding:35px;background:rgba(26,35,71,.3);border-radius:15px;border:1px solid var(--border-color)}
-footer p{font-family:'Space Mono',monospace;font-size:.82em;color:var(--text-secondary)}
+/* ── STATUS BAR ── */
+.statusbar {
+  position: fixed; bottom:0; left:0; right:0;
+  background: var(--orange);
+  color: #000;
+  display: flex;
+  justify-content: space-between;
+  padding: 3px 14px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  z-index: 100;
+}
 
-@media(max-width:1024px){.news-grid{grid-template-columns:1fr}}
-@media(max-width:768px){h1{font-size:1.7em}.section-title,.section-title-usa,.section-title-india{font-size:1.7em}}
+/* ── SCROLLBAR (main sidebar) ── */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {
+  .shell { grid-template-columns: 1fr; height: auto; }
+  .sidebar { display: none; }
+  .ind-row { flex-wrap: wrap; }
+  .ind-cell { min-width: 120px; }
+}
 </style>
 </head>
 <body>
+
+<!-- LOADING OVERLAY -->
 <div class="loading-overlay" id="loadingOverlay">
-    <div class="spinner"></div>
-    <div class="loading-text">Loading Market Data…</div>
+  <div class="spinner"></div>
+  <div class="loading-text">Loading Market Data…</div>
 </div>
 
-<div class="container">
-
-<header>
-    <h1>🌍 Global Market Dashboard</h1>
-    <div class="subtitle">Real-Time Market Data &amp; Live News Headlines</div>
-    <div class="live-badge">🔴 LIVE – Fetched Fresh This Run</div>
-    <div class="timestamp" id="timestamp">📅 Generated: March 07, 2026 at 05:32 AM IST</div>
-<div class="timestamp" id="lastRefresh" style="margin-top:4px;">🔄 Last Refresh: -- | 🕐 IST Now: --</div>
-<div class="stat-bar">✅ 60 articles fetched across all categories</div>
-</header>
-
-<!-- ══ LIVE MARKET INDICATORS ══ -->
-<section>
-    <h2 class="section-title">Live Market Indicators</h2>
-    <div class="indicators-grid">
-        <!-- ✅ FIX 1: GIFT Nifty now fetched from NSE IFSC public data via Stooq/Yahoo proxy fallback -->
-        <div class="indicator-card neutral" id="card-gift-nifty">
-            <div class="indicator-title">🎯 GIFT Nifty (NSE IX)</div>
-            <div class="indicator-value" id="val-gift-nifty">Loading…</div>
-            <div class="indicator-change neutral" id="chg-gift-nifty">Futures · USD-denom.</div>
-        </div>
-        <div class="indicator-card neutral" id="card-dow">
-            <div class="indicator-title">📈 Dow Jones</div>
-            <div class="indicator-value" id="val-dow">Loading…</div>
-            <div class="indicator-change neutral" id="chg-dow">…</div>
-        </div>
-        <div class="indicator-card neutral" id="card-sp500">
-            <div class="indicator-title">💹 S&amp;P 500</div>
-            <div class="indicator-value" id="val-sp500">Loading…</div>
-            <div class="indicator-change neutral" id="chg-sp500">…</div>
-        </div>
-        <div class="indicator-card neutral" id="card-nasdaq">
-            <div class="indicator-title">💻 Nasdaq</div>
-            <div class="indicator-value" id="val-nasdaq">Loading…</div>
-            <div class="indicator-change neutral" id="chg-nasdaq">…</div>
-        </div>
-        <div class="indicator-card neutral" id="card-oil">
-            <div class="indicator-title">🛢️ Crude Oil</div>
-            <div class="indicator-value" id="val-oil">Loading…</div>
-            <div class="indicator-change neutral" id="chg-oil">…</div>
-        </div>
-        <div class="indicator-card neutral" id="card-dollar">
-            <div class="indicator-title">💵 Dollar Index</div>
-            <div class="indicator-value" id="val-dollar">Loading…</div>
-            <div class="indicator-change neutral" id="chg-dollar">…</div>
-        </div>
-        <div class="indicator-card neutral" id="card-gold">
-            <div class="indicator-title">🪙 Gold</div>
-            <div class="indicator-value" id="val-gold">Loading…</div>
-            <div class="indicator-change neutral" id="chg-gold">…</div>
-        </div>
-        <div class="indicator-card neutral" id="card-silver">
-            <div class="indicator-title">⚪ Silver</div>
-            <div class="indicator-value" id="val-silver">Loading…</div>
-            <div class="indicator-change neutral" id="chg-silver">…</div>
-        </div>
-    </div>
-</section>
-
-<!-- ══ USA ECONOMIC INDICATORS ══ -->
-<section>
-    <h2 class="section-title-usa">🇺🇸 USA Economic Indicators</h2>
-    <div class="indicators-grid">
-        <div class="indicator-card neutral"><div class="indicator-title">💵 Fed Funds Rate</div><div class="indicator-value">4.25–4.50%</div><div class="indicator-change neutral">Hold – Jan 2026</div></div>
-        <div class="indicator-card neutral"><div class="indicator-title">🏛️ FOMC Next</div><div class="indicator-value">Hold</div><div class="indicator-change neutral">Mar 18–19, 2026</div></div>
-        <!-- ✅ FIX 2: CPI now loaded via FRED JSON API (CORS-compatible) -->
-        <div class="indicator-card neutral"><div class="indicator-title">📊 CPI YoY</div><div class="indicator-value" id="val-cpi">Loading…</div><div class="indicator-change neutral" id="chg-cpi">Fetching…</div></div>
-        <div class="indicator-card neutral"><div class="indicator-title">📈 Core CPI</div><div class="indicator-value">3.3%</div><div class="indicator-change neutral">YoY Dec 2025</div></div>
-        <div class="indicator-card positive"><div class="indicator-title">💹 GDP Growth</div><div class="indicator-value">2.8%</div><div class="indicator-change positive">Q4 2025 Advance</div></div>
-        <div class="indicator-card positive"><div class="indicator-title">👔 Unemployment</div><div class="indicator-value">4.1%</div><div class="indicator-change positive">Jan 2026</div></div>
-        <div class="indicator-card positive"><div class="indicator-title">👥 NFP</div><div class="indicator-value">+256K</div><div class="indicator-change positive">Jan 2026</div></div>
-        <div class="indicator-card neutral"><div class="indicator-title">🏭 PPI YoY</div><div class="indicator-value">3.3%</div><div class="indicator-change neutral">Dec 2025</div></div>
-    </div>
-</section>
-
-<!-- ══ INDIA ECONOMIC INDICATORS ══ -->
-<section>
-    <h2 class="section-title-india">🇮🇳 India Economic Indicators</h2>
-    <div class="indicators-grid">
-        <div class="indicator-card neutral"><div class="indicator-title">💰 Repo Rate</div><div class="indicator-value">6.25%</div><div class="indicator-change neutral">RBI Feb 2026 Cut</div></div>
-        <div class="indicator-card neutral"><div class="indicator-title">📊 CPI</div><div class="indicator-value">5.22%</div><div class="indicator-change neutral">Dec 2025 YoY</div></div>
-        <div class="indicator-card neutral"><div class="indicator-title">📈 WPI</div><div class="indicator-value">2.4%</div><div class="indicator-change neutral">YoY Nov 2025</div></div>
-        <div class="indicator-card positive"><div class="indicator-title">🏭 IIP</div><div class="indicator-value">5.2%</div><div class="indicator-change positive">YoY Nov 2025</div></div>
-        <div class="indicator-card positive"><div class="indicator-title">📉 Mfg PMI</div><div class="indicator-value">57.7</div><div class="indicator-change positive">Jan 2026</div></div>
-        <div class="indicator-card positive"><div class="indicator-title">💹 GDP Growth</div><div class="indicator-value">6.4%</div><div class="indicator-change positive">FY 2024-25 Est.</div></div>
-        <div class="indicator-card neutral"><div class="indicator-title">🏛️ Fiscal Deficit</div><div class="indicator-value">4.9%</div><div class="indicator-change neutral">of GDP FY25 Target</div></div>
-<div class="indicator-card neutral" id="card-usdinr"><div class="indicator-title">💱 USD/INR</div><div class="indicator-value" id="val-usdinr">Loading…</div><div class="indicator-change neutral" id="chg-usdinr">…</div></div>
-    </div>
-</section>
-    </div>
-</section>
-
-<!-- ══ NEWS ══ -->
-<section class="news-section">
-    <h2 class="section-title">📰 Latest News Headlines</h2>
-    <p style="font-family:'Space Mono',monospace;font-size:.78em;color:var(--text-secondary);margin-bottom:20px;">
-        🖱️ Click any headline to expand &amp; read the summary. Click again to collapse.
-    </p>
-    <div class="news-grid">
-        
-            <div class="news-category-card markets">
-                <div class="category-header" style="border-bottom-color:var(--accent-red)">
-                    <h3 class="category-title" style="color:var(--accent-red)">📊 Market Updates</h3>
-                    <span class="article-count">10 articles</span>
-                </div>
-                <div>
-        <div class="news-item" onclick="toggleNews('news-markets-0')">
-            <div class="news-item-header">
-                <h3>Nvidia-Tied AI Stocks Vertiv, Lumentum, Coherent To Join S&amp;P 500 Index</h3>
-                <span class="expand-icon" id="icon-news-markets-0">&#9660;</span>
-            </div>
-            <div class="news-meta">
-                <span class="news-source">Yahoo Finance</span>
-                <span class="news-date">28 min ago</span>
-            </div>
-            <div class="news-expand" id="news-markets-0">
-                <p class="news-summary">AI stocks Vertiv, Lumentum and Coherent, all with strong Nvidia ties, will join the S&amp;P 500 before the open on March 23, along with EchoStar.</p>
-                <a class="read-more" href="https://finance.yahoo.com/m/33f0ef2c-6fa4-3f23-ac62-90a1bde91945/nvidia-tied-ai-stocks-vertiv%2C.html?.tsrc=rss" target="_blank" rel="noopener">Read Full Article &#8599;</a>
-            </div>
-        </div>
-
-        <div class="news-item" onclick="toggleNews('news-markets-1')">
-            <div class="news-item-header">
-                <h3>Stock Market Awaits Iran War News After Big Losses. Why Oil Prices Could Go Much Higher.</h3>
-                <span class="expand-icon" id="icon-news-markets-1">&#9660;</span>
-            </div>
-            <div class="news-meta">
-                <span class="news-source">Yahoo Finance</span>
-                <span class="news-date">34 min ago</span>
-            </div>
-            <div class="news-expand" id="news-markets-1">
-                <p class="news-summary">With the stock market reeling from crude oil&#x27;s record week, investors await Iran war news, including any Trump moves.</p>
-                <a class="read-more" href="https://finance.yahoo.com/m/988f8dd0-d506-3b09-a611-47793386faff/stock-market-awaits-iran-war.html?.tsrc=rss" target="_blank" rel="noopener">Read Full Article &#8599;</a>
-            </div>
-        </div>
-
-        <div class="news-item" onclick="toggleNews('news-markets-2')">
-            <div class="news-item-header">
-                <h3>Solstice Advanced Materials and SiTime Join the S&amp;P MidCap 400 As AI Stocks Reshuffle the Index</h3>
-                <span class="expand-icon" id="icon-news-markets-2">&#9660;</span>
-            </div>
-            <div class="news-meta">
-                <span class="news-source">Yahoo Finance</span>
-                <span class="news-date">43 min ago</span>
-            </div>
-            <div class="news-expand" id="news-markets-2">
-                <p class="news-summary">Tonight’s S&amp;P quarterly rebalancing is a clean snapshot of where the market’s center of gravity has shifted. Lumentum (LITE) and Coherent (COHR) graduated to the S&amp;P 500, leaving two vacancies in the S&amp;P MidCap 400. The companies stepping into those slots tell you everything about the AI trade right now: Solstice Advanced Materials (SOLS) and ... Solstice Advanced Materials and SiTime Join the S&amp;P MidCap 400 As AI Stocks Reshuffle the Index</p>
-                <a class="read-more" href="https://247wallst.com/investing/2026/03/06/solstice-advanced-materials-and-sitime-join-the-sp-midcap-400-as-ai-stocks-reshuffle-the-index/?.tsrc=rss" target="_blank" rel="noopener">Read Full Article &#8599;</a>
-            </div>
-        </div>
-
-        <div class="news-item" onclick="toggleNews('news-markets-3')">
-            <div class="news-item-header">
-                <h3>Stock Market Today, March 6: Energy Stocks Rise as Oil Closes Over $90 on Middle East Tensions</h3>
-                <span class="expand-icon" id="icon-news-markets-3">&#9660;</span>
-            </div>
-            <div class="news-meta">
-                <span class="news-source">Yahoo Finance</span>
-                <span class="news-date">53 min ago</span>
-            </div>
-            <div class="news-expand" id="news-markets-3">
-                <p class="news-summary">Energy names climb while most U.S. stocks retreat on stagflation fears and war-driven oil gains, today, March 6, 2026.</p>
-                <a class="read-more" href="https://www.fool.com/coverage/stock-market-today/2026/03/06/stock-market-today-march-6-energy-stocks-rise-as-oil-closes-over-usd90-on-middle-east-tensions/?.tsrc=rss" target="_blank" rel="noopener">Read Full Article &#8599;</a>
-            </div>
-        </div>
-
-        <div class="news-item" onclick="toggleNews('news-markets-4')">
-            <div class="news-item-header">
-                <h3>Vertiv and EchoStar lead tech surge in S&amp;P 500 rebalance</h3>
-                <span class="expand-icon" id="icon-news-markets-4">&#9660;</span>
-            </div>
-            <div class="news-meta">
-                <span class="news-source">Yahoo Finance</span>
-                <span class="news-date">55 min ago</span>
-            </div>
-            <div class="news-expand" id="news-markets-4">
-                <p class="news-summary">Investing.com -- S&amp;P Dow Jones Indices announced a sweeping overhaul of its benchmark tracking on Friday, propelling several technology and industrial firms into the prestigious S&amp;P 500. Shares of Vertiv Holdings Co (NYSE:VRT) surged 5.6% in after-hours trading following the news, while EchoStar Corporation (NASDAQ:SATS) and Lumentum Holdings Inc (NASDAQ:LITE) also saw significant gains. The quarterly reshuffle is designed to maintain the integrity of the market’s most-watched gauges. S&amp;P DJI st</p>
-                <a class="read-more" href="https://finance.yahoo.com/news/vertiv-echostar-lead-tech-surge-230634408.html?.tsrc=rss" target="_blank" rel="noopener">Read Full Article &#8599;</a>
-            </div>
-        </div>
-
-        <div class="news-item" onclick="toggleNews('news-markets-5')">
-            <div class="news-item-header">
-                <h3>MU, LRCX, AMAT, GEV All Added to the S&amp;P 100 As AI Stocks Gain Influence</h3>
-                <span class="expand-icon" id="icon-news-markets-5">&#9660;</span>
-            </div>
-            <div class="news-meta">
-                <span class="news-source">Yahoo Finance</span>
-                <span class="news-date">56 min ago</span>
-            </div>
-            <div class="news-expand" id="news-markets-5">
-                <p class="news-summary">It’s the Super Bowl of index rebalancing tonight! The biggest news was the S&amp;P 500 adding Vertiv (VRT), Lumentum (LITE), Coherent (COHR), and EchoStar (SATS). However, S&amp;P Dow Jones Indices also rebalanced other indexes like the S&amp;P 100 and S&amp;P MidCap 400. Four stocks were added to the S&amp;P 100 on the evening of March ... MU, LRCX, AMAT, GEV All Added to the S&amp;P 100 As AI Stocks Gain Influence</p>
-                <a class="read-more" href="https://247wallst.com/investing/2026/03/06/mu-lrcx-amat-gev-all-added-to-the-sp-100-as-ai-stocks-gain-influence/?.tsrc=rss" target="_blank" rel="noopener">Read Full Article &#8599;</a>
-            </div>
-        </div>
-
-        <div class="news-item" onclick="toggleNews('news-markets-6')">
-            <div class="news-item-header">
-                <h3>Wall Street&#x27;s &#x27;fear index&#x27; hits highest point since October</h3>
-                <span class="expand-icon" id="icon-news-markets-6">&#9660;</span>
-            </div>
-            <div class="news-meta">
-                <span class="news-source">Yahoo Finance</span>
-                <span class="news-date">1 hour ago</span>
-            </div>
-            <div class="news-expand" id="news-markets-6">
-                <p class="news-summary">As the war between the U.S.-Israel and Iran continues, Wall Street&#x27;s &quot;fear index&quot; hit the highest point since October 2025. The CBOE Volatility Index (VIX) is a popular measure of the stock market&#x27;s expectation of volatility based on S&amp;P 500 index options. It is calculated and disseminated ...</p>
-                <a class="read-more" href="https://www.thestreet.com/crypto/markets/wall-streets-fear-index-hits-highest-point-since-october?.tsrc=rss" target="_blank" rel="noopener">Read Full Article &#8599;</a>
-            </div>
-        </div>
-
-        <div class="news-item" onclick="toggleNews('news-markets-7')">
-            <div class="news-item-header">
-                <h3>What Investors Are Saying About the Tough Week in Markets</h3>
-                <span class="expand-icon" id="icon-news-markets-7">&#9660;</span>
-            </div>
-            <div class="news-meta">
-                <span class="news-source">Yahoo Finance</span>
-                <span class="news-date">1 hour ago</span>
-            </div>
-            <div class="news-expand" id="news-markets-7">
-                <p class="news-summary">The Dow industrials were the last holdout, turning negative for the year on Thursday and falling deeper into the hole Friday.  After a 453-point decline to end the week, the Dow is down 1.2% for the year and sitting at its lowest level since Dec. 2.  For 2026 so far, the S&amp;P is now down 1.5%, while the Nasdaq is down 3.7%.</p>
-                <a class="read-more" href="https://finance.yahoo.com/m/4e9ec6d7-3aca-394b-a06a-4a9080312172/what-investors-are-saying.html?.tsrc=rss" target="_blank" rel="noopener">Read Full Article &#8599;</a>
-            </div>
-        </div>
-
-        <div class="news-item" onclick="toggleNews('news-markets-8')">
-            <div class="news-item-header">
-                <h3>Lumentum, Coherent, and Vertiv Added to the S&amp;P 500 As AI Stocks Dominate Rebalancing</h3>
-                <span class="expand-icon" id="icon-news-markets-8">&#9660;</span>
-            </div>
-            <div class="news-meta">
-                <span class="news-source">Yahoo Finance</span>
-                <span class="news-date">1 hour ago</span>
-            </div>
-            <div class="news-expand" id="news-markets-8">
-                <p class="news-summary">Three stocks at the heart of the AI infrastructure boom just got their institutional stamp of approval. Lumentum (LITE), Coherent (COHR), and Vertiv (VRT) were announced as additions to the S&amp;P 500 tonight, as part of the quarterly index rebalancing. You can read the official S&amp;P Global announcement here. This is not a routine reshuffling. ... Lumentum, Coherent, and Vertiv Added to the S&amp;P 500 As AI Stocks Dominate Rebalancing</p>
-                <a class="read-more" href="https://247wallst.com/investing/2026/03/06/lumentum-coherent-and-vertiv-added-to-the-sp-500-as-ai-stocks-dominate-rebalancing/?.tsrc=rss" target="_blank" rel="noopener">Read Full Article &#8599;</a>
-            </div>
-        </div>
-
-        <div class="news-item" onclick="toggleNews('news-markets-9')">
-            <div class="news-item-header">
-                <h3>3 Reasons to Sell COMP and 1 Stock to Buy Instead</h3>
-                <span class="expand-icon" id="icon-news-markets-9">&#9660;</span>
-            </div>
-            <div class="news-meta">
-                <span class="news-source">Yahoo Finance</span>
-                <span class="news-date">1 hour ago</span>
-            </div>
-            <div class="news-expand" id="news-markets-9">
-                <p class="news-summary">Since September 2025, Compass has been in a holding pattern, posting a small loss of 1.6% while floating around $9.40. The stock also fell short of the S&amp;P 500’s 5.6% gain during that period.</p>
-                <a class="read-more" href="https://finance.yahoo.com/news/3-reasons-sell-comp-1-224437933.html?.tsrc=rss" target="_blank" rel="noopener">Read Full Article &#8599;</a>
-            </div>
-        </div></div>
-            </div>
-            <div class="news-category-card economic">
-                <div class="category-header" style="border-bottom-color:var(--accent-pink)">
-                    <h3 class="category-title" style="color:var(--accent-pink)">💰 Economic & Policy</h3>
-                    <span class="article-count">10 articles</span>
-                </div>
-                <div>
-        <div class="news-item" onclick="toggleNews('news-economic-0')">
-            <div class="news-item-header">
-                <h3>San Francisco Fed&#x27;s Daly says jobs report complicates interest rate call</h3>
-                <span class="expand-icon" id="icon-news-economic-0">&#9660;</span>
-            </div>
-            <div class="news-meta">
-                <span class="news-source">CNBC</span>
-                <span class="news-date">7 hours ago</span>
-            </div>
-            <div class="news-expand" id="news-economic-0">
-                <p class="news-summary">Daly told CNBC on Friday that the weak February jobs report adds to a difficult policymaking environment.</p>
-                <a class="read-more" href="https://www.cnbc.com/2026/03/06/san-francisco-feds-daly-says-jobs-report-complicates-interest-rate-call.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
-            </div>
-        </div>
-
-        <div class="news-item" onclick="toggleNews('news-economic-1')">
-            <div class="news-item-header">
-                <h3>U.S. payrolls unexpectedly fell by 92,000 in February; unemployment rate rises to 4.4%</h3>
-                <span class="expand-icon" id="icon-news-economic-1">&#9660;</span>
-            </div>
-            <div class="news-meta">
-                <span class="news-source">CNBC</span>
-                <span class="news-date">7 hours ago</span>
-            </div>
-            <div class="news-expand" id="news-economic-1">
-                <p class="news-summary">Nonfarm payrolls were expected to increase 50,000 in February while the unemployment rate held steady at 4.3%.</p>
-                <a class="read-more" href="https://www.cnbc.com/2026/03/06/february-2026-jobs-report.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
-            </div>
-        </div>
-
-        <div class="news-item" onclick="toggleNews('news-economic-2')">
-            <div class="news-item-header">
-                <h3>Here&#x27;s how the U.S.-Iran war is already hitting consumers&#x27; pocketbooks</h3>
-                <span class="expand-icon" id="icon-news-economic-2">&#9660;</span>
-            </div>
-            <div class="news-meta">
-                <span class="news-source">CNBC</span>
-                <span class="news-date">7 hours ago</span>
-            </div>
-            <div class="news-expand" id="news-economic-2">
-                <p class="news-summary">The U.S.-Israeli strikes on Iran over the weekend gave way to a week with topsy-turvy markets, spiking mortgage rates and higher prices at the pump.</p>
-                <a class="read-more" href="https://www.cnbc.com/2026/03/06/us-iran-war-gas-mortgage-markets.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
-            </div>
-        </div>
-
-        <div class="news-item" onclick="toggleNews('news-economic-3')">
-            <div class="news-item-header">
-                <h3>UAE mulls freezing Iranian assets as Middle East conflict escalates: WSJ</h3>
-                <span class="expand-icon" id="icon-news-economic-3">&#9660;</span>
-            </div>
-            <div class="news-meta">
-                <span class="news-source">CNBC</span>
-                <span class="news-date">11 hours ago</span>
-            </div>
-            <div class="news-expand" id="news-economic-3">
-                <p class="news-summary">The UAE is considering freezing billions of dollars of Iranian assets held in the Gulf state, potentially severing one of Tehran&#x27;s most critical economic lifelines.</p>
-                <a class="read-more" href="https://www.cnbc.com/2026/03/06/uae-mulls-freezing-iranian-assets-as-middle-east-conflict-escalates-wsj-.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
-            </div>
-        </div>
-
-        <div class="news-item" onclick="toggleNews('news-economic-4')">
-            <div class="news-item-header">
-                <h3>The February jobs numbers are coming out Friday. Here&#x27;s what to expect</h3>
-                <span class="expand-icon" id="icon-news-economic-4">&#9660;</span>
-            </div>
-            <div class="news-meta">
-                <span class="news-source">CNBC</span>
-                <span class="news-date">1 day ago</span>
-            </div>
-            <div class="news-expand" id="news-economic-4">
-                <p class="news-summary">Economists surveyed by Dow Jones expect payroll growth of 50,000, following January&#x27;s surprisingly high 130,000.</p>
-                <a class="read-more" href="https://www.cnbc.com/2026/03/05/february-2026-jobs-report-preview.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
-            </div>
-        </div>
-
-        <div class="news-item" onclick="toggleNews('news-economic-5')">
-            <div class="news-item-header">
-                <h3>Private companies added 63,000 jobs in February, January revised to just 11,000 additions, ADP says</h3>
-                <span class="expand-icon" id="icon-news-economic-5">&#9660;</span>
-            </div>
-            <div class="news-meta">
-                <span class="news-source">CNBC</span>
-                <span class="news-date">2 days ago</span>
-            </div>
-            <div class="news-expand" id="news-economic-5">
-                <p class="news-summary">Click to read the full article.</p>
-                <a class="read-more" href="https://www.cnbc.com/2026/03/04/private-companies-added-63000-jobs-in-february-january-revised-to-just-11000-additions-adp-says.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
-            </div>
-        </div>
-
-        <div class="news-item" onclick="toggleNews('news-economic-6')">
-            <div class="news-item-header">
-                <h3>Middle East conflict poses fresh test to central banks as oil shock fuels inflation</h3>
-                <span class="expand-icon" id="icon-news-economic-6">&#9660;</span>
-            </div>
-            <div class="news-meta">
-                <span class="news-source">CNBC</span>
-                <span class="news-date">2 days ago</span>
-            </div>
-            <div class="news-expand" id="news-economic-6">
-                <p class="news-summary">Middle East conflict has posed a fresh test to central banks, with fears of an oil shock and renewed inflation risks changing their bid to shore up growth.</p>
-                <a class="read-more" href="https://www.cnbc.com/2026/03/04/iran-israel-us-war-middle-east-conflict-oil-gas-lng-surge-central-banks-inflation-risk.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
-            </div>
-        </div>
-
-        <div class="news-item" onclick="toggleNews('news-economic-7')">
-            <div class="news-item-header">
-                <h3>As Trump declares inflation tamed, Iran conflict threatens new price pressures</h3>
-                <span class="expand-icon" id="icon-news-economic-7">&#9660;</span>
-            </div>
-            <div class="news-meta">
-                <span class="news-source">CNBC</span>
-                <span class="news-date">4 days ago</span>
-            </div>
-            <div class="news-expand" id="news-economic-7">
-                <p class="news-summary">The conflict involving Iran threatens another price spike that could undermine the president&#x27;s central case for lower interest rates.</p>
-                <a class="read-more" href="https://www.cnbc.com/2026/03/02/as-trump-declares-inflation-tamed-iran-conflict-threatens-new-price-pressures.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
-            </div>
-        </div>
-
-        <div class="news-item" onclick="toggleNews('news-economic-8')">
-            <div class="news-item-header">
-                <h3>Why Iran should not count on allies Russia and China to come to its aid</h3>
-                <span class="expand-icon" id="icon-news-economic-8">&#9660;</span>
-            </div>
-            <div class="news-meta">
-                <span class="news-source">CNBC</span>
-                <span class="news-date">3 days ago</span>
-            </div>
-            <div class="news-expand" id="news-economic-8">
-                <p class="news-summary">Iran&#x27;s closest allies, Russia and China, have not offered material support to it, exposing the hard limits of its &quot;strategic&quot; partnerships.</p>
-                <a class="read-more" href="https://www.cnbc.com/2026/03/02/iran-china-russia-strikes-assistance-alliance-weapons-missiles-geopolitics-oil-prices-ukraine.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
-            </div>
-        </div>
-
-        <div class="news-item" onclick="toggleNews('news-economic-9')">
-            <div class="news-item-header">
-                <h3>Iran conflict: Where things stand, global responses — and what comes next</h3>
-                <span class="expand-icon" id="icon-news-economic-9">&#9660;</span>
-            </div>
-            <div class="news-meta">
-                <span class="news-source">CNBC</span>
-                <span class="news-date">4 days ago</span>
-            </div>
-            <div class="news-expand" id="news-economic-9">
-                <p class="news-summary">The U.S.-Israel conflict with Iran is extending into its third day with each side pledging escalation.</p>
-                <a class="read-more" href="https://www.cnbc.com/2026/03/02/iran-israel-us-conflict-oil-jumps-trump-netanyahu-what-is-next.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
-            </div>
-        </div></div>
-            </div>
-            <div class="news-category-card india">
-                <div class="category-header" style="border-bottom-color:var(--accent-yellow)">
-                    <h3 class="category-title" style="color:var(--accent-yellow)">🇮🇳 Indian Markets</h3>
-                    <span class="article-count">10 articles</span>
-                </div>
-                <div>
-        <div class="news-item" onclick="toggleNews('news-india-0')">
-            <div class="news-item-header">
-                <h3>US Stocks: US retail sales decline as consumer pullback deepens</h3>
-                <span class="expand-icon" id="icon-news-india-0">&#9660;</span>
-            </div>
-            <div class="news-meta">
-                <span class="news-source">Economic Times</span>
-                <span class="news-date">8 hours ago</span>
-            </div>
-            <div class="news-expand" id="news-india-0">
-                <p class="news-summary">US retail sales declined by 0.2 percent in January, according to delayed government data released on Friday, missing some analysts&#x27; expectations amid persistent concerns that consumption in the world&#x27;s biggest economy is slowing.</p>
-                <a class="read-more" href="https://economictimes.indiatimes.com/markets/us-stocks/news/us-stocks-us-retail-sales-decline-as-consumer-pullback-deepens/articleshow/129163691.cms" target="_blank" rel="noopener">Read Full Article &#8599;</a>
-            </div>
-        </div>
-
-        <div class="news-item" onclick="toggleNews('news-india-1')">
-            <div class="news-item-header">
-                <h3>SAT gives partial relief to Kotak AMC in Sebi case on fixed maturity plan payouts</h3>
-                <span class="expand-icon" id="icon-news-india-1">&#9660;</span>
-            </div>
-            <div class="news-meta">
-                <span class="news-source">Economic Times</span>
-                <span class="news-date">8 hours ago</span>
-            </div>
-            <div class="news-expand" id="news-india-1">
-                <p class="news-summary">The Securities Appellate Tribunal granted partial relief to Kotak Mahindra AMC in the fixed maturity plan case by setting aside Sebi’s fee disgorgement order but upheld monetary penalties. The ruling relates to delayed investor payouts linked to recoveries from underlying investments.</p>
-                <a class="read-more" href="https://economictimes.indiatimes.com/markets/stocks/news/sat-gives-partial-relief-to-kotak-amc-in-sebi-case-on-fixed-maturity-plan-payouts/articleshow/129162398.cms" target="_blank" rel="noopener">Read Full Article &#8599;</a>
-            </div>
-        </div>
-
-        <div class="news-item" onclick="toggleNews('news-india-2')">
-            <div class="news-item-header">
-                <h3>US Stocks: Fed rate cut bets rise after weak jobs data</h3>
-                <span class="expand-icon" id="icon-news-india-2">&#9660;</span>
-            </div>
-            <div class="news-meta">
-                <span class="news-source">Economic Times</span>
-                <span class="news-date">9 hours ago</span>
-            </div>
-            <div class="news-expand" id="news-india-2">
-                <p class="news-summary">New signs of labor weakness and oil-driven inflation concerns may saddle U.S. ​Federal Reserve officials with a choice they&#x27;d hoped to avoid between ensuring prices remain contained or keeping a possibly wobbly job market on track.</p>
-                <a class="read-more" href="https://economictimes.indiatimes.com/markets/us-stocks/news/us-stocks-fed-rate-cut-bets-rise-after-weak-jobs-data/articleshow/129161811.cms" target="_blank" rel="noopener">Read Full Article &#8599;</a>
-            </div>
-        </div>
-
-        <div class="news-item" onclick="toggleNews('news-india-3')">
-            <div class="news-item-header">
-                <h3>US Stocks: US nonfarm payrolls decline in February; unemployment rate rises to 4.4%</h3>
-                <span class="expand-icon" id="icon-news-india-3">&#9660;</span>
-            </div>
-            <div class="news-meta">
-                <span class="news-source">Economic Times</span>
-                <span class="news-date">9 hours ago</span>
-            </div>
-            <div class="news-expand" id="news-india-3">
-                <p class="news-summary">The U.S. economy unexpectedly shed jobs in February amid a strike by ​healthcare workers and harsh winter weather, while the ​unemployment rate increased to 4.4%.</p>
-                <a class="read-more" href="https://economictimes.indiatimes.com/markets/us-stocks/news/us-stocks-us-nonfarm-payrolls-decline-in-february-unemployment-rate-rises-to-4-4/articleshow/129161175.cms" target="_blank" rel="noopener">Read Full Article &#8599;</a>
-            </div>
-        </div>
-
-        <div class="news-item" onclick="toggleNews('news-india-4')">
-            <div class="news-item-header">
-                <h3>Global Stocks: Big bond markets left battered and bruised as Middle East war stokes inflation angst</h3>
-                <span class="expand-icon" id="icon-news-india-4">&#9660;</span>
-            </div>
-            <div class="news-meta">
-                <span class="news-source">Economic Times</span>
-                <span class="news-date">9 hours ago</span>
-            </div>
-            <div class="news-expand" id="news-india-4">
-                <p class="news-summary">The world&#x27;s biggest bond markets were headed for their worst week ​since at least last April as concerns that war in the Middle East will renew upward pressure on inflation and force central banks to start hiking interest rates soon.</p>
-                <a class="read-more" href="https://economictimes.indiatimes.com/markets/us-stocks/news/global-stocks-big-bond-markets-left-battered-and-bruised-as-middle-east-war-stokes-inflation-angst/articleshow/129160889.cms" target="_blank" rel="noopener">Read Full Article &#8599;</a>
-            </div>
-        </div>
-
-        <div class="news-item" onclick="toggleNews('news-india-5')">
-            <div class="news-item-header">
-                <h3>US stocks today: Dow Jones crashes 800 points, S&amp;P 500, Nasdaq plummet over 1% as Mideast turmoil, weak jobs report weigh</h3>
-                <span class="expand-icon" id="icon-news-india-5">&#9660;</span>
-            </div>
-            <div class="news-meta">
-                <span class="news-source">Economic Times</span>
-                <span class="news-date">9 hours ago</span>
-            </div>
-            <div class="news-expand" id="news-india-5">
-                <p class="news-summary">Wall Street indexes tumbled Friday as Middle East conflict threatened inflation and weak jobs data surprised markets. Traders now see a 50/50 chance of a June Fed rate cut, but persistent high oil prices could keep the Fed on hold. Banking stocks led the decline, with Western Alliance shares plummeting.</p>
-                <a class="read-more" href="https://economictimes.indiatimes.com/markets/us-stocks/news/us-stocks-today-dow-jones-crashes-800-points-sp-500-nasdaq-plummet-over-1-as-middle-east-turmoil-weak-jobs-report-weigh/articleshow/129161017.cms" target="_blank" rel="noopener">Read Full Article &#8599;</a>
-            </div>
-        </div>
-
-        <div class="news-item" onclick="toggleNews('news-india-6')">
-            <div class="news-item-header">
-                <h3>Brent oil price tops $90 as Mideast war escalates</h3>
-                <span class="expand-icon" id="icon-news-india-6">&#9660;</span>
-            </div>
-            <div class="news-meta">
-                <span class="news-source">Economic Times</span>
-                <span class="news-date">9 hours ago</span>
-            </div>
-            <div class="news-expand" id="news-india-6">
-                <p class="news-summary">Oil prices jumped further on Friday after US President Donald Trump said only &quot;unconditional surrender&quot; of Iran will end the Middle East war, as fresh strikes hit the Islamic republic.</p>
-                <a class="read-more" href="https://economictimes.indiatimes.com/markets/commodities/news/brent-oil-price-tops-90-as-mideast-war-escalates/articleshow/129160021.cms" target="_blank" rel="noopener">Read Full Article &#8599;</a>
-            </div>
-        </div>
-
-        <div class="news-item" onclick="toggleNews('news-india-7')">
-            <div class="news-item-header">
-                <h3>PB Fintech: Goldman Sachs, Tata Mutual Fund buy stake in Rs 695 crore block deal</h3>
-                <span class="expand-icon" id="icon-news-india-7">&#9660;</span>
-            </div>
-            <div class="news-meta">
-                <span class="news-source">Economic Times</span>
-                <span class="news-date">10 hours ago</span>
-            </div>
-            <div class="news-expand" id="news-india-7">
-                <p class="news-summary">PB Fintech shares witnessed block deals worth Rs 695 crore, with Goldman Sachs, mutual funds, and foreign investors acquiring shares from Tencent Cloud Europe, signaling sustained institutional interest in the company.</p>
-                <a class="read-more" href="https://economictimes.indiatimes.com/markets/stocks/news/pb-fintech-goldman-sachs-tata-mutual-fund-buy-stake-in-rs-695-crore-block-deal/articleshow/129159306.cms" target="_blank" rel="noopener">Read Full Article &#8599;</a>
-            </div>
-        </div>
-
-        <div class="news-item" onclick="toggleNews('news-india-8')">
-            <div class="news-item-header">
-                <h3>Sebi approves 3 IPOs including Eastman Auto and Milestone Gears</h3>
-                <span class="expand-icon" id="icon-news-india-8">&#9660;</span>
-            </div>
-            <div class="news-meta">
-                <span class="news-source">Economic Times</span>
-                <span class="news-date">10 hours ago</span>
-            </div>
-            <div class="news-expand" id="news-india-8">
-                <p class="news-summary">Sebi has cleared IPOs for Bonbloc Technologies, Eastman Auto and Power, and Milestone Gears. The companies plan fresh equity and offers for sale, targeting NSE and BSE listings amid steady primary market activity.</p>
-                <a class="read-more" href="https://economictimes.indiatimes.com/markets/stocks/news/sebi-approves-3-ipos-including-eastman-auto-and-milestone-gears/articleshow/129158957.cms" target="_blank" rel="noopener">Read Full Article &#8599;</a>
-            </div>
-        </div>
-
-        <div class="news-item" onclick="toggleNews('news-india-9')">
-            <div class="news-item-header">
-                <h3>Oil marketing companies, paint stocks decline amid surging crude oil prices</h3>
-                <span class="expand-icon" id="icon-news-india-9">&#9660;</span>
-            </div>
-            <div class="news-meta">
-                <span class="news-source">Economic Times</span>
-                <span class="news-date">10 hours ago</span>
-            </div>
-            <div class="news-expand" id="news-india-9">
-                <p class="news-summary">Shares of oil marketing companies ended lower on Friday after a day&#x27;s breather amid surging crude oil prices due to the deepening conflict in West Asia.</p>
-                <a class="read-more" href="https://economictimes.indiatimes.com/markets/stocks/news/oil-marketing-companies-paint-stocks-decline-amid-surging-crude-oil-prices/articleshow/129157328.cms" target="_blank" rel="noopener">Read Full Article &#8599;</a>
-            </div>
-        </div></div>
-            </div>
-            <div class="news-category-card google_trending">
-                <div class="category-header" style="border-bottom-color:var(--accent-orange)">
-                    <h3 class="category-title" style="color:var(--accent-orange)">🔥 Google Trending Stocks</h3>
-                    <span class="article-count">10 articles</span>
-                </div>
-                <div>
-        <div class="news-item" onclick="toggleNews('news-google_trending-0')">
-            <div class="news-item-header">
-                <h3>Insolation Energy Receives Final Approval from BSE and NSE for Main Board Migration - scanx.trade</h3>
-                <span class="expand-icon" id="icon-news-google_trending-0">&#9660;</span>
-            </div>
-            <div class="news-meta">
-                <span class="news-source">news.google.com</span>
-                <span class="news-date">10 hours ago</span>
-            </div>
-            <div class="news-expand" id="news-google_trending-0">
-                <p class="news-summary">Insolation Energy Receives Final Approval from BSE and NSE for Main Board Migration  scanx.trade</p>
-                <a class="read-more" href="https://news.google.com/rss/articles/CBMi0wFBVV95cUxNLTE5Q3ByYTJiRzVkNnk5aTh1djdibDJNdGExWWxVYXpDenI4MUhpMndyWk5nbFlIN2U1eXBrcnRYOTVBQWhEbXRyZmVwTmZfUG5NQTZVMGhGY0loenZNR2dTdy1pcjdSeHQ5VHV5ajM3TllzT0ljTWF6RFpXd2ZtNEZMakE1VndnOC1uUEZiUjRGdzBBd3NRbnU0RnlUdzVWZ0NOOUZEZXNNOWVLZE14eWtGTWNqTW9rRFN3R2kxcFdhdHZOUHBpb3VKQWs3ZC1BbGs4?oc=5" target="_blank" rel="noopener">Read Full Article &#8599;</a>
-            </div>
-        </div>
-
-        <div class="news-item" onclick="toggleNews('news-google_trending-1')">
-            <div class="news-item-header">
-                <h3>Sensex falls over 1,000 points, Nifty drops 315 amid Middle East tensions - ddnews.gov.in</h3>
-                <span class="expand-icon" id="icon-news-google_trending-1">&#9660;</span>
-            </div>
-            <div class="news-meta">
-                <span class="news-source">news.google.com</span>
-                <span class="news-date">13 hours ago</span>
-            </div>
-            <div class="news-expand" id="news-google_trending-1">
-                <p class="news-summary">Sensex falls over 1,000 points, Nifty drops 315 amid Middle East tensions  ddnews.gov.in</p>
-                <a class="read-more" href="https://news.google.com/rss/articles/CBMingFBVV95cUxNTDVMMzdON0hVZFZiWG1jMDFYWUwxZFlBSmJRQTNwX1hSRGx0eTJFcE9yM1ZPWjYyUmJFT3hhUlQwd0k3V2pyV2pPYTRxVnFJbE5ORFBHLWo5bXhBM1FkakpmaDRiaEVCSmZDX1lsVUp4NFd2TDhFSXd4YTl2N19TZnRmdWdqcDVJOFZvNUFBdDJFalNWT3I3NTh6dURNdw?oc=5" target="_blank" rel="noopener">Read Full Article &#8599;</a>
-            </div>
-        </div>
-
-        <div class="news-item" onclick="toggleNews('news-google_trending-2')">
-            <div class="news-item-header">
-                <h3>Stock market holiday for Holi: Are NSE, BSE shut on Tuesday or Wednesday? - MSN</h3>
-                <span class="expand-icon" id="icon-news-google_trending-2">&#9660;</span>
-            </div>
-            <div class="news-meta">
-                <span class="news-source">news.google.com</span>
-                <span class="news-date">19 hours ago</span>
-            </div>
-            <div class="news-expand" id="news-google_trending-2">
-                <p class="news-summary">Stock market holiday for Holi: Are NSE, BSE shut on Tuesday or Wednesday?  MSN</p>
-                <a class="read-more" href="https://news.google.com/rss/articles/CBMi5gFBVV95cUxPRV9vR3VseFlqekZsT24yLUZLVTBock9qWnhQb3RLVGJQR0hBdkhzZnlRbVRrb1h0MUFyRmRpWXAxTEw1XzFEdFR4ZmJuRGtzUVBYSllFdjF4SnZCRTAtbHB2cnhLMTVMb2h4R0c5SG9QdFdfTmpuRDRLdG8wNU5kM1JBUC1YSHBSUEFxLWd5M2oxcWVkYzR5VFZBUEwtSDhHRVpUR2FtZGdDWEtIZWh0RWJnaWZoSmc1aGFpZmFscE9sV1cwYXIyeWdxRUowYTc1SVpKTVhTOXdSX1FoYUxrSXd3Q0lGZw?oc=5" target="_blank" rel="noopener">Read Full Article &#8599;</a>
-            </div>
-        </div>
-
-        <div class="news-item" onclick="toggleNews('news-google_trending-3')">
-            <div class="news-item-header">
-                <h3>ED Targets Firms Over Alleged NSE Pre-IPO Share Scam - BW Businessworld</h3>
-                <span class="expand-icon" id="icon-news-google_trending-3">&#9660;</span>
-            </div>
-            <div class="news-meta">
-                <span class="news-source">news.google.com</span>
-                <span class="news-date">1 hour ago</span>
-            </div>
-            <div class="news-expand" id="news-google_trending-3">
-                <p class="news-summary">ED Targets Firms Over Alleged NSE Pre-IPO Share Scam  BW Businessworld</p>
-                <a class="read-more" href="https://news.google.com/rss/articles/CBMinAFBVV95cUxPMFBVYzRNeXV1UDBibl9Nemk3UGRDMS1CRVozT1dsdUlpVUtwWFlOamw0YzRlUGNrbWRiSUFlMFJLXzAyQ3FPanMtY2dGLWZNNlVtNFRfcFcyMk5oNmN2cElMenllbDZ3dEFvTTI2alVXMUlRbkFwRTBOckhhcnNBZFBYcm1Ick1mRjFQbzdHVHZZeUNxRFN0S1Q4dXg?oc=5" target="_blank" rel="noopener">Read Full Article &#8599;</a>
-            </div>
-        </div>
-
-        <div class="news-item" onclick="toggleNews('news-google_trending-4')">
-            <div class="news-item-header">
-                <h3>NETWEB TECHNOLOGIES Share Price Today Down 4% - Equitymaster</h3>
-                <span class="expand-icon" id="icon-news-google_trending-4">&#9660;</span>
-            </div>
-            <div class="news-meta">
-                <span class="news-source">news.google.com</span>
-                <span class="news-date">4 hours ago</span>
-            </div>
-            <div class="news-expand" id="news-google_trending-4">
-                <p class="news-summary">NETWEB TECHNOLOGIES Share Price Today Down 4%  Equitymaster</p>
-                <a class="read-more" href="https://news.google.com/rss/articles/CBMilAFBVV95cUxNVVRSWmliWXhiRG41UzNYR2R4dm5ic3Y1c2NqQ0pIaHNKSGVMak01aU9CSWFpVEdsd3Q1TWN5VVI3WFV1SllqWXJQeks0WWoxNGdyLTNuYk1lWVJhWGNURXVCaVp5ZWI0TXpkQk1jTlpwRjg5M05hdWhGZ2puYjJmRS1ZcTRJcHI3bDkyeEVQTXJlRnhR?oc=5" target="_blank" rel="noopener">Read Full Article &#8599;</a>
-            </div>
-        </div>
-
-        <div class="news-item" onclick="toggleNews('news-google_trending-5')">
-            <div class="news-item-header">
-                <h3>How US-Iran War And Crude Price Surge Rewrote The Script For Dalal Street - ETV Bharat</h3>
-                <span class="expand-icon" id="icon-news-google_trending-5">&#9660;</span>
-            </div>
-            <div class="news-meta">
-                <span class="news-source">news.google.com</span>
-                <span class="news-date">9 hours ago</span>
-            </div>
-            <div class="news-expand" id="news-google_trending-5">
-                <p class="news-summary">How US-Iran War And Crude Price Surge Rewrote The Script For Dalal Street  ETV Bharat</p>
-                <a class="read-more" href="https://news.google.com/rss/articles/CBMixAFBVV95cUxNaXBFS2hhNWhvdTloY0tMamlKdVMzX1JqWjJzdmhuNjhBVHc4ZHNXcnVoS3huQWJFRGdoeDJWNWtlOEZwVUViQVRaaDFOb0h5VlcyS1Rwcmc2bnR3R2E0Q0NUS00xSnZBdVlqMWNHLWNmY3ZndHkwVWhPdzUybGZPUG1URk1LMi1TSnl4Z25IQTdpZDJDWVo5UnlfUDhpOWpLR0lTLWNWVG11cjRXZUdwNUxtMkNGUF9ISW56WmNOX1RrRHp20gHKAUFVX3lxTE9hRnBvWW5uV1FwaW9DZUNENm1OenQ4OVVVT0FmUy16eXNnQ1ZJMkFaaThIclpZbHlsaWV5UVBOYWl5YTNBWFR5ZmRrem8zZW0zNFNYN1drdHdncHFzTFJDcVZJN1pZeWotMUt6SmllRjd0a0p0OUZ5czk3WTNhWHpPUDFwREhQWGRLdFJXYjVyREw0aFFkWjRUb08wOWlKLVpyY3FoanR0TXliTGJEc1EtUUt6djJ0OGJHT0JsMWJpYXllQm5JT3lRVEE?oc=5" target="_blank" rel="noopener">Read Full Article &#8599;</a>
-            </div>
-        </div>
-
-        <div class="news-item" onclick="toggleNews('news-google_trending-6')">
-            <div class="news-item-header">
-                <h3>Insolation Energy Receives Final BSE and NSE Main Board Migration Approval - India IPO</h3>
-                <span class="expand-icon" id="icon-news-google_trending-6">&#9660;</span>
-            </div>
-            <div class="news-meta">
-                <span class="news-source">news.google.com</span>
-                <span class="news-date">9 hours ago</span>
-            </div>
-            <div class="news-expand" id="news-google_trending-6">
-                <p class="news-summary">Insolation Energy Receives Final BSE and NSE Main Board Migration Approval  India IPO</p>
-                <a class="read-more" href="https://news.google.com/rss/articles/CBMirwFBVV95cUxNVl84S0p1TU1DQ3MxNmRlUGE3RXZFeEVuWXdhTnV6U3ZVTngzVDJkTW1zV2tEZ01IM2gzN1djQ2ZQT1RLT3d5UmNNRloxVmQ3SzFxT1BzRGtYY1hwOHp3cmdUZjQzZFpxWHA2Y21PekJZbzgtbE0tV1JTTExNYWNGYVNRZGliekFRVTkwY0ltd2xweGh4dHVNZ1hjTWx5RzdhLTFuT0t2T0NBMmw5QXlj?oc=5" target="_blank" rel="noopener">Read Full Article &#8599;</a>
-            </div>
-        </div>
-
-        <div class="news-item" onclick="toggleNews('news-google_trending-7')">
-            <div class="news-item-header">
-                <h3>TVS Motor Gets NSE &amp; BSE Approval to List ₹190 Crore NCRPS Shares, Trading From March 10 - PSU Connect</h3>
-                <span class="expand-icon" id="icon-news-google_trending-7">&#9660;</span>
-            </div>
-            <div class="news-meta">
-                <span class="news-source">news.google.com</span>
-                <span class="news-date">7 hours ago</span>
-            </div>
-            <div class="news-expand" id="news-google_trending-7">
-                <p class="news-summary">TVS Motor Gets NSE &amp; BSE Approval to List ₹190 Crore NCRPS Shares, Trading From March 10  PSU Connect</p>
-                <a class="read-more" href="https://news.google.com/rss/articles/CBMinwFBVV95cUxPbVpOVmZQc1BlWms1dDcxalllODZwSnI1R0dNdE00c2t3TjVXSHVsN2M1QWRCVDkzLUd3LXhmTUZoSFhMVmdEWDRlLTYzRS1zcDJCOElhR0c0amJLel9BVXhVb0pTVXFvWHVqTFVfaklESDgzUlExWGtHaHJEWHh0QjlxalVWQU5INGNHRl92VnV3dldCakdabWJXem1USkU?oc=5" target="_blank" rel="noopener">Read Full Article &#8599;</a>
-            </div>
-        </div>
-
-        <div class="news-item" onclick="toggleNews('news-google_trending-8')">
-            <div class="news-item-header">
-                <h3>TVS Motor Gains NSE, BSE Nod to List 190 Crore Preference Shares - TipRanks</h3>
-                <span class="expand-icon" id="icon-news-google_trending-8">&#9660;</span>
-            </div>
-            <div class="news-meta">
-                <span class="news-source">news.google.com</span>
-                <span class="news-date">3 hours ago</span>
-            </div>
-            <div class="news-expand" id="news-google_trending-8">
-                <p class="news-summary">TVS Motor Gains NSE, BSE Nod to List 190 Crore Preference Shares  TipRanks</p>
-                <a class="read-more" href="https://news.google.com/rss/articles/CBMitgFBVV95cUxOVmhfRmNXc2FhQU0ta1hxQ2FlMjVoaFVZOXNGM1VPVjBUSVNWeUN0cmU3Q0pZZE05UVVIR2wtYnVmVllSbGRtd0dSOExjNlZuYUJ0NFRhbHY2VGc3SEJ1QWlUaTA0ai1jS0RXc2dkWVYtUUNvSGh1M2JLc2lubzhFcXlUXzJjRUpwSzhNa2NPbFdCUFBORE8zVS1jNzN2OE5uUGoxdUFjZGU1bVlOcDJUd3NDMS1Ydw?oc=5" target="_blank" rel="noopener">Read Full Article &#8599;</a>
-            </div>
-        </div>
-
-        <div class="news-item" onclick="toggleNews('news-google_trending-9')">
-            <div class="news-item-header">
-                <h3>Sensex tanks 500 points: Why is stock market falling today? - India Today</h3>
-                <span class="expand-icon" id="icon-news-google_trending-9">&#9660;</span>
-            </div>
-            <div class="news-meta">
-                <span class="news-source">news.google.com</span>
-                <span class="news-date">17 hours ago</span>
-            </div>
-            <div class="news-expand" id="news-google_trending-9">
-                <p class="news-summary">Sensex tanks 500 points: Why is stock market falling today?  India Today</p>
-                <a class="read-more" href="https://news.google.com/rss/articles/CBMi-AFBVV95cUxNV2ZiMG1kQlpjd00tWXEycFRFQjFsVHJFOVpWZWhHN1R2T2FMZHpMODN5ZTVEY0ZCN1I4bjZWazNodzlZUUFQLTdVbkhfS1RNdVZfOE84NnlTX2dlQ1JEbmNaM1dhd3I5S2xhNl9qQU9ENWl1dTZQZHh4OTA0c2N0LXlfUWxlVHhDaGFkNWVsQlVPQll5Y2dxUFg0NnVRYmRWc29PUDR1SGNVWnlXemo1eEhXMGo5dzZsVW41b0Rfcmp1eHJubndrTTl1MDMzNnFSSGE3UXRRZUJDOTNVMXpzWFg2UEozeVRPc3R4NnY0Q2tDbHlPRlAzd9IB-AFBVV95cUxNV2ZiMG1kQlpjd00tWXEycFRFQjFsVHJFOVpWZWhHN1R2T2FMZHpMODN5ZTVEY0ZCN1I4bjZWazNodzlZUUFQLTdVbkhfS1RNdVZfOE84NnlTX2dlQ1JEbmNaM1dhd3I5S2xhNl9qQU9ENWl1dTZQZHh4OTA0c2N0LXlfUWxlVHhDaGFkNWVsQlVPQll5Y2dxUFg0NnVRYmRWc29PUDR1SGNVWnlXemo1eEhXMGo5dzZsVW41b0Rfcmp1eHJubndrTTl1MDMzNnFSSGE3UXRRZUJDOTNVMXpzWFg2UEozeVRPc3R4NnY0Q2tDbHlPRlAzdw?oc=5" target="_blank" rel="noopener">Read Full Article &#8599;</a>
-            </div>
-        </div></div>
-            </div>
-            <div class="news-category-card corporate">
-                <div class="category-header" style="border-bottom-color:var(--accent-cyan)">
-                    <h3 class="category-title" style="color:var(--accent-cyan)">🏢 Corporate News</h3>
-                    <span class="article-count">10 articles</span>
-                </div>
-                <div>
-        <div class="news-item" onclick="toggleNews('news-corporate-0')">
-            <div class="news-item-header">
-                <h3>FDA vaccine head will step down in April after string of controversial decisions</h3>
-                <span class="expand-icon" id="icon-news-corporate-0">&#9660;</span>
-            </div>
-            <div class="news-meta">
-                <span class="news-source">CNBC</span>
-                <span class="news-date">38 min ago</span>
-            </div>
-            <div class="news-expand" id="news-corporate-0">
-                <p class="news-summary">Vinay Prasad is leaving his post as director of the Center for Biologics Evaluation and Research.</p>
-                <a class="read-more" href="https://www.cnbc.com/2026/03/06/fda-vaccine-head-prasad-step-down.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
-            </div>
-        </div>
-
-        <div class="news-item" onclick="toggleNews('news-corporate-1')">
-            <div class="news-item-header">
-                <h3>FDA reversals leave investors worrying about the fates of other experimental drugs</h3>
-                <span class="expand-icon" id="icon-news-corporate-1">&#9660;</span>
-            </div>
-            <div class="news-meta">
-                <span class="news-source">CNBC</span>
-                <span class="news-date">3 hours ago</span>
-            </div>
-            <div class="news-expand" id="news-corporate-1">
-                <p class="news-summary">Investors are scrutinizing the prospects for some drugs in the pipeline following a string of recent rejections from the U.S. Food and Drug Administration.</p>
-                <a class="read-more" href="https://www.cnbc.com/2026/03/06/fda-reversals-on-uniqure-moderna-approvals-worry-investors.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
-            </div>
-        </div>
-
-        <div class="news-item" onclick="toggleNews('news-corporate-2')">
-            <div class="news-item-header">
-                <h3>Used vehicle prices jump ahead of spring selling season optimism</h3>
-                <span class="expand-icon" id="icon-news-corporate-2">&#9660;</span>
-            </div>
-            <div class="news-meta">
-                <span class="news-source">CNBC</span>
-                <span class="news-date">7 hours ago</span>
-            </div>
-            <div class="news-expand" id="news-corporate-2">
-                <p class="news-summary">A closely watched barometer for used vehicle pricing jumped last month as dealers sped to increase inventories amid optimism of a robust spring selling season.</p>
-                <a class="read-more" href="https://www.cnbc.com/2026/03/06/used-vehicle-prices.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
-            </div>
-        </div>
-
-        <div class="news-item" onclick="toggleNews('news-corporate-3')">
-            <div class="news-item-header">
-                <h3>United CEO Scott Kirby says higher airfare could be ahead after fuel price spike</h3>
-                <span class="expand-icon" id="icon-news-corporate-3">&#9660;</span>
-            </div>
-            <div class="news-meta">
-                <span class="news-source">CNBC</span>
-                <span class="news-date">9 hours ago</span>
-            </div>
-            <div class="news-expand" id="news-corporate-3">
-                <p class="news-summary">United CEO Scott Kirby said demand remains high but that fuel prices will hit first-quarter results.</p>
-                <a class="read-more" href="https://www.cnbc.com/2026/03/06/united-airlines-ceo-scott-kirby.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
-            </div>
-        </div>
-
-        <div class="news-item" onclick="toggleNews('news-corporate-4')">
-            <div class="news-item-header">
-                <h3>Toyota, Hyundai and Chinese automakers expected to be most impacted by Iran war</h3>
-                <span class="expand-icon" id="icon-news-corporate-4">&#9660;</span>
-            </div>
-            <div class="news-meta">
-                <span class="news-source">CNBC</span>
-                <span class="news-date">6 hours ago</span>
-            </div>
-            <div class="news-expand" id="news-corporate-4">
-                <p class="news-summary">While regional sales will be impacted, the closing of the Strait of Hormuz and rising oil prices will have ripple effects across the global automotive industry.</p>
-                <a class="read-more" href="https://www.cnbc.com/2026/03/06/iran-war-automakers-toyota-hyundai-china.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
-            </div>
-        </div>
-
-        <div class="news-item" onclick="toggleNews('news-corporate-5')">
-            <div class="news-item-header">
-                <h3>Historic winter storms weigh on Gap, Old Navy performance after 800 temporary store closures</h3>
-                <span class="expand-icon" id="icon-news-corporate-5">&#9660;</span>
-            </div>
-            <div class="news-meta">
-                <span class="news-source">CNBC</span>
-                <span class="news-date">13 hours ago</span>
-            </div>
-            <div class="news-expand" id="news-corporate-5">
-                <p class="news-summary">Gap has been on a steady upswing of growth but saw worse than expected results during its holiday quarter after historic winter storms led to store closures.</p>
-                <a class="read-more" href="https://www.cnbc.com/2026/03/05/gap-gap-q4-2025-earnings.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
-            </div>
-        </div>
-
-        <div class="news-item" onclick="toggleNews('news-corporate-6')">
-            <div class="news-item-header">
-                <h3>Home sellers are relisting properties at fastest pace in a decade, but spring supply is still low</h3>
-                <span class="expand-icon" id="icon-news-corporate-6">&#9660;</span>
-            </div>
-            <div class="news-meta">
-                <span class="news-source">CNBC</span>
-                <span class="news-date">2 hours ago</span>
-            </div>
-            <div class="news-expand" id="news-corporate-6">
-                <p class="news-summary">Frustrated sellers who pulled homes off the market last fall are now relisting them at a quick pace, thanks to lower mortgage rates, but supply is still low.</p>
-                <a class="read-more" href="https://www.cnbc.com/2026/03/05/home-sales-mortgage-rates.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
-            </div>
-        </div>
-
-        <div class="news-item" onclick="toggleNews('news-corporate-7')">
-            <div class="news-item-header">
-                <h3>States led by New York sue to block Trump&#x27;s latest tariffs, calling them an illegal end run around Supreme Court</h3>
-                <span class="expand-icon" id="icon-news-corporate-7">&#9660;</span>
-            </div>
-            <div class="news-meta">
-                <span class="news-source">CNBC</span>
-                <span class="news-date">1 day ago</span>
-            </div>
-            <div class="news-expand" id="news-corporate-7">
-                <p class="news-summary">The move from the state AGs — part of the successful effort to block Trump&#x27;s original tariffs — adds to the ongoing uncertainty created by his tariff policies.</p>
-                <a class="read-more" href="https://www.cnbc.com/2026/03/05/trump-tariffs-state-ags-sue-supreme-court-decision.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
-            </div>
-        </div>
-
-        <div class="news-item" onclick="toggleNews('news-corporate-8')">
-            <div class="news-item-header">
-                <h3>Iran war threatens $11.7 trillion global travel industry as passengers get caught in crossfire</h3>
-                <span class="expand-icon" id="icon-news-corporate-8">&#9660;</span>
-            </div>
-            <div class="news-meta">
-                <span class="news-source">CNBC</span>
-                <span class="news-date">1 day ago</span>
-            </div>
-            <div class="news-expand" id="news-corporate-8">
-                <p class="news-summary">Travelers who are far from falling missiles, drone attacks and other geopolitical flashpoints aren&#x27;t immune to ripple effects.</p>
-                <a class="read-more" href="https://www.cnbc.com/2026/03/05/iran-war-travel-flights-cruise-hotels.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
-            </div>
-        </div>
-
-        <div class="news-item" onclick="toggleNews('news-corporate-9')">
-            <div class="news-item-header">
-                <h3>Mortgages in 47 seconds: Better’s new ChatGPT app targets lenders Rocket and UWM</h3>
-                <span class="expand-icon" id="icon-news-corporate-9">&#9660;</span>
-            </div>
-            <div class="news-meta">
-                <span class="news-source">CNBC</span>
-                <span class="news-date">1 day ago</span>
-            </div>
-            <div class="news-expand" id="news-corporate-9">
-                <p class="news-summary">Creating a mortgage has been one of the most time-consuming corners of American finance, with lenders relying on dozens of steps that can take weeks.</p>
-                <a class="read-more" href="https://www.cnbc.com/2026/03/05/mortgages-in-47-seconds-betters-new-chatgpt-app-targets-lenders-rocket-and-uwm.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
-            </div>
-        </div></div>
-            </div>
-            <div class="news-category-card geopolitical">
-                <div class="category-header" style="border-bottom-color:var(--accent-green)">
-                    <h3 class="category-title" style="color:var(--accent-green)">🌍 Geopolitical</h3>
-                    <span class="article-count">10 articles</span>
-                </div>
-                <div>
-        <div class="news-item" onclick="toggleNews('news-geopolitical-0')">
-            <div class="news-item-header">
-                <h3>Oil surges 35% this week for biggest gain in futures trading history dating back to 1983</h3>
-                <span class="expand-icon" id="icon-news-geopolitical-0">&#9660;</span>
-            </div>
-            <div class="news-meta">
-                <span class="news-source">CNBC</span>
-                <span class="news-date">3 hours ago</span>
-            </div>
-            <div class="news-expand" id="news-geopolitical-0">
-                <p class="news-summary">The oil market is worried that Gulf countries will have to shut production if tankers are unable to pass through the Strait of Hormuz.</p>
-                <a class="read-more" href="https://www.cnbc.com/2026/03/06/iran-us-war-oil-prices-brent-wti-barrel-futures.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
-            </div>
-        </div>
-
-        <div class="news-item" onclick="toggleNews('news-geopolitical-1')">
-            <div class="news-item-header">
-                <h3>Amazon says Anthropic’s Claude still OK for AWS customers to use outside defense work</h3>
-                <span class="expand-icon" id="icon-news-geopolitical-1">&#9660;</span>
-            </div>
-            <div class="news-meta">
-                <span class="news-source">CNBC</span>
-                <span class="news-date">3 hours ago</span>
-            </div>
-            <div class="news-expand" id="news-geopolitical-1">
-                <p class="news-summary">Amazon joined Microsoft and Google in continue to offer Anthropic&#x27;s Claude AI technology to customers after the Pentagon deemed it a &quot;supply chain risk.&quot;</p>
-                <a class="read-more" href="https://www.cnbc.com/2026/03/06/amazon-aws-anthropic-claude-pentagon-blacklist.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
-            </div>
-        </div>
-
-        <div class="news-item" onclick="toggleNews('news-geopolitical-2')">
-            <div class="news-item-header">
-                <h3>Trump wants U.S. Navy to escort tankers through the Gulf. Why that plan may not work</h3>
-                <span class="expand-icon" id="icon-news-geopolitical-2">&#9660;</span>
-            </div>
-            <div class="news-meta">
-                <span class="news-source">CNBC</span>
-                <span class="news-date">11 hours ago</span>
-            </div>
-            <div class="news-expand" id="news-geopolitical-2">
-                <p class="news-summary">A backup of oil tankers in the Persian Gulf is disrupting supplies, and will only get worse the longer the Strait of Hormuz is closed.</p>
-                <a class="read-more" href="https://www.cnbc.com/2026/03/06/trump-navy-strait-hormuz-iran-oil-tanker.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
-            </div>
-        </div>
-
-        <div class="news-item" onclick="toggleNews('news-geopolitical-3')">
-            <div class="news-item-header">
-                <h3>Palantir rallies 15% for the week as Iran war boosts prospects, muting Anthropic concern</h3>
-                <span class="expand-icon" id="icon-news-geopolitical-3">&#9660;</span>
-            </div>
-            <div class="news-meta">
-                <span class="news-source">CNBC</span>
-                <span class="news-date">1 hour ago</span>
-            </div>
-            <div class="news-expand" id="news-geopolitical-3">
-                <p class="news-summary">Palantir&#x27;s stock had its best week since August and outperformed all of its large-cap tech peers after the U.S. attacked Iran.</p>
-                <a class="read-more" href="https://www.cnbc.com/2026/03/06/palantir-stock-jumps-15percent-in-week-on-iran-war-boosts-anthropic-muted.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
-            </div>
-        </div>
-
-        <div class="news-item" onclick="toggleNews('news-geopolitical-4')">
-            <div class="news-item-header">
-                <h3>Google joins Microsoft in telling users Anthropic is still available outside defense projects</h3>
-                <span class="expand-icon" id="icon-news-geopolitical-4">&#9660;</span>
-            </div>
-            <div class="news-meta">
-                <span class="news-source">CNBC</span>
-                <span class="news-date">4 hours ago</span>
-            </div>
-            <div class="news-expand" id="news-geopolitical-4">
-                <p class="news-summary">Cloud vendors are letting customers know that Anthropic&#x27;s popular AI tools can still be accessed after the Department of Defense blacklisted the company.</p>
-                <a class="read-more" href="https://www.cnbc.com/2026/03/06/google-says-anthropic-remains-available-outside-of-defense-projects.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
-            </div>
-        </div>
-
-        <div class="news-item" onclick="toggleNews('news-geopolitical-5')">
-            <div class="news-item-header">
-                <h3>Zealand&#x27;s stock falls 35% after disappointing drug result. Its CEO tells CNBC people need to focus less on the &#x27;weight loss Olympics&#x27;</h3>
-                <span class="expand-icon" id="icon-news-geopolitical-5">&#9660;</span>
-            </div>
-            <div class="news-meta">
-                <span class="news-source">CNBC</span>
-                <span class="news-date">7 hours ago</span>
-            </div>
-            <div class="news-expand" id="news-geopolitical-5">
-                <p class="news-summary">Zealand and Roche are jointly developing the drug petrelintide which in a mid-stage study led to a worse-than-expected 10.7% weight-loss over 42 weeks.</p>
-                <a class="read-more" href="https://www.cnbc.com/2026/03/06/zealand-stock-zela-roche-trial-weight-loss-ceo-novo-glp1.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
-            </div>
-        </div>
-
-        <div class="news-item" onclick="toggleNews('news-geopolitical-6')">
-            <div class="news-item-header">
-                <h3>Trump tariffs: Customs and Border Protection tells judge it can&#x27;t comply with refund order</h3>
-                <span class="expand-icon" id="icon-news-geopolitical-6">&#9660;</span>
-            </div>
-            <div class="news-meta">
-                <span class="news-source">CNBC</span>
-                <span class="news-date">2 hours ago</span>
-            </div>
-            <div class="news-expand" id="news-geopolitical-6">
-                <p class="news-summary">CBP told Judge Richard Eaton that the technology upgrades it plans would save more than 4 million man-hours in processing refunds for Trump&#x27;s tariffs.</p>
-                <a class="read-more" href="https://www.cnbc.com/2026/03/06/trump-trade-tariffs-refunds-customs-border-protection.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
-            </div>
-        </div>
-
-        <div class="news-item" onclick="toggleNews('news-geopolitical-7')">
-            <div class="news-item-header">
-                <h3>Samsung reveals first details of its AI smart glasses to CNBC</h3>
-                <span class="expand-icon" id="icon-news-geopolitical-7">&#9660;</span>
-            </div>
-            <div class="news-meta">
-                <span class="news-source">CNBC</span>
-                <span class="news-date">10 hours ago</span>
-            </div>
-            <div class="news-expand" id="news-geopolitical-7">
-                <p class="news-summary">Samsung&#x27;s AI smart glasses will be launched in 2026 and will mark the company&#x27;s first foray into the product category.</p>
-                <a class="read-more" href="https://www.cnbc.com/2026/03/06/samsung-ai-smart-glasses-first-details-specs-release-date.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
-            </div>
-        </div>
-
-        <div class="news-item" onclick="toggleNews('news-geopolitical-8')">
-            <div class="news-item-header">
-                <h3>States led by New York sue to block Trump&#x27;s latest tariffs, calling them an illegal end run around Supreme Court</h3>
-                <span class="expand-icon" id="icon-news-geopolitical-8">&#9660;</span>
-            </div>
-            <div class="news-meta">
-                <span class="news-source">CNBC</span>
-                <span class="news-date">1 day ago</span>
-            </div>
-            <div class="news-expand" id="news-geopolitical-8">
-                <p class="news-summary">The move from the state AGs — part of the successful effort to block Trump&#x27;s original tariffs — adds to the ongoing uncertainty created by his tariff policies.</p>
-                <a class="read-more" href="https://www.cnbc.com/2026/03/05/trump-tariffs-state-ags-sue-supreme-court-decision.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
-            </div>
-        </div>
-
-        <div class="news-item" onclick="toggleNews('news-geopolitical-9')">
-            <div class="news-item-header">
-                <h3>Inside India newsletter: Energy, airlines and now over $50 billion in remittances to India at risk as Middle East conflict deepens</h3>
-                <span class="expand-icon" id="icon-news-geopolitical-9">&#9660;</span>
-            </div>
-            <div class="news-meta">
-                <span class="news-source">CNBC</span>
-                <span class="news-date">1 day ago</span>
-            </div>
-            <div class="news-expand" id="news-geopolitical-9">
-                <p class="news-summary">India can&#x27;t seem to escape from the fallout of the escalating conflict in the Middle East. After energy and aviation, remittances could be the latest worry.</p>
-                <a class="read-more" href="https://www.cnbc.com/2026/03/05/iran-conflict-india-impact-remittance-pipeline.html" target="_blank" rel="noopener">Read Full Article &#8599;</a>
-            </div>
-        </div></div>
-            </div>
-    </div>
-</section>
-
-<footer>
-    <p>🔄 News is fetched fresh every time the script runs &nbsp;|&nbsp; Market data updates live in the browser</p>
-    <p style="margin-top:10px;font-size:.72em;opacity:.5">⚠️ For informational purposes only. Not financial advice.</p>
-</footer>
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-left">
+    <div class="topbar-dot"></div>
+    <span>◼ GLOBAL MARKET DASHBOARD</span>
+  </div>
+  <div class="topbar-right">
+    <span>🔴 LIVE FEED</span>
+    <span id="topClock">--:--:-- IST</span>
+    <span>📅 Generated: March 07, 2026 at 05:37 AM IST</span>
+    <span>✅ 60 ARTICLES</span>
+  </div>
 </div>
 
-<!-- ══ SCRIPTS ══ -->
+<!-- TICKER STRIP -->
+<div class="ticker">
+  <div class="ticker-track" id="tickerTrack">
+    <!-- populated by JS -->
+  </div>
+</div>
+
+<!-- MAIN SHELL -->
+<div class="shell">
+
+  <!-- ═══ SIDEBAR ═══ -->
+  <div class="sidebar">
+
+    <div class="sb-section">
+      <div class="sb-label">▶ CATEGORIES</div>
+      <div class="sb-item active" id="sb-markets"        onclick="switchCat('markets',this)">
+        <span class="sb-name">📊 Markets</span>
+        <span class="sb-count">10</span>
+      </div>
+      <div class="sb-item" id="sb-economic"       onclick="switchCat('economic',this)">
+        <span class="sb-name">💰 Economic</span>
+        <span class="sb-count">10</span>
+      </div>
+      <div class="sb-item" id="sb-india"          onclick="switchCat('india',this)">
+        <span class="sb-name">🇮🇳 India</span>
+        <span class="sb-count">10</span>
+      </div>
+      <div class="sb-item" id="sb-google_trending" onclick="switchCat('google_trending',this)">
+        <span class="sb-name">🔥 Trending</span>
+        <span class="sb-count">10</span>
+      </div>
+      <div class="sb-item" id="sb-corporate"      onclick="switchCat('corporate',this)">
+        <span class="sb-name">🏢 Corporate</span>
+        <span class="sb-count">10</span>
+      </div>
+      <div class="sb-item" id="sb-geopolitical"   onclick="switchCat('geopolitical',this)">
+        <span class="sb-name">🌍 Geopolitical</span>
+        <span class="sb-count">10</span>
+      </div>
+    </div>
+
+    <div class="sb-section">
+      <div class="sb-label">▶ LIVE PRICES</div>
+      <div class="sb-ind-row"><span class="sb-ind-name">S&amp;P 500</span>    <span class="sb-ind-val neu" id="sbv-sp500">--</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">Dow Jones</span>   <span class="sb-ind-val neu" id="sbv-dow">--</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">Nasdaq</span>      <span class="sb-ind-val neu" id="sbv-nasdaq">--</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">Nifty 50</span>    <span class="sb-ind-val neu" id="sbv-nifty">--</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">Sensex</span>      <span class="sb-ind-val neu" id="sbv-sensex">--</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">USD/INR</span>     <span class="sb-ind-val neu" id="sbv-usdinr">--</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">Crude Oil</span>   <span class="sb-ind-val neu" id="sbv-oil">--</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">Gold</span>        <span class="sb-ind-val neu" id="sbv-gold">--</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">Silver</span>      <span class="sb-ind-val neu" id="sbv-silver">--</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">USD Index</span>   <span class="sb-ind-val neu" id="sbv-dollar">--</span></div>
+    </div>
+
+    <div class="sb-section">
+      <div class="sb-label">▶ SOURCES</div>
+      <div class="sb-ind-row"><span class="sb-ind-name">CNBC</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">MarketWatch</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">Reuters</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">Economic Times</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">MoneyControl</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">Yahoo Finance</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">Google News</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">Federal Reserve</span></div>
+    </div>
+
+  </div><!-- /sidebar -->
+
+  <!-- ═══ MAIN ═══ -->
+  <div class="main">
+
+    <!-- ── LIVE MARKET INDICATORS ── -->
+    <div class="ind-panel">
+      <div class="ind-panel-hdr">▶ LIVE MARKET INDICATORS</div>
+      <div class="ind-row">
+        <div class="ind-cell neu" id="card-gift-nifty">
+          <div class="ind-name">GIFT NIFTY (NSE IX)</div>
+          <div class="ind-val" id="val-gift-nifty">Loading…</div>
+          <div class="ind-chg neu" id="chg-gift-nifty">Futures · USD-denom.</div>
+        </div>
+        <div class="ind-cell neu" id="card-dow">
+          <div class="ind-name">DOW JONES</div>
+          <div class="ind-val" id="val-dow">Loading…</div>
+          <div class="ind-chg neu" id="chg-dow">…</div>
+        </div>
+        <div class="ind-cell neu" id="card-sp500">
+          <div class="ind-name">S&amp;P 500</div>
+          <div class="ind-val" id="val-sp500">Loading…</div>
+          <div class="ind-chg neu" id="chg-sp500">…</div>
+        </div>
+        <div class="ind-cell neu" id="card-nasdaq">
+          <div class="ind-name">NASDAQ</div>
+          <div class="ind-val" id="val-nasdaq">Loading…</div>
+          <div class="ind-chg neu" id="chg-nasdaq">…</div>
+        </div>
+        <div class="ind-cell neu" id="card-oil">
+          <div class="ind-name">CRUDE OIL</div>
+          <div class="ind-val" id="val-oil">Loading…</div>
+          <div class="ind-chg neu" id="chg-oil">…</div>
+        </div>
+        <div class="ind-cell neu" id="card-dollar">
+          <div class="ind-name">USD INDEX</div>
+          <div class="ind-val" id="val-dollar">Loading…</div>
+          <div class="ind-chg neu" id="chg-dollar">…</div>
+        </div>
+        <div class="ind-cell neu" id="card-gold">
+          <div class="ind-name">GOLD</div>
+          <div class="ind-val" id="val-gold">Loading…</div>
+          <div class="ind-chg neu" id="chg-gold">…</div>
+        </div>
+        <div class="ind-cell neu" id="card-silver">
+          <div class="ind-name">SILVER</div>
+          <div class="ind-val" id="val-silver">Loading…</div>
+          <div class="ind-chg neu" id="chg-silver">…</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── USA ECONOMIC INDICATORS ── -->
+    <div class="econ-section">
+      <div class="ind-panel-hdr econ-hdr usa">▶ 🇺🇸 USA ECONOMIC INDICATORS</div>
+      <div class="ind-row">
+        <div class="ind-cell neu"><div class="ind-name">FED FUNDS RATE</div><div class="ind-val">4.25–4.50%</div><div class="ind-chg neu">Hold – Jan 2026</div></div>
+        <div class="ind-cell neu"><div class="ind-name">FOMC NEXT</div><div class="ind-val">Hold</div><div class="ind-chg neu">Mar 18–19, 2026</div></div>
+        <div class="ind-cell neu"><div class="ind-name">CPI YoY</div><div class="ind-val" id="val-cpi">Loading…</div><div class="ind-chg neu" id="chg-cpi">Fetching…</div></div>
+        <div class="ind-cell neu"><div class="ind-name">CORE CPI</div><div class="ind-val">3.3%</div><div class="ind-chg neu">YoY Dec 2025</div></div>
+        <div class="ind-cell pos"><div class="ind-name">GDP GROWTH</div><div class="ind-val">2.8%</div><div class="ind-chg pos">Q4 2025 Advance</div></div>
+        <div class="ind-cell pos"><div class="ind-name">UNEMPLOYMENT</div><div class="ind-val">4.1%</div><div class="ind-chg pos">Jan 2026</div></div>
+        <div class="ind-cell pos"><div class="ind-name">NFP</div><div class="ind-val">+256K</div><div class="ind-chg pos">Jan 2026</div></div>
+        <div class="ind-cell neu"><div class="ind-name">PPI YoY</div><div class="ind-val">3.3%</div><div class="ind-chg neu">Dec 2025</div></div>
+      </div>
+    </div>
+
+    <!-- ── INDIA ECONOMIC INDICATORS ── -->
+    <div class="econ-section">
+      <div class="ind-panel-hdr econ-hdr india">▶ 🇮🇳 INDIA ECONOMIC INDICATORS</div>
+      <div class="ind-row">
+        <div class="ind-cell neu"><div class="ind-name">REPO RATE</div><div class="ind-val">6.25%</div><div class="ind-chg neu">RBI Feb 2026 Cut</div></div>
+        <div class="ind-cell neu"><div class="ind-name">CPI</div><div class="ind-val">5.22%</div><div class="ind-chg neu">Dec 2025 YoY</div></div>
+        <div class="ind-cell neu"><div class="ind-name">WPI</div><div class="ind-val">2.4%</div><div class="ind-chg neu">YoY Nov 2025</div></div>
+        <div class="ind-cell pos"><div class="ind-name">IIP</div><div class="ind-val">5.2%</div><div class="ind-chg pos">YoY Nov 2025</div></div>
+        <div class="ind-cell pos"><div class="ind-name">MFG PMI</div><div class="ind-val">57.7</div><div class="ind-chg pos">Jan 2026</div></div>
+        <div class="ind-cell pos"><div class="ind-name">GDP GROWTH</div><div class="ind-val">6.4%</div><div class="ind-chg pos">FY 2024-25 Est.</div></div>
+        <div class="ind-cell neu"><div class="ind-name">FISCAL DEFICIT</div><div class="ind-val">4.9%</div><div class="ind-chg neu">of GDP FY25 Target</div></div>
+        <div class="ind-cell neu" id="card-usdinr"><div class="ind-name">USD/INR</div><div class="ind-val" id="val-usdinr">Loading…</div><div class="ind-chg neu" id="chg-usdinr">…</div></div>
+      </div>
+    </div>
+
+    <!-- ── CATEGORY TABS ── -->
+    <div class="cat-tabs" id="catTabs">
+      <div class="cat-tab active" id="tab-markets"        onclick="switchCat('markets',null)">📊 MARKETS</div>
+      <div class="cat-tab"        id="tab-economic"       onclick="switchCat('economic',null)">💰 ECONOMIC</div>
+      <div class="cat-tab"        id="tab-india"          onclick="switchCat('india',null)">🇮🇳 INDIA</div>
+      <div class="cat-tab"        id="tab-google_trending" onclick="switchCat('google_trending',null)">🔥 TRENDING</div>
+      <div class="cat-tab"        id="tab-corporate"      onclick="switchCat('corporate',null)">🏢 CORPORATE</div>
+      <div class="cat-tab"        id="tab-geopolitical"   onclick="switchCat('geopolitical',null)">🌍 GEOPOLITICAL</div>
+    </div>
+
+    <!-- ── NEWS AREA ── -->
+    <div class="news-area">
+      <div class="news-hdr">
+        <span class="news-hdr-title" id="newsTitle">▶ MARKET UPDATES</span>
+        <span class="news-hdr-meta" id="newsSubtitle">Click any headline to expand · March 07, 2026 at 05:37 AM IST</span>
+      </div>
+      <table class="news-table">
+        <tbody id="newsTbody"></tbody>
+      </table>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /shell -->
+
+<!-- STATUS BAR -->
+<div class="statusbar">
+  <span>GLOBAL MARKET DASHBOARD · RSS FEEDS: 18 SOURCES · AUTO-REFRESH: 5 MIN · NOT FINANCIAL ADVICE</span>
+  <span id="statusClock">--:-- IST</span>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SCRIPTS
+══════════════════════════════════════════ -->
 <script>
-// ── Expand / collapse news items ──
-function toggleNews(id) {
-    const el = document.getElementById(id);
-    const icon = document.getElementById('icon-' + id);
-    if (!el) return;
-    el.classList.toggle('open');
-    icon.classList.toggle('open');
+// ── All news injected by Python ──
+const NEWS_DATA = {"markets": {"label": "📊 MARKET UPDATES", "items": [{"title": "Top analysts clash on Bitcoin outlook as oil shock rattles markets", "source": "Yahoo Finance", "time": "7 min ago", "summary": "The financial world is currently divided over how energy markets influence digital wealth. As tensions in the Strait of Hormuz sent Bitcoin prices rallying toward $73,000 on March 4, two prominent analysts presented completely opposite visions for what comes next. On one side, Senior ...", "link": "https://www.thestreet.com/crypto/markets/top-analysts-clash-on-bitcoin-outlook-as-oil-shock-rattles-markets?.tsrc=rss"}, {"title": "Nvidia-Tied AI Stocks Vertiv, Lumentum, Coherent To Join S&amp;P 500 Index", "source": "Yahoo Finance", "time": "33 min ago", "summary": "AI stocks Vertiv, Lumentum and Coherent, all with strong Nvidia ties, will join the S&amp;P 500 before the open on March 23, along with EchoStar.", "link": "https://finance.yahoo.com/m/33f0ef2c-6fa4-3f23-ac62-90a1bde91945/nvidia-tied-ai-stocks-vertiv%2C.html?.tsrc=rss"}, {"title": "Stock Market Awaits Iran War News After Big Losses. Why Oil Prices Could Go Much Higher.", "source": "Yahoo Finance", "time": "39 min ago", "summary": "With the stock market reeling from crude oil&#x27;s record week, investors await Iran war news, including any Trump moves.", "link": "https://finance.yahoo.com/m/988f8dd0-d506-3b09-a611-47793386faff/stock-market-awaits-iran-war.html?.tsrc=rss"}, {"title": "Solstice Advanced Materials and SiTime Join the S&amp;P MidCap 400 As AI Stocks Reshuffle the Index", "source": "Yahoo Finance", "time": "49 min ago", "summary": "Tonight’s S&amp;P quarterly rebalancing is a clean snapshot of where the market’s center of gravity has shifted. Lumentum (LITE) and Coherent (COHR) graduated to the S&amp;P 500, leaving two vacancies in the S&amp;P MidCap 400. The companies stepping into those slots tell you everything about the AI trade right now: Solstice Advanced Materials (SOLS) and ... Solstice Advanced Materials and SiTime Join the S&amp;P MidCap 400 As AI Stocks Reshuffle the Index", "link": "https://247wallst.com/investing/2026/03/06/solstice-advanced-materials-and-sitime-join-the-sp-midcap-400-as-ai-stocks-reshuffle-the-index/?.tsrc=rss"}, {"title": "Stock Market Today, March 6: Energy Stocks Rise as Oil Closes Over $90 on Middle East Tensions", "source": "Yahoo Finance", "time": "58 min ago", "summary": "Energy names climb while most U.S. stocks retreat on stagflation fears and war-driven oil gains, today, March 6, 2026.", "link": "https://www.fool.com/coverage/stock-market-today/2026/03/06/stock-market-today-march-6-energy-stocks-rise-as-oil-closes-over-usd90-on-middle-east-tensions/?.tsrc=rss"}, {"title": "Vertiv and EchoStar lead tech surge in S&amp;P 500 rebalance", "source": "Yahoo Finance", "time": "1 hour ago", "summary": "Investing.com -- S&amp;P Dow Jones Indices announced a sweeping overhaul of its benchmark tracking on Friday, propelling several technology and industrial firms into the prestigious S&amp;P 500. Shares of Vertiv Holdings Co (NYSE:VRT) surged 5.6% in after-hours trading following the news, while EchoStar Corporation (NASDAQ:SATS) and Lumentum Holdings Inc (NASDAQ:LITE) also saw significant gains. The quarterly reshuffle is designed to maintain the integrity of the market’s most-watched gauges. S&amp;P DJI st", "link": "https://finance.yahoo.com/news/vertiv-echostar-lead-tech-surge-230634408.html?.tsrc=rss"}, {"title": "MU, LRCX, AMAT, GEV All Added to the S&amp;P 100 As AI Stocks Gain Influence", "source": "Yahoo Finance", "time": "1 hour ago", "summary": "It’s the Super Bowl of index rebalancing tonight! The biggest news was the S&amp;P 500 adding Vertiv (VRT), Lumentum (LITE), Coherent (COHR), and EchoStar (SATS). However, S&amp;P Dow Jones Indices also rebalanced other indexes like the S&amp;P 100 and S&amp;P MidCap 400. Four stocks were added to the S&amp;P 100 on the evening of March ... MU, LRCX, AMAT, GEV All Added to the S&amp;P 100 As AI Stocks Gain Influence", "link": "https://247wallst.com/investing/2026/03/06/mu-lrcx-amat-gev-all-added-to-the-sp-100-as-ai-stocks-gain-influence/?.tsrc=rss"}, {"title": "Wall Street&#x27;s &#x27;fear index&#x27; hits highest point since October", "source": "Yahoo Finance", "time": "1 hour ago", "summary": "As the war between the U.S.-Israel and Iran continues, Wall Street&#x27;s &quot;fear index&quot; hit the highest point since October 2025. The CBOE Volatility Index (VIX) is a popular measure of the stock market&#x27;s expectation of volatility based on S&amp;P 500 index options. It is calculated and disseminated ...", "link": "https://www.thestreet.com/crypto/markets/wall-streets-fear-index-hits-highest-point-since-october?.tsrc=rss"}, {"title": "What Investors Are Saying About the Tough Week in Markets", "source": "Yahoo Finance", "time": "1 hour ago", "summary": "The Dow industrials were the last holdout, turning negative for the year on Thursday and falling deeper into the hole Friday.  After a 453-point decline to end the week, the Dow is down 1.2% for the year and sitting at its lowest level since Dec. 2.  For 2026 so far, the S&amp;P is now down 1.5%, while the Nasdaq is down 3.7%.", "link": "https://finance.yahoo.com/m/4e9ec6d7-3aca-394b-a06a-4a9080312172/what-investors-are-saying.html?.tsrc=rss"}, {"title": "Lumentum, Coherent, and Vertiv Added to the S&amp;P 500 As AI Stocks Dominate Rebalancing", "source": "Yahoo Finance", "time": "1 hour ago", "summary": "Three stocks at the heart of the AI infrastructure boom just got their institutional stamp of approval. Lumentum (LITE), Coherent (COHR), and Vertiv (VRT) were announced as additions to the S&amp;P 500 tonight, as part of the quarterly index rebalancing. You can read the official S&amp;P Global announcement here. This is not a routine reshuffling. ... Lumentum, Coherent, and Vertiv Added to the S&amp;P 500 As AI Stocks Dominate Rebalancing", "link": "https://247wallst.com/investing/2026/03/06/lumentum-coherent-and-vertiv-added-to-the-sp-500-as-ai-stocks-dominate-rebalancing/?.tsrc=rss"}]}, "economic": {"label": "💰 ECONOMIC & POLICY", "items": [{"title": "San Francisco Fed&#x27;s Daly says jobs report complicates interest rate call", "source": "CNBC", "time": "7 hours ago", "summary": "Daly told CNBC on Friday that the weak February jobs report adds to a difficult policymaking environment.", "link": "https://www.cnbc.com/2026/03/06/san-francisco-feds-daly-says-jobs-report-complicates-interest-rate-call.html"}, {"title": "U.S. payrolls unexpectedly fell by 92,000 in February; unemployment rate rises to 4.4%", "source": "CNBC", "time": "7 hours ago", "summary": "Nonfarm payrolls were expected to increase 50,000 in February while the unemployment rate held steady at 4.3%.", "link": "https://www.cnbc.com/2026/03/06/february-2026-jobs-report.html"}, {"title": "Here&#x27;s how the U.S.-Iran war is already hitting consumers&#x27; pocketbooks", "source": "CNBC", "time": "7 hours ago", "summary": "The U.S.-Israeli strikes on Iran over the weekend gave way to a week with topsy-turvy markets, spiking mortgage rates and higher prices at the pump.", "link": "https://www.cnbc.com/2026/03/06/us-iran-war-gas-mortgage-markets.html"}, {"title": "UAE mulls freezing Iranian assets as Middle East conflict escalates: WSJ", "source": "CNBC", "time": "11 hours ago", "summary": "The UAE is considering freezing billions of dollars of Iranian assets held in the Gulf state, potentially severing one of Tehran&#x27;s most critical economic lifelines.", "link": "https://www.cnbc.com/2026/03/06/uae-mulls-freezing-iranian-assets-as-middle-east-conflict-escalates-wsj-.html"}, {"title": "The February jobs numbers are coming out Friday. Here&#x27;s what to expect", "source": "CNBC", "time": "1 day ago", "summary": "Economists surveyed by Dow Jones expect payroll growth of 50,000, following January&#x27;s surprisingly high 130,000.", "link": "https://www.cnbc.com/2026/03/05/february-2026-jobs-report-preview.html"}, {"title": "Private companies added 63,000 jobs in February, January revised to just 11,000 additions, ADP says", "source": "CNBC", "time": "2 days ago", "summary": "Click to read the full article.", "link": "https://www.cnbc.com/2026/03/04/private-companies-added-63000-jobs-in-february-january-revised-to-just-11000-additions-adp-says.html"}, {"title": "Middle East conflict poses fresh test to central banks as oil shock fuels inflation", "source": "CNBC", "time": "2 days ago", "summary": "Middle East conflict has posed a fresh test to central banks, with fears of an oil shock and renewed inflation risks changing their bid to shore up growth.", "link": "https://www.cnbc.com/2026/03/04/iran-israel-us-war-middle-east-conflict-oil-gas-lng-surge-central-banks-inflation-risk.html"}, {"title": "As Trump declares inflation tamed, Iran conflict threatens new price pressures", "source": "CNBC", "time": "4 days ago", "summary": "The conflict involving Iran threatens another price spike that could undermine the president&#x27;s central case for lower interest rates.", "link": "https://www.cnbc.com/2026/03/02/as-trump-declares-inflation-tamed-iran-conflict-threatens-new-price-pressures.html"}, {"title": "Why Iran should not count on allies Russia and China to come to its aid", "source": "CNBC", "time": "3 days ago", "summary": "Iran&#x27;s closest allies, Russia and China, have not offered material support to it, exposing the hard limits of its &quot;strategic&quot; partnerships.", "link": "https://www.cnbc.com/2026/03/02/iran-china-russia-strikes-assistance-alliance-weapons-missiles-geopolitics-oil-prices-ukraine.html"}, {"title": "Iran conflict: Where things stand, global responses — and what comes next", "source": "CNBC", "time": "4 days ago", "summary": "The U.S.-Israel conflict with Iran is extending into its third day with each side pledging escalation.", "link": "https://www.cnbc.com/2026/03/02/iran-israel-us-conflict-oil-jumps-trump-netanyahu-what-is-next.html"}]}, "india": {"label": "🇮🇳 INDIAN MARKETS", "items": [{"title": "US Stocks: US retail sales decline as consumer pullback deepens", "source": "Economic Times", "time": "8 hours ago", "summary": "US retail sales declined by 0.2 percent in January, according to delayed government data released on Friday, missing some analysts&#x27; expectations amid persistent concerns that consumption in the world&#x27;s biggest economy is slowing.", "link": "https://economictimes.indiatimes.com/markets/us-stocks/news/us-stocks-us-retail-sales-decline-as-consumer-pullback-deepens/articleshow/129163691.cms"}, {"title": "SAT gives partial relief to Kotak AMC in Sebi case on fixed maturity plan payouts", "source": "Economic Times", "time": "9 hours ago", "summary": "The Securities Appellate Tribunal granted partial relief to Kotak Mahindra AMC in the fixed maturity plan case by setting aside Sebi’s fee disgorgement order but upheld monetary penalties. The ruling relates to delayed investor payouts linked to recoveries from underlying investments.", "link": "https://economictimes.indiatimes.com/markets/stocks/news/sat-gives-partial-relief-to-kotak-amc-in-sebi-case-on-fixed-maturity-plan-payouts/articleshow/129162398.cms"}, {"title": "US Stocks: Fed rate cut bets rise after weak jobs data", "source": "Economic Times", "time": "9 hours ago", "summary": "New signs of labor weakness and oil-driven inflation concerns may saddle U.S. ​Federal Reserve officials with a choice they&#x27;d hoped to avoid between ensuring prices remain contained or keeping a possibly wobbly job market on track.", "link": "https://economictimes.indiatimes.com/markets/us-stocks/news/us-stocks-fed-rate-cut-bets-rise-after-weak-jobs-data/articleshow/129161811.cms"}, {"title": "US Stocks: US nonfarm payrolls decline in February; unemployment rate rises to 4.4%", "source": "Economic Times", "time": "9 hours ago", "summary": "The U.S. economy unexpectedly shed jobs in February amid a strike by ​healthcare workers and harsh winter weather, while the ​unemployment rate increased to 4.4%.", "link": "https://economictimes.indiatimes.com/markets/us-stocks/news/us-stocks-us-nonfarm-payrolls-decline-in-february-unemployment-rate-rises-to-4-4/articleshow/129161175.cms"}, {"title": "Global Stocks: Big bond markets left battered and bruised as Middle East war stokes inflation angst", "source": "Economic Times", "time": "9 hours ago", "summary": "The world&#x27;s biggest bond markets were headed for their worst week ​since at least last April as concerns that war in the Middle East will renew upward pressure on inflation and force central banks to start hiking interest rates soon.", "link": "https://economictimes.indiatimes.com/markets/us-stocks/news/global-stocks-big-bond-markets-left-battered-and-bruised-as-middle-east-war-stokes-inflation-angst/articleshow/129160889.cms"}, {"title": "US stocks today: Dow Jones crashes 800 points, S&amp;P 500, Nasdaq plummet over 1% as Mideast turmoil, weak jobs report weigh", "source": "Economic Times", "time": "9 hours ago", "summary": "Wall Street indexes tumbled Friday as Middle East conflict threatened inflation and weak jobs data surprised markets. Traders now see a 50/50 chance of a June Fed rate cut, but persistent high oil prices could keep the Fed on hold. Banking stocks led the decline, with Western Alliance shares plummeting.", "link": "https://economictimes.indiatimes.com/markets/us-stocks/news/us-stocks-today-dow-jones-crashes-800-points-sp-500-nasdaq-plummet-over-1-as-middle-east-turmoil-weak-jobs-report-weigh/articleshow/129161017.cms"}, {"title": "Brent oil price tops $90 as Mideast war escalates", "source": "Economic Times", "time": "9 hours ago", "summary": "Oil prices jumped further on Friday after US President Donald Trump said only &quot;unconditional surrender&quot; of Iran will end the Middle East war, as fresh strikes hit the Islamic republic.", "link": "https://economictimes.indiatimes.com/markets/commodities/news/brent-oil-price-tops-90-as-mideast-war-escalates/articleshow/129160021.cms"}, {"title": "PB Fintech: Goldman Sachs, Tata Mutual Fund buy stake in Rs 695 crore block deal", "source": "Economic Times", "time": "10 hours ago", "summary": "PB Fintech shares witnessed block deals worth Rs 695 crore, with Goldman Sachs, mutual funds, and foreign investors acquiring shares from Tencent Cloud Europe, signaling sustained institutional interest in the company.", "link": "https://economictimes.indiatimes.com/markets/stocks/news/pb-fintech-goldman-sachs-tata-mutual-fund-buy-stake-in-rs-695-crore-block-deal/articleshow/129159306.cms"}, {"title": "Sebi approves 3 IPOs including Eastman Auto and Milestone Gears", "source": "Economic Times", "time": "10 hours ago", "summary": "Sebi has cleared IPOs for Bonbloc Technologies, Eastman Auto and Power, and Milestone Gears. The companies plan fresh equity and offers for sale, targeting NSE and BSE listings amid steady primary market activity.", "link": "https://economictimes.indiatimes.com/markets/stocks/news/sebi-approves-3-ipos-including-eastman-auto-and-milestone-gears/articleshow/129158957.cms"}, {"title": "Oil marketing companies, paint stocks decline amid surging crude oil prices", "source": "Economic Times", "time": "10 hours ago", "summary": "Shares of oil marketing companies ended lower on Friday after a day&#x27;s breather amid surging crude oil prices due to the deepening conflict in West Asia.", "link": "https://economictimes.indiatimes.com/markets/stocks/news/oil-marketing-companies-paint-stocks-decline-amid-surging-crude-oil-prices/articleshow/129157328.cms"}]}, "google_trending": {"label": "🔥 GOOGLE TRENDING", "items": [{"title": "Insolation Energy Receives Final Approval from BSE and NSE for Main Board Migration - scanx.trade", "source": "news.google.com", "time": "10 hours ago", "summary": "Insolation Energy Receives Final Approval from BSE and NSE for Main Board Migration  scanx.trade", "link": "https://news.google.com/rss/articles/CBMi0wFBVV95cUxNLTE5Q3ByYTJiRzVkNnk5aTh1djdibDJNdGExWWxVYXpDenI4MUhpMndyWk5nbFlIN2U1eXBrcnRYOTVBQWhEbXRyZmVwTmZfUG5NQTZVMGhGY0loenZNR2dTdy1pcjdSeHQ5VHV5ajM3TllzT0ljTWF6RFpXd2ZtNEZMakE1VndnOC1uUEZiUjRGdzBBd3NRbnU0RnlUdzVWZ0NOOUZEZXNNOWVLZE14eWtGTWNqTW9rRFN3R2kxcFdhdHZOUHBpb3VKQWs3ZC1BbGs4?oc=5"}, {"title": "Sensex falls over 1,000 points, Nifty drops 315 amid Middle East tensions - ddnews.gov.in", "source": "news.google.com", "time": "13 hours ago", "summary": "Sensex falls over 1,000 points, Nifty drops 315 amid Middle East tensions  ddnews.gov.in", "link": "https://news.google.com/rss/articles/CBMingFBVV95cUxNTDVMMzdON0hVZFZiWG1jMDFYWUwxZFlBSmJRQTNwX1hSRGx0eTJFcE9yM1ZPWjYyUmJFT3hhUlQwd0k3V2pyV2pPYTRxVnFJbE5ORFBHLWo5bXhBM1FkakpmaDRiaEVCSmZDX1lsVUp4NFd2TDhFSXd4YTl2N19TZnRmdWdqcDVJOFZvNUFBdDJFalNWT3I3NTh6dURNdw?oc=5"}, {"title": "Stock market holiday for Holi: Are NSE, BSE shut on Tuesday or Wednesday? - MSN", "source": "news.google.com", "time": "19 hours ago", "summary": "Stock market holiday for Holi: Are NSE, BSE shut on Tuesday or Wednesday?  MSN", "link": "https://news.google.com/rss/articles/CBMi5gFBVV95cUxPRV9vR3VseFlqekZsT24yLUZLVTBock9qWnhQb3RLVGJQR0hBdkhzZnlRbVRrb1h0MUFyRmRpWXAxTEw1XzFEdFR4ZmJuRGtzUVBYSllFdjF4SnZCRTAtbHB2cnhLMTVMb2h4R0c5SG9QdFdfTmpuRDRLdG8wNU5kM1JBUC1YSHBSUEFxLWd5M2oxcWVkYzR5VFZBUEwtSDhHRVpUR2FtZGdDWEtIZWh0RWJnaWZoSmc1aGFpZmFscE9sV1cwYXIyeWdxRUowYTc1SVpKTVhTOXdSX1FoYUxrSXd3Q0lGZw?oc=5"}, {"title": "ED Targets Firms Over Alleged NSE Pre-IPO Share Scam - BW Businessworld", "source": "news.google.com", "time": "1 hour ago", "summary": "ED Targets Firms Over Alleged NSE Pre-IPO Share Scam  BW Businessworld", "link": "https://news.google.com/rss/articles/CBMinAFBVV95cUxPMFBVYzRNeXV1UDBibl9Nemk3UGRDMS1CRVozT1dsdUlpVUtwWFlOamw0YzRlUGNrbWRiSUFlMFJLXzAyQ3FPanMtY2dGLWZNNlVtNFRfcFcyMk5oNmN2cElMenllbDZ3dEFvTTI2alVXMUlRbkFwRTBOckhhcnNBZFBYcm1Ick1mRjFQbzdHVHZZeUNxRFN0S1Q4dXg?oc=5"}, {"title": "NETWEB TECHNOLOGIES Share Price Today Down 4% - Equitymaster", "source": "news.google.com", "time": "4 hours ago", "summary": "NETWEB TECHNOLOGIES Share Price Today Down 4%  Equitymaster", "link": "https://news.google.com/rss/articles/CBMilAFBVV95cUxNVVRSWmliWXhiRG41UzNYR2R4dm5ic3Y1c2NqQ0pIaHNKSGVMak01aU9CSWFpVEdsd3Q1TWN5VVI3WFV1SllqWXJQeks0WWoxNGdyLTNuYk1lWVJhWGNURXVCaVp5ZWI0TXpkQk1jTlpwRjg5M05hdWhGZ2puYjJmRS1ZcTRJcHI3bDkyeEVQTXJlRnhR?oc=5"}, {"title": "How US-Iran War And Crude Price Surge Rewrote The Script For Dalal Street - ETV Bharat", "source": "news.google.com", "time": "9 hours ago", "summary": "How US-Iran War And Crude Price Surge Rewrote The Script For Dalal Street  ETV Bharat", "link": "https://news.google.com/rss/articles/CBMixAFBVV95cUxNaXBFS2hhNWhvdTloY0tMamlKdVMzX1JqWjJzdmhuNjhBVHc4ZHNXcnVoS3huQWJFRGdoeDJWNWtlOEZwVUViQVRaaDFOb0h5VlcyS1Rwcmc2bnR3R2E0Q0NUS00xSnZBdVlqMWNHLWNmY3ZndHkwVWhPdzUybGZPUG1URk1LMi1TSnl4Z25IQTdpZDJDWVo5UnlfUDhpOWpLR0lTLWNWVG11cjRXZUdwNUxtMkNGUF9ISW56WmNOX1RrRHp20gHKAUFVX3lxTE9hRnBvWW5uV1FwaW9DZUNENm1OenQ4OVVVT0FmUy16eXNnQ1ZJMkFaaThIclpZbHlsaWV5UVBOYWl5YTNBWFR5ZmRrem8zZW0zNFNYN1drdHdncHFzTFJDcVZJN1pZeWotMUt6SmllRjd0a0p0OUZ5czk3WTNhWHpPUDFwREhQWGRLdFJXYjVyREw0aFFkWjRUb08wOWlKLVpyY3FoanR0TXliTGJEc1EtUUt6djJ0OGJHT0JsMWJpYXllQm5JT3lRVEE?oc=5"}, {"title": "Insolation Energy Receives Final BSE and NSE Main Board Migration Approval - India IPO", "source": "news.google.com", "time": "9 hours ago", "summary": "Insolation Energy Receives Final BSE and NSE Main Board Migration Approval  India IPO", "link": "https://news.google.com/rss/articles/CBMirwFBVV95cUxNVl84S0p1TU1DQ3MxNmRlUGE3RXZFeEVuWXdhTnV6U3ZVTngzVDJkTW1zV2tEZ01IM2gzN1djQ2ZQT1RLT3d5UmNNRloxVmQ3SzFxT1BzRGtYY1hwOHp3cmdUZjQzZFpxWHA2Y21PekJZbzgtbE0tV1JTTExNYWNGYVNRZGliekFRVTkwY0ltd2xweGh4dHVNZ1hjTWx5RzdhLTFuT0t2T0NBMmw5QXlj?oc=5"}, {"title": "While indices slide, some small-cap stocks are soaring to the upper circuit. - Dalal Street Investment Journal", "source": "news.google.com", "time": "11 hours ago", "summary": "While indices slide, some small-cap stocks are soaring to the upper circuit.  Dalal Street Investment Journal", "link": "https://news.google.com/rss/articles/CBMiugFBVV95cUxNZ3Z0Um9RQ05JSVpFMnlmUHFkcVROUWF4Ql9EQTI5RDNpdW5tVGNHYzJ5N1pMRk1BTElHdi1PMWRJSlQ4Q3F2b2RqRlV3RnF5TW1tNFp3NzFlNExITGVwSHl4YnZTcnZ5N21PZExDczFOWGlNRXNfRU5vbDcxUG5xMDdTbHk5eW5JSTJBbkhzd2lucTQ4d2R0NXN2dktVaFZSX0dIMS1QX19XQ2V1WC1Kdk1RWHlOcmprc1E?oc=5"}, {"title": "TVS Motor Gets NSE &amp; BSE Approval to List ₹190 Crore NCRPS Shares, Trading From March 10 - PSU Connect", "source": "news.google.com", "time": "7 hours ago", "summary": "TVS Motor Gets NSE &amp; BSE Approval to List ₹190 Crore NCRPS Shares, Trading From March 10  PSU Connect", "link": "https://news.google.com/rss/articles/CBMinwFBVV95cUxPbVpOVmZQc1BlWms1dDcxalllODZwSnI1R0dNdE00c2t3TjVXSHVsN2M1QWRCVDkzLUd3LXhmTUZoSFhMVmdEWDRlLTYzRS1zcDJCOElhR0c0amJLel9BVXhVb0pTVXFvWHVqTFVfaklESDgzUlExWGtHaHJEWHh0QjlxalVWQU5INGNHRl92VnV3dldCakdabWJXem1USkU?oc=5"}, {"title": "TVS Motor Gains NSE, BSE Nod to List 190 Crore Preference Shares - TipRanks", "source": "news.google.com", "time": "3 hours ago", "summary": "TVS Motor Gains NSE, BSE Nod to List 190 Crore Preference Shares  TipRanks", "link": "https://news.google.com/rss/articles/CBMitgFBVV95cUxOVmhfRmNXc2FhQU0ta1hxQ2FlMjVoaFVZOXNGM1VPVjBUSVNWeUN0cmU3Q0pZZE05UVVIR2wtYnVmVllSbGRtd0dSOExjNlZuYUJ0NFRhbHY2VGc3SEJ1QWlUaTA0ai1jS0RXc2dkWVYtUUNvSGh1M2JLc2lubzhFcXlUXzJjRUpwSzhNa2NPbFdCUFBORE8zVS1jNzN2OE5uUGoxdUFjZGU1bVlOcDJUd3NDMS1Ydw?oc=5"}]}, "corporate": {"label": "🏢 CORPORATE NEWS", "items": [{"title": "FDA vaccine head will step down in April after string of controversial decisions", "source": "CNBC", "time": "43 min ago", "summary": "Vinay Prasad is leaving his post as director of the Center for Biologics Evaluation and Research.", "link": "https://www.cnbc.com/2026/03/06/fda-vaccine-head-prasad-step-down.html"}, {"title": "FDA reversals leave investors worrying about the fates of other experimental drugs", "source": "CNBC", "time": "3 hours ago", "summary": "Investors are scrutinizing the prospects for some drugs in the pipeline following a string of recent rejections from the U.S. Food and Drug Administration.", "link": "https://www.cnbc.com/2026/03/06/fda-reversals-on-uniqure-moderna-approvals-worry-investors.html"}, {"title": "Used vehicle prices jump ahead of spring selling season optimism", "source": "CNBC", "time": "7 hours ago", "summary": "A closely watched barometer for used vehicle pricing jumped last month as dealers sped to increase inventories amid optimism of a robust spring selling season.", "link": "https://www.cnbc.com/2026/03/06/used-vehicle-prices.html"}, {"title": "United CEO Scott Kirby says higher airfare could be ahead after fuel price spike", "source": "CNBC", "time": "9 hours ago", "summary": "United CEO Scott Kirby said demand remains high but that fuel prices will hit first-quarter results.", "link": "https://www.cnbc.com/2026/03/06/united-airlines-ceo-scott-kirby.html"}, {"title": "Toyota, Hyundai and Chinese automakers expected to be most impacted by Iran war", "source": "CNBC", "time": "6 hours ago", "summary": "While regional sales will be impacted, the closing of the Strait of Hormuz and rising oil prices will have ripple effects across the global automotive industry.", "link": "https://www.cnbc.com/2026/03/06/iran-war-automakers-toyota-hyundai-china.html"}, {"title": "Historic winter storms weigh on Gap, Old Navy performance after 800 temporary store closures", "source": "CNBC", "time": "13 hours ago", "summary": "Gap has been on a steady upswing of growth but saw worse than expected results during its holiday quarter after historic winter storms led to store closures.", "link": "https://www.cnbc.com/2026/03/05/gap-gap-q4-2025-earnings.html"}, {"title": "Home sellers are relisting properties at fastest pace in a decade, but spring supply is still low", "source": "CNBC", "time": "2 hours ago", "summary": "Frustrated sellers who pulled homes off the market last fall are now relisting them at a quick pace, thanks to lower mortgage rates, but supply is still low.", "link": "https://www.cnbc.com/2026/03/05/home-sales-mortgage-rates.html"}, {"title": "States led by New York sue to block Trump&#x27;s latest tariffs, calling them an illegal end run around Supreme Court", "source": "CNBC", "time": "1 day ago", "summary": "The move from the state AGs — part of the successful effort to block Trump&#x27;s original tariffs — adds to the ongoing uncertainty created by his tariff policies.", "link": "https://www.cnbc.com/2026/03/05/trump-tariffs-state-ags-sue-supreme-court-decision.html"}, {"title": "Iran war threatens $11.7 trillion global travel industry as passengers get caught in crossfire", "source": "CNBC", "time": "1 day ago", "summary": "Travelers who are far from falling missiles, drone attacks and other geopolitical flashpoints aren&#x27;t immune to ripple effects.", "link": "https://www.cnbc.com/2026/03/05/iran-war-travel-flights-cruise-hotels.html"}, {"title": "Mortgages in 47 seconds: Better’s new ChatGPT app targets lenders Rocket and UWM", "source": "CNBC", "time": "1 day ago", "summary": "Creating a mortgage has been one of the most time-consuming corners of American finance, with lenders relying on dozens of steps that can take weeks.", "link": "https://www.cnbc.com/2026/03/05/mortgages-in-47-seconds-betters-new-chatgpt-app-targets-lenders-rocket-and-uwm.html"}]}, "geopolitical": {"label": "🌍 GEOPOLITICAL", "items": [{"title": "Oil surges 35% this week for biggest gain in futures trading history dating back to 1983", "source": "CNBC", "time": "3 hours ago", "summary": "The oil market is worried that Gulf countries will have to shut production if tankers are unable to pass through the Strait of Hormuz.", "link": "https://www.cnbc.com/2026/03/06/iran-us-war-oil-prices-brent-wti-barrel-futures.html"}, {"title": "Amazon says Anthropic’s Claude still OK for AWS customers to use outside defense work", "source": "CNBC", "time": "4 min ago", "summary": "Amazon joined Microsoft and Google in continue to offer Anthropic&#x27;s Claude AI technology to customers after the Pentagon deemed it a &quot;supply chain risk.&quot;", "link": "https://www.cnbc.com/2026/03/06/amazon-aws-anthropic-claude-pentagon-blacklist.html"}, {"title": "Trump wants U.S. Navy to escort tankers through the Gulf. Why that plan may not work", "source": "CNBC", "time": "12 hours ago", "summary": "A backup of oil tankers in the Persian Gulf is disrupting supplies, and will only get worse the longer the Strait of Hormuz is closed.", "link": "https://www.cnbc.com/2026/03/06/trump-navy-strait-hormuz-iran-oil-tanker.html"}, {"title": "Palantir rallies 15% for the week as Iran war boosts prospects, muting Anthropic concern", "source": "CNBC", "time": "1 hour ago", "summary": "Palantir&#x27;s stock had its best week since August and outperformed all of its large-cap tech peers after the U.S. attacked Iran.", "link": "https://www.cnbc.com/2026/03/06/palantir-stock-jumps-15percent-in-week-on-iran-war-boosts-anthropic-muted.html"}, {"title": "Google joins Microsoft in telling users Anthropic is still available outside defense projects", "source": "CNBC", "time": "4 hours ago", "summary": "Cloud vendors are letting customers know that Anthropic&#x27;s popular AI tools can still be accessed after the Department of Defense blacklisted the company.", "link": "https://www.cnbc.com/2026/03/06/google-says-anthropic-remains-available-outside-of-defense-projects.html"}, {"title": "Zealand&#x27;s stock falls 35% after disappointing drug result. Its CEO tells CNBC people need to focus less on the &#x27;weight loss Olympics&#x27;", "source": "CNBC", "time": "8 hours ago", "summary": "Zealand and Roche are jointly developing the drug petrelintide which in a mid-stage study led to a worse-than-expected 10.7% weight-loss over 42 weeks.", "link": "https://www.cnbc.com/2026/03/06/zealand-stock-zela-roche-trial-weight-loss-ceo-novo-glp1.html"}, {"title": "Trump tariffs: Customs and Border Protection tells judge it can&#x27;t comply with refund order", "source": "CNBC", "time": "2 hours ago", "summary": "CBP told Judge Richard Eaton that the technology upgrades it plans would save more than 4 million man-hours in processing refunds for Trump&#x27;s tariffs.", "link": "https://www.cnbc.com/2026/03/06/trump-trade-tariffs-refunds-customs-border-protection.html"}, {"title": "Samsung reveals first details of its AI smart glasses to CNBC", "source": "CNBC", "time": "10 hours ago", "summary": "Samsung&#x27;s AI smart glasses will be launched in 2026 and will mark the company&#x27;s first foray into the product category.", "link": "https://www.cnbc.com/2026/03/06/samsung-ai-smart-glasses-first-details-specs-release-date.html"}, {"title": "States led by New York sue to block Trump&#x27;s latest tariffs, calling them an illegal end run around Supreme Court", "source": "CNBC", "time": "1 day ago", "summary": "The move from the state AGs — part of the successful effort to block Trump&#x27;s original tariffs — adds to the ongoing uncertainty created by his tariff policies.", "link": "https://www.cnbc.com/2026/03/05/trump-tariffs-state-ags-sue-supreme-court-decision.html"}, {"title": "Inside India newsletter: Energy, airlines and now over $50 billion in remittances to India at risk as Middle East conflict deepens", "source": "CNBC", "time": "1 day ago", "summary": "India can&#x27;t seem to escape from the fallout of the escalating conflict in the Middle East. After energy and aviation, remittances could be the latest worry.", "link": "https://www.cnbc.com/2026/03/05/iran-conflict-india-impact-remittance-pipeline.html"}]}};
+
+// ── Current active category ──
+let currentCat = 'markets';
+
+// ════════════════════════════
+// RENDER NEWS TABLE
+// ════════════════════════════
+function renderNews(cat) {
+  const d = NEWS_DATA[cat];
+  if (!d) return;
+  const tbody = document.getElementById('newsTbody');
+  const items = d.items;
+
+  if (!items || items.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" class="no-news">No articles available for this category.</td></tr>';
+    document.getElementById('newsTitle').textContent = '▶ ' + d.label + ' — 0 ARTICLES';
+    return;
+  }
+
+  tbody.innerHTML = items.map((item, i) => {
+    const link = item.link && item.link !== '#'
+      ? `<a class="expand-link" href="${item.link}" target="_blank" rel="noopener">Read Full Article ↗</a>`
+      : '';
+    return `
+      <tr onclick="toggleRow(this)">
+        <td class="td-num">${String(i+1).padStart(2,'0')}</td>
+        <td class="td-time">${item.time}</td>
+        <td class="td-src"><span class="src-badge">${item.source}</span></td>
+        <td class="td-title">
+          <div class="headline">${item.title}</div>
+          <div class="expand-body">
+            <div class="expand-summary">${item.summary}</div>
+            ${link}
+          </div>
+        </td>
+        <td class="td-arrow"><span class="arrow-icon">▼</span></td>
+      </tr>`;
+  }).join('');
+
+  document.getElementById('newsTitle').textContent = '▶ ' + d.label + ' — ' + items.length + ' ARTICLES';
 }
 
-// ════════════════════════════════════════════════
-// FIX 1 – GIFT Nifty
-// Yahoo Finance does NOT carry GIFT Nifty (NSE IX futures).
-// Strategy: try multiple CORS proxies for the NSE IFSC public quote API.
-// Fallback: show Nifty 50 (^NSEI) clearly labelled as the spot proxy.
-// ════════════════════════════════════════════════
+function toggleRow(row) {
+  row.classList.toggle('open');
+}
 
-// Standard Yahoo Finance symbols (unchanged)
+// ════════════════════════════
+// SWITCH CATEGORY
+// ════════════════════════════
+function switchCat(cat, sidebarEl) {
+  currentCat = cat;
+
+  // Update sidebar items
+  document.querySelectorAll('.sb-item').forEach(el => el.classList.remove('active'));
+  const sbEl = document.getElementById('sb-' + cat);
+  if (sbEl) sbEl.classList.add('active');
+
+  // Update tabs
+  document.querySelectorAll('.cat-tab').forEach(el => el.classList.remove('active'));
+  const tabEl = document.getElementById('tab-' + cat);
+  if (tabEl) tabEl.classList.add('active');
+
+  renderNews(cat);
+}
+
+// ════════════════════════════
+// TICKER STRIP
+// ════════════════════════════
+const TICKER_SYMBOLS = [
+  ['GIFT NIFTY', 'gift-nifty'],
+  ['DOW',    'dow'],
+  ['S&P 500','sp500'],
+  ['NASDAQ', 'nasdaq'],
+  ['CRUDE',  'oil'],
+  ['GOLD',   'gold'],
+  ['SILVER', 'silver'],
+  ['USD IDX','dollar'],
+  ['USD/INR','usdinr'],
+];
+
+function buildTicker() {
+  const track = document.getElementById('tickerTrack');
+  // Double for seamless loop
+  const items = [...TICKER_SYMBOLS, ...TICKER_SYMBOLS];
+  track.innerHTML = items.map(([name, key]) => `
+    <span class="ticker-item" id="tick-${key}">
+      <span class="t-sym">${name}</span>
+      <span class="t-val t-neu" id="tv-${key}">--</span>
+    </span>
+  `).join('');
+}
+
+function updateTicker(key, val, pct) {
+  const el = document.getElementById('tv-' + key);
+  if (!el) return;
+  const p = parseFloat(pct);
+  el.textContent = val + (pct ? ' (' + (p >= 0 ? '+' : '') + pct + '%)' : '');
+  el.className = 't-val ' + (p > 0 ? 't-pos' : p < 0 ? 't-neg' : 't-neu');
+
+  // Update duplicate ticker item too
+  const els = document.querySelectorAll('[id="tv-' + key + '"]');
+  els.forEach(e => {
+    e.textContent = el.textContent;
+    e.className = el.className;
+  });
+}
+
+// ════════════════════════════
+// INDICATOR CARD UPDATE
+// ════════════════════════════
+function updateCard(id, value, change, pchange) {
+  const vEl = document.getElementById('val-' + id);
+  const cEl = document.getElementById('chg-' + id);
+  const card = document.getElementById('card-' + id);
+  if (vEl) vEl.textContent = value;
+  if (cEl) {
+    const p = parseFloat(pchange);
+    const sign = p >= 0 ? '+' : '';
+    cEl.textContent = sign + change + ' (' + sign + pchange + '%)';
+    const cls = p > 0 ? 'pos' : p < 0 ? 'neg' : 'neu';
+    cEl.className = 'ind-chg ' + cls;
+    if (card) card.className = 'ind-cell ' + cls;
+  }
+  // Update sidebar
+  const sbEl = document.getElementById('sbv-' + id);
+  if (sbEl) {
+    sbEl.textContent = value;
+    const p = parseFloat(pchange);
+    sbEl.className = 'sb-ind-val ' + (p > 0 ? 'pos' : p < 0 ? 'neg' : 'neu');
+  }
+  updateTicker(id, value, pchange);
+}
+
+// ════════════════════════════
+// YAHOO FINANCE FETCH
+// ════════════════════════════
 const SYMBOLS = {
-    'dow':   '^DJI',
-    'sp500': '^GSPC',
-    'nasdaq':'^IXIC',
-    'oil':   'CL=F',
-    'dollar':'DX-Y.NYB',
-    'gold':  'GC=F',
-    'silver':'SI=F',
-    'usdinr': 'INR=X'
+  'dow':    '^DJI',
+  'sp500':  '^GSPC',
+  'nasdaq': '^IXIC',
+  'oil':    'CL=F',
+  'dollar': 'DX-Y.NYB',
+  'gold':   'GC=F',
+  'silver': 'SI=F',
+  'usdinr': 'INR=X'
 };
 
-
-
-function updateCard(id, value, change, pchange) {
-    const vEl = document.getElementById('val-'+id);
-    const cEl = document.getElementById('chg-'+id);
-    const card = document.getElementById('card-'+id);
-    if (vEl) vEl.textContent = value;
-    if (cEl) {
-        const p = parseFloat(pchange);
-        const sign = p >= 0 ? '+' : '';
-        cEl.textContent = sign+change+' ('+sign+pchange+'%)';
-        const cls = p > 0 ? 'positive' : p < 0 ? 'negative' : 'neutral';
-        cEl.className = 'indicator-change '+cls;
-        if (card) card.className = 'indicator-card '+cls;
-    }
-}
-
 async function fetchYahoo(key, sym) {
-    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${sym}?interval=1d&range=1d`;
-    const proxies = [
-        'https://corsproxy.io/?'+encodeURIComponent(url),
-        'https://api.allorigins.win/get?url='+encodeURIComponent(url),
-        url
-    ];
-    for (const u of proxies) {
-        try {
-            const r = await fetch(u, {mode:'cors'});
-            if (!r.ok) continue;
-            let d = await r.json();
-            if (d.contents) d = JSON.parse(d.contents);  // allorigins wrapper
-            const meta = d?.chart?.result?.[0]?.meta;
-            if (!meta) continue;
-            const cur = meta.regularMarketPrice;
-            const prev = meta.chartPreviousClose || meta.previousClose;
-            if (!cur || !prev) continue;
-            const chg = (cur - prev).toFixed(2);
-            const pct = (((cur-prev)/prev)*100).toFixed(2);
-            let val = ['dow','sp500','nasdaq'].includes(key)
-                ? cur.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})
-                : key==='dollar' ? cur.toFixed(2)
-                : key==='usdinr' ? '₹'+cur.toFixed(2)
-                : '$'+cur.toFixed(2);
-            updateCard(key, val, chg, pct);
-            return true;
-        } catch(e) { /* try next */ }
-    }
-    return false;
+  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${sym}?interval=1d&range=1d`;
+  const proxies = [
+    'https://corsproxy.io/?' + encodeURIComponent(url),
+    'https://api.allorigins.win/get?url=' + encodeURIComponent(url),
+    url
+  ];
+  for (const u of proxies) {
+    try {
+      const r = await fetch(u, {mode: 'cors'});
+      if (!r.ok) continue;
+      let d = await r.json();
+      if (d.contents) d = JSON.parse(d.contents);
+      const meta = d?.chart?.result?.[0]?.meta;
+      if (!meta) continue;
+      const cur = meta.regularMarketPrice;
+      const prev = meta.chartPreviousClose || meta.previousClose;
+      if (!cur || !prev) continue;
+      const chg = (cur - prev).toFixed(2);
+      const pct = (((cur - prev) / prev) * 100).toFixed(2);
+      let val = ['dow', 'sp500', 'nasdaq'].includes(key)
+        ? cur.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})
+        : key === 'dollar' ? cur.toFixed(2)
+        : key === 'usdinr' ? '₹' + cur.toFixed(2)
+        : '$' + cur.toFixed(2);
+      updateCard(key, val, chg, pct);
+      // Extra sidebar updates for nifty/sensex placeholder
+      if (key === 'usdinr') {
+        const sbEl = document.getElementById('sbv-usdinr');
+        if (sbEl) { sbEl.textContent = '₹' + cur.toFixed(2); }
+      }
+      return true;
+    } catch (e) { /* try next */ }
+  }
+  return false;
 }
-// ── GIFT Nifty: fetch from NSE IFSC public data (via CORS proxy) ──
-// NSE IFSC provides a public JSON feed; we try via corsproxy.io
-// If that fails we fall back to the Stooq CSV (no CORS issue) for ^N50USD
-// which is the USD-denominated Nifty equivalent – closest public proxy.
+
+// ════════════════════════════
+// GIFT NIFTY FETCH
+// ════════════════════════════
 async function fetchGiftNifty() {
-    // Attempt 1: corsproxy → NSE IFSC market data (live)
-    const nseUrl = 'https://www.nseifsc.com/market/GetIndexChartDetails?indices=NIFTY50&type=I';
-    try {
-        const r = await fetch('https://corsproxy.io/?'+encodeURIComponent(nseUrl), {mode:'cors', signal: AbortSignal.timeout(6000)});
-        if (r.ok) {
-            const d = await r.json();
-            // NSE IFSC returns array; grab latest price & prev close
-            if (d && d.length > 0) {
-                const last = d[d.length - 1];
-                const first = d[0];
-                const cur = parseFloat(last[1]);
-                const prev = parseFloat(first[1]);
-                if (cur && prev) {
-                    const chg = (cur - prev).toFixed(2);
-                    const pct = (((cur-prev)/prev)*100).toFixed(2);
-                    const val = cur.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
-                    const vEl = document.getElementById('val-gift-nifty');
-                    const cEl = document.getElementById('chg-gift-nifty');
-                    const card = document.getElementById('card-gift-nifty');
-                    if (vEl) vEl.textContent = val;
-                    if (cEl) {
-                        const p = parseFloat(pct);
-                        const sign = p >= 0 ? '+' : '';
-                        cEl.textContent = sign+chg+' ('+sign+pct+'%) · NSE IX';
-                        const cls = p > 0 ? 'positive' : p < 0 ? 'negative' : 'neutral';
-                        cEl.className = 'indicator-change '+cls;
-                        if (card) card.className = 'indicator-card '+cls;
-                    }
-                    return;
-                }
-            }
+  // Attempt 1: NSE IFSC via CORS proxy
+  const nseUrl = 'https://www.nseifsc.com/market/GetIndexChartDetails?indices=NIFTY50&type=I';
+  try {
+    const r = await fetch('https://corsproxy.io/?' + encodeURIComponent(nseUrl), {mode: 'cors', signal: AbortSignal.timeout(6000)});
+    if (r.ok) {
+      const d = await r.json();
+      if (d && d.length > 0) {
+        const last = d[d.length - 1];
+        const first = d[0];
+        const cur = parseFloat(last[1]);
+        const prev = parseFloat(first[1]);
+        if (cur && prev) {
+          const chg = (cur - prev).toFixed(2);
+          const pct = (((cur - prev) / prev) * 100).toFixed(2);
+          const val = cur.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+          const vEl = document.getElementById('val-gift-nifty');
+          const cEl = document.getElementById('chg-gift-nifty');
+          const card = document.getElementById('card-gift-nifty');
+          if (vEl) vEl.textContent = val;
+          if (cEl) {
+            const p = parseFloat(pct);
+            const sign = p >= 0 ? '+' : '';
+            cEl.textContent = sign + chg + ' (' + sign + pct + '%) · NSE IX';
+            const cls = p > 0 ? 'pos' : p < 0 ? 'neg' : 'neu';
+            cEl.className = 'ind-chg ' + cls;
+            if (card) card.className = 'ind-cell ' + cls;
+          }
+          updateTicker('gift-nifty', val, pct);
+          // sidebar nifty
+          const sbN = document.getElementById('sbv-nifty');
+          if (sbN) { sbN.textContent = val; sbN.className = 'sb-ind-val ' + (parseFloat(pct) > 0 ? 'pos' : parseFloat(pct) < 0 ? 'neg' : 'neu'); }
+          return;
         }
-    } catch(e) { /* fall through */ }
+      }
+    }
+  } catch (e) { /* fall through */ }
 
-    // Attempt 2: Stooq – N50USD (Nifty 50 in USD) – best public proxy for GIFT Nifty
-    // Stooq serves CSV without CORS restrictions
-    try {
-        const stooqUrl = 'https://stooq.com/q/l/?s=nifty.ix&f=sd2t2ohlcv&e=csv';
-        const r = await fetch('https://corsproxy.io/?'+encodeURIComponent(stooqUrl), {signal: AbortSignal.timeout(5000)});
-        if (r.ok) {
-            const text = await r.text();
-            const lines = text.trim().split('\n');
-            if (lines.length >= 2) {
-                const cols = lines[1].split(',');
-                // Stooq CSV: Symbol,Date,Time,Open,High,Low,Close,Volume
-                const close = parseFloat(cols[6]);
-                const open  = parseFloat(cols[3]);
-                if (close && open) {
-                    const chg = (close - open).toFixed(2);
-                    const pct = (((close-open)/open)*100).toFixed(2);
-                    const val = close.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
-                    const vEl = document.getElementById('val-gift-nifty');
-                    const cEl = document.getElementById('chg-gift-nifty');
-                    const card = document.getElementById('card-gift-nifty');
-                    if (vEl) vEl.textContent = val;
-                    if (cEl) {
-                        const p = parseFloat(pct);
-                        const sign = p >= 0 ? '+' : '';
-                        cEl.textContent = sign+chg+' ('+sign+pct+'%) · NSE IX ~';
-                        const cls = p > 0 ? 'positive' : p < 0 ? 'negative' : 'neutral';
-                        cEl.className = 'indicator-change '+cls;
-                        if (card) card.className = 'indicator-card '+cls;
-                    }
-                    return;
-                }
-            }
+  // Attempt 2: Stooq
+  try {
+    const stooqUrl = 'https://stooq.com/q/l/?s=nifty.ix&f=sd2t2ohlcv&e=csv';
+    const r = await fetch('https://corsproxy.io/?' + encodeURIComponent(stooqUrl), {signal: AbortSignal.timeout(5000)});
+    if (r.ok) {
+      const text = await r.text();
+      const lines = text.trim().split('\n');
+      if (lines.length >= 2) {
+        const cols = lines[1].split(',');
+        const close = parseFloat(cols[6]);
+        const open = parseFloat(cols[3]);
+        if (close && open) {
+          const chg = (close - open).toFixed(2);
+          const pct = (((close - open) / open) * 100).toFixed(2);
+          const val = close.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+          const vEl = document.getElementById('val-gift-nifty');
+          const cEl = document.getElementById('chg-gift-nifty');
+          const card = document.getElementById('card-gift-nifty');
+          if (vEl) vEl.textContent = val;
+          if (cEl) {
+            const p = parseFloat(pct);
+            const sign = p >= 0 ? '+' : '';
+            cEl.textContent = sign + chg + ' (' + sign + pct + '%) · NSE IX ~';
+            const cls = p > 0 ? 'pos' : p < 0 ? 'neg' : 'neu';
+            cEl.className = 'ind-chg ' + cls;
+            if (card) card.className = 'ind-cell ' + cls;
+          }
+          updateTicker('gift-nifty', val, pct);
+          return;
         }
-    } catch(e) { /* fall through */ }
+      }
+    }
+  } catch (e) { /* fall through */ }
 
-    // Attempt 3: Fallback – show Nifty 50 spot (^NSEI) clearly labelled as proxy
-    try {
-        const url = 'https://query1.finance.yahoo.com/v8/finance/chart/%5ENSEI?interval=1d&range=1d';
-        const r = await fetch('https://corsproxy.io/?'+encodeURIComponent(url), {mode:'cors', signal: AbortSignal.timeout(5000)});
-        if (r.ok) {
-            const d = await r.json();
-            const meta = d?.chart?.result?.[0]?.meta;
-            if (meta) {
-                const cur = meta.regularMarketPrice;
-                const prev = meta.chartPreviousClose || meta.previousClose;
-                if (cur && prev) {
-                    const chg = (cur - prev).toFixed(2);
-                    const pct = (((cur-prev)/prev)*100).toFixed(2);
-                    const val = cur.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
-                    const vEl = document.getElementById('val-gift-nifty');
-                    const cEl = document.getElementById('chg-gift-nifty');
-                    const card = document.getElementById('card-gift-nifty');
-                    const titleEl = document.querySelector('#card-gift-nifty .indicator-title');
-                    // Clearly relabel so user knows this is Nifty 50 spot, not GIFT Nifty
-                    if (titleEl) titleEl.textContent = '⚠️ Nifty 50 (GIFT proxy)';
-                    if (vEl) vEl.textContent = val;
-                    if (cEl) {
-                        const p = parseFloat(pct);
-                        const sign = p >= 0 ? '+' : '';
-                        cEl.textContent = sign+chg+' ('+sign+pct+'%) · INR spot';
-                        const cls = p > 0 ? 'positive' : p < 0 ? 'negative' : 'neutral';
-                        cEl.className = 'indicator-change '+cls;
-                        if (card) card.className = 'indicator-card '+cls;
-                    }
-                    return;
-                }
-            }
+  // Attempt 3: Fallback – Nifty 50 spot as proxy
+  try {
+    const url = 'https://query1.finance.yahoo.com/v8/finance/chart/%5ENSEI?interval=1d&range=1d';
+    const r = await fetch('https://corsproxy.io/?' + encodeURIComponent(url), {mode: 'cors', signal: AbortSignal.timeout(5000)});
+    if (r.ok) {
+      const d = await r.json();
+      const meta = d?.chart?.result?.[0]?.meta;
+      if (meta) {
+        const cur = meta.regularMarketPrice;
+        const prev = meta.chartPreviousClose || meta.previousClose;
+        if (cur && prev) {
+          const chg = (cur - prev).toFixed(2);
+          const pct = (((cur - prev) / prev) * 100).toFixed(2);
+          const val = cur.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+          const titleEl = document.querySelector('#card-gift-nifty .ind-name');
+          if (titleEl) titleEl.textContent = '⚠ NIFTY 50 (GIFT proxy)';
+          const vEl = document.getElementById('val-gift-nifty');
+          const cEl = document.getElementById('chg-gift-nifty');
+          const card = document.getElementById('card-gift-nifty');
+          if (vEl) vEl.textContent = val;
+          if (cEl) {
+            const p = parseFloat(pct);
+            const sign = p >= 0 ? '+' : '';
+            cEl.textContent = sign + chg + ' (' + sign + pct + '%) · INR spot';
+            const cls = p > 0 ? 'pos' : p < 0 ? 'neg' : 'neu';
+            cEl.className = 'ind-chg ' + cls;
+            if (card) card.className = 'ind-cell ' + cls;
+          }
+          updateTicker('gift-nifty', val, pct);
+          // sidebar sensex/nifty
+          const sbN = document.getElementById('sbv-nifty');
+          if (sbN) { sbN.textContent = val; sbN.className = 'sb-ind-val ' + (parseFloat(pct) > 0 ? 'pos' : parseFloat(pct) < 0 ? 'neg' : 'neu'); }
+          return;
         }
-    } catch(e) {}
+      }
+    }
+  } catch (e) { /* fall through */ }
 
-    // Hard fallback
-    const vEl = document.getElementById('val-gift-nifty');
-    const cEl = document.getElementById('chg-gift-nifty');
-    if (vEl) vEl.textContent = 'N/A';
-    if (cEl) cEl.textContent = 'Data unavailable';
+  // Hard fallback
+  const vEl = document.getElementById('val-gift-nifty');
+  const cEl = document.getElementById('chg-gift-nifty');
+  if (vEl) vEl.textContent = 'N/A';
+  if (cEl) cEl.textContent = 'Data unavailable';
+}
+
+// ════════════════════════════
+// CPI via FRED CSV (CORS proxy)
+// ════════════════════════════
+async function fetchCPI() {
+  const csvUrl = 'https://fred.stlouisfed.org/graph/fredgraph.csv?id=CPIAUCSL';
+  const proxied = 'https://corsproxy.io/?' + encodeURIComponent(csvUrl);
+  try {
+    const r = await fetch(proxied, {signal: AbortSignal.timeout(8000)});
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const text = await r.text();
+    const lines = text.trim().split('\n').filter(l => l && !l.startsWith('DATE'));
+    if (lines.length < 13) throw new Error('Not enough data');
+    const lastLine = lines[lines.length - 1].split(',');
+    const prevLine = lines[lines.length - 13].split(',');
+    const lastVal = parseFloat(lastLine[1]);
+    const prevVal = parseFloat(prevLine[1]);
+    if (isNaN(lastVal) || isNaN(prevVal) || prevVal === 0) throw new Error('Bad values');
+    const yoy = (((lastVal - prevVal) / prevVal) * 100).toFixed(1);
+    const date = lastLine[0];
+    const d = new Date(date + 'T12:00:00Z');
+    const label = d.toLocaleString('en-US', {month: 'short', year: 'numeric', timeZone: 'UTC'});
+    const vEl = document.getElementById('val-cpi');
+    const cEl = document.getElementById('chg-cpi');
+    const card = vEl ? vEl.closest('.ind-cell') : null;
+    if (vEl) vEl.textContent = yoy + '%';
+    if (cEl) cEl.textContent = 'YoY · ' + label;
+    if (card) {
+      const p = parseFloat(yoy);
+      card.className = 'ind-cell ' + (p > 3 ? 'neg' : p <= 2 ? 'pos' : 'neu');
+    }
+  } catch (e) {
+    const vEl = document.getElementById('val-cpi');
+    const cEl = document.getElementById('chg-cpi');
+    if (vEl) vEl.textContent = '2.9%';
+    if (cEl) cEl.textContent = 'YoY · Dec 2025 (cached)';
+  }
+}
+
+// ════════════════════════════
+// CLOCK & REFRESH
+// ════════════════════════════
+function updateClock() {
+  const now = new Date();
+  const opts = {hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'Asia/Kolkata'};
+  const ist = now.toLocaleString('en-US', opts);
+  const el = document.getElementById('topClock');
+  if (el) el.textContent = ist + ' IST';
+  const st = document.getElementById('statusClock');
+  if (st) st.textContent = ist + ' IST';
+  const ref = document.getElementById('newsSubtitle');
+  if (ref) {
+    const opts2 = {hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Kolkata'};
+    ref.textContent = 'Click any headline to expand · Last refresh: ' + now.toLocaleString('en-US', opts2) + ' IST';
+  }
 }
 
 let isFirstLoad = true;
 
 async function loadAll() {
-    // Fetch GIFT Nifty separately with dedicated logic
-    fetchGiftNifty();
-
-    // Fetch all Yahoo Finance symbols in parallel (no flicker/delay)
-    await Promise.all(
-        Object.entries(SYMBOLS).map(async ([k, s]) => {
-const ok = await fetchYahoo(k, s);
-            if (!ok) {
-    const vEl = document.getElementById('val-'+k);
-    const cEl = document.getElementById('chg-'+k);
-    if (vEl) vEl.textContent = 'N/A';
-    if (cEl) cEl.textContent = 'Data unavailable';
-}
-        })
-    );
-    updateRefreshTime();
-
-    // Only show/hide the overlay on the very first load
-    if (isFirstLoad) {
-        setTimeout(() => document.getElementById('loadingOverlay').classList.remove('visible'), 600);
-        isFirstLoad = false;
-    }
+  fetchGiftNifty();
+  await Promise.all(
+    Object.entries(SYMBOLS).map(async ([k, s]) => {
+      const ok = await fetchYahoo(k, s);
+      if (!ok) {
+        const vEl = document.getElementById('val-' + k);
+        const cEl = document.getElementById('chg-' + k);
+        if (vEl) vEl.textContent = 'N/A';
+        if (cEl) cEl.textContent = 'Unavailable';
+      }
+    })
+  );
+  updateClock();
+  if (isFirstLoad) {
+    setTimeout(() => document.getElementById('loadingOverlay').classList.remove('visible'), 500);
+    isFirstLoad = false;
+  }
 }
 
-function updateRefreshTime() {
-    const now = new Date();
-    const opts = {hour:'2-digit', minute:'2-digit', second:'2-digit', timeZone:'Asia/Kolkata'};
-    const istTime = now.toLocaleString('en-US', opts);
-    const el = document.getElementById('lastRefresh');
-    if (el) el.textContent = '🔄 Last Refresh: ' + istTime + ' IST  |  🕐 IST Now: ' + istTime;
-}
+// ════════════════════════════
+// INIT
+// ════════════════════════════
+window.addEventListener('DOMContentLoaded', () => {
+  buildTicker();
+  renderNews('markets');
 
-// ════════════════════════════════════════════════
-// FIX 2 – CPI YoY via FRED JSON API (CORS-compatible, no key needed for reading)
-// The old CSV approach failed due to CORS. The FRED JSON API returns proper
-// CORS headers and is reliably accessible from the browser.
-// ════════════════════════════════════════════════
-async function fetchCPI() {
-    // FRED JSON API: CPIAUCSL (Consumer Price Index, All Urban Consumers)
-    // We request the last 13 observations so we can compute YoY change.
-    const fredUrl = 'https://fred.stlouisfed.org/graph/fredgraph.json?id=CPIAUCSL&vintage_date=';
-    
-    // Alternative: use the public FRED data API endpoint (no API key, returns JSON with CORS)
-    const apiUrl = 'https://api.stlouisfed.org/fred/series/observations?series_id=CPIAUCSL&sort_order=desc&limit=13&file_type=json&api_key=';
-    
-    // We use a CORS proxy to reach the FRED CSV endpoint reliably
-    // (FRED's JSON API requires an API key; we proxy their public CSV instead)
-    const csvUrl = 'https://fred.stlouisfed.org/graph/fredgraph.csv?id=CPIAUCSL';
-    const proxiedCsv = 'https://corsproxy.io/?'+encodeURIComponent(csvUrl);
-    
-    try {
-        const r = await fetch(proxiedCsv, {signal: AbortSignal.timeout(8000)});
-        if (!r.ok) throw new Error('HTTP '+r.status);
-        const text = await r.text();
-        const lines = text.trim().split('\n').filter(l => l && !l.startsWith('DATE'));
-        if (lines.length < 13) throw new Error('Not enough data');
-        
-        // Last value = most recent month
-        const lastLine  = lines[lines.length - 1].split(',');
-        // 12 months ago
-        const prevLine  = lines[lines.length - 13].split(',');
-        
-        const lastVal = parseFloat(lastLine[1]);
-        const prevVal = parseFloat(prevLine[1]);
-        
-        if (isNaN(lastVal) || isNaN(prevVal) || prevVal === 0) throw new Error('Bad values');
-        
-        const yoy = (((lastVal - prevVal) / prevVal) * 100).toFixed(1);
-        const date = lastLine[0]; // "YYYY-MM-DD"
-        
-        // Format date nicely: "2025-12-01" → "Dec 2025"
-        const d = new Date(date + 'T12:00:00Z');
-        const label = d.toLocaleString('en-US', {month:'short', year:'numeric', timeZone:'UTC'});
-        
-        const vEl = document.getElementById('val-cpi');
-        const cEl = document.getElementById('chg-cpi');
-        const card = vEl ? vEl.closest('.indicator-card') : null;
-        
-        if (vEl) vEl.textContent = yoy + '%';
-        if (cEl) cEl.textContent = 'YoY · ' + label;
-        
-        // Colour the card: >3% is negative (high inflation), ≤2% positive (on-target)
-        if (card) {
-            const p = parseFloat(yoy);
-            card.className = 'indicator-card ' + (p > 3 ? 'negative' : p <= 2 ? 'positive' : 'neutral');
-        }
-    } catch(e) {
-        console.warn('CPI fetch error:', e.message);
-        // Hard-coded latest known value as last resort
-        const vEl = document.getElementById('val-cpi');
-        const cEl = document.getElementById('chg-cpi');
-        if (vEl) vEl.textContent = '2.9%';
-        if (cEl) cEl.textContent = 'YoY · Dec 2025 (cached)';
-    }
-}
+  if (!sessionStorage.getItem('visited')) {
+    document.getElementById('loadingOverlay').classList.add('visible');
+    sessionStorage.setItem('visited', '1');
+  }
 
-// Update browser timestamp every minute
-function tick() {
-    const now = new Date();
-    const opts = {year:'numeric',month:'long',day:'numeric',hour:'2-digit',minute:'2-digit',timeZone:'Asia/Kolkata'};
-    document.getElementById('timestamp').textContent =
-        '📅 Page generated: March 07, 2026 at 05:32 AM IST | Browser: '+now.toLocaleString('en-US',opts)+' IST';
-}
-
-window.addEventListener('DOMContentLoaded',()=>{
-    if (!sessionStorage.getItem('visited')) {
-        document.getElementById('loadingOverlay').classList.add('visible');
-        sessionStorage.setItem('visited', '1');
-    }
-    loadAll();
-    fetchCPI();
-    setInterval(loadAll, 5*60*1000);
-    setInterval(tick, 60*1000);
+  loadAll();
+  fetchCPI();
+  setInterval(loadAll, 5 * 60 * 1000);
+  setInterval(updateClock, 1000);
 });
 </script>
 </body>
