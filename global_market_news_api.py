@@ -439,6 +439,44 @@ body {{
 .sb-ind-val.neg {{ color: var(--red); }}
 .sb-ind-val.neu {{ color: #aaaaaa; }}
 
+/* ── COLLAPSIBLE ECON SECTIONS IN SIDEBAR ── */
+.sb-econ-hdr {{
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 6px 14px 8px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.12s;
+}}
+.sb-econ-hdr:hover {{ background: rgba(255,106,0,0.06); }}
+.sb-econ-title {{
+  font-size: 11px; font-weight: 700; letter-spacing: 2px;
+  text-transform: uppercase; display: flex; align-items: center; gap: 6px;
+}}
+.sb-econ-title.usa  {{ color: #e05060; }}
+.sb-econ-title.india {{ color: #ffaa44; }}
+.sb-econ-arrow {{
+  color: var(--orange); font-size: 9px;
+  transition: transform 0.2s; flex-shrink: 0;
+}}
+.sb-econ-arrow.collapsed {{ transform: rotate(-90deg); }}
+
+.sb-econ-body {{ overflow: hidden; transition: max-height 0.25s ease; }}
+.sb-econ-body.collapsed {{ max-height: 0 !important; }}
+
+.sb-econ-row {{
+  padding: 5px 14px;
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 11px; border-bottom: 1px solid var(--border2);
+}}
+.sb-econ-row:last-child {{ border-bottom: none; padding-bottom: 8px; }}
+.sb-econ-key {{ color: #bbbbbb; font-size: 10px; letter-spacing: 0.3px; flex: 1; }}
+.sb-econ-val {{ font-weight: 700; font-size: 11px; white-space: nowrap; margin-left: 6px; }}
+.sb-econ-val.pos {{ color: var(--green); }}
+.sb-econ-val.neg {{ color: var(--red); }}
+.sb-econ-val.neu {{ color: #aaaaaa; }}
+.sb-econ-note {{ color: #666; font-size: 9px; margin-left: 4px; white-space: nowrap; }}
+
 /* ── MAIN CONTENT ── */
 .main {{ overflow-y: auto; display: flex; flex-direction: column; scrollbar-width: thin; scrollbar-color: var(--border) transparent; }}
 .main::-webkit-scrollbar {{ width:4px; }}
@@ -829,6 +867,42 @@ body {{
       <div class="sb-ind-row"><span class="sb-ind-name">TechCrunch</span></div>
     </div>
 
+    <!-- ── 🇺🇸 USA ECONOMIC INDICATORS (collapsible) ── -->
+    <div class="sb-section">
+      <div class="sb-econ-hdr" onclick="toggleEcon('usa')">
+        <span class="sb-econ-title usa">🇺🇸 USA ECONOMIC</span>
+        <span class="sb-econ-arrow" id="arrow-usa">▼</span>
+      </div>
+      <div class="sb-econ-body" id="body-usa">
+        <div class="sb-econ-row"><span class="sb-econ-key">Fed Funds Rate</span><span class="sb-econ-val neu">4.25–4.50%</span></div>
+        <div class="sb-econ-row"><span class="sb-econ-key">FOMC Next</span><span class="sb-econ-val neu">Hold</span><span class="sb-econ-note">Mar 18–19</span></div>
+        <div class="sb-econ-row"><span class="sb-econ-key">CPI YoY</span><span class="sb-econ-val neu" id="sbv-cpi">--</span></div>
+        <div class="sb-econ-row"><span class="sb-econ-key">Core CPI</span><span class="sb-econ-val neu">3.3%</span><span class="sb-econ-note">Dec 2025</span></div>
+        <div class="sb-econ-row"><span class="sb-econ-key">GDP Growth</span><span class="sb-econ-val pos">2.8%</span><span class="sb-econ-note">Q4 2025</span></div>
+        <div class="sb-econ-row"><span class="sb-econ-key">Unemployment</span><span class="sb-econ-val pos">4.1%</span><span class="sb-econ-note">Jan 2026</span></div>
+        <div class="sb-econ-row"><span class="sb-econ-key">NFP</span><span class="sb-econ-val pos">+256K</span><span class="sb-econ-note">Jan 2026</span></div>
+        <div class="sb-econ-row"><span class="sb-econ-key">PPI YoY</span><span class="sb-econ-val neu">3.3%</span><span class="sb-econ-note">Dec 2025</span></div>
+      </div>
+    </div>
+
+    <!-- ── 🇮🇳 INDIA ECONOMIC INDICATORS (collapsible) ── -->
+    <div class="sb-section">
+      <div class="sb-econ-hdr" onclick="toggleEcon('india')">
+        <span class="sb-econ-title india">🇮🇳 INDIA ECONOMIC</span>
+        <span class="sb-econ-arrow" id="arrow-india">▼</span>
+      </div>
+      <div class="sb-econ-body" id="body-india">
+        <div class="sb-econ-row"><span class="sb-econ-key">Repo Rate</span><span class="sb-econ-val neu">6.25%</span><span class="sb-econ-note">RBI Feb 2026</span></div>
+        <div class="sb-econ-row"><span class="sb-econ-key">CPI</span><span class="sb-econ-val neu">5.22%</span><span class="sb-econ-note">Dec 2025</span></div>
+        <div class="sb-econ-row"><span class="sb-econ-key">WPI</span><span class="sb-econ-val neu">2.4%</span><span class="sb-econ-note">Nov 2025</span></div>
+        <div class="sb-econ-row"><span class="sb-econ-key">IIP</span><span class="sb-econ-val pos">5.2%</span><span class="sb-econ-note">Nov 2025</span></div>
+        <div class="sb-econ-row"><span class="sb-econ-key">Mfg PMI</span><span class="sb-econ-val pos">57.7</span><span class="sb-econ-note">Jan 2026</span></div>
+        <div class="sb-econ-row"><span class="sb-econ-key">GDP Growth</span><span class="sb-econ-val pos">6.4%</span><span class="sb-econ-note">FY25</span></div>
+        <div class="sb-econ-row"><span class="sb-econ-key">Fiscal Deficit</span><span class="sb-econ-val neu">4.9%</span><span class="sb-econ-note">FY25 Target</span></div>
+        <div class="sb-econ-row"><span class="sb-econ-key">USD/INR</span><span class="sb-econ-val neu" id="sbv-usdinr2">₹--</span></div>
+      </div>
+    </div>
+
   </div><!-- /sidebar -->
 
   <!-- ═══ MAIN ═══ -->
@@ -844,36 +918,6 @@ body {{
       <span id="card-dollar"></span><span id="val-dollar"></span><span id="chg-dollar"></span>
       <span id="card-gold"></span><span id="val-gold"></span><span id="chg-gold"></span>
       <span id="card-silver"></span><span id="val-silver"></span><span id="chg-silver"></span>
-    </div>
-
-    <!-- ── USA ECONOMIC INDICATORS ── -->
-    <div class="econ-section">
-      <div class="ind-panel-hdr econ-hdr usa">▶ 🇺🇸 USA ECONOMIC INDICATORS</div>
-      <div class="ind-row">
-        <div class="ind-cell neu"><div class="ind-name">FED FUNDS RATE</div><div class="ind-val">4.25–4.50%</div><div class="ind-chg neu">Hold – Jan 2026</div></div>
-        <div class="ind-cell neu"><div class="ind-name">FOMC NEXT</div><div class="ind-val">Hold</div><div class="ind-chg neu">Mar 18–19, 2026</div></div>
-        <div class="ind-cell neu"><div class="ind-name">CPI YoY</div><div class="ind-val" id="val-cpi">Loading…</div><div class="ind-chg neu" id="chg-cpi">Fetching…</div></div>
-        <div class="ind-cell neu"><div class="ind-name">CORE CPI</div><div class="ind-val">3.3%</div><div class="ind-chg neu">YoY Dec 2025</div></div>
-        <div class="ind-cell pos"><div class="ind-name">GDP GROWTH</div><div class="ind-val">2.8%</div><div class="ind-chg pos">Q4 2025 Advance</div></div>
-        <div class="ind-cell pos"><div class="ind-name">UNEMPLOYMENT</div><div class="ind-val">4.1%</div><div class="ind-chg pos">Jan 2026</div></div>
-        <div class="ind-cell pos"><div class="ind-name">NFP</div><div class="ind-val">+256K</div><div class="ind-chg pos">Jan 2026</div></div>
-        <div class="ind-cell neu"><div class="ind-name">PPI YoY</div><div class="ind-val">3.3%</div><div class="ind-chg neu">Dec 2025</div></div>
-      </div>
-    </div>
-
-    <!-- ── INDIA ECONOMIC INDICATORS ── -->
-    <div class="econ-section">
-      <div class="ind-panel-hdr econ-hdr india">▶ 🇮🇳 INDIA ECONOMIC INDICATORS</div>
-      <div class="ind-row">
-        <div class="ind-cell neu"><div class="ind-name">REPO RATE</div><div class="ind-val">6.25%</div><div class="ind-chg neu">RBI Feb 2026 Cut</div></div>
-        <div class="ind-cell neu"><div class="ind-name">CPI</div><div class="ind-val">5.22%</div><div class="ind-chg neu">Dec 2025 YoY</div></div>
-        <div class="ind-cell neu"><div class="ind-name">WPI</div><div class="ind-val">2.4%</div><div class="ind-chg neu">YoY Nov 2025</div></div>
-        <div class="ind-cell pos"><div class="ind-name">IIP</div><div class="ind-val">5.2%</div><div class="ind-chg pos">YoY Nov 2025</div></div>
-        <div class="ind-cell pos"><div class="ind-name">MFG PMI</div><div class="ind-val">57.7</div><div class="ind-chg pos">Jan 2026</div></div>
-        <div class="ind-cell pos"><div class="ind-name">GDP GROWTH</div><div class="ind-val">6.4%</div><div class="ind-chg pos">FY 2024-25 Est.</div></div>
-        <div class="ind-cell neu"><div class="ind-name">FISCAL DEFICIT</div><div class="ind-val">4.9%</div><div class="ind-chg neu">of GDP FY25 Target</div></div>
-        <div class="ind-cell neu" id="card-usdinr"><div class="ind-name">USD/INR</div><div class="ind-val" id="val-usdinr">Loading…</div><div class="ind-chg neu" id="chg-usdinr">…</div></div>
-      </div>
     </div>
 
     <!-- ── CATEGORY TABS ── -->
@@ -990,6 +1034,23 @@ function switchCat(cat, sidebarEl) {{
 }}
 
 // ════════════════════════════
+// TOGGLE ECON SECTIONS IN SIDEBAR
+// ════════════════════════════
+function toggleEcon(id) {{
+  const body  = document.getElementById('body-'  + id);
+  const arrow = document.getElementById('arrow-' + id);
+  if (!body) return;
+  body.classList.toggle('collapsed');
+  arrow.classList.toggle('collapsed');
+  // Set explicit max-height for smooth animation
+  if (!body.classList.contains('collapsed')) {{
+    body.style.maxHeight = body.scrollHeight + 'px';
+  }} else {{
+    body.style.maxHeight = '0';
+  }}
+}}
+
+// ════════════════════════════
 // TICKER STRIP
 // ════════════════════════════
 const TICKER_SYMBOLS = [
@@ -1101,6 +1162,8 @@ async function fetchYahoo(key, sym) {{
       if (key === 'usdinr') {{
         const sbEl = document.getElementById('sbv-usdinr');
         if (sbEl) {{ sbEl.textContent = '₹' + cur.toFixed(2); }}
+        const sbEl2 = document.getElementById('sbv-usdinr2');
+        if (sbEl2) {{ sbEl2.textContent = '₹' + cur.toFixed(2); }}
       }}
       return true;
     }} catch (e) {{ /* try next */ }}
@@ -1258,11 +1321,16 @@ async function fetchCPI() {{
       const p = parseFloat(yoy);
       card.className = 'ind-cell ' + (p > 3 ? 'neg' : p <= 2 ? 'pos' : 'neu');
     }}
+    // Update sidebar CPI
+    const sbCpi = document.getElementById('sbv-cpi');
+    if (sbCpi) {{ sbCpi.textContent = yoy + '%'; sbCpi.className = 'sb-econ-val ' + (parseFloat(yoy) > 3 ? 'neg' : parseFloat(yoy) <= 2 ? 'pos' : 'neu'); }}
   }} catch (e) {{
     const vEl = document.getElementById('val-cpi');
     const cEl = document.getElementById('chg-cpi');
     if (vEl) vEl.textContent = '2.9%';
     if (cEl) cEl.textContent = 'YoY · Dec 2025 (cached)';
+    const sbCpi = document.getElementById('sbv-cpi');
+    if (sbCpi) {{ sbCpi.textContent = '2.9%'; }}
   }}
 }}
 
@@ -1312,6 +1380,12 @@ async function loadAll() {{
 window.addEventListener('DOMContentLoaded', () => {{
   buildTicker();
   renderNews('markets');
+
+  // Set initial max-height for smooth collapse animation
+  ['usa', 'india'].forEach(id => {{
+    const body = document.getElementById('body-' + id);
+    if (body) body.style.maxHeight = body.scrollHeight + 'px';
+  }});
 
   if (!sessionStorage.getItem('visited')) {{
     document.getElementById('loadingOverlay').classList.add('visible');
