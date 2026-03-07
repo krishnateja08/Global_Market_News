@@ -578,109 +578,88 @@ body {{
 }}
 .news-hdr-meta {{ color: #aaaaaa; font-size: 11px; }}
 
-/* ── NEWS TABLE ── */
-.news-table {{ width: 100%; border-collapse: collapse; }}
-.news-table tbody tr {{
-  border-bottom: 1px solid var(--border2);
-  cursor: pointer;
-  transition: background 0.1s;
-}}
-.news-table tbody tr:hover td {{ background: rgba(255,106,0,0.05); }}
-.news-table tbody tr.open td {{ background: rgba(255,106,0,0.08); }}
+/* ── NEWSPAPER COLUMN (Option B) ── */
+.news-col {{ border: 1px solid var(--border); border-radius: 2px; overflow: hidden; }}
 
-.td-num {{
-  color: #888888;
-  font-size: 11px;
-  padding: 11px 8px 11px 4px;
-  width: 30px;
-  text-align: right;
-  vertical-align: top;
-  font-weight: 600;
+.nc-item {{
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  border-bottom: 1px solid #1e1e1e;
+  cursor: pointer;
+  transition: background 0.12s;
 }}
-.td-time {{
-  color: #aaaaaa;
-  font-size: 11px;
-  width: 88px;
-  white-space: nowrap;
-  padding: 11px 10px;
-  vertical-align: top;
-  font-weight: 500;
+.nc-item:last-of-type {{ border-bottom: none; }}
+.nc-item:hover {{ background: rgba(255,106,0,0.04); }}
+.nc-item.open {{ background: rgba(255,106,0,0.07); }}
+
+.nc-num {{
+  padding: 15px 0 15px 14px;
+  font-size: 11px; font-weight: 700;
+  color: var(--orange); opacity: 0.65;
+  font-family: 'IBM Plex Mono', monospace;
+  vertical-align: top; line-height: 1;
+  padding-top: 16px;
 }}
-.td-src {{
-  width: 104px;
-  padding: 11px 10px;
-  vertical-align: top;
-}}
-.src-badge {{
-  display: inline-block;
-  background: var(--orange-dim);
-  color: var(--orange);
-  border: 1px solid rgba(255,106,0,0.35);
-  font-size: 11px;
-  font-weight: 700;
-  padding: 3px 8px;
-  border-radius: 2px;
-  white-space: nowrap;
-  letter-spacing: 0.5px;
-}}
-.td-title {{ padding: 11px 10px; vertical-align: top; }}
-.td-title .headline {{
-  font-size: 13px;
-  color: #f0f0f0;
-  line-height: 1.55;
-  letter-spacing: 0.2px;
+.nc-body {{ padding: 13px 16px 13px 0; }}
+.nc-headline {{
   font-family: 'IBM Plex Sans', sans-serif;
-  font-weight: 400;
+  font-size: 14px; font-weight: 600;
+  color: #eeeeee; line-height: 1.55;
+  margin-bottom: 7px;
+  letter-spacing: 0.1px;
 }}
-.td-title .expand-body {{
+.nc-foot {{
+  display: flex; align-items: center; gap: 8px;
+}}
+.nc-src-dot {{
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--orange); flex-shrink: 0;
+}}
+.nc-src {{ font-size: 11px; color: var(--orange); font-weight: 700; letter-spacing: 0.3px; }}
+.nc-sep {{ color: #333; font-size: 11px; }}
+.nc-time {{ font-size: 11px; color: #666; font-family: 'IBM Plex Mono', monospace; }}
+
+.nc-expand-body {{
   display: none;
-  margin-top: 10px;
-  padding: 12px 14px;
-  background: rgba(255,106,0,0.05);
-  border-left: 2px solid var(--orange);
+  padding: 0 16px 14px 54px;
+  border-bottom: 1px solid #1e1e1e;
+  margin-top: -2px;
+  background: rgba(255,106,0,0.03);
+  border-left: 3px solid rgba(255,106,0,0.35);
 }}
-.news-table tbody tr.open .td-title .expand-body {{ display: block; }}
-.expand-summary {{
-  font-size: 13px;
-  color: #d0d0d0;
-  line-height: 1.75;
+.nc-expand-body.open {{ display: block; }}
+.nc-summary {{
   font-family: 'IBM Plex Sans', sans-serif;
-  margin-bottom: 10px;
+  font-size: 13px; color: #cccccc;
+  line-height: 1.75; padding-top: 10px;
+  margin-bottom: 8px;
 }}
-.expand-link {{
+.nc-link {{
   display: inline-block;
-  color: var(--orange);
-  font-size: 11px;
-  text-decoration: none;
-  letter-spacing: 1px;
-  border-bottom: 1px solid rgba(255,106,0,0.4);
-  padding-bottom: 1px;
-  transition: opacity 0.15s;
-  font-weight: 600;
+  color: var(--orange); font-size: 11px; font-weight: 700;
+  text-decoration: none; letter-spacing: 0.8px;
+  border-bottom: 1px solid rgba(255,106,0,0.35);
+  padding-bottom: 1px; transition: opacity 0.15s;
 }}
-.expand-link:hover {{ opacity: 0.75; }}
-.td-arrow {{
-  width: 26px;
-  padding: 11px 4px;
-  vertical-align: top;
-  text-align: center;
+.nc-link:hover {{ opacity: 0.7; }}
+.nc-arrow {{
+  color: #444; font-size: 10px;
+  padding: 16px 12px 0 0;
+  text-align: right; line-height: 1;
+  transition: color 0.15s;
+  grid-column: unset;
+  align-self: start;
+  justify-self: end;
 }}
-.arrow-icon {{
-  color: var(--orange);
-  font-size: 11px;
-  display: inline-block;
-  transition: transform 0.2s;
-  opacity: 0.65;
-}}
-.news-table tbody tr.open .arrow-icon {{
-  transform: rotate(180deg);
-  opacity: 1;
-}}
+.nc-item:hover .nc-arrow {{ color: var(--orange); }}
+.nc-item.open .nc-arrow {{ color: var(--orange); transform: rotate(180deg); display:inline-block; }}
+
 .no-news {{
   color: #aaaaaa;
   font-size: 13px;
-  padding: 24px 4px;
+  padding: 24px 16px;
   font-style: italic;
+  font-family: 'IBM Plex Sans', sans-serif;
 }}
 
 /* ── LOADING OVERLAY ── */
@@ -918,9 +897,7 @@ body {{
         <span class="news-hdr-title" id="newsTitle">▶ MARKET UPDATES</span>
         <span class="news-hdr-meta" id="newsSubtitle">Click any headline to expand · {current_time}</span>
       </div>
-      <table class="news-table">
-        <tbody id="newsTbody"></tbody>
-      </table>
+      <div class="news-col" id="newsCol"></div>
     </div>
 
   </div><!-- /main -->
@@ -943,45 +920,54 @@ const NEWS_DATA = {news_json};
 let currentCat = 'markets';
 
 // ════════════════════════════
-// RENDER NEWS TABLE
+// RENDER NEWS — NEWSPAPER COLUMN (Option B)
 // ════════════════════════════
 function renderNews(cat) {{
   const d = NEWS_DATA[cat];
   if (!d) return;
-  const tbody = document.getElementById('newsTbody');
+  const col = document.getElementById('newsCol');
   const items = d.items;
 
   if (!items || items.length === 0) {{
-    tbody.innerHTML = '<tr><td colspan="5" class="no-news">No articles available for this category.</td></tr>';
+    col.innerHTML = '<div class="no-news">No articles available for this category.</div>';
     document.getElementById('newsTitle').textContent = '▶ ' + d.label + ' — 0 ARTICLES';
     return;
   }}
 
-  tbody.innerHTML = items.map((item, i) => {{
+  col.innerHTML = items.map((item, i) => {{
+    const num = String(i + 1).padStart(2, '0');
     const link = item.link && item.link !== '#'
-      ? `<a class="expand-link" href="${{item.link}}" target="_blank" rel="noopener">Read Full Article ↗</a>`
+      ? `<a class="nc-link" href="${{item.link}}" target="_blank" rel="noopener">Read Full Article ↗</a>`
       : '';
     return `
-      <tr onclick="toggleRow(this)">
-        <td class="td-num">${{String(i+1).padStart(2,'0')}}</td>
-        <td class="td-time">${{item.time}}</td>
-        <td class="td-src"><span class="src-badge">${{item.source}}</span></td>
-        <td class="td-title">
-          <div class="headline">${{item.title}}</div>
-          <div class="expand-body">
-            <div class="expand-summary">${{item.summary}}</div>
-            ${{link}}
+      <div class="nc-item" onclick="toggleNC(this)" id="nc-${{cat}}-${{i}}">
+        <div class="nc-num">${{num}}</div>
+        <div class="nc-body">
+          <div class="nc-headline">${{item.title}}</div>
+          <div class="nc-foot">
+            <div class="nc-src-dot"></div>
+            <span class="nc-src">${{item.source}}</span>
+            <span class="nc-sep">·</span>
+            <span class="nc-time">${{item.time}}</span>
           </div>
-        </td>
-        <td class="td-arrow"><span class="arrow-icon">▼</span></td>
-      </tr>`;
+        </div>
+        <div class="nc-arrow">▼</div>
+      </div>
+      <div class="nc-expand-body" id="nc-exp-${{cat}}-${{i}}">
+        <div class="nc-summary">${{item.summary}}</div>
+        ${{link}}
+      </div>`;
   }}).join('');
 
   document.getElementById('newsTitle').textContent = '▶ ' + d.label + ' — ' + items.length + ' ARTICLES';
 }}
 
-function toggleRow(row) {{
+function toggleNC(row) {{
   row.classList.toggle('open');
+  const exp = row.nextElementSibling;
+  if (exp && exp.classList.contains('nc-expand-body')) {{
+    exp.classList.toggle('open');
+  }}
 }}
 
 // ════════════════════════════
