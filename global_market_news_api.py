@@ -60,9 +60,9 @@ RSS_SOURCES = {
         "https://feeds.reuters.com/reuters/CNtopNews",
     ],
     "tech_ai": [
-        "https://feeds.feedburner.com/TechCrunch",
-        "https://www.cnbc.com/id/19854910/device/rss/rss.html",
-        "https://news.google.com/rss/search?q=AI+artificial+intelligence+tech+stocks+when:1d&hl=en-US&gl=US&ceid=US:en",
+        "https://news.google.com/rss/search?q=artificial+intelligence+AI+tech+when:1d&hl=en-US&gl=US&ceid=US:en",
+        "https://news.google.com/rss/search?q=OpenAI+Google+AI+Microsoft+AI+when:1d&hl=en-US&gl=US&ceid=US:en",
+        "https://news.google.com/rss/search?q=AI+chips+semiconductor+LLM+when:1d&hl=en-US&gl=US&ceid=US:en",
     ],
     "banking": [
         "https://news.google.com/rss/search?q=central+bank+interest+rates+Fed+ECB+RBI+when:1d&hl=en-US&gl=US&ceid=US:en",
@@ -147,6 +147,31 @@ def fetch_category_news(category: str, urls: list[str]) -> list[dict]:
     results = []
     cutoff = datetime.utcnow() - timedelta(hours=24)
 
+    DATE_FMTS = [
+        "%a, %d %b %Y %H:%M:%S %z",
+        "%a, %d %b %Y %H:%M:%S %Z",
+        "%Y-%m-%dT%H:%M:%S%z",
+        "%Y-%m-%dT%H:%M:%SZ",
+        "%Y-%m-%d",
+    ]
+
+    def is_within_24h(pub_date_str: str) -> bool:
+        """Returns True only if article date is within last 24h.
+        Articles with missing or unparseable dates are REJECTED to avoid old evergreen content."""
+        if not pub_date_str:
+            return False  # no date → reject (prevents old undated articles sneaking through)
+        for fmt in DATE_FMTS:
+            try:
+                pub = datetime.strptime(pub_date_str.strip(), fmt)
+                # normalise to naive UTC for comparison
+                if pub.tzinfo is not None:
+                    pub = pub.utctimetuple()
+                    pub = datetime(*pub[:6])
+                return pub >= cutoff
+            except ValueError:
+                continue
+        return False  # unrecognised format → reject to be safe
+
     for url in urls:
         print(f"  Fetching {url[:60]}...")
         for item in fetch_rss(url):
@@ -154,19 +179,9 @@ def fetch_category_news(category: str, urls: list[str]) -> list[dict]:
             if key in seen_titles:
                 continue
 
-            if category == "google_trending" and item.get("pubDate"):
-                try:
-                    for fmt in ["%a, %d %b %Y %H:%M:%S %z", "%a, %d %b %Y %H:%M:%S %Z"]:
-                        try:
-                            pub = datetime.strptime(item["pubDate"].strip(), fmt)
-                            pub_utc = pub.replace(tzinfo=None) if pub.tzinfo else pub
-                            if pub_utc < cutoff:
-                                continue
-                            break
-                        except ValueError:
-                            continue
-                except Exception:
-                    pass
+            # ── 24-hour filter applied to ALL categories ──
+            if not is_within_24h(item.get("pubDate", "")):
+                continue
 
             seen_titles.add(key)
             results.append(item)
