@@ -790,84 +790,7 @@ body {{
   <!-- ═══ SIDEBAR ═══ -->
   <div class="sidebar">
 
-    <div class="sb-section">
-      <div class="sb-label">▶ CATEGORIES</div>
-      <div class="sb-item active" id="sb-markets"        onclick="switchCat('markets',this)">
-        <span class="sb-name">📊 Markets</span>
-        <span class="sb-count">{cat_counts["markets"]}</span>
-      </div>
-      <div class="sb-item" id="sb-economic"       onclick="switchCat('economic',this)">
-        <span class="sb-name">💰 Economic</span>
-        <span class="sb-count">{cat_counts["economic"]}</span>
-      </div>
-      <div class="sb-item" id="sb-india"          onclick="switchCat('india',this)">
-        <span class="sb-name">🇮🇳 India</span>
-        <span class="sb-count">{cat_counts["india"]}</span>
-      </div>
-      <div class="sb-item" id="sb-google_trending" onclick="switchCat('google_trending',this)">
-        <span class="sb-name">🔥 Trending</span>
-        <span class="sb-count">{cat_counts["google_trending"]}</span>
-      </div>
-      <div class="sb-item" id="sb-corporate"      onclick="switchCat('corporate',this)">
-        <span class="sb-name">🏢 Corporate</span>
-        <span class="sb-count">{cat_counts["corporate"]}</span>
-      </div>
-      <div class="sb-item" id="sb-geopolitical"   onclick="switchCat('geopolitical',this)">
-        <span class="sb-name">🌍 Geopolitical</span>
-        <span class="sb-count">{cat_counts["geopolitical"]}</span>
-      </div>
-      <div class="sb-item" id="sb-crypto"          onclick="switchCat('crypto',this)">
-        <span class="sb-name">📉 Crypto</span>
-        <span class="sb-count">{cat_counts["crypto"]}</span>
-      </div>
-      <div class="sb-item" id="sb-china"           onclick="switchCat('china',this)">
-        <span class="sb-name">🇨🇳 China</span>
-        <span class="sb-count">{cat_counts["china"]}</span>
-      </div>
-      <div class="sb-item" id="sb-tech_ai"         onclick="switchCat('tech_ai',this)">
-        <span class="sb-name">🤖 Tech & AI</span>
-        <span class="sb-count">{cat_counts["tech_ai"]}</span>
-      </div>
-      <div class="sb-item" id="sb-banking"         onclick="switchCat('banking',this)">
-        <span class="sb-name">🏦 Banking</span>
-        <span class="sb-count">{cat_counts["banking"]}</span>
-      </div>
-      <div class="sb-item" id="sb-commodities"     onclick="switchCat('commodities',this)">
-        <span class="sb-name">📦 Commodities</span>
-        <span class="sb-count">{cat_counts["commodities"]}</span>
-      </div>
-    </div>
-
-    <div class="sb-section">
-      <div class="sb-label">▶ LIVE PRICES</div>
-      <div class="sb-ind-row"><span class="sb-ind-name">S&amp;P 500</span>    <span class="sb-ind-val neu" id="sbv-sp500">--</span></div>
-      <div class="sb-ind-row"><span class="sb-ind-name">Dow Jones</span>   <span class="sb-ind-val neu" id="sbv-dow">--</span></div>
-      <div class="sb-ind-row"><span class="sb-ind-name">Nasdaq</span>      <span class="sb-ind-val neu" id="sbv-nasdaq">--</span></div>
-      <div class="sb-ind-row"><span class="sb-ind-name">Nifty 50</span>    <span class="sb-ind-val neu" id="sbv-nifty">--</span></div>
-      <div class="sb-ind-row"><span class="sb-ind-name">Sensex</span>      <span class="sb-ind-val neu" id="sbv-sensex">--</span></div>
-      <div class="sb-ind-row"><span class="sb-ind-name">USD/INR</span>     <span class="sb-ind-val neu" id="sbv-usdinr">--</span></div>
-      <div class="sb-ind-row"><span class="sb-ind-name">Crude Oil</span>   <span class="sb-ind-val neu" id="sbv-oil">--</span></div>
-      <div class="sb-ind-row"><span class="sb-ind-name">Gold</span>        <span class="sb-ind-val neu" id="sbv-gold">--</span></div>
-      <div class="sb-ind-row"><span class="sb-ind-name">Silver</span>      <span class="sb-ind-val neu" id="sbv-silver">--</span></div>
-      <div class="sb-ind-row"><span class="sb-ind-name">USD Index</span>   <span class="sb-ind-val neu" id="sbv-dollar">--</span></div>
-    </div>
-
-    <div class="sb-section">
-      <div class="sb-label">▶ SOURCES</div>
-      <div class="sb-ind-row"><span class="sb-ind-name">CNBC</span></div>
-      <div class="sb-ind-row"><span class="sb-ind-name">MarketWatch</span></div>
-      <div class="sb-ind-row"><span class="sb-ind-name">Reuters</span></div>
-      <div class="sb-ind-row"><span class="sb-ind-name">Economic Times</span></div>
-      <div class="sb-ind-row"><span class="sb-ind-name">MoneyControl</span></div>
-      <div class="sb-ind-row"><span class="sb-ind-name">Yahoo Finance</span></div>
-      <div class="sb-ind-row"><span class="sb-ind-name">Google News</span></div>
-      <div class="sb-ind-row"><span class="sb-ind-name">Federal Reserve</span></div>
-      <div class="sb-ind-row"><span class="sb-ind-name">CoinTelegraph</span></div>
-      <div class="sb-ind-row"><span class="sb-ind-name">CoinDesk</span></div>
-      <div class="sb-ind-row"><span class="sb-ind-name">TechCrunch</span></div>
-    </div>
-
-    <!-- ── 🇺🇸 USA ECONOMIC INDICATORS (collapsible) ── -->
+    <!-- 1. USA ECONOMIC (collapsible) ── -->
     <div class="sb-section">
       <div class="sb-econ-hdr" onclick="toggleEcon('usa')">
         <span class="sb-econ-title usa">🇺🇸 USA ECONOMIC</span>
@@ -885,7 +808,7 @@ body {{
       </div>
     </div>
 
-    <!-- ── 🇮🇳 INDIA ECONOMIC INDICATORS (collapsible) ── -->
+    <!-- 2. INDIA ECONOMIC (collapsible) ── -->
     <div class="sb-section">
       <div class="sb-econ-hdr" onclick="toggleEcon('india')">
         <span class="sb-econ-title india">🇮🇳 INDIA ECONOMIC</span>
@@ -901,6 +824,86 @@ body {{
         <div class="sb-econ-row"><span class="sb-econ-key">Fiscal Deficit</span><span class="sb-econ-val neu">4.9%</span><span class="sb-econ-note">FY25 Target</span></div>
         <div class="sb-econ-row"><span class="sb-econ-key">USD/INR</span><span class="sb-econ-val neu" id="sbv-usdinr2">₹--</span></div>
       </div>
+    </div>
+
+    <!-- 3. LIVE PRICES ── -->
+    <div class="sb-section">
+      <div class="sb-label">▶ LIVE PRICES</div>
+      <div class="sb-ind-row"><span class="sb-ind-name">S&amp;P 500</span>    <span class="sb-ind-val neu" id="sbv-sp500">--</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">Dow Jones</span>   <span class="sb-ind-val neu" id="sbv-dow">--</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">Nasdaq</span>      <span class="sb-ind-val neu" id="sbv-nasdaq">--</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">Nifty 50</span>    <span class="sb-ind-val neu" id="sbv-nifty">--</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">Sensex</span>      <span class="sb-ind-val neu" id="sbv-sensex">--</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">USD/INR</span>     <span class="sb-ind-val neu" id="sbv-usdinr">--</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">Crude Oil</span>   <span class="sb-ind-val neu" id="sbv-oil">--</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">Gold</span>        <span class="sb-ind-val neu" id="sbv-gold">--</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">Silver</span>      <span class="sb-ind-val neu" id="sbv-silver">--</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">USD Index</span>   <span class="sb-ind-val neu" id="sbv-dollar">--</span></div>
+    </div>
+
+    <!-- 4. CATEGORIES ── -->
+    <div class="sb-section">
+      <div class="sb-label">▶ CATEGORIES</div>
+      <div class="sb-item active" id="sb-markets"         onclick="switchCat('markets',this)">
+        <span class="sb-name">📊 Markets</span>
+        <span class="sb-count">{cat_counts["markets"]}</span>
+      </div>
+      <div class="sb-item" id="sb-economic"        onclick="switchCat('economic',this)">
+        <span class="sb-name">💰 Economic</span>
+        <span class="sb-count">{cat_counts["economic"]}</span>
+      </div>
+      <div class="sb-item" id="sb-india"           onclick="switchCat('india',this)">
+        <span class="sb-name">🇮🇳 India</span>
+        <span class="sb-count">{cat_counts["india"]}</span>
+      </div>
+      <div class="sb-item" id="sb-google_trending"  onclick="switchCat('google_trending',this)">
+        <span class="sb-name">🔥 Trending</span>
+        <span class="sb-count">{cat_counts["google_trending"]}</span>
+      </div>
+      <div class="sb-item" id="sb-corporate"       onclick="switchCat('corporate',this)">
+        <span class="sb-name">🏢 Corporate</span>
+        <span class="sb-count">{cat_counts["corporate"]}</span>
+      </div>
+      <div class="sb-item" id="sb-geopolitical"    onclick="switchCat('geopolitical',this)">
+        <span class="sb-name">🌍 Geopolitical</span>
+        <span class="sb-count">{cat_counts["geopolitical"]}</span>
+      </div>
+      <div class="sb-item" id="sb-crypto"           onclick="switchCat('crypto',this)">
+        <span class="sb-name">📉 Crypto</span>
+        <span class="sb-count">{cat_counts["crypto"]}</span>
+      </div>
+      <div class="sb-item" id="sb-china"            onclick="switchCat('china',this)">
+        <span class="sb-name">🇨🇳 China</span>
+        <span class="sb-count">{cat_counts["china"]}</span>
+      </div>
+      <div class="sb-item" id="sb-tech_ai"          onclick="switchCat('tech_ai',this)">
+        <span class="sb-name">🤖 Tech & AI</span>
+        <span class="sb-count">{cat_counts["tech_ai"]}</span>
+      </div>
+      <div class="sb-item" id="sb-banking"          onclick="switchCat('banking',this)">
+        <span class="sb-name">🏦 Banking</span>
+        <span class="sb-count">{cat_counts["banking"]}</span>
+      </div>
+      <div class="sb-item" id="sb-commodities"      onclick="switchCat('commodities',this)">
+        <span class="sb-name">📦 Commodities</span>
+        <span class="sb-count">{cat_counts["commodities"]}</span>
+      </div>
+    </div>
+
+    <!-- Sources ── -->
+    <div class="sb-section">
+      <div class="sb-label">▶ SOURCES</div>
+      <div class="sb-ind-row"><span class="sb-ind-name">CNBC</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">MarketWatch</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">Reuters</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">Economic Times</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">MoneyControl</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">Yahoo Finance</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">Google News</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">Federal Reserve</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">CoinTelegraph</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">CoinDesk</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">TechCrunch</span></div>
     </div>
 
   </div><!-- /sidebar -->
