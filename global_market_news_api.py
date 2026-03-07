@@ -145,7 +145,6 @@ def fetch_rss(url: str) -> list[dict]:
 def fetch_category_news(category: str, urls: list[str]) -> list[dict]:
     seen_titles = set()
     results = []
-    cutoff = datetime.utcnow() - timedelta(hours=24)
 
     DATE_FMTS = [
         "%a, %d %b %Y %H:%M:%S %z",
@@ -155,40 +154,45 @@ def fetch_category_news(category: str, urls: list[str]) -> list[dict]:
         "%Y-%m-%d",
     ]
 
-    def is_within_24h(pub_date_str: str) -> bool:
-        """Returns True only if article date is within last 24h.
-        Articles with missing or unparseable dates are REJECTED to avoid old evergreen content."""
+    def is_within_window(pub_date_str: str, cutoff: datetime) -> bool:
+        """Returns True if article date is within the given cutoff window."""
         if not pub_date_str:
-            return False  # no date → reject (prevents old undated articles sneaking through)
+            return False
         for fmt in DATE_FMTS:
             try:
                 pub = datetime.strptime(pub_date_str.strip(), fmt)
-                # normalise to naive UTC for comparison
                 if pub.tzinfo is not None:
                     pub = pub.utctimetuple()
                     pub = datetime(*pub[:6])
                 return pub >= cutoff
             except ValueError:
                 continue
-        return False  # unrecognised format → reject to be safe
+        return False
 
-    for url in urls:
-        print(f"  Fetching {url[:60]}...")
-        for item in fetch_rss(url):
-            key = item["title"].lower()[:60]
-            if key in seen_titles:
-                continue
-
-            # ── 24-hour filter applied to ALL categories ──
-            if not is_within_24h(item.get("pubDate", "")):
-                continue
-
-            seen_titles.add(key)
-            results.append(item)
+    def _collect(cutoff: datetime) -> None:
+        for url in urls:
+            print(f"  Fetching {url[:60]}...")
+            for item in fetch_rss(url):
+                key = item["title"].lower()[:60]
+                if key in seen_titles:
+                    continue
+                if not is_within_window(item.get("pubDate", ""), cutoff):
+                    continue
+                seen_titles.add(key)
+                results.append(item)
+                if len(results) >= MAX_NEWS_PER_CATEGORY:
+                    return
             if len(results) >= MAX_NEWS_PER_CATEGORY:
-                break
-        if len(results) >= MAX_NEWS_PER_CATEGORY:
-            break
+                return
+
+    # ── Pass 1: last 24 hours ──
+    _collect(datetime.utcnow() - timedelta(hours=24))
+
+    # ── Pass 2 (fallback): extend to 7 days if fewer than 5 articles found ──
+    if len(results) < 5:
+        print(f"  ⚠  Only {len(results)} articles in 24 h for [{category}] — extending to 7-day window…")
+        _collect(datetime.utcnow() - timedelta(days=7))
+
     return results[:MAX_NEWS_PER_CATEGORY]
 
 
@@ -292,7 +296,7 @@ def generate_complete_html(all_news: dict) -> str:
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Global Market Dashboard – Live News</title>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;600;700&family=IBM+Plex+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;600;700&family=IBM+Plex+Sans:wght@300;400;600&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 /* ══════════════════════════════════════════
    BLOOMBERG TERMINAL THEME
@@ -631,88 +635,89 @@ body {{
 }}
 .news-hdr-meta {{ color: #aaaaaa; font-size: 11px; }}
 
-/* ── NEWSPAPER COLUMN (Option B) ── */
-.news-col {{ border: 1px solid var(--border); border-radius: 2px; overflow: hidden; }}
+/* ── NEWSPAPER COLUMN — COMPACT STYLE ── */
+.news-col {{ border: 1px solid var(--border); border-radius: 3px; overflow: hidden; }}
 
 .nc-item {{
-  display: grid;
-  grid-template-columns: 40px 1fr;
   border-bottom: 1px solid #1e1e1e;
   cursor: pointer;
   transition: background 0.12s;
+  user-select: none;
 }}
 .nc-item:last-of-type {{ border-bottom: none; }}
 .nc-item:hover {{ background: rgba(255,106,0,0.04); }}
-.nc-item.open {{ background: rgba(255,106,0,0.07); }}
+.nc-item.open {{ background: rgba(255,106,0,0.06); border-left: 2px solid var(--orange); }}
 
-.nc-num {{
-  padding: 15px 0 15px 14px;
-  font-size: 11px; font-weight: 700;
-  color: var(--orange); opacity: 0.65;
-  font-family: 'IBM Plex Mono', monospace;
-  vertical-align: top; line-height: 1;
-  padding-top: 16px;
+/* Collapsed row — headline only */
+.nc-row {{
+  display: grid;
+  grid-template-columns: 36px 1fr 24px;
+  align-items: center;
+  padding: 9px 12px 9px 0;
+  gap: 4px;
 }}
-.nc-body {{ padding: 13px 16px 13px 0; }}
+.nc-num {{
+  font-size: 10px; font-weight: 700;
+  color: var(--orange); opacity: 0.55;
+  font-family: 'IBM Plex Mono', monospace;
+  text-align: right; padding-right: 4px;
+}}
 .nc-headline {{
-  font-family: 'IBM Plex Sans', sans-serif;
-  font-size: 14px; font-weight: 600;
-  color: #eeeeee; line-height: 1.55;
-  margin-bottom: 7px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px; font-weight: 500;
+  color: #e8e8e8; line-height: 1.45;
   letter-spacing: 0.1px;
 }}
-.nc-foot {{
-  display: flex; align-items: center; gap: 8px;
+.nc-arrow {{
+  color: #555; font-size: 9px;
+  text-align: center; transition: transform 0.2s, color 0.15s;
 }}
-.nc-src-dot {{
-  width: 6px; height: 6px; border-radius: 50%;
-  background: var(--orange); flex-shrink: 0;
-}}
-.nc-src {{ font-size: 11px; color: var(--orange); font-weight: 700; letter-spacing: 0.3px; }}
-.nc-sep {{ color: #333; font-size: 11px; }}
-.nc-time {{ font-size: 11px; color: #666; font-family: 'IBM Plex Mono', monospace; }}
+.nc-item:hover .nc-arrow {{ color: var(--orange); }}
+.nc-item.open .nc-arrow {{ transform: rotate(180deg); color: var(--orange); }}
 
+/* Expanded body — source, time, summary, link */
 .nc-expand-body {{
   display: none;
-  padding: 0 16px 14px 54px;
-  border-bottom: 1px solid #1e1e1e;
-  margin-top: -2px;
-  background: rgba(255,106,0,0.03);
-  border-left: 3px solid rgba(255,106,0,0.35);
+  padding: 0 14px 12px 36px;
+  border-top: 1px dashed #2a2a2a;
 }}
-.nc-expand-body.open {{ display: block; }}
+.nc-expand-body.open {{ display: block; animation: fadeIn 0.18s ease; }}
+@keyframes fadeIn {{ from {{ opacity:0; transform:translateY(-3px); }} to {{ opacity:1; transform:translateY(0); }} }}
+
+.nc-meta {{
+  display: flex; align-items: center; gap: 6px;
+  padding: 8px 0 6px;
+}}
+.nc-src {{
+  font-family: 'DM Sans', sans-serif;
+  font-size: 9.5px; font-weight: 600; letter-spacing: 0.5px;
+  padding: 2px 7px; border-radius: 3px;
+  background: rgba(255,106,0,0.14); color: var(--orange);
+  text-transform: uppercase;
+}}
+.nc-sep {{ color: #444; font-size: 10px; }}
+.nc-time {{
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px; color: #666;
+}}
 .nc-summary {{
-  font-family: 'IBM Plex Sans', sans-serif;
-  font-size: 13px; color: #cccccc;
-  line-height: 1.75; padding-top: 10px;
-  margin-bottom: 8px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12.5px; color: #aaaaaa;
+  line-height: 1.7; margin-bottom: 8px;
 }}
 .nc-link {{
   display: inline-block;
-  color: var(--orange); font-size: 11px; font-weight: 700;
-  text-decoration: none; letter-spacing: 0.8px;
-  border-bottom: 1px solid rgba(255,106,0,0.35);
+  font-family: 'DM Sans', sans-serif;
+  color: var(--orange); font-size: 11px; font-weight: 600;
+  text-decoration: none; letter-spacing: 0.5px;
+  border-bottom: 1px solid rgba(255,106,0,0.3);
   padding-bottom: 1px; transition: opacity 0.15s;
 }}
 .nc-link:hover {{ opacity: 0.7; }}
-.nc-arrow {{
-  color: #444; font-size: 10px;
-  padding: 16px 12px 0 0;
-  text-align: right; line-height: 1;
-  transition: color 0.15s;
-  grid-column: unset;
-  align-self: start;
-  justify-self: end;
-}}
-.nc-item:hover .nc-arrow {{ color: var(--orange); }}
-.nc-item.open .nc-arrow {{ color: var(--orange); transform: rotate(180deg); display:inline-block; }}
 
 .no-news {{
-  color: #aaaaaa;
-  font-size: 13px;
-  padding: 24px 16px;
-  font-style: italic;
-  font-family: 'IBM Plex Sans', sans-serif;
+  color: #777; font-size: 12px;
+  padding: 20px 14px; font-family: 'DM Sans', sans-serif;
 }}
 
 /* ── LOADING OVERLAY ── */
@@ -761,12 +766,81 @@ body {{
 ::-webkit-scrollbar-track {{ background: transparent; }}
 ::-webkit-scrollbar-thumb {{ background: var(--border); border-radius: 2px; }}
 
-/* ── RESPONSIVE ── */
+/* ── HAMBURGER BUTTON (hidden on desktop) ── */
+.hamburger {{
+  display: none;
+  flex-direction: column; justify-content: center; gap: 4px;
+  width: 32px; height: 32px; cursor: pointer;
+  padding: 4px; border-radius: 3px;
+  transition: background 0.15s;
+}}
+.hamburger:hover {{ background: rgba(0,0,0,0.2); }}
+.hamburger span {{
+  display: block; width: 20px; height: 2px;
+  background: #000; border-radius: 2px; transition: all 0.2s;
+}}
+
+/* ── SIDEBAR OVERLAY (mobile) ── */
+.sidebar-overlay {{
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 200;
+}}
+.sidebar-overlay.open {{ display: block; }}
+
+/* ── RESPONSIVE — Tablet (≤900px) ── */
 @media (max-width: 900px) {{
   .shell {{ grid-template-columns: 1fr; height: auto; }}
-  .sidebar {{ display: none; }}
+
+  /* Sidebar becomes a fixed drawer on mobile */
+  .sidebar {{
+    position: fixed; top: 0; left: -260px; bottom: 0;
+    width: 260px; z-index: 300;
+    transition: left 0.25s ease;
+    padding-top: 50px;
+  }}
+  .sidebar.open {{ left: 0; }}
+
+  .hamburger {{ display: flex; }}
+
+  .topbar-right span:nth-child(3) {{ display: none; }} /* hide "Generated:" on tablet */
+
   .ind-row {{ flex-wrap: wrap; }}
-  .ind-cell {{ min-width: 120px; }}
+  .ind-cell {{ min-width: 110px; }}
+
+  .news-area {{ padding: 12px 10px; }}
+  .statusbar span:first-child {{ font-size: 9px; letter-spacing: 0; }}
+}}
+
+/* ── RESPONSIVE — Mobile (≤600px) ── */
+@media (max-width: 600px) {{
+  body {{ font-size: 13px; }}
+
+  .topbar {{ padding: 5px 10px; }}
+  .topbar-right {{ gap: 10px; font-size: 10px; }}
+  .topbar-right span:nth-child(3),
+  .topbar-right span:nth-child(4) {{ display: none; }} /* keep only LIVE + clock */
+
+  .ticker-item {{ padding: 0 14px; font-size: 11px; }}
+
+  .cat-tabs {{ padding: 0 6px; }}
+  .cat-tab {{ padding: 8px 10px; font-size: 10px; letter-spacing: 0.5px; }}
+
+  .news-area {{ padding: 10px 8px; }}
+  .news-hdr {{ margin-bottom: 10px; padding-bottom: 8px; }}
+  .news-hdr-title {{ font-size: 10px; }}
+  .news-hdr-meta {{ display: none; }}
+
+  .nc-row {{ padding: 8px 8px 8px 0; }}
+  .nc-headline {{ font-size: 12.5px; }}
+  .nc-expand-body {{ padding: 0 8px 10px 30px; }}
+
+  .statusbar {{ padding: 3px 8px; font-size: 9px; }}
+  .statusbar span:first-child {{ display: none; }}
+
+  .ind-cell {{ min-width: 90px; padding: 8px 10px; }}
+  .ind-val {{ font-size: 14px; }}
 }}
 </style>
 </head>
@@ -781,6 +855,9 @@ body {{
 <!-- TOP BAR -->
 <div class="topbar">
   <div class="topbar-left">
+    <div class="hamburger" onclick="toggleSidebar()" id="hamburgerBtn" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </div>
     <div class="topbar-dot"></div>
     <span>◼ GLOBAL MARKET DASHBOARD</span>
   </div>
@@ -798,6 +875,9 @@ body {{
     <!-- populated by JS -->
   </div>
 </div>
+
+<!-- SIDEBAR OVERLAY (mobile) -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 
 <!-- MAIN SHELL -->
 <div class="shell">
@@ -1001,24 +1081,22 @@ function renderNews(cat) {{
     const link = item.link && item.link !== '#'
       ? `<a class="nc-link" href="${{item.link}}" target="_blank" rel="noopener">Read Full Article ↗</a>`
       : '';
-    return `
-      <div class="nc-item" onclick="toggleNC(this)" id="nc-${{cat}}-${{i}}">
-        <div class="nc-num">${{num}}</div>
-        <div class="nc-body">
-          <div class="nc-headline">${{item.title}}</div>
-          <div class="nc-foot">
-            <div class="nc-src-dot"></div>
-            <span class="nc-src">${{item.source}}</span>
-            <span class="nc-sep">·</span>
-            <span class="nc-time">${{item.time}}</span>
-          </div>
-        </div>
-        <div class="nc-arrow">▼</div>
-      </div>
-      <div class="nc-expand-body" id="nc-exp-${{cat}}-${{i}}">
-        <div class="nc-summary">${{item.summary}}</div>
-        ${{link}}
-      </div>`;
+    return `<div class="nc-item" onclick="toggleNC(this)" id="nc-${{cat}}-${{i}}">
+  <div class="nc-row">
+    <span class="nc-num">${{num}}</span>
+    <span class="nc-headline">${{item.title}}</span>
+    <span class="nc-arrow">▼</span>
+  </div>
+  <div class="nc-expand-body" id="nc-exp-${{cat}}-${{i}}">
+    <div class="nc-meta">
+      <span class="nc-src">${{item.source}}</span>
+      <span class="nc-sep">·</span>
+      <span class="nc-time">${{item.time}}</span>
+    </div>
+    <div class="nc-summary">${{item.summary}}</div>
+    ${{link}}
+  </div>
+</div>`;
   }}).join('');
 
   document.getElementById('newsTitle').textContent = '▶ ' + d.label + ' — ' + items.length + ' ARTICLES';
@@ -1026,10 +1104,19 @@ function renderNews(cat) {{
 
 function toggleNC(row) {{
   row.classList.toggle('open');
-  const exp = row.nextElementSibling;
-  if (exp && exp.classList.contains('nc-expand-body')) {{
-    exp.classList.toggle('open');
-  }}
+  const exp = row.querySelector('.nc-expand-body');
+  if (exp) exp.classList.toggle('open');
+}}
+
+// ════════════════════════════
+// HAMBURGER / SIDEBAR DRAWER
+// ════════════════════════════
+function toggleSidebar() {{
+  const sidebar  = document.querySelector('.sidebar');
+  const overlay  = document.getElementById('sidebarOverlay');
+  const isOpen   = sidebar.classList.contains('open');
+  sidebar.classList.toggle('open', !isOpen);
+  overlay.classList.toggle('open', !isOpen);
 }}
 
 // ════════════════════════════
