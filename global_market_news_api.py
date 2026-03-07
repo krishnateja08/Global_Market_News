@@ -49,6 +49,31 @@ RSS_SOURCES = {
         "https://www.cnbc.com/id/100727362/device/rss/rss.html",
         "https://feeds.marketwatch.com/marketwatch/realtimeheadlines/",
     ],
+    "crypto": [
+        "https://cointelegraph.com/rss",
+        "https://www.coindesk.com/arc/outboundfeeds/rss/",
+        "https://news.google.com/rss/search?q=bitcoin+ethereum+crypto+when:1d&hl=en-US&gl=US&ceid=US:en",
+    ],
+    "china": [
+        "https://news.google.com/rss/search?q=china+stock+market+Hang+Seng+Shanghai+when:1d&hl=en-US&gl=US&ceid=US:en",
+        "https://news.google.com/rss/search?q=PBOC+yuan+China+economy+when:1d&hl=en-US&gl=US&ceid=US:en",
+        "https://feeds.reuters.com/reuters/CNtopNews",
+    ],
+    "tech_ai": [
+        "https://feeds.feedburner.com/TechCrunch",
+        "https://www.cnbc.com/id/19854910/device/rss/rss.html",
+        "https://news.google.com/rss/search?q=AI+artificial+intelligence+tech+stocks+when:1d&hl=en-US&gl=US&ceid=US:en",
+    ],
+    "banking": [
+        "https://news.google.com/rss/search?q=central+bank+interest+rates+Fed+ECB+RBI+when:1d&hl=en-US&gl=US&ceid=US:en",
+        "https://www.cnbc.com/id/10000108/device/rss/rss.html",
+        "https://feeds.marketwatch.com/marketwatch/financialservices/",
+    ],
+    "commodities": [
+        "https://news.google.com/rss/search?q=commodities+copper+wheat+natural+gas+when:1d&hl=en-US&gl=US&ceid=US:en",
+        "https://feeds.marketwatch.com/marketwatch/commodities/",
+        "https://www.cnbc.com/id/10000113/device/rss/rss.html",
+    ],
 }
 
 MAX_NEWS_PER_CATEGORY = 10
@@ -86,6 +111,11 @@ def fetch_rss(url: str) -> list[dict]:
             "economictimes.indiatimes.com": "Economic Times",
             "moneycontrol.com": "MoneyControl",
             "federalreserve.gov": "Federal Reserve",
+            "cointelegraph.com": "CoinTelegraph",
+            "coindesk.com": "CoinDesk",
+            "feedburner.com": "TechCrunch",
+            "techcrunch.com": "TechCrunch",
+            "news.google.com": "Google News",
         }
         source = next((v for k, v in source_map.items() if k in domain), domain)
 
@@ -195,6 +225,11 @@ def build_news_json(all_news: dict) -> str:
         "google_trending": "🔥 GOOGLE TRENDING",
         "corporate":       "🏢 CORPORATE NEWS",
         "geopolitical":    "🌍 GEOPOLITICAL",
+        "crypto":          "📉 CRYPTO & WEB3",
+        "china":           "🇨🇳 CHINA MARKETS",
+        "tech_ai":         "🤖 TECH & AI",
+        "banking":         "🏦 BANKING & RATES",
+        "commodities":     "📦 COMMODITIES",
     }
 
     out = {}
@@ -229,6 +264,11 @@ def generate_complete_html(all_news: dict) -> str:
         "google_trending": len(all_news.get("google_trending", [])),
         "corporate":       len(all_news.get("corporate", [])),
         "geopolitical":    len(all_news.get("geopolitical", [])),
+        "crypto":          len(all_news.get("crypto", [])),
+        "china":           len(all_news.get("china", [])),
+        "tech_ai":         len(all_news.get("tech_ai", [])),
+        "banking":         len(all_news.get("banking", [])),
+        "commodities":     len(all_news.get("commodities", [])),
     }
 
     return f"""<!DOCTYPE html>
@@ -759,6 +799,26 @@ body {{
         <span class="sb-name">🌍 Geopolitical</span>
         <span class="sb-count">{cat_counts["geopolitical"]}</span>
       </div>
+      <div class="sb-item" id="sb-crypto"          onclick="switchCat('crypto',this)">
+        <span class="sb-name">📉 Crypto</span>
+        <span class="sb-count">{cat_counts["crypto"]}</span>
+      </div>
+      <div class="sb-item" id="sb-china"           onclick="switchCat('china',this)">
+        <span class="sb-name">🇨🇳 China</span>
+        <span class="sb-count">{cat_counts["china"]}</span>
+      </div>
+      <div class="sb-item" id="sb-tech_ai"         onclick="switchCat('tech_ai',this)">
+        <span class="sb-name">🤖 Tech & AI</span>
+        <span class="sb-count">{cat_counts["tech_ai"]}</span>
+      </div>
+      <div class="sb-item" id="sb-banking"         onclick="switchCat('banking',this)">
+        <span class="sb-name">🏦 Banking</span>
+        <span class="sb-count">{cat_counts["banking"]}</span>
+      </div>
+      <div class="sb-item" id="sb-commodities"     onclick="switchCat('commodities',this)">
+        <span class="sb-name">📦 Commodities</span>
+        <span class="sb-count">{cat_counts["commodities"]}</span>
+      </div>
     </div>
 
     <div class="sb-section">
@@ -785,6 +845,9 @@ body {{
       <div class="sb-ind-row"><span class="sb-ind-name">Yahoo Finance</span></div>
       <div class="sb-ind-row"><span class="sb-ind-name">Google News</span></div>
       <div class="sb-ind-row"><span class="sb-ind-name">Federal Reserve</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">CoinTelegraph</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">CoinDesk</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">TechCrunch</span></div>
     </div>
 
   </div><!-- /sidebar -->
@@ -842,6 +905,11 @@ body {{
       <div class="cat-tab"        id="tab-google_trending" onclick="switchCat('google_trending',null)">🔥 TRENDING</div>
       <div class="cat-tab"        id="tab-corporate"      onclick="switchCat('corporate',null)">🏢 CORPORATE</div>
       <div class="cat-tab"        id="tab-geopolitical"   onclick="switchCat('geopolitical',null)">🌍 GEOPOLITICAL</div>
+      <div class="cat-tab"        id="tab-crypto"         onclick="switchCat('crypto',null)">📉 CRYPTO</div>
+      <div class="cat-tab"        id="tab-china"          onclick="switchCat('china',null)">🇨🇳 CHINA</div>
+      <div class="cat-tab"        id="tab-tech_ai"        onclick="switchCat('tech_ai',null)">🤖 TECH & AI</div>
+      <div class="cat-tab"        id="tab-banking"        onclick="switchCat('banking',null)">🏦 BANKING</div>
+      <div class="cat-tab"        id="tab-commodities"    onclick="switchCat('commodities',null)">📦 COMMODITIES</div>
     </div>
 
     <!-- ── NEWS AREA ── -->
@@ -860,7 +928,7 @@ body {{
 
 <!-- STATUS BAR -->
 <div class="statusbar">
-  <span>GLOBAL MARKET DASHBOARD · RSS FEEDS: 18 SOURCES · AUTO-REFRESH: 5 MIN · NOT FINANCIAL ADVICE</span>
+  <span>GLOBAL MARKET DASHBOARD · RSS FEEDS: 33 SOURCES · 11 CATEGORIES · AUTO-REFRESH: 5 MIN · NOT FINANCIAL ADVICE</span>
   <span id="statusClock">--:-- IST</span>
 </div>
 
@@ -1280,6 +1348,7 @@ window.addEventListener('DOMContentLoaded', () => {{
 def main():
     print("\n" + "=" * 70)
     print("🚀  GLOBAL MARKET DASHBOARD  –  BLOOMBERG TERMINAL THEME")
+    print("    11 CATEGORIES · 33 RSS SOURCES")
     print("=" * 70)
 
     all_news = {}
