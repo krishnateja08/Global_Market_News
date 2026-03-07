@@ -292,7 +292,7 @@ def generate_complete_html(all_news: dict) -> str:
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Global Market Dashboard – Live News</title>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;600;700&family=IBM+Plex+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;600;700&family=IBM+Plex+Sans:wght@300;400;600&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 /* ══════════════════════════════════════════
    BLOOMBERG TERMINAL THEME
@@ -631,88 +631,99 @@ body {{
 }}
 .news-hdr-meta {{ color: #aaaaaa; font-size: 11px; }}
 
-/* ── NEWSPAPER COLUMN (Option B) ── */
-.news-col {{ border: 1px solid var(--border); border-radius: 2px; overflow: hidden; }}
+/* ── NEWSPAPER COLUMN — COMPACT CARD (Sample 2) ── */
+.news-col {{ border: 1px solid #222d40; border-radius: 6px; overflow: hidden; background: #161b27; }}
 
 .nc-item {{
-  display: grid;
-  grid-template-columns: 40px 1fr;
-  border-bottom: 1px solid #1e1e1e;
+  display: flex;
+  flex-direction: column;
+  padding: 7px 14px;
+  border-bottom: 1px solid #1a2030;
   cursor: pointer;
   transition: background 0.12s;
+  user-select: none;
 }}
 .nc-item:last-of-type {{ border-bottom: none; }}
-.nc-item:hover {{ background: rgba(255,106,0,0.04); }}
-.nc-item.open {{ background: rgba(255,106,0,0.07); }}
+.nc-item:hover {{ background: #1c2435; }}
+.nc-item.open {{ background: #1a2535; }}
 
-.nc-num {{
-  padding: 15px 0 15px 14px;
-  font-size: 11px; font-weight: 700;
-  color: var(--orange); opacity: 0.65;
-  font-family: 'IBM Plex Mono', monospace;
-  vertical-align: top; line-height: 1;
-  padding-top: 16px;
+.nc-top {{
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
 }}
-.nc-body {{ padding: 13px 16px 13px 0; }}
 .nc-headline {{
-  font-family: 'IBM Plex Sans', sans-serif;
-  font-size: 14px; font-weight: 600;
-  color: #eeeeee; line-height: 1.55;
-  margin-bottom: 7px;
-  letter-spacing: 0.1px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: #eef0f5;
+  line-height: 1.4;
+  flex: 1;
 }}
-.nc-foot {{
-  display: flex; align-items: center; gap: 8px;
+.nc-caret {{
+  font-size: 10px;
+  color: #5a6580;
+  transition: transform 0.2s;
+  display: inline-block;
+  flex-shrink: 0;
+  margin-left: 6px;
 }}
-.nc-src-dot {{
-  width: 6px; height: 6px; border-radius: 50%;
-  background: var(--orange); flex-shrink: 0;
+.nc-item.open .nc-caret {{ transform: rotate(180deg); }}
+
+.nc-time {{
+  font-family: 'DM Sans', sans-serif;
+  font-size: 10px;
+  color: #5a6580;
+  white-space: nowrap;
+  flex-shrink: 0;
 }}
-.nc-src {{ font-size: 11px; color: var(--orange); font-weight: 700; letter-spacing: 0.3px; }}
-.nc-sep {{ color: #333; font-size: 11px; }}
-.nc-time {{ font-size: 11px; color: #666; font-family: 'IBM Plex Mono', monospace; }}
+
+.nc-src {{
+  display: inline-block;
+  margin-top: 3px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  padding: 1px 6px;
+  border-radius: 3px;
+  background: rgba(255,106,0,0.12);
+  color: var(--orange);
+}}
 
 .nc-expand-body {{
   display: none;
-  padding: 0 16px 14px 54px;
-  border-bottom: 1px solid #1e1e1e;
-  margin-top: -2px;
-  background: rgba(255,106,0,0.03);
-  border-left: 3px solid rgba(255,106,0,0.35);
+  padding: 6px 0 4px 0;
+  margin-top: 5px;
+  border-top: 1px dashed #252e42;
 }}
 .nc-expand-body.open {{ display: block; }}
 .nc-summary {{
-  font-family: 'IBM Plex Sans', sans-serif;
-  font-size: 13px; color: #cccccc;
-  line-height: 1.75; padding-top: 10px;
-  margin-bottom: 8px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11.5px;
+  color: #8090aa;
+  line-height: 1.65;
+  margin-bottom: 5px;
 }}
 .nc-link {{
   display: inline-block;
-  color: var(--orange); font-size: 11px; font-weight: 700;
-  text-decoration: none; letter-spacing: 0.8px;
-  border-bottom: 1px solid rgba(255,106,0,0.35);
-  padding-bottom: 1px; transition: opacity 0.15s;
+  font-family: 'DM Sans', sans-serif;
+  color: #60a5fa;
+  font-size: 10.5px;
+  font-weight: 500;
+  text-decoration: none;
+  padding-bottom: 1px;
+  border-bottom: 1px solid rgba(96,165,250,0.3);
+  transition: opacity 0.15s;
 }}
-.nc-link:hover {{ opacity: 0.7; }}
-.nc-arrow {{
-  color: #444; font-size: 10px;
-  padding: 16px 12px 0 0;
-  text-align: right; line-height: 1;
-  transition: color 0.15s;
-  grid-column: unset;
-  align-self: start;
-  justify-self: end;
-}}
-.nc-item:hover .nc-arrow {{ color: var(--orange); }}
-.nc-item.open .nc-arrow {{ color: var(--orange); transform: rotate(180deg); display:inline-block; }}
+.nc-link:hover {{ opacity: 0.75; }}
 
 .no-news {{
-  color: #aaaaaa;
-  font-size: 13px;
-  padding: 24px 16px;
-  font-style: italic;
-  font-family: 'IBM Plex Sans', sans-serif;
+  color: #8090aa;
+  font-size: 12px;
+  padding: 20px 14px;
+  font-family: 'DM Sans', sans-serif;
 }}
 
 /* ── LOADING OVERLAY ── */
@@ -997,27 +1008,20 @@ function renderNews(cat) {{
   }}
 
   col.innerHTML = items.map((item, i) => {{
-    const num = String(i + 1).padStart(2, '0');
     const link = item.link && item.link !== '#'
       ? `<a class="nc-link" href="${{item.link}}" target="_blank" rel="noopener">Read Full Article ↗</a>`
       : '';
     return `
       <div class="nc-item" onclick="toggleNC(this)" id="nc-${{cat}}-${{i}}">
-        <div class="nc-num">${{num}}</div>
-        <div class="nc-body">
-          <div class="nc-headline">${{item.title}}</div>
-          <div class="nc-foot">
-            <div class="nc-src-dot"></div>
-            <span class="nc-src">${{item.source}}</span>
-            <span class="nc-sep">·</span>
-            <span class="nc-time">${{item.time}}</span>
-          </div>
+        <div class="nc-top">
+          <span class="nc-headline">${{item.title}} <span class="nc-caret">▾</span></span>
+          <span class="nc-time">${{item.time}}</span>
         </div>
-        <div class="nc-arrow">▼</div>
-      </div>
-      <div class="nc-expand-body" id="nc-exp-${{cat}}-${{i}}">
-        <div class="nc-summary">${{item.summary}}</div>
-        ${{link}}
+        <span class="nc-src">${{item.source}}</span>
+        <div class="nc-expand-body" id="nc-exp-${{cat}}-${{i}}">
+          <div class="nc-summary">${{item.summary}}</div>
+          ${{link}}
+        </div>
       </div>`;
   }}).join('');
 
@@ -1026,10 +1030,8 @@ function renderNews(cat) {{
 
 function toggleNC(row) {{
   row.classList.toggle('open');
-  const exp = row.nextElementSibling;
-  if (exp && exp.classList.contains('nc-expand-body')) {{
-    exp.classList.toggle('open');
-  }}
+  const exp = row.querySelector('.nc-expand-body');
+  if (exp) exp.classList.toggle('open');
 }}
 
 // ════════════════════════════
