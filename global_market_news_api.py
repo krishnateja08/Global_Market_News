@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
 Global Market News & Indicators Dashboard
-Fetches REAL latest news using NewsAPI / RSS feeds every run.
-Generates HTML with expandable news articles.
+Fetches REAL latest news using RSS feeds every run.
+Generates HTML with Bloomberg Terminal UI (Template 1).
 """
 
 import json
@@ -115,7 +115,7 @@ def fetch_rss(url: str) -> list[dict]:
 def fetch_category_news(category: str, urls: list[str]) -> list[dict]:
     seen_titles = set()
     results = []
-    cutoff = datetime.utcnow() - timedelta(hours=24)  # ← 24hr cutoff
+    cutoff = datetime.utcnow() - timedelta(hours=24)
 
     for url in urls:
         print(f"  Fetching {url[:60]}...")
@@ -124,7 +124,6 @@ def fetch_category_news(category: str, urls: list[str]) -> list[dict]:
             if key in seen_titles:
                 continue
 
-            # ── Filter old articles for google_trending only ──
             if category == "google_trending" and item.get("pubDate"):
                 try:
                     for fmt in ["%a, %d %b %Y %H:%M:%S %z", "%a, %d %b %Y %H:%M:%S %Z"]:
@@ -132,7 +131,7 @@ def fetch_category_news(category: str, urls: list[str]) -> list[dict]:
                             pub = datetime.strptime(item["pubDate"].strip(), fmt)
                             pub_utc = pub.replace(tzinfo=None) if pub.tzinfo else pub
                             if pub_utc < cutoff:
-                                continue  # skip old articles
+                                continue
                             break
                         except ValueError:
                             continue
@@ -187,61 +186,50 @@ def escape(text: str) -> str:
     return html_module.escape(str(text), quote=True)
 
 
-def generate_news_items_html(items: list[dict], cat_id: str) -> str:
-    if not items:
-        return '<p style="color:#a8b2d1;padding:15px;">No news fetched – check your internet connection.</p>'
-    parts = []
-    for i, item in enumerate(items):
-        item_id = f"news-{cat_id}-{i}"
-        time_str = format_pub_date(item.get("pubDate", ""))
-        summary = escape(item.get("summary", "Click to read the full article."))
-        link = escape(item.get("link", "#"))
-        title = escape(item.get("title", "Untitled"))
-        source = escape(item.get("source", "Unknown"))
+def build_news_json(all_news: dict) -> str:
+    """Serialize all_news into a JS-safe JSON object for client-side tab rendering."""
+    categories_meta = {
+        "markets":         "📊 MARKET UPDATES",
+        "economic":        "💰 ECONOMIC & POLICY",
+        "india":           "🇮🇳 INDIAN MARKETS",
+        "google_trending": "🔥 GOOGLE TRENDING",
+        "corporate":       "🏢 CORPORATE NEWS",
+        "geopolitical":    "🌍 GEOPOLITICAL",
+    }
 
-        parts.append(f"""
-        <div class="news-item" onclick="toggleNews('{item_id}')">
-            <div class="news-item-header">
-                <h3>{title}</h3>
-                <span class="expand-icon" id="icon-{item_id}">&#9660;</span>
-            </div>
-            <div class="news-meta">
-                <span class="news-source">{source}</span>
-                <span class="news-date">{time_str}</span>
-            </div>
-            <div class="news-expand" id="{item_id}">
-                <p class="news-summary">{summary}</p>
-                {'<a class="read-more" href="' + link + '" target="_blank" rel="noopener">Read Full Article &#8599;</a>' if link and link != '#' else ''}
-            </div>
-        </div>""")
-    return "\n".join(parts)
+    out = {}
+    for cat, label in categories_meta.items():
+        items = all_news.get(cat, [])
+        out[cat] = {
+            "label": label,
+            "items": [
+                {
+                    "title":   escape(item.get("title", "Untitled")),
+                    "source":  escape(item.get("source", "Unknown")),
+                    "time":    format_pub_date(item.get("pubDate", "")),
+                    "summary": escape(item.get("summary", "Click to read the full article.")),
+                    "link":    escape(item.get("link", "#")),
+                }
+                for item in items
+            ],
+        }
+    return json.dumps(out, ensure_ascii=False)
 
 
 def generate_complete_html(all_news: dict) -> str:
     current_time = get_ist_time()
     total_articles = sum(len(v) for v in all_news.values())
+    news_json = build_news_json(all_news)
 
-    categories = {
-        "markets":     ("📊 Market Updates",     "markets",     "var(--accent-red)"),
-        "economic":    ("💰 Economic & Policy",  "economic",    "var(--accent-pink)"),
-        "india":           ("🇮🇳 Indian Markets",        "india",           "var(--accent-yellow)"),
-        "google_trending": ("🔥 Google Trending Stocks", "google_trending", "var(--accent-orange)"),
-        "corporate":       ("🏢 Corporate News",         "corporate",       "var(--accent-cyan)"),
-        "geopolitical":("🌍 Geopolitical",       "geopolitical","var(--accent-green)"),
+    # Count per category for sidebar
+    cat_counts = {
+        "markets":         len(all_news.get("markets", [])),
+        "economic":        len(all_news.get("economic", [])),
+        "india":           len(all_news.get("india", [])),
+        "google_trending": len(all_news.get("google_trending", [])),
+        "corporate":       len(all_news.get("corporate", [])),
+        "geopolitical":    len(all_news.get("geopolitical", [])),
     }
-
-    news_cards_html = ""
-    for key, (label, css_class, color) in categories.items():
-        items = all_news.get(key, [])
-        items_html = generate_news_items_html(items, key)
-        news_cards_html += f"""
-            <div class="news-category-card {css_class}">
-                <div class="category-header" style="border-bottom-color:{color}">
-                    <h3 class="category-title" style="color:{color}">{label}</h3>
-                    <span class="article-count">{len(items)} articles</span>
-                </div>
-                <div>{items_html}</div>
-            </div>"""
 
     return f"""<!DOCTYPE html>
 <html lang="en">
@@ -249,531 +237,1075 @@ def generate_complete_html(all_news: dict) -> str:
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Global Market Dashboard – Live News</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Space+Mono:wght@400;700&family=IBM+Plex+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;600;700&family=IBM+Plex+Sans:wght@300;400;600&display=swap" rel="stylesheet">
 <style>
+/* ══════════════════════════════════════════
+   BLOOMBERG TERMINAL THEME
+   ══════════════════════════════════════════ */
 :root {{
-    --primary-bg: #0a0e27; --secondary-bg: #141b3d; --accent-bg: #1a2347;
-    --text-primary: #e8edf5; --text-secondary: #a8b2d1;
-    --accent-blue: #4a9eff; --accent-green: #00ff88; --accent-red: #ff4757;
-    --accent-yellow: #ffd93d; --accent-purple: #a78bfa;
-    --accent-pink: #f093fb; --accent-cyan: #4facfe; --accent-orange: #ff9f43;
-    --border-color: #2a3a5f; --card-shadow: rgba(0,0,0,.5);
-    --usa-red:#B22234; --usa-blue:#3C3B6E;
-    --india-saffron:#FF9933; --india-green:#138808; --india-navy:#000080;
+  --bg: #0d0d0d;
+  --panel: #111111;
+  --panel2: #161616;
+  --border: #2a2a2a;
+  --border2: #1e1e1e;
+  --orange: #ff6600;
+  --orange-dim: rgba(255,102,0,0.08);
+  --orange-mid: rgba(255,102,0,0.18);
+  --green: #00ff41;
+  --green-dim: rgba(0,255,65,0.08);
+  --red: #ff2244;
+  --red-dim: rgba(255,34,68,0.08);
+  --yellow: #ffd700;
+  --blue: #00aaff;
+  --muted: #555;
+  --muted2: #3a3a3a;
+  --text: #cccccc;
+  --white: #eeeeee;
 }}
-*{{margin:0;padding:0;box-sizing:border-box}}
-body{{font-family:'IBM Plex Sans',sans-serif;background:linear-gradient(135deg,#0a0e27 0%,#1a1f3a 50%,#0f1629 100%);color:var(--text-primary);min-height:100vh;padding:20px;overflow-x:hidden}}
-body::before{{content:'';position:fixed;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(circle,rgba(74,158,255,.08) 1px,transparent 1px);background-size:50px 50px;animation:moveGrid 25s linear infinite;z-index:0}}
-@keyframes moveGrid{{0%{{transform:translate(0,0)}}100%{{transform:translate(50px,50px)}}}}
-.container{{max-width:1600px;margin:0 auto;position:relative;z-index:1}}
 
-/* ── HEADER ── */
-header{{text-align:center;margin-bottom:30px;padding:25px 20px;background:rgba(26,35,71,.5);backdrop-filter:blur(10px);border-radius:15px;border:1px solid var(--border-color);box-shadow:0 15px 40px var(--card-shadow);position:relative;overflow:hidden}}
-header::after{{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(74,158,255,.15),transparent);animation:shimmer 3s infinite}}
-@keyframes shimmer{{0%{{left:-100%}}100%{{left:100%}}}}
-h1{{font-family:'Playfair Display',serif;font-size:2.2em;font-weight:900;background:linear-gradient(135deg,#4a9eff,#00ff88);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:10px;letter-spacing:-1px;position:relative;z-index:1}}
-.subtitle{{font-family:'Space Mono',monospace;font-size:.85em;color:var(--text-secondary);letter-spacing:1px;text-transform:uppercase}}
-.live-badge{{display:inline-block;background:linear-gradient(135deg,#ff4757,#ff6b81);color:#fff;padding:5px 15px;border-radius:20px;font-size:.7em;font-weight:700;margin-top:10px;animation:pulse 2s infinite}}
-@keyframes pulse{{0%,100%{{opacity:1}}50%{{opacity:.7}}}}
-.timestamp{{margin-top:12px;font-family:'Space Mono',monospace;font-size:.75em;color:var(--accent-blue);opacity:.9}}
-.stat-bar{{margin-top:12px;font-family:'Space Mono',monospace;font-size:.7em;color:var(--accent-green)}}
+* {{ margin:0; padding:0; box-sizing:border-box; }}
 
-/* ── SECTION TITLES ── */
-.section-title{{font-family:'Playfair Display',serif;font-size:2.2em;font-weight:900;margin-bottom:25px;background:linear-gradient(135deg,var(--accent-blue),var(--accent-cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}}
-.section-title-usa{{font-family:'Playfair Display',serif;font-size:2.2em;font-weight:900;margin-bottom:25px;background:linear-gradient(135deg,var(--usa-red),#fff,var(--usa-blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}}
-.section-title-india{{font-family:'Playfair Display',serif;font-size:2.2em;font-weight:900;margin-bottom:25px;background:linear-gradient(135deg,var(--india-saffron),#fff,var(--india-green));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}}
+body {{
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  min-height: 100vh;
+  overflow-x: hidden;
+}}
 
-/* ── INDICATOR CARDS ── */
-.indicators-grid{{display:flex;gap:15px;margin-bottom:40px;overflow-x:auto;padding-bottom:10px}}
-.indicator-card{{background:rgba(26,35,71,.6);backdrop-filter:blur(10px);padding:15px 20px;border-radius:12px;border:1px solid var(--border-color);box-shadow:0 8px 20px var(--card-shadow);transition:all .3s;position:relative;overflow:hidden;min-width:175px;flex-shrink:0}}
-.indicator-card::before{{content:'';position:absolute;top:0;left:0;right:0;height:2px}}
-.indicator-card.positive::before{{background:linear-gradient(90deg,var(--accent-green),var(--accent-blue))}}
-.indicator-card.negative::before{{background:linear-gradient(90deg,var(--accent-red),var(--accent-yellow))}}
-.indicator-card.neutral::before{{background:linear-gradient(90deg,var(--text-secondary),var(--accent-blue))}}
-.indicator-card:hover{{transform:translateY(-3px);box-shadow:0 12px 30px rgba(74,158,255,.3);border-color:var(--accent-blue)}}
-.indicator-title{{font-family:'Space Mono',monospace;font-size:.68em;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;white-space:nowrap}}
-.indicator-value{{font-family:'Playfair Display',serif;font-size:1.4em;font-weight:700;color:var(--text-primary);margin-bottom:6px;white-space:nowrap}}
-.indicator-change{{font-family:'Space Mono',monospace;font-size:.78em;padding:3px 8px;border-radius:4px;display:inline-block;white-space:nowrap}}
-.positive{{color:var(--accent-green);background:rgba(0,255,136,.1)}}
-.negative{{color:var(--accent-red);background:rgba(255,71,87,.1)}}
-.neutral{{color:var(--text-secondary);background:rgba(168,178,209,.1)}}
+/* ── TOP BAR ── */
+.topbar {{
+  background: var(--orange);
+  color: #000;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 5px 16px;
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 2px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}}
+.topbar-left {{ display:flex; align-items:center; gap:16px; }}
+.topbar-right {{ display:flex; gap: 20px; font-weight: 400; font-size: 10px; }}
+.topbar-dot {{ width:8px; height:8px; border-radius:50%; background:#000; animation: blink 1.5s step-end infinite; }}
+@keyframes blink {{ 0%,100%{{opacity:1}} 50%{{opacity:0.2}} }}
 
-/* ── NEWS SECTION ── */
-.news-section{{margin-top:60px}}
-.news-grid{{display:grid;grid-template-columns:repeat(auto-fit,minmax(420px,1fr));gap:30px;margin-bottom:40px}}
-.news-category-card{{background:rgba(26,35,71,.6);backdrop-filter:blur(10px);padding:28px;border-radius:15px;border:1px solid var(--border-color);box-shadow:0 10px 30px var(--card-shadow)}}
-.category-header{{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;padding-bottom:12px;border-bottom:2px solid}}
-.category-title{{font-family:'Playfair Display',serif;font-size:1.5em;font-weight:700}}
-.article-count{{font-family:'Space Mono',monospace;font-size:.7em;color:var(--text-secondary);background:rgba(74,158,255,.1);padding:3px 8px;border-radius:10px}}
+/* ── TICKER STRIP ── */
+.ticker {{
+  background: #1a1a1a;
+  border-bottom: 1px solid var(--border);
+  padding: 5px 0;
+  overflow: hidden;
+  white-space: nowrap;
+}}
+.ticker-track {{
+  display: inline-flex;
+  gap: 0;
+  animation: scroll-ticker 60s linear infinite;
+}}
+.ticker-track:hover {{ animation-play-state: paused; }}
+.ticker-item {{
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 24px;
+  border-right: 1px solid var(--border);
+  font-size: 11px;
+  letter-spacing: 0.3px;
+}}
+.t-sym {{ color: var(--orange); font-weight: 700; }}
+.t-val {{ color: var(--white); }}
+.t-pos {{ color: var(--green); }}
+.t-neg {{ color: var(--red); }}
+.t-neu {{ color: var(--muted); }}
+@keyframes scroll-ticker {{
+  0%   {{ transform: translateX(0); }}
+  100% {{ transform: translateX(-50%); }}
+}}
 
-/* ── NEWS ITEMS ── */
-.news-item{{padding:14px;margin-bottom:10px;background:rgba(10,14,39,.4);border-radius:10px;border-left:3px solid var(--accent-blue);transition:all .2s;cursor:pointer;user-select:none}}
-.news-item:hover{{background:rgba(10,14,39,.65);transform:translateX(4px);box-shadow:0 4px 15px rgba(74,158,255,.2)}}
-.news-item-header{{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}}
-.news-item h3{{font-size:.93em;line-height:1.4;font-weight:600;color:var(--text-primary);flex:1}}
-.expand-icon{{font-size:.8em;color:var(--accent-blue);margin-top:3px;transition:transform .25s;flex-shrink:0}}
-.expand-icon.open{{transform:rotate(180deg)}}
-.news-meta{{display:flex;gap:10px;align-items:center;margin-top:7px;font-size:.73em;color:var(--text-secondary);flex-wrap:wrap}}
-.news-source{{background:var(--accent-blue);color:#fff;padding:2px 8px;border-radius:10px;font-size:.85em;font-family:'Space Mono',monospace}}
-.news-date{{font-family:'Space Mono',monospace}}
+/* ── MAIN SHELL ── */
+.shell {{
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  height: calc(100vh - 52px);
+}}
 
-/* ── EXPANDABLE CONTENT ── */
-.news-expand{{display:none;margin-top:12px;padding-top:12px;border-top:1px solid rgba(74,158,255,.2)}}
-.news-expand.open{{display:block;animation:fadeIn .25s ease}}
-@keyframes fadeIn{{from{{opacity:0;transform:translateY(-5px)}}to{{opacity:1;transform:translateY(0)}}}}
-.news-summary{{font-size:.88em;line-height:1.6;color:var(--text-secondary);margin-bottom:10px}}
-.read-more{{display:inline-block;margin-top:6px;padding:6px 14px;background:linear-gradient(135deg,var(--accent-blue),var(--accent-cyan));color:#fff;border-radius:8px;font-size:.78em;font-family:'Space Mono',monospace;text-decoration:none;transition:opacity .2s}}
-.read-more:hover{{opacity:.8}}
+/* ── SIDEBAR ── */
+.sidebar {{
+  background: var(--panel);
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  padding: 16px 0 40px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}}
+.sidebar::-webkit-scrollbar {{ width:4px; }}
+.sidebar::-webkit-scrollbar-track {{ background:transparent; }}
+.sidebar::-webkit-scrollbar-thumb {{ background:var(--border); border-radius:2px; }}
 
-/* ── category border colours ── */
-.markets .news-item{{border-left-color:var(--accent-red)}}
-.economic .news-item{{border-left-color:var(--accent-pink)}}
-.india .news-item{{border-left-color:var(--accent-yellow)}}
-.corporate .news-item{{border-left-color:var(--accent-cyan)}}
-.geopolitical .news-item{{border-left-color:var(--accent-green)}}
-.google_trending .news-item{{border-left-color:var(--accent-orange)}}
+.sb-section {{ margin-bottom: 22px; }}
+.sb-label {{
+  color: var(--orange);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  padding: 4px 14px 7px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}}
+.sb-item {{
+  padding: 7px 14px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-left: 3px solid transparent;
+  transition: all 0.12s;
+  font-size: 11px;
+}}
+.sb-item:hover {{ background: var(--orange-dim); border-left-color: rgba(255,102,0,0.4); }}
+.sb-item.active {{ background: var(--orange-dim); border-left-color: var(--orange); }}
+.sb-item .sb-name {{ color: var(--white); }}
+.sb-item .sb-count {{
+  color: var(--muted);
+  font-size: 10px;
+  background: var(--border2);
+  padding: 1px 6px;
+  border-radius: 2px;
+}}
+.sb-item.active .sb-count {{ background: var(--orange-mid); color: var(--orange); }}
+
+.sb-ind-row {{
+  padding: 6px 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 10px;
+  border-bottom: 1px solid var(--border2);
+}}
+.sb-ind-row:last-child {{ border-bottom: none; }}
+.sb-ind-name {{ color: var(--text); }}
+.sb-ind-val {{ font-weight: 700; font-size: 10px; }}
+.sb-ind-val.pos {{ color: var(--green); }}
+.sb-ind-val.neg {{ color: var(--red); }}
+.sb-ind-val.neu {{ color: var(--muted); }}
+
+/* ── MAIN CONTENT ── */
+.main {{ overflow-y: auto; display: flex; flex-direction: column; scrollbar-width: thin; scrollbar-color: var(--border) transparent; }}
+.main::-webkit-scrollbar {{ width:4px; }}
+.main::-webkit-scrollbar-thumb {{ background:var(--border); border-radius:2px; }}
+
+/* ── INDICATORS PANEL ── */
+.ind-panel {{
+  background: #0f0f0f;
+  border-bottom: 1px solid var(--border);
+  padding: 14px 16px;
+  flex-shrink: 0;
+}}
+.ind-panel-hdr {{
+  color: var(--orange);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}}
+.ind-panel-hdr::after {{ content:''; flex:1; height:1px; background: linear-gradient(90deg, rgba(255,102,0,0.4), transparent); }}
+
+.ind-row {{ display: flex; gap: 2px; flex-wrap: wrap; }}
+
+.ind-cell {{
+  background: var(--panel);
+  border: 1px solid var(--border);
+  padding: 9px 13px;
+  min-width: 130px;
+  flex: 1;
+  position: relative;
+  transition: border-color 0.2s;
+}}
+.ind-cell::after {{
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+}}
+.ind-cell.pos::after {{ background: var(--green); }}
+.ind-cell.neg::after {{ background: var(--red); }}
+.ind-cell.neu::after {{ background: var(--muted); }}
+.ind-cell:hover {{ border-color: var(--orange); }}
+
+.ind-name {{
+  color: var(--muted);
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}}
+.ind-val {{
+  color: var(--white);
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 3px;
+  white-space: nowrap;
+  letter-spacing: -0.5px;
+}}
+.ind-chg {{
+  font-size: 10px;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}}
+.ind-chg.pos {{ color: var(--green); }}
+.ind-chg.neg {{ color: var(--red); }}
+.ind-chg.neu {{ color: var(--muted); }}
+
+/* ── USA / INDIA ECON PANELS ── */
+.econ-section {{
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+  background: #0f0f0f;
+  flex-shrink: 0;
+}}
+.econ-hdr {{
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}}
+.econ-hdr.usa {{ color: #B22234; }}
+.econ-hdr.usa::after {{ content:''; flex:1; height:1px; background: linear-gradient(90deg, rgba(178,34,52,0.5), transparent); }}
+.econ-hdr.india {{ color: #FF9933; }}
+.econ-hdr.india::after {{ content:''; flex:1; height:1px; background: linear-gradient(90deg, rgba(255,153,51,0.5), transparent); }}
+
+/* ── CATEGORY TABS ── */
+.cat-tabs {{
+  display: flex;
+  gap: 0;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--border);
+  background: #0f0f0f;
+  overflow-x: auto;
+  flex-shrink: 0;
+  scrollbar-width: none;
+}}
+.cat-tabs::-webkit-scrollbar {{ display:none; }}
+.cat-tab {{
+  padding: 7px 16px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}}
+.cat-tab:hover {{ color: var(--white); }}
+.cat-tab.active {{
+  color: var(--orange);
+  border-bottom-color: var(--orange);
+}}
+
+/* ── NEWS AREA ── */
+.news-area {{ flex: 1; padding: 14px 16px; overflow-y: auto; }}
+.news-hdr {{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}}
+.news-hdr-title {{
+  color: var(--orange);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}}
+.news-hdr-meta {{ color: var(--muted); font-size: 10px; }}
+
+/* ── NEWS TABLE ── */
+.news-table {{ width: 100%; border-collapse: collapse; }}
+.news-table tbody tr {{
+  border-bottom: 1px solid var(--border2);
+  cursor: pointer;
+  transition: background 0.1s;
+}}
+.news-table tbody tr:hover td {{ background: rgba(255,102,0,0.04); }}
+.news-table tbody tr.open td {{ background: rgba(255,102,0,0.06); }}
+
+.td-num {{
+  color: var(--muted);
+  font-size: 9px;
+  padding: 10px 8px 10px 4px;
+  width: 28px;
+  text-align: right;
+  vertical-align: top;
+  padding-top: 11px;
+}}
+.td-time {{
+  color: var(--muted);
+  font-size: 10px;
+  width: 76px;
+  white-space: nowrap;
+  padding: 10px 8px;
+  vertical-align: top;
+  padding-top: 11px;
+}}
+.td-src {{
+  width: 96px;
+  padding: 10px 8px;
+  vertical-align: top;
+  padding-top: 11px;
+}}
+.src-badge {{
+  display: inline-block;
+  background: var(--orange-dim);
+  color: var(--orange);
+  border: 1px solid rgba(255,102,0,0.25);
+  font-size: 9px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 2px;
+  white-space: nowrap;
+  letter-spacing: 0.5px;
+}}
+.td-title {{ padding: 10px 8px; vertical-align: top; }}
+.td-title .headline {{
+  font-size: 12px;
+  color: var(--white);
+  line-height: 1.5;
+  letter-spacing: 0.2px;
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-weight: 400;
+}}
+.td-title .expand-body {{
+  display: none;
+  margin-top: 10px;
+  padding: 10px 12px;
+  background: rgba(255,102,0,0.04);
+  border-left: 2px solid var(--orange);
+}}
+.news-table tbody tr.open .td-title .expand-body {{ display: block; }}
+.expand-summary {{
+  font-size: 11px;
+  color: var(--text);
+  line-height: 1.7;
+  font-family: 'IBM Plex Sans', sans-serif;
+  margin-bottom: 8px;
+}}
+.expand-link {{
+  display: inline-block;
+  color: var(--orange);
+  font-size: 10px;
+  text-decoration: none;
+  letter-spacing: 1px;
+  border-bottom: 1px solid rgba(255,102,0,0.3);
+  padding-bottom: 1px;
+  transition: opacity 0.15s;
+}}
+.expand-link:hover {{ opacity: 0.7; }}
+.td-arrow {{
+  width: 24px;
+  padding: 10px 4px;
+  vertical-align: top;
+  padding-top: 11px;
+  text-align: center;
+}}
+.arrow-icon {{
+  color: var(--orange);
+  font-size: 10px;
+  display: inline-block;
+  transition: transform 0.2s;
+  opacity: 0.5;
+}}
+.news-table tbody tr.open .arrow-icon {{
+  transform: rotate(180deg);
+  opacity: 1;
+}}
+.no-news {{
+  color: var(--muted);
+  font-size: 11px;
+  padding: 20px 4px;
+  font-style: italic;
+}}
 
 /* ── LOADING OVERLAY ── */
-.loading-overlay{{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(10,14,39,.95);display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:9999;opacity:0;pointer-events:none;transition:opacity .5s}}
-.loading-overlay.visible{{opacity:1;pointer-events:all}}
-.loading-overlay.hidden{{opacity:0;pointer-events:none}}
-.spinner{{width:50px;height:50px;border:3px solid rgba(74,158,255,.3);border-top-color:#4a9eff;border-radius:50%;animation:spin 1s linear infinite}}
-@keyframes spin{{to{{transform:rotate(360deg)}}}}
-.loading-text{{margin-top:20px;font-family:'Space Mono',monospace;color:var(--accent-blue);font-size:1.1em}}
+.loading-overlay {{
+  position: fixed; top:0; left:0; width:100%; height:100%;
+  background: rgba(10,10,10,0.96);
+  display: flex; flex-direction: column;
+  justify-content: center; align-items: center;
+  z-index: 9999; opacity: 0; pointer-events: none;
+  transition: opacity 0.4s;
+}}
+.loading-overlay.visible {{ opacity:1; pointer-events:all; }}
+.spinner {{
+  width: 36px; height: 36px;
+  border: 2px solid rgba(255,102,0,0.2);
+  border-top-color: var(--orange);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}}
+@keyframes spin {{ to {{ transform: rotate(360deg); }} }}
+.loading-text {{
+  margin-top: 16px;
+  font-size: 11px;
+  letter-spacing: 3px;
+  color: var(--orange);
+  text-transform: uppercase;
+}}
 
-/* ── FOOTER ── */
-footer{{margin-top:80px;text-align:center;padding:35px;background:rgba(26,35,71,.3);border-radius:15px;border:1px solid var(--border-color)}}
-footer p{{font-family:'Space Mono',monospace;font-size:.82em;color:var(--text-secondary)}}
+/* ── STATUS BAR ── */
+.statusbar {{
+  position: fixed; bottom:0; left:0; right:0;
+  background: var(--orange);
+  color: #000;
+  display: flex;
+  justify-content: space-between;
+  padding: 3px 14px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  z-index: 100;
+}}
 
-@media(max-width:1024px){{.news-grid{{grid-template-columns:1fr}}}}
-@media(max-width:768px){{h1{{font-size:1.7em}}.section-title,.section-title-usa,.section-title-india{{font-size:1.7em}}}}
+/* ── SCROLLBAR (main sidebar) ── */
+::-webkit-scrollbar {{ width: 4px; height: 4px; }}
+::-webkit-scrollbar-track {{ background: transparent; }}
+::-webkit-scrollbar-thumb {{ background: var(--border); border-radius: 2px; }}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {{
+  .shell {{ grid-template-columns: 1fr; height: auto; }}
+  .sidebar {{ display: none; }}
+  .ind-row {{ flex-wrap: wrap; }}
+  .ind-cell {{ min-width: 120px; }}
+}}
 </style>
 </head>
 <body>
+
+<!-- LOADING OVERLAY -->
 <div class="loading-overlay" id="loadingOverlay">
-    <div class="spinner"></div>
-    <div class="loading-text">Loading Market Data…</div>
+  <div class="spinner"></div>
+  <div class="loading-text">Loading Market Data…</div>
 </div>
 
-<div class="container">
-
-<header>
-    <h1>🌍 Global Market Dashboard</h1>
-    <div class="subtitle">Real-Time Market Data &amp; Live News Headlines</div>
-    <div class="live-badge">🔴 LIVE – Fetched Fresh This Run</div>
-    <div class="timestamp" id="timestamp">📅 Generated: {current_time}</div>
-<div class="timestamp" id="lastRefresh" style="margin-top:4px;">🔄 Last Refresh: -- | 🕐 IST Now: --</div>
-<div class="stat-bar">✅ {total_articles} articles fetched across all categories</div>
-</header>
-
-<!-- ══ LIVE MARKET INDICATORS ══ -->
-<section>
-    <h2 class="section-title">Live Market Indicators</h2>
-    <div class="indicators-grid">
-        <!-- ✅ FIX 1: GIFT Nifty now fetched from NSE IFSC public data via Stooq/Yahoo proxy fallback -->
-        <div class="indicator-card neutral" id="card-gift-nifty">
-            <div class="indicator-title">🎯 GIFT Nifty (NSE IX)</div>
-            <div class="indicator-value" id="val-gift-nifty">Loading…</div>
-            <div class="indicator-change neutral" id="chg-gift-nifty">Futures · USD-denom.</div>
-        </div>
-        <div class="indicator-card neutral" id="card-dow">
-            <div class="indicator-title">📈 Dow Jones</div>
-            <div class="indicator-value" id="val-dow">Loading…</div>
-            <div class="indicator-change neutral" id="chg-dow">…</div>
-        </div>
-        <div class="indicator-card neutral" id="card-sp500">
-            <div class="indicator-title">💹 S&amp;P 500</div>
-            <div class="indicator-value" id="val-sp500">Loading…</div>
-            <div class="indicator-change neutral" id="chg-sp500">…</div>
-        </div>
-        <div class="indicator-card neutral" id="card-nasdaq">
-            <div class="indicator-title">💻 Nasdaq</div>
-            <div class="indicator-value" id="val-nasdaq">Loading…</div>
-            <div class="indicator-change neutral" id="chg-nasdaq">…</div>
-        </div>
-        <div class="indicator-card neutral" id="card-oil">
-            <div class="indicator-title">🛢️ Crude Oil</div>
-            <div class="indicator-value" id="val-oil">Loading…</div>
-            <div class="indicator-change neutral" id="chg-oil">…</div>
-        </div>
-        <div class="indicator-card neutral" id="card-dollar">
-            <div class="indicator-title">💵 Dollar Index</div>
-            <div class="indicator-value" id="val-dollar">Loading…</div>
-            <div class="indicator-change neutral" id="chg-dollar">…</div>
-        </div>
-        <div class="indicator-card neutral" id="card-gold">
-            <div class="indicator-title">🪙 Gold</div>
-            <div class="indicator-value" id="val-gold">Loading…</div>
-            <div class="indicator-change neutral" id="chg-gold">…</div>
-        </div>
-        <div class="indicator-card neutral" id="card-silver">
-            <div class="indicator-title">⚪ Silver</div>
-            <div class="indicator-value" id="val-silver">Loading…</div>
-            <div class="indicator-change neutral" id="chg-silver">…</div>
-        </div>
-    </div>
-</section>
-
-<!-- ══ USA ECONOMIC INDICATORS ══ -->
-<section>
-    <h2 class="section-title-usa">🇺🇸 USA Economic Indicators</h2>
-    <div class="indicators-grid">
-        <div class="indicator-card neutral"><div class="indicator-title">💵 Fed Funds Rate</div><div class="indicator-value">4.25–4.50%</div><div class="indicator-change neutral">Hold – Jan 2026</div></div>
-        <div class="indicator-card neutral"><div class="indicator-title">🏛️ FOMC Next</div><div class="indicator-value">Hold</div><div class="indicator-change neutral">Mar 18–19, 2026</div></div>
-        <!-- ✅ FIX 2: CPI now loaded via FRED JSON API (CORS-compatible) -->
-        <div class="indicator-card neutral"><div class="indicator-title">📊 CPI YoY</div><div class="indicator-value" id="val-cpi">Loading…</div><div class="indicator-change neutral" id="chg-cpi">Fetching…</div></div>
-        <div class="indicator-card neutral"><div class="indicator-title">📈 Core CPI</div><div class="indicator-value">3.3%</div><div class="indicator-change neutral">YoY Dec 2025</div></div>
-        <div class="indicator-card positive"><div class="indicator-title">💹 GDP Growth</div><div class="indicator-value">2.8%</div><div class="indicator-change positive">Q4 2025 Advance</div></div>
-        <div class="indicator-card positive"><div class="indicator-title">👔 Unemployment</div><div class="indicator-value">4.1%</div><div class="indicator-change positive">Jan 2026</div></div>
-        <div class="indicator-card positive"><div class="indicator-title">👥 NFP</div><div class="indicator-value">+256K</div><div class="indicator-change positive">Jan 2026</div></div>
-        <div class="indicator-card neutral"><div class="indicator-title">🏭 PPI YoY</div><div class="indicator-value">3.3%</div><div class="indicator-change neutral">Dec 2025</div></div>
-    </div>
-</section>
-
-<!-- ══ INDIA ECONOMIC INDICATORS ══ -->
-<section>
-    <h2 class="section-title-india">🇮🇳 India Economic Indicators</h2>
-    <div class="indicators-grid">
-        <div class="indicator-card neutral"><div class="indicator-title">💰 Repo Rate</div><div class="indicator-value">6.25%</div><div class="indicator-change neutral">RBI Feb 2026 Cut</div></div>
-        <div class="indicator-card neutral"><div class="indicator-title">📊 CPI</div><div class="indicator-value">5.22%</div><div class="indicator-change neutral">Dec 2025 YoY</div></div>
-        <div class="indicator-card neutral"><div class="indicator-title">📈 WPI</div><div class="indicator-value">2.4%</div><div class="indicator-change neutral">YoY Nov 2025</div></div>
-        <div class="indicator-card positive"><div class="indicator-title">🏭 IIP</div><div class="indicator-value">5.2%</div><div class="indicator-change positive">YoY Nov 2025</div></div>
-        <div class="indicator-card positive"><div class="indicator-title">📉 Mfg PMI</div><div class="indicator-value">57.7</div><div class="indicator-change positive">Jan 2026</div></div>
-        <div class="indicator-card positive"><div class="indicator-title">💹 GDP Growth</div><div class="indicator-value">6.4%</div><div class="indicator-change positive">FY 2024-25 Est.</div></div>
-        <div class="indicator-card neutral"><div class="indicator-title">🏛️ Fiscal Deficit</div><div class="indicator-value">4.9%</div><div class="indicator-change neutral">of GDP FY25 Target</div></div>
-<div class="indicator-card neutral" id="card-usdinr"><div class="indicator-title">💱 USD/INR</div><div class="indicator-value" id="val-usdinr">Loading…</div><div class="indicator-change neutral" id="chg-usdinr">…</div></div>
-    </div>
-</section>
-    </div>
-</section>
-
-<!-- ══ NEWS ══ -->
-<section class="news-section">
-    <h2 class="section-title">📰 Latest News Headlines</h2>
-    <p style="font-family:'Space Mono',monospace;font-size:.78em;color:var(--text-secondary);margin-bottom:20px;">
-        🖱️ Click any headline to expand &amp; read the summary. Click again to collapse.
-    </p>
-    <div class="news-grid">
-        {news_cards_html}
-    </div>
-</section>
-
-<footer>
-    <p>🔄 News is fetched fresh every time the script runs &nbsp;|&nbsp; Market data updates live in the browser</p>
-    <p style="margin-top:10px;font-size:.72em;opacity:.5">⚠️ For informational purposes only. Not financial advice.</p>
-</footer>
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-left">
+    <div class="topbar-dot"></div>
+    <span>◼ GLOBAL MARKET DASHBOARD</span>
+  </div>
+  <div class="topbar-right">
+    <span>🔴 LIVE FEED</span>
+    <span id="topClock">--:--:-- IST</span>
+    <span>📅 Generated: {current_time}</span>
+    <span>✅ {total_articles} ARTICLES</span>
+  </div>
 </div>
 
-<!-- ══ SCRIPTS ══ -->
+<!-- TICKER STRIP -->
+<div class="ticker">
+  <div class="ticker-track" id="tickerTrack">
+    <!-- populated by JS -->
+  </div>
+</div>
+
+<!-- MAIN SHELL -->
+<div class="shell">
+
+  <!-- ═══ SIDEBAR ═══ -->
+  <div class="sidebar">
+
+    <div class="sb-section">
+      <div class="sb-label">▶ CATEGORIES</div>
+      <div class="sb-item active" id="sb-markets"        onclick="switchCat('markets',this)">
+        <span class="sb-name">📊 Markets</span>
+        <span class="sb-count">{cat_counts["markets"]}</span>
+      </div>
+      <div class="sb-item" id="sb-economic"       onclick="switchCat('economic',this)">
+        <span class="sb-name">💰 Economic</span>
+        <span class="sb-count">{cat_counts["economic"]}</span>
+      </div>
+      <div class="sb-item" id="sb-india"          onclick="switchCat('india',this)">
+        <span class="sb-name">🇮🇳 India</span>
+        <span class="sb-count">{cat_counts["india"]}</span>
+      </div>
+      <div class="sb-item" id="sb-google_trending" onclick="switchCat('google_trending',this)">
+        <span class="sb-name">🔥 Trending</span>
+        <span class="sb-count">{cat_counts["google_trending"]}</span>
+      </div>
+      <div class="sb-item" id="sb-corporate"      onclick="switchCat('corporate',this)">
+        <span class="sb-name">🏢 Corporate</span>
+        <span class="sb-count">{cat_counts["corporate"]}</span>
+      </div>
+      <div class="sb-item" id="sb-geopolitical"   onclick="switchCat('geopolitical',this)">
+        <span class="sb-name">🌍 Geopolitical</span>
+        <span class="sb-count">{cat_counts["geopolitical"]}</span>
+      </div>
+    </div>
+
+    <div class="sb-section">
+      <div class="sb-label">▶ LIVE PRICES</div>
+      <div class="sb-ind-row"><span class="sb-ind-name">S&amp;P 500</span>    <span class="sb-ind-val neu" id="sbv-sp500">--</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">Dow Jones</span>   <span class="sb-ind-val neu" id="sbv-dow">--</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">Nasdaq</span>      <span class="sb-ind-val neu" id="sbv-nasdaq">--</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">Nifty 50</span>    <span class="sb-ind-val neu" id="sbv-nifty">--</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">Sensex</span>      <span class="sb-ind-val neu" id="sbv-sensex">--</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">USD/INR</span>     <span class="sb-ind-val neu" id="sbv-usdinr">--</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">Crude Oil</span>   <span class="sb-ind-val neu" id="sbv-oil">--</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">Gold</span>        <span class="sb-ind-val neu" id="sbv-gold">--</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">Silver</span>      <span class="sb-ind-val neu" id="sbv-silver">--</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">USD Index</span>   <span class="sb-ind-val neu" id="sbv-dollar">--</span></div>
+    </div>
+
+    <div class="sb-section">
+      <div class="sb-label">▶ SOURCES</div>
+      <div class="sb-ind-row"><span class="sb-ind-name">CNBC</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">MarketWatch</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">Reuters</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">Economic Times</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">MoneyControl</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">Yahoo Finance</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">Google News</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">Federal Reserve</span></div>
+    </div>
+
+  </div><!-- /sidebar -->
+
+  <!-- ═══ MAIN ═══ -->
+  <div class="main">
+
+    <!-- ── LIVE MARKET INDICATORS ── -->
+    <div class="ind-panel">
+      <div class="ind-panel-hdr">▶ LIVE MARKET INDICATORS</div>
+      <div class="ind-row">
+        <div class="ind-cell neu" id="card-gift-nifty">
+          <div class="ind-name">GIFT NIFTY (NSE IX)</div>
+          <div class="ind-val" id="val-gift-nifty">Loading…</div>
+          <div class="ind-chg neu" id="chg-gift-nifty">Futures · USD-denom.</div>
+        </div>
+        <div class="ind-cell neu" id="card-dow">
+          <div class="ind-name">DOW JONES</div>
+          <div class="ind-val" id="val-dow">Loading…</div>
+          <div class="ind-chg neu" id="chg-dow">…</div>
+        </div>
+        <div class="ind-cell neu" id="card-sp500">
+          <div class="ind-name">S&amp;P 500</div>
+          <div class="ind-val" id="val-sp500">Loading…</div>
+          <div class="ind-chg neu" id="chg-sp500">…</div>
+        </div>
+        <div class="ind-cell neu" id="card-nasdaq">
+          <div class="ind-name">NASDAQ</div>
+          <div class="ind-val" id="val-nasdaq">Loading…</div>
+          <div class="ind-chg neu" id="chg-nasdaq">…</div>
+        </div>
+        <div class="ind-cell neu" id="card-oil">
+          <div class="ind-name">CRUDE OIL</div>
+          <div class="ind-val" id="val-oil">Loading…</div>
+          <div class="ind-chg neu" id="chg-oil">…</div>
+        </div>
+        <div class="ind-cell neu" id="card-dollar">
+          <div class="ind-name">USD INDEX</div>
+          <div class="ind-val" id="val-dollar">Loading…</div>
+          <div class="ind-chg neu" id="chg-dollar">…</div>
+        </div>
+        <div class="ind-cell neu" id="card-gold">
+          <div class="ind-name">GOLD</div>
+          <div class="ind-val" id="val-gold">Loading…</div>
+          <div class="ind-chg neu" id="chg-gold">…</div>
+        </div>
+        <div class="ind-cell neu" id="card-silver">
+          <div class="ind-name">SILVER</div>
+          <div class="ind-val" id="val-silver">Loading…</div>
+          <div class="ind-chg neu" id="chg-silver">…</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── USA ECONOMIC INDICATORS ── -->
+    <div class="econ-section">
+      <div class="ind-panel-hdr econ-hdr usa">▶ 🇺🇸 USA ECONOMIC INDICATORS</div>
+      <div class="ind-row">
+        <div class="ind-cell neu"><div class="ind-name">FED FUNDS RATE</div><div class="ind-val">4.25–4.50%</div><div class="ind-chg neu">Hold – Jan 2026</div></div>
+        <div class="ind-cell neu"><div class="ind-name">FOMC NEXT</div><div class="ind-val">Hold</div><div class="ind-chg neu">Mar 18–19, 2026</div></div>
+        <div class="ind-cell neu"><div class="ind-name">CPI YoY</div><div class="ind-val" id="val-cpi">Loading…</div><div class="ind-chg neu" id="chg-cpi">Fetching…</div></div>
+        <div class="ind-cell neu"><div class="ind-name">CORE CPI</div><div class="ind-val">3.3%</div><div class="ind-chg neu">YoY Dec 2025</div></div>
+        <div class="ind-cell pos"><div class="ind-name">GDP GROWTH</div><div class="ind-val">2.8%</div><div class="ind-chg pos">Q4 2025 Advance</div></div>
+        <div class="ind-cell pos"><div class="ind-name">UNEMPLOYMENT</div><div class="ind-val">4.1%</div><div class="ind-chg pos">Jan 2026</div></div>
+        <div class="ind-cell pos"><div class="ind-name">NFP</div><div class="ind-val">+256K</div><div class="ind-chg pos">Jan 2026</div></div>
+        <div class="ind-cell neu"><div class="ind-name">PPI YoY</div><div class="ind-val">3.3%</div><div class="ind-chg neu">Dec 2025</div></div>
+      </div>
+    </div>
+
+    <!-- ── INDIA ECONOMIC INDICATORS ── -->
+    <div class="econ-section">
+      <div class="ind-panel-hdr econ-hdr india">▶ 🇮🇳 INDIA ECONOMIC INDICATORS</div>
+      <div class="ind-row">
+        <div class="ind-cell neu"><div class="ind-name">REPO RATE</div><div class="ind-val">6.25%</div><div class="ind-chg neu">RBI Feb 2026 Cut</div></div>
+        <div class="ind-cell neu"><div class="ind-name">CPI</div><div class="ind-val">5.22%</div><div class="ind-chg neu">Dec 2025 YoY</div></div>
+        <div class="ind-cell neu"><div class="ind-name">WPI</div><div class="ind-val">2.4%</div><div class="ind-chg neu">YoY Nov 2025</div></div>
+        <div class="ind-cell pos"><div class="ind-name">IIP</div><div class="ind-val">5.2%</div><div class="ind-chg pos">YoY Nov 2025</div></div>
+        <div class="ind-cell pos"><div class="ind-name">MFG PMI</div><div class="ind-val">57.7</div><div class="ind-chg pos">Jan 2026</div></div>
+        <div class="ind-cell pos"><div class="ind-name">GDP GROWTH</div><div class="ind-val">6.4%</div><div class="ind-chg pos">FY 2024-25 Est.</div></div>
+        <div class="ind-cell neu"><div class="ind-name">FISCAL DEFICIT</div><div class="ind-val">4.9%</div><div class="ind-chg neu">of GDP FY25 Target</div></div>
+        <div class="ind-cell neu" id="card-usdinr"><div class="ind-name">USD/INR</div><div class="ind-val" id="val-usdinr">Loading…</div><div class="ind-chg neu" id="chg-usdinr">…</div></div>
+      </div>
+    </div>
+
+    <!-- ── CATEGORY TABS ── -->
+    <div class="cat-tabs" id="catTabs">
+      <div class="cat-tab active" id="tab-markets"        onclick="switchCat('markets',null)">📊 MARKETS</div>
+      <div class="cat-tab"        id="tab-economic"       onclick="switchCat('economic',null)">💰 ECONOMIC</div>
+      <div class="cat-tab"        id="tab-india"          onclick="switchCat('india',null)">🇮🇳 INDIA</div>
+      <div class="cat-tab"        id="tab-google_trending" onclick="switchCat('google_trending',null)">🔥 TRENDING</div>
+      <div class="cat-tab"        id="tab-corporate"      onclick="switchCat('corporate',null)">🏢 CORPORATE</div>
+      <div class="cat-tab"        id="tab-geopolitical"   onclick="switchCat('geopolitical',null)">🌍 GEOPOLITICAL</div>
+    </div>
+
+    <!-- ── NEWS AREA ── -->
+    <div class="news-area">
+      <div class="news-hdr">
+        <span class="news-hdr-title" id="newsTitle">▶ MARKET UPDATES</span>
+        <span class="news-hdr-meta" id="newsSubtitle">Click any headline to expand · {current_time}</span>
+      </div>
+      <table class="news-table">
+        <tbody id="newsTbody"></tbody>
+      </table>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /shell -->
+
+<!-- STATUS BAR -->
+<div class="statusbar">
+  <span>GLOBAL MARKET DASHBOARD · RSS FEEDS: 18 SOURCES · AUTO-REFRESH: 5 MIN · NOT FINANCIAL ADVICE</span>
+  <span id="statusClock">--:-- IST</span>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SCRIPTS
+══════════════════════════════════════════ -->
 <script>
-// ── Expand / collapse news items ──
-function toggleNews(id) {{
-    const el = document.getElementById(id);
-    const icon = document.getElementById('icon-' + id);
-    if (!el) return;
-    el.classList.toggle('open');
-    icon.classList.toggle('open');
+// ── All news injected by Python ──
+const NEWS_DATA = {news_json};
+
+// ── Current active category ──
+let currentCat = 'markets';
+
+// ════════════════════════════
+// RENDER NEWS TABLE
+// ════════════════════════════
+function renderNews(cat) {{
+  const d = NEWS_DATA[cat];
+  if (!d) return;
+  const tbody = document.getElementById('newsTbody');
+  const items = d.items;
+
+  if (!items || items.length === 0) {{
+    tbody.innerHTML = '<tr><td colspan="5" class="no-news">No articles available for this category.</td></tr>';
+    document.getElementById('newsTitle').textContent = '▶ ' + d.label + ' — 0 ARTICLES';
+    return;
+  }}
+
+  tbody.innerHTML = items.map((item, i) => {{
+    const link = item.link && item.link !== '#'
+      ? `<a class="expand-link" href="${{item.link}}" target="_blank" rel="noopener">Read Full Article ↗</a>`
+      : '';
+    return `
+      <tr onclick="toggleRow(this)">
+        <td class="td-num">${{String(i+1).padStart(2,'0')}}</td>
+        <td class="td-time">${{item.time}}</td>
+        <td class="td-src"><span class="src-badge">${{item.source}}</span></td>
+        <td class="td-title">
+          <div class="headline">${{item.title}}</div>
+          <div class="expand-body">
+            <div class="expand-summary">${{item.summary}}</div>
+            ${{link}}
+          </div>
+        </td>
+        <td class="td-arrow"><span class="arrow-icon">▼</span></td>
+      </tr>`;
+  }}).join('');
+
+  document.getElementById('newsTitle').textContent = '▶ ' + d.label + ' — ' + items.length + ' ARTICLES';
 }}
 
-// ════════════════════════════════════════════════
-// FIX 1 – GIFT Nifty
-// Yahoo Finance does NOT carry GIFT Nifty (NSE IX futures).
-// Strategy: try multiple CORS proxies for the NSE IFSC public quote API.
-// Fallback: show Nifty 50 (^NSEI) clearly labelled as the spot proxy.
-// ════════════════════════════════════════════════
+function toggleRow(row) {{
+  row.classList.toggle('open');
+}}
 
-// Standard Yahoo Finance symbols (unchanged)
+// ════════════════════════════
+// SWITCH CATEGORY
+// ════════════════════════════
+function switchCat(cat, sidebarEl) {{
+  currentCat = cat;
+
+  // Update sidebar items
+  document.querySelectorAll('.sb-item').forEach(el => el.classList.remove('active'));
+  const sbEl = document.getElementById('sb-' + cat);
+  if (sbEl) sbEl.classList.add('active');
+
+  // Update tabs
+  document.querySelectorAll('.cat-tab').forEach(el => el.classList.remove('active'));
+  const tabEl = document.getElementById('tab-' + cat);
+  if (tabEl) tabEl.classList.add('active');
+
+  renderNews(cat);
+}}
+
+// ════════════════════════════
+// TICKER STRIP
+// ════════════════════════════
+const TICKER_SYMBOLS = [
+  ['GIFT NIFTY', 'gift-nifty'],
+  ['DOW',    'dow'],
+  ['S&P 500','sp500'],
+  ['NASDAQ', 'nasdaq'],
+  ['CRUDE',  'oil'],
+  ['GOLD',   'gold'],
+  ['SILVER', 'silver'],
+  ['USD IDX','dollar'],
+  ['USD/INR','usdinr'],
+];
+
+function buildTicker() {{
+  const track = document.getElementById('tickerTrack');
+  // Double for seamless loop
+  const items = [...TICKER_SYMBOLS, ...TICKER_SYMBOLS];
+  track.innerHTML = items.map(([name, key]) => `
+    <span class="ticker-item" id="tick-${{key}}">
+      <span class="t-sym">${{name}}</span>
+      <span class="t-val t-neu" id="tv-${{key}}">--</span>
+    </span>
+  `).join('');
+}}
+
+function updateTicker(key, val, pct) {{
+  const el = document.getElementById('tv-' + key);
+  if (!el) return;
+  const p = parseFloat(pct);
+  el.textContent = val + (pct ? ' (' + (p >= 0 ? '+' : '') + pct + '%)' : '');
+  el.className = 't-val ' + (p > 0 ? 't-pos' : p < 0 ? 't-neg' : 't-neu');
+
+  // Update duplicate ticker item too
+  const els = document.querySelectorAll('[id="tv-' + key + '"]');
+  els.forEach(e => {{
+    e.textContent = el.textContent;
+    e.className = el.className;
+  }});
+}}
+
+// ════════════════════════════
+// INDICATOR CARD UPDATE
+// ════════════════════════════
+function updateCard(id, value, change, pchange) {{
+  const vEl = document.getElementById('val-' + id);
+  const cEl = document.getElementById('chg-' + id);
+  const card = document.getElementById('card-' + id);
+  if (vEl) vEl.textContent = value;
+  if (cEl) {{
+    const p = parseFloat(pchange);
+    const sign = p >= 0 ? '+' : '';
+    cEl.textContent = sign + change + ' (' + sign + pchange + '%)';
+    const cls = p > 0 ? 'pos' : p < 0 ? 'neg' : 'neu';
+    cEl.className = 'ind-chg ' + cls;
+    if (card) card.className = 'ind-cell ' + cls;
+  }}
+  // Update sidebar
+  const sbEl = document.getElementById('sbv-' + id);
+  if (sbEl) {{
+    sbEl.textContent = value;
+    const p = parseFloat(pchange);
+    sbEl.className = 'sb-ind-val ' + (p > 0 ? 'pos' : p < 0 ? 'neg' : 'neu');
+  }}
+  updateTicker(id, value, pchange);
+}}
+
+// ════════════════════════════
+// YAHOO FINANCE FETCH
+// ════════════════════════════
 const SYMBOLS = {{
-    'dow':   '^DJI',
-    'sp500': '^GSPC',
-    'nasdaq':'^IXIC',
-    'oil':   'CL=F',
-    'dollar':'DX-Y.NYB',
-    'gold':  'GC=F',
-    'silver':'SI=F',
-    'usdinr': 'INR=X'
+  'dow':    '^DJI',
+  'sp500':  '^GSPC',
+  'nasdaq': '^IXIC',
+  'oil':    'CL=F',
+  'dollar': 'DX-Y.NYB',
+  'gold':   'GC=F',
+  'silver': 'SI=F',
+  'usdinr': 'INR=X'
 }};
 
-
-
-function updateCard(id, value, change, pchange) {{
-    const vEl = document.getElementById('val-'+id);
-    const cEl = document.getElementById('chg-'+id);
-    const card = document.getElementById('card-'+id);
-    if (vEl) vEl.textContent = value;
-    if (cEl) {{
-        const p = parseFloat(pchange);
-        const sign = p >= 0 ? '+' : '';
-        cEl.textContent = sign+change+' ('+sign+pchange+'%)';
-        const cls = p > 0 ? 'positive' : p < 0 ? 'negative' : 'neutral';
-        cEl.className = 'indicator-change '+cls;
-        if (card) card.className = 'indicator-card '+cls;
-    }}
-}}
-
 async function fetchYahoo(key, sym) {{
-    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${{sym}}?interval=1d&range=1d`;
-    const proxies = [
-        'https://corsproxy.io/?'+encodeURIComponent(url),
-        'https://api.allorigins.win/get?url='+encodeURIComponent(url),
-        url
-    ];
-    for (const u of proxies) {{
-        try {{
-            const r = await fetch(u, {{mode:'cors'}});
-            if (!r.ok) continue;
-            let d = await r.json();
-            if (d.contents) d = JSON.parse(d.contents);  // allorigins wrapper
-            const meta = d?.chart?.result?.[0]?.meta;
-            if (!meta) continue;
-            const cur = meta.regularMarketPrice;
-            const prev = meta.chartPreviousClose || meta.previousClose;
-            if (!cur || !prev) continue;
-            const chg = (cur - prev).toFixed(2);
-            const pct = (((cur-prev)/prev)*100).toFixed(2);
-            let val = ['dow','sp500','nasdaq'].includes(key)
-                ? cur.toLocaleString('en-US',{{minimumFractionDigits:2,maximumFractionDigits:2}})
-                : key==='dollar' ? cur.toFixed(2)
-                : key==='usdinr' ? '₹'+cur.toFixed(2)
-                : '$'+cur.toFixed(2);
-            updateCard(key, val, chg, pct);
-            return true;
-        }} catch(e) {{ /* try next */ }}
-    }}
-    return false;
+  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${{sym}}?interval=1d&range=1d`;
+  const proxies = [
+    'https://corsproxy.io/?' + encodeURIComponent(url),
+    'https://api.allorigins.win/get?url=' + encodeURIComponent(url),
+    url
+  ];
+  for (const u of proxies) {{
+    try {{
+      const r = await fetch(u, {{mode: 'cors'}});
+      if (!r.ok) continue;
+      let d = await r.json();
+      if (d.contents) d = JSON.parse(d.contents);
+      const meta = d?.chart?.result?.[0]?.meta;
+      if (!meta) continue;
+      const cur = meta.regularMarketPrice;
+      const prev = meta.chartPreviousClose || meta.previousClose;
+      if (!cur || !prev) continue;
+      const chg = (cur - prev).toFixed(2);
+      const pct = (((cur - prev) / prev) * 100).toFixed(2);
+      let val = ['dow', 'sp500', 'nasdaq'].includes(key)
+        ? cur.toLocaleString('en-US', {{minimumFractionDigits: 2, maximumFractionDigits: 2}})
+        : key === 'dollar' ? cur.toFixed(2)
+        : key === 'usdinr' ? '₹' + cur.toFixed(2)
+        : '$' + cur.toFixed(2);
+      updateCard(key, val, chg, pct);
+      // Extra sidebar updates for nifty/sensex placeholder
+      if (key === 'usdinr') {{
+        const sbEl = document.getElementById('sbv-usdinr');
+        if (sbEl) {{ sbEl.textContent = '₹' + cur.toFixed(2); }}
+      }}
+      return true;
+    }} catch (e) {{ /* try next */ }}
+  }}
+  return false;
 }}
-// ── GIFT Nifty: fetch from NSE IFSC public data (via CORS proxy) ──
-// NSE IFSC provides a public JSON feed; we try via corsproxy.io
-// If that fails we fall back to the Stooq CSV (no CORS issue) for ^N50USD
-// which is the USD-denominated Nifty equivalent – closest public proxy.
+
+// ════════════════════════════
+// GIFT NIFTY FETCH
+// ════════════════════════════
 async function fetchGiftNifty() {{
-    // Attempt 1: corsproxy → NSE IFSC market data (live)
-    const nseUrl = 'https://www.nseifsc.com/market/GetIndexChartDetails?indices=NIFTY50&type=I';
-    try {{
-        const r = await fetch('https://corsproxy.io/?'+encodeURIComponent(nseUrl), {{mode:'cors', signal: AbortSignal.timeout(6000)}});
-        if (r.ok) {{
-            const d = await r.json();
-            // NSE IFSC returns array; grab latest price & prev close
-            if (d && d.length > 0) {{
-                const last = d[d.length - 1];
-                const first = d[0];
-                const cur = parseFloat(last[1]);
-                const prev = parseFloat(first[1]);
-                if (cur && prev) {{
-                    const chg = (cur - prev).toFixed(2);
-                    const pct = (((cur-prev)/prev)*100).toFixed(2);
-                    const val = cur.toLocaleString('en-US',{{minimumFractionDigits:2,maximumFractionDigits:2}});
-                    const vEl = document.getElementById('val-gift-nifty');
-                    const cEl = document.getElementById('chg-gift-nifty');
-                    const card = document.getElementById('card-gift-nifty');
-                    if (vEl) vEl.textContent = val;
-                    if (cEl) {{
-                        const p = parseFloat(pct);
-                        const sign = p >= 0 ? '+' : '';
-                        cEl.textContent = sign+chg+' ('+sign+pct+'%) · NSE IX';
-                        const cls = p > 0 ? 'positive' : p < 0 ? 'negative' : 'neutral';
-                        cEl.className = 'indicator-change '+cls;
-                        if (card) card.className = 'indicator-card '+cls;
-                    }}
-                    return;
-                }}
-            }}
+  // Attempt 1: NSE IFSC via CORS proxy
+  const nseUrl = 'https://www.nseifsc.com/market/GetIndexChartDetails?indices=NIFTY50&type=I';
+  try {{
+    const r = await fetch('https://corsproxy.io/?' + encodeURIComponent(nseUrl), {{mode: 'cors', signal: AbortSignal.timeout(6000)}});
+    if (r.ok) {{
+      const d = await r.json();
+      if (d && d.length > 0) {{
+        const last = d[d.length - 1];
+        const first = d[0];
+        const cur = parseFloat(last[1]);
+        const prev = parseFloat(first[1]);
+        if (cur && prev) {{
+          const chg = (cur - prev).toFixed(2);
+          const pct = (((cur - prev) / prev) * 100).toFixed(2);
+          const val = cur.toLocaleString('en-US', {{minimumFractionDigits: 2, maximumFractionDigits: 2}});
+          const vEl = document.getElementById('val-gift-nifty');
+          const cEl = document.getElementById('chg-gift-nifty');
+          const card = document.getElementById('card-gift-nifty');
+          if (vEl) vEl.textContent = val;
+          if (cEl) {{
+            const p = parseFloat(pct);
+            const sign = p >= 0 ? '+' : '';
+            cEl.textContent = sign + chg + ' (' + sign + pct + '%) · NSE IX';
+            const cls = p > 0 ? 'pos' : p < 0 ? 'neg' : 'neu';
+            cEl.className = 'ind-chg ' + cls;
+            if (card) card.className = 'ind-cell ' + cls;
+          }}
+          updateTicker('gift-nifty', val, pct);
+          // sidebar nifty
+          const sbN = document.getElementById('sbv-nifty');
+          if (sbN) {{ sbN.textContent = val; sbN.className = 'sb-ind-val ' + (parseFloat(pct) > 0 ? 'pos' : parseFloat(pct) < 0 ? 'neg' : 'neu'); }}
+          return;
         }}
-    }} catch(e) {{ /* fall through */ }}
+      }}
+    }}
+  }} catch (e) {{ /* fall through */ }}
 
-    // Attempt 2: Stooq – N50USD (Nifty 50 in USD) – best public proxy for GIFT Nifty
-    // Stooq serves CSV without CORS restrictions
-    try {{
-        const stooqUrl = 'https://stooq.com/q/l/?s=nifty.ix&f=sd2t2ohlcv&e=csv';
-        const r = await fetch('https://corsproxy.io/?'+encodeURIComponent(stooqUrl), {{signal: AbortSignal.timeout(5000)}});
-        if (r.ok) {{
-            const text = await r.text();
-            const lines = text.trim().split('\\n');
-            if (lines.length >= 2) {{
-                const cols = lines[1].split(',');
-                // Stooq CSV: Symbol,Date,Time,Open,High,Low,Close,Volume
-                const close = parseFloat(cols[6]);
-                const open  = parseFloat(cols[3]);
-                if (close && open) {{
-                    const chg = (close - open).toFixed(2);
-                    const pct = (((close-open)/open)*100).toFixed(2);
-                    const val = close.toLocaleString('en-US',{{minimumFractionDigits:2,maximumFractionDigits:2}});
-                    const vEl = document.getElementById('val-gift-nifty');
-                    const cEl = document.getElementById('chg-gift-nifty');
-                    const card = document.getElementById('card-gift-nifty');
-                    if (vEl) vEl.textContent = val;
-                    if (cEl) {{
-                        const p = parseFloat(pct);
-                        const sign = p >= 0 ? '+' : '';
-                        cEl.textContent = sign+chg+' ('+sign+pct+'%) · NSE IX ~';
-                        const cls = p > 0 ? 'positive' : p < 0 ? 'negative' : 'neutral';
-                        cEl.className = 'indicator-change '+cls;
-                        if (card) card.className = 'indicator-card '+cls;
-                    }}
-                    return;
-                }}
-            }}
+  // Attempt 2: Stooq
+  try {{
+    const stooqUrl = 'https://stooq.com/q/l/?s=nifty.ix&f=sd2t2ohlcv&e=csv';
+    const r = await fetch('https://corsproxy.io/?' + encodeURIComponent(stooqUrl), {{signal: AbortSignal.timeout(5000)}});
+    if (r.ok) {{
+      const text = await r.text();
+      const lines = text.trim().split('\\n');
+      if (lines.length >= 2) {{
+        const cols = lines[1].split(',');
+        const close = parseFloat(cols[6]);
+        const open = parseFloat(cols[3]);
+        if (close && open) {{
+          const chg = (close - open).toFixed(2);
+          const pct = (((close - open) / open) * 100).toFixed(2);
+          const val = close.toLocaleString('en-US', {{minimumFractionDigits: 2, maximumFractionDigits: 2}});
+          const vEl = document.getElementById('val-gift-nifty');
+          const cEl = document.getElementById('chg-gift-nifty');
+          const card = document.getElementById('card-gift-nifty');
+          if (vEl) vEl.textContent = val;
+          if (cEl) {{
+            const p = parseFloat(pct);
+            const sign = p >= 0 ? '+' : '';
+            cEl.textContent = sign + chg + ' (' + sign + pct + '%) · NSE IX ~';
+            const cls = p > 0 ? 'pos' : p < 0 ? 'neg' : 'neu';
+            cEl.className = 'ind-chg ' + cls;
+            if (card) card.className = 'ind-cell ' + cls;
+          }}
+          updateTicker('gift-nifty', val, pct);
+          return;
         }}
-    }} catch(e) {{ /* fall through */ }}
+      }}
+    }}
+  }} catch (e) {{ /* fall through */ }}
 
-    // Attempt 3: Fallback – show Nifty 50 spot (^NSEI) clearly labelled as proxy
-    try {{
-        const url = 'https://query1.finance.yahoo.com/v8/finance/chart/%5ENSEI?interval=1d&range=1d';
-        const r = await fetch('https://corsproxy.io/?'+encodeURIComponent(url), {{mode:'cors', signal: AbortSignal.timeout(5000)}});
-        if (r.ok) {{
-            const d = await r.json();
-            const meta = d?.chart?.result?.[0]?.meta;
-            if (meta) {{
-                const cur = meta.regularMarketPrice;
-                const prev = meta.chartPreviousClose || meta.previousClose;
-                if (cur && prev) {{
-                    const chg = (cur - prev).toFixed(2);
-                    const pct = (((cur-prev)/prev)*100).toFixed(2);
-                    const val = cur.toLocaleString('en-US',{{minimumFractionDigits:2,maximumFractionDigits:2}});
-                    const vEl = document.getElementById('val-gift-nifty');
-                    const cEl = document.getElementById('chg-gift-nifty');
-                    const card = document.getElementById('card-gift-nifty');
-                    const titleEl = document.querySelector('#card-gift-nifty .indicator-title');
-                    // Clearly relabel so user knows this is Nifty 50 spot, not GIFT Nifty
-                    if (titleEl) titleEl.textContent = '⚠️ Nifty 50 (GIFT proxy)';
-                    if (vEl) vEl.textContent = val;
-                    if (cEl) {{
-                        const p = parseFloat(pct);
-                        const sign = p >= 0 ? '+' : '';
-                        cEl.textContent = sign+chg+' ('+sign+pct+'%) · INR spot';
-                        const cls = p > 0 ? 'positive' : p < 0 ? 'negative' : 'neutral';
-                        cEl.className = 'indicator-change '+cls;
-                        if (card) card.className = 'indicator-card '+cls;
-                    }}
-                    return;
-                }}
-            }}
+  // Attempt 3: Fallback – Nifty 50 spot as proxy
+  try {{
+    const url = 'https://query1.finance.yahoo.com/v8/finance/chart/%5ENSEI?interval=1d&range=1d';
+    const r = await fetch('https://corsproxy.io/?' + encodeURIComponent(url), {{mode: 'cors', signal: AbortSignal.timeout(5000)}});
+    if (r.ok) {{
+      const d = await r.json();
+      const meta = d?.chart?.result?.[0]?.meta;
+      if (meta) {{
+        const cur = meta.regularMarketPrice;
+        const prev = meta.chartPreviousClose || meta.previousClose;
+        if (cur && prev) {{
+          const chg = (cur - prev).toFixed(2);
+          const pct = (((cur - prev) / prev) * 100).toFixed(2);
+          const val = cur.toLocaleString('en-US', {{minimumFractionDigits: 2, maximumFractionDigits: 2}});
+          const titleEl = document.querySelector('#card-gift-nifty .ind-name');
+          if (titleEl) titleEl.textContent = '⚠ NIFTY 50 (GIFT proxy)';
+          const vEl = document.getElementById('val-gift-nifty');
+          const cEl = document.getElementById('chg-gift-nifty');
+          const card = document.getElementById('card-gift-nifty');
+          if (vEl) vEl.textContent = val;
+          if (cEl) {{
+            const p = parseFloat(pct);
+            const sign = p >= 0 ? '+' : '';
+            cEl.textContent = sign + chg + ' (' + sign + pct + '%) · INR spot';
+            const cls = p > 0 ? 'pos' : p < 0 ? 'neg' : 'neu';
+            cEl.className = 'ind-chg ' + cls;
+            if (card) card.className = 'ind-cell ' + cls;
+          }}
+          updateTicker('gift-nifty', val, pct);
+          // sidebar sensex/nifty
+          const sbN = document.getElementById('sbv-nifty');
+          if (sbN) {{ sbN.textContent = val; sbN.className = 'sb-ind-val ' + (parseFloat(pct) > 0 ? 'pos' : parseFloat(pct) < 0 ? 'neg' : 'neu'); }}
+          return;
         }}
-    }} catch(e) {{}}
+      }}
+    }}
+  }} catch (e) {{ /* fall through */ }}
 
-    // Hard fallback
-    const vEl = document.getElementById('val-gift-nifty');
-    const cEl = document.getElementById('chg-gift-nifty');
-    if (vEl) vEl.textContent = 'N/A';
-    if (cEl) cEl.textContent = 'Data unavailable';
+  // Hard fallback
+  const vEl = document.getElementById('val-gift-nifty');
+  const cEl = document.getElementById('chg-gift-nifty');
+  if (vEl) vEl.textContent = 'N/A';
+  if (cEl) cEl.textContent = 'Data unavailable';
+}}
+
+// ════════════════════════════
+// CPI via FRED CSV (CORS proxy)
+// ════════════════════════════
+async function fetchCPI() {{
+  const csvUrl = 'https://fred.stlouisfed.org/graph/fredgraph.csv?id=CPIAUCSL';
+  const proxied = 'https://corsproxy.io/?' + encodeURIComponent(csvUrl);
+  try {{
+    const r = await fetch(proxied, {{signal: AbortSignal.timeout(8000)}});
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const text = await r.text();
+    const lines = text.trim().split('\\n').filter(l => l && !l.startsWith('DATE'));
+    if (lines.length < 13) throw new Error('Not enough data');
+    const lastLine = lines[lines.length - 1].split(',');
+    const prevLine = lines[lines.length - 13].split(',');
+    const lastVal = parseFloat(lastLine[1]);
+    const prevVal = parseFloat(prevLine[1]);
+    if (isNaN(lastVal) || isNaN(prevVal) || prevVal === 0) throw new Error('Bad values');
+    const yoy = (((lastVal - prevVal) / prevVal) * 100).toFixed(1);
+    const date = lastLine[0];
+    const d = new Date(date + 'T12:00:00Z');
+    const label = d.toLocaleString('en-US', {{month: 'short', year: 'numeric', timeZone: 'UTC'}});
+    const vEl = document.getElementById('val-cpi');
+    const cEl = document.getElementById('chg-cpi');
+    const card = vEl ? vEl.closest('.ind-cell') : null;
+    if (vEl) vEl.textContent = yoy + '%';
+    if (cEl) cEl.textContent = 'YoY · ' + label;
+    if (card) {{
+      const p = parseFloat(yoy);
+      card.className = 'ind-cell ' + (p > 3 ? 'neg' : p <= 2 ? 'pos' : 'neu');
+    }}
+  }} catch (e) {{
+    const vEl = document.getElementById('val-cpi');
+    const cEl = document.getElementById('chg-cpi');
+    if (vEl) vEl.textContent = '2.9%';
+    if (cEl) cEl.textContent = 'YoY · Dec 2025 (cached)';
+  }}
+}}
+
+// ════════════════════════════
+// CLOCK & REFRESH
+// ════════════════════════════
+function updateClock() {{
+  const now = new Date();
+  const opts = {{hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'Asia/Kolkata'}};
+  const ist = now.toLocaleString('en-US', opts);
+  const el = document.getElementById('topClock');
+  if (el) el.textContent = ist + ' IST';
+  const st = document.getElementById('statusClock');
+  if (st) st.textContent = ist + ' IST';
+  const ref = document.getElementById('newsSubtitle');
+  if (ref) {{
+    const opts2 = {{hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Kolkata'}};
+    ref.textContent = 'Click any headline to expand · Last refresh: ' + now.toLocaleString('en-US', opts2) + ' IST';
+  }}
 }}
 
 let isFirstLoad = true;
 
 async function loadAll() {{
-    // Fetch GIFT Nifty separately with dedicated logic
-    fetchGiftNifty();
-
-    // Fetch all Yahoo Finance symbols in parallel (no flicker/delay)
-    await Promise.all(
-        Object.entries(SYMBOLS).map(async ([k, s]) => {{
-const ok = await fetchYahoo(k, s);
-            if (!ok) {{
-    const vEl = document.getElementById('val-'+k);
-    const cEl = document.getElementById('chg-'+k);
-    if (vEl) vEl.textContent = 'N/A';
-    if (cEl) cEl.textContent = 'Data unavailable';
-}}
-        }})
-    );
-    updateRefreshTime();
-
-    // Only show/hide the overlay on the very first load
-    if (isFirstLoad) {{
-        setTimeout(() => document.getElementById('loadingOverlay').classList.remove('visible'), 600);
-        isFirstLoad = false;
-    }}
+  fetchGiftNifty();
+  await Promise.all(
+    Object.entries(SYMBOLS).map(async ([k, s]) => {{
+      const ok = await fetchYahoo(k, s);
+      if (!ok) {{
+        const vEl = document.getElementById('val-' + k);
+        const cEl = document.getElementById('chg-' + k);
+        if (vEl) vEl.textContent = 'N/A';
+        if (cEl) cEl.textContent = 'Unavailable';
+      }}
+    }})
+  );
+  updateClock();
+  if (isFirstLoad) {{
+    setTimeout(() => document.getElementById('loadingOverlay').classList.remove('visible'), 500);
+    isFirstLoad = false;
+  }}
 }}
 
-function updateRefreshTime() {{
-    const now = new Date();
-    const opts = {{hour:'2-digit', minute:'2-digit', second:'2-digit', timeZone:'Asia/Kolkata'}};
-    const istTime = now.toLocaleString('en-US', opts);
-    const el = document.getElementById('lastRefresh');
-    if (el) el.textContent = '🔄 Last Refresh: ' + istTime + ' IST  |  🕐 IST Now: ' + istTime;
-}}
+// ════════════════════════════
+// INIT
+// ════════════════════════════
+window.addEventListener('DOMContentLoaded', () => {{
+  buildTicker();
+  renderNews('markets');
 
-// ════════════════════════════════════════════════
-// FIX 2 – CPI YoY via FRED JSON API (CORS-compatible, no key needed for reading)
-// The old CSV approach failed due to CORS. The FRED JSON API returns proper
-// CORS headers and is reliably accessible from the browser.
-// ════════════════════════════════════════════════
-async function fetchCPI() {{
-    // FRED JSON API: CPIAUCSL (Consumer Price Index, All Urban Consumers)
-    // We request the last 13 observations so we can compute YoY change.
-    const fredUrl = 'https://fred.stlouisfed.org/graph/fredgraph.json?id=CPIAUCSL&vintage_date=';
-    
-    // Alternative: use the public FRED data API endpoint (no API key, returns JSON with CORS)
-    const apiUrl = 'https://api.stlouisfed.org/fred/series/observations?series_id=CPIAUCSL&sort_order=desc&limit=13&file_type=json&api_key=';
-    
-    // We use a CORS proxy to reach the FRED CSV endpoint reliably
-    // (FRED's JSON API requires an API key; we proxy their public CSV instead)
-    const csvUrl = 'https://fred.stlouisfed.org/graph/fredgraph.csv?id=CPIAUCSL';
-    const proxiedCsv = 'https://corsproxy.io/?'+encodeURIComponent(csvUrl);
-    
-    try {{
-        const r = await fetch(proxiedCsv, {{signal: AbortSignal.timeout(8000)}});
-        if (!r.ok) throw new Error('HTTP '+r.status);
-        const text = await r.text();
-        const lines = text.trim().split('\\n').filter(l => l && !l.startsWith('DATE'));
-        if (lines.length < 13) throw new Error('Not enough data');
-        
-        // Last value = most recent month
-        const lastLine  = lines[lines.length - 1].split(',');
-        // 12 months ago
-        const prevLine  = lines[lines.length - 13].split(',');
-        
-        const lastVal = parseFloat(lastLine[1]);
-        const prevVal = parseFloat(prevLine[1]);
-        
-        if (isNaN(lastVal) || isNaN(prevVal) || prevVal === 0) throw new Error('Bad values');
-        
-        const yoy = (((lastVal - prevVal) / prevVal) * 100).toFixed(1);
-        const date = lastLine[0]; // "YYYY-MM-DD"
-        
-        // Format date nicely: "2025-12-01" → "Dec 2025"
-        const d = new Date(date + 'T12:00:00Z');
-        const label = d.toLocaleString('en-US', {{month:'short', year:'numeric', timeZone:'UTC'}});
-        
-        const vEl = document.getElementById('val-cpi');
-        const cEl = document.getElementById('chg-cpi');
-        const card = vEl ? vEl.closest('.indicator-card') : null;
-        
-        if (vEl) vEl.textContent = yoy + '%';
-        if (cEl) cEl.textContent = 'YoY · ' + label;
-        
-        // Colour the card: >3% is negative (high inflation), ≤2% positive (on-target)
-        if (card) {{
-            const p = parseFloat(yoy);
-            card.className = 'indicator-card ' + (p > 3 ? 'negative' : p <= 2 ? 'positive' : 'neutral');
-        }}
-    }} catch(e) {{
-        console.warn('CPI fetch error:', e.message);
-        // Hard-coded latest known value as last resort
-        const vEl = document.getElementById('val-cpi');
-        const cEl = document.getElementById('chg-cpi');
-        if (vEl) vEl.textContent = '2.9%';
-        if (cEl) cEl.textContent = 'YoY · Dec 2025 (cached)';
-    }}
-}}
+  if (!sessionStorage.getItem('visited')) {{
+    document.getElementById('loadingOverlay').classList.add('visible');
+    sessionStorage.setItem('visited', '1');
+  }}
 
-// Update browser timestamp every minute
-function tick() {{
-    const now = new Date();
-    const opts = {{year:'numeric',month:'long',day:'numeric',hour:'2-digit',minute:'2-digit',timeZone:'Asia/Kolkata'}};
-    document.getElementById('timestamp').textContent =
-        '📅 Page generated: {current_time} | Browser: '+now.toLocaleString('en-US',opts)+' IST';
-}}
-
-window.addEventListener('DOMContentLoaded',()=>{{
-    if (!sessionStorage.getItem('visited')) {{
-        document.getElementById('loadingOverlay').classList.add('visible');
-        sessionStorage.setItem('visited', '1');
-    }}
-    loadAll();
-    fetchCPI();
-    setInterval(loadAll, 5*60*1000);
-    setInterval(tick, 60*1000);
+  loadAll();
+  fetchCPI();
+  setInterval(loadAll, 5 * 60 * 1000);
+  setInterval(updateClock, 1000);
 }});
 </script>
 </body>
@@ -784,9 +1316,9 @@ window.addEventListener('DOMContentLoaded',()=>{{
 #  MAIN
 # ─────────────────────────────────────────────
 def main():
-    print("\n" + "="*70)
-    print("🚀  GLOBAL MARKET DASHBOARD  –  FRESH NEWS EVERY RUN")
-    print("="*70)
+    print("\n" + "=" * 70)
+    print("🚀  GLOBAL MARKET DASHBOARD  –  BLOOMBERG TERMINAL THEME")
+    print("=" * 70)
 
     all_news = {}
     for category, urls in RSS_SOURCES.items():
@@ -805,9 +1337,9 @@ def main():
     with open(output, "w", encoding="utf-8") as f:
         f.write(html)
 
-    print("\n" + "="*70)
+    print("\n" + "=" * 70)
     print(f"✅  SUCCESS!  Dashboard written to: {output}")
-    print("="*70)
+    print("=" * 70)
     print("\n💡 Every time you run this script the news refreshes automatically.")
     print("   Click any headline in the browser to expand and read the summary.\n")
     return 0
