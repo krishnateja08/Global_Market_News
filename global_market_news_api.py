@@ -19,60 +19,89 @@ import re
 #  NEWS SOURCES  (RSS feeds – no API key needed)
 # ─────────────────────────────────────────────
 RSS_SOURCES = {
+    # 1 ── Markets + Earnings + IPO & Deals
     "markets": [
         "https://feeds.finance.yahoo.com/rss/2.0/headline?s=^GSPC,^DJI,^IXIC&region=US&lang=en-US",
         "https://www.cnbc.com/id/100003114/device/rss/rss.html",
         "https://feeds.marketwatch.com/marketwatch/topstories/",
+        "https://news.google.com/rss/search?q=earnings+results+IPO+stock+market+when:1d&hl=en-US&gl=US&ceid=US:en",
     ],
-    "economic": [
+    # 2 ── Macro & Policy + Trade & Tariffs
+    "macro_policy": [
         "https://www.cnbc.com/id/20910258/device/rss/rss.html",
         "https://feeds.marketwatch.com/marketwatch/economy-politics/",
         "https://www.federalreserve.gov/feeds/press_all.xml",
+        "https://news.google.com/rss/search?q=trade+tariffs+WTO+supply+chain+when:1d&hl=en-US&gl=US&ceid=US:en",
     ],
+    # 3 ── Banking & FX + Forex
+    "banking_fx": [
+        "https://news.google.com/rss/search?q=central+bank+interest+rates+Fed+ECB+RBI+when:1d&hl=en-US&gl=US&ceid=US:en",
+        "https://www.cnbc.com/id/10000108/device/rss/rss.html",
+        "https://feeds.marketwatch.com/marketwatch/financialservices/",
+        "https://news.google.com/rss/search?q=forex+USD+EUR+JPY+GBP+currency+when:1d&hl=en-US&gl=US&ceid=US:en",
+    ],
+    # 4 ── Commodities & Energy + OPEC
+    "commodities_energy": [
+        "https://news.google.com/rss/search?q=commodities+copper+wheat+natural+gas+when:1d&hl=en-US&gl=US&ceid=US:en",
+        "https://feeds.marketwatch.com/marketwatch/commodities/",
+        "https://www.cnbc.com/id/10000113/device/rss/rss.html",
+        "https://news.google.com/rss/search?q=OPEC+oil+energy+renewables+when:1d&hl=en-US&gl=US&ceid=US:en",
+    ],
+    # 5 ── India Markets
     "india": [
         "https://economictimes.indiatimes.com/markets/rssfeeds/1977021501.cms",
         "https://www.moneycontrol.com/rss/marketreports.xml",
         "https://economictimes.indiatimes.com/rssfeeds/1373380680.cms",
     ],
-    "google_trending": [
+    # 6 ── Trending (India Google)
+    "trending": [
         "https://news.google.com/rss/search?q=NSE+BSE+stock+market+when:1d&hl=en-IN&gl=IN&ceid=IN:en",
         "https://news.google.com/rss/search?q=Nifty+Sensex+today+when:1d&hl=en-IN&gl=IN&ceid=IN:en",
         "https://news.google.com/rss/search?q=india+stocks+trending+today+when:1d&hl=en-IN&gl=IN&ceid=IN:en",
     ],
+    # 7 ── Corporate News
     "corporate": [
         "https://www.cnbc.com/id/10001147/device/rss/rss.html",
         "https://feeds.marketwatch.com/marketwatch/marketpulse/",
         "https://finance.yahoo.com/rss/topfinstories",
     ],
+    # 8 ── Geopolitical
     "geopolitical": [
         "https://feeds.reuters.com/reuters/businessNews",
         "https://www.cnbc.com/id/100727362/device/rss/rss.html",
         "https://feeds.marketwatch.com/marketwatch/realtimeheadlines/",
     ],
+    # 9 ── Crypto & Web3
     "crypto": [
         "https://cointelegraph.com/rss",
         "https://www.coindesk.com/arc/outboundfeeds/rss/",
-        "https://news.google.com/rss/search?q=bitcoin+ethereum+crypto+when:1d&hl=en-US&gl=US&ceid=US:en",
+        "https://news.google.com/rss/search?q=bitcoin+ethereum+crypto+DeFi+when:1d&hl=en-US&gl=US&ceid=US:en",
     ],
-    "china": [
-        "https://news.google.com/rss/search?q=china+stock+market+Hang+Seng+Shanghai+when:1d&hl=en-US&gl=US&ceid=US:en",
-        "https://news.google.com/rss/search?q=PBOC+yuan+China+economy+when:1d&hl=en-US&gl=US&ceid=US:en",
-        "https://feeds.reuters.com/reuters/CNtopNews",
-    ],
+    # 10 ── Tech & AI
     "tech_ai": [
         "https://news.google.com/rss/search?q=artificial+intelligence+AI+tech+when:1d&hl=en-US&gl=US&ceid=US:en",
         "https://news.google.com/rss/search?q=OpenAI+Google+AI+Microsoft+AI+when:1d&hl=en-US&gl=US&ceid=US:en",
         "https://news.google.com/rss/search?q=AI+chips+semiconductor+LLM+when:1d&hl=en-US&gl=US&ceid=US:en",
     ],
-    "banking": [
-        "https://news.google.com/rss/search?q=central+bank+interest+rates+Fed+ECB+RBI+when:1d&hl=en-US&gl=US&ceid=US:en",
-        "https://www.cnbc.com/id/10000108/device/rss/rss.html",
-        "https://feeds.marketwatch.com/marketwatch/financialservices/",
+    # 11 ── Asia & China (China + Japan/Nikkei/BOJ)
+    "asia_china": [
+        "https://news.google.com/rss/search?q=china+stock+market+Hang+Seng+Shanghai+when:1d&hl=en-US&gl=US&ceid=US:en",
+        "https://news.google.com/rss/search?q=PBOC+yuan+China+economy+when:1d&hl=en-US&gl=US&ceid=US:en",
+        "https://feeds.reuters.com/reuters/CNtopNews",
+        "https://news.google.com/rss/search?q=Nikkei+Japan+BOJ+yen+Asia+markets+when:1d&hl=en-US&gl=US&ceid=US:en",
     ],
-    "commodities": [
-        "https://news.google.com/rss/search?q=commodities+copper+wheat+natural+gas+when:1d&hl=en-US&gl=US&ceid=US:en",
-        "https://feeds.marketwatch.com/marketwatch/commodities/",
-        "https://www.cnbc.com/id/10000113/device/rss/rss.html",
+    # 12 ── Europe & UK (NEW)
+    "europe_uk": [
+        "https://news.google.com/rss/search?q=DAX+FTSE+Euro+Stoxx+European+markets+when:1d&hl=en-US&gl=US&ceid=US:en",
+        "https://news.google.com/rss/search?q=ECB+Bank+of+England+interest+rates+Europe+when:1d&hl=en-US&gl=US&ceid=US:en",
+        "https://feeds.reuters.com/reuters/UKTopNews",
+        "https://news.google.com/rss/search?q=FTSE+100+UK+economy+pound+sterling+when:1d&hl=en-US&gl=US&ceid=US:en",
+    ],
+    # 13 ── ESG & Climate (NEW)
+    "esg_climate": [
+        "https://news.google.com/rss/search?q=ESG+green+bonds+sustainable+investing+when:1d&hl=en-US&gl=US&ceid=US:en",
+        "https://news.google.com/rss/search?q=carbon+market+climate+change+COP+when:1d&hl=en-US&gl=US&ceid=US:en",
+        "https://news.google.com/rss/search?q=renewable+energy+solar+wind+EV+when:1d&hl=en-US&gl=US&ceid=US:en",
     ],
 }
 
@@ -116,6 +145,9 @@ def fetch_rss(url: str) -> list[dict]:
             "feedburner.com": "TechCrunch",
             "techcrunch.com": "TechCrunch",
             "news.google.com": "Google News",
+            "ft.com": "Financial Times",
+            "bbc.co.uk": "BBC",
+            "theguardian.com": "The Guardian",
         }
         source = next((v for k, v in source_map.items() if k in domain), domain)
 
@@ -155,7 +187,6 @@ def fetch_category_news(category: str, urls: list[str]) -> list[dict]:
     ]
 
     def is_within_window(pub_date_str: str, cutoff: datetime) -> bool:
-        """Returns True if article date is within the given cutoff window."""
         if not pub_date_str:
             return False
         for fmt in DATE_FMTS:
@@ -185,12 +216,12 @@ def fetch_category_news(category: str, urls: list[str]) -> list[dict]:
             if len(results) >= MAX_NEWS_PER_CATEGORY:
                 return
 
-    # ── Pass 1: last 24 hours ──
+    # Pass 1: last 24 hours
     _collect(datetime.utcnow() - timedelta(hours=24))
 
-    # ── Pass 2 (fallback): extend to 7 days if fewer than 5 articles found ──
+    # Pass 2 fallback: extend to 7 days if fewer than 5 articles
     if len(results) < 5:
-        print(f"  ⚠  Only {len(results)} articles in 24 h for [{category}] — extending to 7-day window…")
+        print(f"  ⚠  Only {len(results)} articles in 24h for [{category}] — extending to 7-day window…")
         _collect(datetime.utcnow() - timedelta(days=7))
 
     return results[:MAX_NEWS_PER_CATEGORY]
@@ -238,17 +269,19 @@ def escape(text: str) -> str:
 def build_news_json(all_news: dict) -> str:
     """Serialize all_news into a JS-safe JSON object for client-side tab rendering."""
     categories_meta = {
-        "markets":         "📊 MARKET UPDATES",
-        "economic":        "💰 ECONOMIC & POLICY",
-        "india":           "🇮🇳 INDIAN MARKETS",
-        "google_trending": "🔥 GOOGLE TRENDING",
-        "corporate":       "🏢 CORPORATE NEWS",
-        "geopolitical":    "🌍 GEOPOLITICAL",
-        "crypto":          "📉 CRYPTO & WEB3",
-        "china":           "🇨🇳 CHINA MARKETS",
-        "tech_ai":         "🤖 TECH & AI",
-        "banking":         "🏦 BANKING & RATES",
-        "commodities":     "📦 COMMODITIES",
+        "markets":            "📊 MARKETS & EARNINGS",
+        "macro_policy":       "💰 MACRO & POLICY",
+        "banking_fx":         "🏦 BANKING & FX",
+        "commodities_energy": "📦 COMMODITIES & ENERGY",
+        "india":              "🇮🇳 INDIA MARKETS",
+        "trending":           "🔥 TRENDING",
+        "corporate":          "🏢 CORPORATE NEWS",
+        "geopolitical":       "🌍 GEOPOLITICAL",
+        "crypto":             "📉 CRYPTO & WEB3",
+        "tech_ai":            "🤖 TECH & AI",
+        "asia_china":         "🌏 ASIA & CHINA",
+        "europe_uk":          "🇪🇺 EUROPE & UK",
+        "esg_climate":        "🌱 ESG & CLIMATE",
     }
 
     out = {}
@@ -277,17 +310,19 @@ def generate_complete_html(all_news: dict) -> str:
 
     # Count per category for sidebar
     cat_counts = {
-        "markets":         len(all_news.get("markets", [])),
-        "economic":        len(all_news.get("economic", [])),
-        "india":           len(all_news.get("india", [])),
-        "google_trending": len(all_news.get("google_trending", [])),
-        "corporate":       len(all_news.get("corporate", [])),
-        "geopolitical":    len(all_news.get("geopolitical", [])),
-        "crypto":          len(all_news.get("crypto", [])),
-        "china":           len(all_news.get("china", [])),
-        "tech_ai":         len(all_news.get("tech_ai", [])),
-        "banking":         len(all_news.get("banking", [])),
-        "commodities":     len(all_news.get("commodities", [])),
+        "markets":            len(all_news.get("markets", [])),
+        "macro_policy":       len(all_news.get("macro_policy", [])),
+        "banking_fx":         len(all_news.get("banking_fx", [])),
+        "commodities_energy": len(all_news.get("commodities_energy", [])),
+        "india":              len(all_news.get("india", [])),
+        "trending":           len(all_news.get("trending", [])),
+        "corporate":          len(all_news.get("corporate", [])),
+        "geopolitical":       len(all_news.get("geopolitical", [])),
+        "crypto":             len(all_news.get("crypto", [])),
+        "tech_ai":            len(all_news.get("tech_ai", [])),
+        "asia_china":         len(all_news.get("asia_china", [])),
+        "europe_uk":          len(all_news.get("europe_uk", [])),
+        "esg_climate":        len(all_news.get("esg_climate", [])),
     }
 
     return f"""<!DOCTYPE html>
@@ -295,7 +330,7 @@ def generate_complete_html(all_news: dict) -> str:
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Global Market Dashboard – Live News</title>
+<title>NexusFeed – Global Market Intelligence</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;600;700&family=IBM+Plex+Sans:wght@300;400;600&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 /* ══════════════════════════════════════════
@@ -648,7 +683,6 @@ body {{
 .nc-item:hover {{ background: rgba(255,106,0,0.04); }}
 .nc-item.open {{ background: rgba(255,106,0,0.06); border-left: 2px solid var(--orange); }}
 
-/* Collapsed row — headline only */
 .nc-row {{
   display: grid;
   grid-template-columns: 36px 1fr 24px;
@@ -675,7 +709,6 @@ body {{
 .nc-item:hover .nc-arrow {{ color: var(--orange); }}
 .nc-item.open .nc-arrow {{ transform: rotate(180deg); color: var(--orange); }}
 
-/* Expanded body — source, time, summary, link */
 .nc-expand-body {{
   display: none;
   padding: 0 14px 12px 36px;
@@ -696,10 +729,7 @@ body {{
   text-transform: uppercase;
 }}
 .nc-sep {{ color: #444; font-size: 10px; }}
-.nc-time {{
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 10px; color: #666;
-}}
+.nc-time {{ font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: #666; }}
 .nc-summary {{
   font-family: 'DM Sans', sans-serif;
   font-size: 12.5px; color: #aaaaaa;
@@ -720,125 +750,65 @@ body {{
   padding: 20px 14px; font-family: 'DM Sans', sans-serif;
 }}
 
-/* ── LOADING OVERLAY ── */
-.loading-overlay {{
-  position: fixed; top:0; left:0; width:100%; height:100%;
-  background: rgba(10,10,10,0.97);
-  display: flex; flex-direction: column;
-  justify-content: center; align-items: center;
-  z-index: 9999; opacity: 0; pointer-events: none;
-  transition: opacity 0.4s;
-}}
-.loading-overlay.visible {{ opacity:1; pointer-events:all; }}
-.spinner {{
-  width: 38px; height: 38px;
-  border: 2px solid rgba(255,106,0,0.25);
-  border-top-color: var(--orange);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}}
-@keyframes spin {{ to {{ transform: rotate(360deg); }} }}
-.loading-text {{
-  margin-top: 18px;
-  font-size: 13px;
-  letter-spacing: 3px;
-  color: var(--orange);
-  text-transform: uppercase;
-  font-weight: 600;
-}}
-
-/* ── STATUS BAR ── */
-.statusbar {{
-  position: fixed; bottom:0; left:0; right:0;
-  background: var(--orange);
-  color: #000;
-  display: flex;
-  justify-content: space-between;
-  padding: 4px 16px;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-  z-index: 100;
-}}
-
-/* ── SCROLLBAR (main sidebar) ── */
+/* ── SCROLLBAR ── */
 ::-webkit-scrollbar {{ width: 4px; height: 4px; }}
 ::-webkit-scrollbar-track {{ background: transparent; }}
 ::-webkit-scrollbar-thumb {{ background: var(--border); border-radius: 2px; }}
 
-/* ── HAMBURGER BUTTON (hidden on desktop) ── */
+/* ── HAMBURGER BUTTON ── */
 .hamburger {{
   display: none;
   flex-direction: column; justify-content: center; gap: 4px;
   width: 32px; height: 32px; cursor: pointer;
   padding: 4px; border-radius: 3px;
-  transition: background 0.15s;
+  transition: background 0.15s; flex-shrink: 0;
 }}
 .hamburger:hover {{ background: rgba(0,0,0,0.2); }}
-.hamburger span {{
-  display: block; width: 20px; height: 2px;
-  background: #000; border-radius: 2px; transition: all 0.2s;
-}}
+.hamburger span {{ display: block; width: 20px; height: 2px; background: #000; border-radius: 2px; }}
 
 /* ── SIDEBAR OVERLAY (mobile) ── */
 .sidebar-overlay {{
   display: none;
   position: fixed; inset: 0;
-  background: rgba(0,0,0,0.7);
-  z-index: 200;
+  background: rgba(0,0,0,0.7); z-index: 200;
 }}
 .sidebar-overlay.open {{ display: block; }}
 
-/* ── RESPONSIVE — Tablet (≤900px) ── */
+/* ── RESPONSIVE — Tablet ── */
 @media (max-width: 900px) {{
   .shell {{ grid-template-columns: 1fr; height: auto; }}
-
-  /* Sidebar becomes a fixed drawer on mobile */
   .sidebar {{
-    position: fixed; top: 0; left: -260px; bottom: 0;
-    width: 260px; z-index: 300;
-    transition: left 0.25s ease;
-    padding-top: 50px;
+    position: fixed; top: 0; left: -265px; bottom: 0;
+    width: 265px; z-index: 300;
+    transition: left 0.25s ease; padding-top: 50px;
   }}
   .sidebar.open {{ left: 0; }}
-
   .hamburger {{ display: flex; }}
-
-  .topbar-right span:nth-child(3) {{ display: none; }} /* hide "Generated:" on tablet */
-
+  .topbar-right span:nth-child(3) {{ display: none; }}
   .ind-row {{ flex-wrap: wrap; }}
   .ind-cell {{ min-width: 110px; }}
-
   .news-area {{ padding: 12px 10px; }}
   .statusbar span:first-child {{ font-size: 9px; letter-spacing: 0; }}
 }}
 
-/* ── RESPONSIVE — Mobile (≤600px) ── */
+/* ── RESPONSIVE — Mobile ── */
 @media (max-width: 600px) {{
   body {{ font-size: 13px; }}
-
   .topbar {{ padding: 5px 10px; }}
   .topbar-right {{ gap: 10px; font-size: 10px; }}
-  .topbar-right span:nth-child(3),
-  .topbar-right span:nth-child(4) {{ display: none; }} /* keep only LIVE + clock */
-
+  .topbar-right span:nth-child(3), .topbar-right span:nth-child(4) {{ display: none; }}
   .ticker-item {{ padding: 0 14px; font-size: 11px; }}
-
   .cat-tabs {{ padding: 0 6px; }}
   .cat-tab {{ padding: 8px 10px; font-size: 10px; letter-spacing: 0.5px; }}
-
   .news-area {{ padding: 10px 8px; }}
   .news-hdr {{ margin-bottom: 10px; padding-bottom: 8px; }}
   .news-hdr-title {{ font-size: 10px; }}
   .news-hdr-meta {{ display: none; }}
-
   .nc-row {{ padding: 8px 8px 8px 0; }}
   .nc-headline {{ font-size: 12.5px; }}
   .nc-expand-body {{ padding: 0 8px 10px 30px; }}
-
   .statusbar {{ padding: 3px 8px; font-size: 9px; }}
   .statusbar span:first-child {{ display: none; }}
-
   .ind-cell {{ min-width: 90px; padding: 8px 10px; }}
   .ind-val {{ font-size: 14px; }}
 }}
@@ -855,16 +825,16 @@ body {{
 <!-- TOP BAR -->
 <div class="topbar">
   <div class="topbar-left">
-    <div class="hamburger" onclick="toggleSidebar()" id="hamburgerBtn" aria-label="Menu">
+    <div class="hamburger" onclick="toggleSidebar()" aria-label="Menu">
       <span></span><span></span><span></span>
     </div>
     <div class="topbar-dot"></div>
-    <span>◼ GLOBAL MARKET DASHBOARD</span>
+    <span>🌐 NEXUSFEED</span>
   </div>
   <div class="topbar-right">
     <span>🔴 LIVE FEED</span>
     <span id="topClock">--:--:-- IST</span>
-    <span>📅 Generated: {current_time}</span>
+    <span>📅 {current_time}</span>
     <span>✅ {total_articles} ARTICLES</span>
   </div>
 </div>
@@ -939,49 +909,57 @@ body {{
     <!-- 4. CATEGORIES ── -->
     <div class="sb-section">
       <div class="sb-label">▶ CATEGORIES</div>
-      <div class="sb-item active" id="sb-markets"         onclick="switchCat('markets',this)">
+      <div class="sb-item active" id="sb-markets"            onclick="switchCat('markets',this)">
         <span class="sb-name">📊 Markets</span>
         <span class="sb-count">{cat_counts["markets"]}</span>
       </div>
-      <div class="sb-item" id="sb-economic"        onclick="switchCat('economic',this)">
-        <span class="sb-name">💰 Economic</span>
-        <span class="sb-count">{cat_counts["economic"]}</span>
+      <div class="sb-item" id="sb-macro_policy"      onclick="switchCat('macro_policy',this)">
+        <span class="sb-name">💰 Macro & Policy</span>
+        <span class="sb-count">{cat_counts["macro_policy"]}</span>
       </div>
-      <div class="sb-item" id="sb-india"           onclick="switchCat('india',this)">
+      <div class="sb-item" id="sb-banking_fx"        onclick="switchCat('banking_fx',this)">
+        <span class="sb-name">🏦 Banking & FX</span>
+        <span class="sb-count">{cat_counts["banking_fx"]}</span>
+      </div>
+      <div class="sb-item" id="sb-commodities_energy" onclick="switchCat('commodities_energy',this)">
+        <span class="sb-name">📦 Commodities & Energy</span>
+        <span class="sb-count">{cat_counts["commodities_energy"]}</span>
+      </div>
+      <div class="sb-item" id="sb-india"             onclick="switchCat('india',this)">
         <span class="sb-name">🇮🇳 India</span>
         <span class="sb-count">{cat_counts["india"]}</span>
       </div>
-      <div class="sb-item" id="sb-google_trending"  onclick="switchCat('google_trending',this)">
+      <div class="sb-item" id="sb-trending"          onclick="switchCat('trending',this)">
         <span class="sb-name">🔥 Trending</span>
-        <span class="sb-count">{cat_counts["google_trending"]}</span>
+        <span class="sb-count">{cat_counts["trending"]}</span>
       </div>
-      <div class="sb-item" id="sb-corporate"       onclick="switchCat('corporate',this)">
+      <div class="sb-item" id="sb-corporate"         onclick="switchCat('corporate',this)">
         <span class="sb-name">🏢 Corporate</span>
         <span class="sb-count">{cat_counts["corporate"]}</span>
       </div>
-      <div class="sb-item" id="sb-geopolitical"    onclick="switchCat('geopolitical',this)">
+      <div class="sb-item" id="sb-geopolitical"      onclick="switchCat('geopolitical',this)">
         <span class="sb-name">🌍 Geopolitical</span>
         <span class="sb-count">{cat_counts["geopolitical"]}</span>
       </div>
-      <div class="sb-item" id="sb-crypto"           onclick="switchCat('crypto',this)">
-        <span class="sb-name">📉 Crypto</span>
+      <div class="sb-item" id="sb-crypto"            onclick="switchCat('crypto',this)">
+        <span class="sb-name">📉 Crypto & Web3</span>
         <span class="sb-count">{cat_counts["crypto"]}</span>
       </div>
-      <div class="sb-item" id="sb-china"            onclick="switchCat('china',this)">
-        <span class="sb-name">🇨🇳 China</span>
-        <span class="sb-count">{cat_counts["china"]}</span>
-      </div>
-      <div class="sb-item" id="sb-tech_ai"          onclick="switchCat('tech_ai',this)">
+      <div class="sb-item" id="sb-tech_ai"           onclick="switchCat('tech_ai',this)">
         <span class="sb-name">🤖 Tech & AI</span>
         <span class="sb-count">{cat_counts["tech_ai"]}</span>
       </div>
-      <div class="sb-item" id="sb-banking"          onclick="switchCat('banking',this)">
-        <span class="sb-name">🏦 Banking</span>
-        <span class="sb-count">{cat_counts["banking"]}</span>
+      <div class="sb-item" id="sb-asia_china"        onclick="switchCat('asia_china',this)">
+        <span class="sb-name">🌏 Asia & China</span>
+        <span class="sb-count">{cat_counts["asia_china"]}</span>
       </div>
-      <div class="sb-item" id="sb-commodities"      onclick="switchCat('commodities',this)">
-        <span class="sb-name">📦 Commodities</span>
-        <span class="sb-count">{cat_counts["commodities"]}</span>
+      <div class="sb-item" id="sb-europe_uk"         onclick="switchCat('europe_uk',this)">
+        <span class="sb-name">🇪🇺 Europe & UK</span>
+        <span class="sb-count">{cat_counts["europe_uk"]}</span>
+      </div>
+      <div class="sb-item" id="sb-esg_climate"       onclick="switchCat('esg_climate',this)">
+        <span class="sb-name">🌱 ESG & Climate</span>
+        <span class="sb-count">{cat_counts["esg_climate"]}</span>
       </div>
     </div>
 
@@ -998,7 +976,8 @@ body {{
       <div class="sb-ind-row"><span class="sb-ind-name">Federal Reserve</span></div>
       <div class="sb-ind-row"><span class="sb-ind-name">CoinTelegraph</span></div>
       <div class="sb-ind-row"><span class="sb-ind-name">CoinDesk</span></div>
-      <div class="sb-ind-row"><span class="sb-ind-name">TechCrunch</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">Reuters UK</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">Reuters China</span></div>
     </div>
 
   </div><!-- /sidebar -->
@@ -1020,24 +999,26 @@ body {{
 
     <!-- ── CATEGORY TABS ── -->
     <div class="cat-tabs" id="catTabs">
-      <div class="cat-tab active" id="tab-markets"        onclick="switchCat('markets',null)">📊 MARKETS</div>
-      <div class="cat-tab"        id="tab-economic"       onclick="switchCat('economic',null)">💰 ECONOMIC</div>
-      <div class="cat-tab"        id="tab-india"          onclick="switchCat('india',null)">🇮🇳 INDIA</div>
-      <div class="cat-tab"        id="tab-google_trending" onclick="switchCat('google_trending',null)">🔥 TRENDING</div>
-      <div class="cat-tab"        id="tab-corporate"      onclick="switchCat('corporate',null)">🏢 CORPORATE</div>
-      <div class="cat-tab"        id="tab-geopolitical"   onclick="switchCat('geopolitical',null)">🌍 GEOPOLITICAL</div>
-      <div class="cat-tab"        id="tab-crypto"         onclick="switchCat('crypto',null)">📉 CRYPTO</div>
-      <div class="cat-tab"        id="tab-china"          onclick="switchCat('china',null)">🇨🇳 CHINA</div>
-      <div class="cat-tab"        id="tab-tech_ai"        onclick="switchCat('tech_ai',null)">🤖 TECH & AI</div>
-      <div class="cat-tab"        id="tab-banking"        onclick="switchCat('banking',null)">🏦 BANKING</div>
-      <div class="cat-tab"        id="tab-commodities"    onclick="switchCat('commodities',null)">📦 COMMODITIES</div>
+      <div class="cat-tab active" id="tab-markets"           onclick="switchCat('markets',null)">📊 MARKETS</div>
+      <div class="cat-tab"        id="tab-macro_policy"      onclick="switchCat('macro_policy',null)">💰 MACRO</div>
+      <div class="cat-tab"        id="tab-banking_fx"        onclick="switchCat('banking_fx',null)">🏦 BANKING & FX</div>
+      <div class="cat-tab"        id="tab-commodities_energy" onclick="switchCat('commodities_energy',null)">📦 COMMODITIES</div>
+      <div class="cat-tab"        id="tab-india"             onclick="switchCat('india',null)">🇮🇳 INDIA</div>
+      <div class="cat-tab"        id="tab-trending"          onclick="switchCat('trending',null)">🔥 TRENDING</div>
+      <div class="cat-tab"        id="tab-corporate"         onclick="switchCat('corporate',null)">🏢 CORPORATE</div>
+      <div class="cat-tab"        id="tab-geopolitical"      onclick="switchCat('geopolitical',null)">🌍 GEOPOLITICAL</div>
+      <div class="cat-tab"        id="tab-crypto"            onclick="switchCat('crypto',null)">📉 CRYPTO</div>
+      <div class="cat-tab"        id="tab-tech_ai"           onclick="switchCat('tech_ai',null)">🤖 TECH & AI</div>
+      <div class="cat-tab"        id="tab-asia_china"        onclick="switchCat('asia_china',null)">🌏 ASIA & CHINA</div>
+      <div class="cat-tab"        id="tab-europe_uk"         onclick="switchCat('europe_uk',null)">🇪🇺 EUROPE & UK</div>
+      <div class="cat-tab"        id="tab-esg_climate"       onclick="switchCat('esg_climate',null)">🌱 ESG & CLIMATE</div>
     </div>
 
     <!-- ── NEWS AREA ── -->
     <div class="news-area">
       <div class="news-hdr">
         <span class="news-hdr-title" id="newsTitle">▶ MARKET UPDATES</span>
-        <span class="news-hdr-meta" id="newsSubtitle">Click any headline to expand · {current_time}</span>
+        <span class="news-hdr-meta" id="newsSubtitle">Click headline to expand · {current_time}</span>
       </div>
       <div class="news-col" id="newsCol"></div>
     </div>
@@ -1047,7 +1028,7 @@ body {{
 
 <!-- STATUS BAR -->
 <div class="statusbar">
-  <span>GLOBAL MARKET DASHBOARD · RSS FEEDS: 33 SOURCES · 11 CATEGORIES · AUTO-REFRESH: 5 MIN · NOT FINANCIAL ADVICE</span>
+  <span>NEXUSFEED · RSS FEEDS: 43 SOURCES · 13 CATEGORIES · AUTO-REFRESH: 5 MIN · NOT FINANCIAL ADVICE</span>
   <span id="statusClock">--:-- IST</span>
 </div>
 
@@ -1101,7 +1082,6 @@ function renderNews(cat) {{
 
   document.getElementById('newsTitle').textContent = '▶ ' + d.label + ' — ' + items.length + ' ARTICLES';
 }}
-
 function toggleNC(row) {{
   row.classList.toggle('open');
   const exp = row.querySelector('.nc-expand-body');
@@ -1112,9 +1092,9 @@ function toggleNC(row) {{
 // HAMBURGER / SIDEBAR DRAWER
 // ════════════════════════════
 function toggleSidebar() {{
-  const sidebar  = document.querySelector('.sidebar');
-  const overlay  = document.getElementById('sidebarOverlay');
-  const isOpen   = sidebar.classList.contains('open');
+  const sidebar = document.querySelector('.sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  const isOpen  = sidebar.classList.contains('open');
   sidebar.classList.toggle('open', !isOpen);
   overlay.classList.toggle('open', !isOpen);
 }}
