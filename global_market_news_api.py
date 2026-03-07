@@ -244,23 +244,23 @@ def generate_complete_html(all_news: dict) -> str:
    ══════════════════════════════════════════ */
 :root {{
   --bg: #0d0d0d;
-  --panel: #111111;
-  --panel2: #161616;
-  --border: #2a2a2a;
-  --border2: #1e1e1e;
-  --orange: #ff6600;
-  --orange-dim: rgba(255,102,0,0.08);
-  --orange-mid: rgba(255,102,0,0.18);
-  --green: #00ff41;
-  --green-dim: rgba(0,255,65,0.08);
-  --red: #ff2244;
-  --red-dim: rgba(255,34,68,0.08);
+  --panel: #131313;
+  --panel2: #181818;
+  --border: #333333;
+  --border2: #252525;
+  --orange: #ff6a00;
+  --orange-dim: rgba(255,106,0,0.10);
+  --orange-mid: rgba(255,106,0,0.22);
+  --green: #00ff55;
+  --green-dim: rgba(0,255,85,0.08);
+  --red: #ff3355;
+  --red-dim: rgba(255,51,85,0.08);
   --yellow: #ffd700;
-  --blue: #00aaff;
-  --muted: #555;
-  --muted2: #3a3a3a;
-  --text: #cccccc;
-  --white: #eeeeee;
+  --blue: #29b6ff;
+  --muted: #999999;
+  --muted2: #666666;
+  --text: #d8d8d8;
+  --white: #f5f5f5;
 }}
 
 * {{ margin:0; padding:0; box-sizing:border-box; }}
@@ -269,7 +269,7 @@ body {{
   background: var(--bg);
   color: var(--text);
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 13px;
+  font-size: 14px;
   min-height: 100vh;
   overflow-x: hidden;
 }}
@@ -281,24 +281,24 @@ body {{
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 5px 16px;
+  padding: 6px 18px;
   font-weight: 700;
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: 2px;
   position: sticky;
   top: 0;
   z-index: 100;
 }}
 .topbar-left {{ display:flex; align-items:center; gap:16px; }}
-.topbar-right {{ display:flex; gap: 20px; font-weight: 400; font-size: 10px; }}
+.topbar-right {{ display:flex; gap: 22px; font-weight: 600; font-size: 11px; }}
 .topbar-dot {{ width:8px; height:8px; border-radius:50%; background:#000; animation: blink 1.5s step-end infinite; }}
 @keyframes blink {{ 0%,100%{{opacity:1}} 50%{{opacity:0.2}} }}
 
 /* ── TICKER STRIP ── */
 .ticker {{
-  background: #1a1a1a;
+  background: #1c1c1c;
   border-bottom: 1px solid var(--border);
-  padding: 5px 0;
+  padding: 6px 0;
   overflow: hidden;
   white-space: nowrap;
 }}
@@ -311,17 +311,17 @@ body {{
 .ticker-item {{
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 0 24px;
+  gap: 7px;
+  padding: 0 26px;
   border-right: 1px solid var(--border);
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: 0.3px;
 }}
 .t-sym {{ color: var(--orange); font-weight: 700; }}
-.t-val {{ color: var(--white); }}
-.t-pos {{ color: var(--green); }}
-.t-neg {{ color: var(--red); }}
-.t-neu {{ color: var(--muted); }}
+.t-val {{ color: var(--white); font-weight: 500; }}
+.t-pos {{ color: var(--green); font-weight: 600; }}
+.t-neg {{ color: var(--red); font-weight: 600; }}
+.t-neu {{ color: #aaaaaa; }}
 @keyframes scroll-ticker {{
   0%   {{ transform: translateX(0); }}
   100% {{ transform: translateX(-50%); }}
@@ -330,8 +330,8 @@ body {{
 /* ── MAIN SHELL ── */
 .shell {{
   display: grid;
-  grid-template-columns: 220px 1fr;
-  height: calc(100vh - 52px);
+  grid-template-columns: 240px 1fr;
+  height: calc(100vh - 56px);
 }}
 
 /* ── SIDEBAR ── */
@@ -347,14 +347,14 @@ body {{
 .sidebar::-webkit-scrollbar-track {{ background:transparent; }}
 .sidebar::-webkit-scrollbar-thumb {{ background:var(--border); border-radius:2px; }}
 
-.sb-section {{ margin-bottom: 22px; }}
+.sb-section {{ margin-bottom: 24px; }}
 .sb-label {{
   color: var(--orange);
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 700;
   letter-spacing: 3px;
   text-transform: uppercase;
-  padding: 4px 14px 7px;
+  padding: 5px 14px 8px;
   border-bottom: 1px solid var(--border);
   margin-bottom: 4px;
   display: flex;
@@ -362,41 +362,42 @@ body {{
   gap: 6px;
 }}
 .sb-item {{
-  padding: 7px 14px;
+  padding: 8px 14px;
   cursor: pointer;
   display: flex;
   justify-content: space-between;
   align-items: center;
   border-left: 3px solid transparent;
   transition: all 0.12s;
-  font-size: 11px;
+  font-size: 13px;
 }}
-.sb-item:hover {{ background: var(--orange-dim); border-left-color: rgba(255,102,0,0.4); }}
+.sb-item:hover {{ background: var(--orange-dim); border-left-color: rgba(255,106,0,0.4); }}
 .sb-item.active {{ background: var(--orange-dim); border-left-color: var(--orange); }}
-.sb-item .sb-name {{ color: var(--white); }}
+.sb-item .sb-name {{ color: var(--white); font-weight: 500; }}
 .sb-item .sb-count {{
-  color: var(--muted);
-  font-size: 10px;
+  color: #cccccc;
+  font-size: 11px;
   background: var(--border2);
-  padding: 1px 6px;
+  padding: 1px 7px;
   border-radius: 2px;
+  font-weight: 600;
 }}
 .sb-item.active .sb-count {{ background: var(--orange-mid); color: var(--orange); }}
 
 .sb-ind-row {{
-  padding: 6px 14px;
+  padding: 7px 14px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 10px;
+  font-size: 12px;
   border-bottom: 1px solid var(--border2);
 }}
 .sb-ind-row:last-child {{ border-bottom: none; }}
-.sb-ind-name {{ color: var(--text); }}
-.sb-ind-val {{ font-weight: 700; font-size: 10px; }}
+.sb-ind-name {{ color: #cccccc; font-weight: 400; }}
+.sb-ind-val {{ font-weight: 700; font-size: 12px; }}
 .sb-ind-val.pos {{ color: var(--green); }}
 .sb-ind-val.neg {{ color: var(--red); }}
-.sb-ind-val.neu {{ color: var(--muted); }}
+.sb-ind-val.neu {{ color: #aaaaaa; }}
 
 /* ── MAIN CONTENT ── */
 .main {{ overflow-y: auto; display: flex; flex-direction: column; scrollbar-width: thin; scrollbar-color: var(--border) transparent; }}
@@ -405,14 +406,14 @@ body {{
 
 /* ── INDICATORS PANEL ── */
 .ind-panel {{
-  background: #0f0f0f;
+  background: #101010;
   border-bottom: 1px solid var(--border);
   padding: 14px 16px;
   flex-shrink: 0;
 }}
 .ind-panel-hdr {{
   color: var(--orange);
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 700;
   letter-spacing: 3px;
   text-transform: uppercase;
@@ -421,14 +422,14 @@ body {{
   align-items: center;
   gap: 8px;
 }}
-.ind-panel-hdr::after {{ content:''; flex:1; height:1px; background: linear-gradient(90deg, rgba(255,102,0,0.4), transparent); }}
+.ind-panel-hdr::after {{ content:''; flex:1; height:1px; background: linear-gradient(90deg, rgba(255,106,0,0.5), transparent); }}
 
-.ind-row {{ display: flex; gap: 2px; flex-wrap: wrap; }}
+.ind-row {{ display: flex; gap: 3px; flex-wrap: wrap; }}
 
 .ind-cell {{
   background: var(--panel);
   border: 1px solid var(--border);
-  padding: 9px 13px;
+  padding: 10px 14px;
   min-width: 130px;
   flex: 1;
   position: relative;
@@ -442,42 +443,44 @@ body {{
 }}
 .ind-cell.pos::after {{ background: var(--green); }}
 .ind-cell.neg::after {{ background: var(--red); }}
-.ind-cell.neu::after {{ background: var(--muted); }}
+.ind-cell.neu::after {{ background: #666; }}
 .ind-cell:hover {{ border-color: var(--orange); }}
 
 .ind-name {{
-  color: var(--muted);
-  font-size: 9px;
+  color: #aaaaaa;
+  font-size: 11px;
   letter-spacing: 1.5px;
   text-transform: uppercase;
-  margin-bottom: 4px;
+  margin-bottom: 5px;
+  font-weight: 500;
 }}
 .ind-val {{
   color: var(--white);
-  font-size: 15px;
+  font-size: 17px;
   font-weight: 700;
-  margin-bottom: 3px;
+  margin-bottom: 4px;
   white-space: nowrap;
   letter-spacing: -0.5px;
 }}
 .ind-chg {{
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 0.3px;
   white-space: nowrap;
+  font-weight: 600;
 }}
 .ind-chg.pos {{ color: var(--green); }}
 .ind-chg.neg {{ color: var(--red); }}
-.ind-chg.neu {{ color: var(--muted); }}
+.ind-chg.neu {{ color: #aaaaaa; }}
 
 /* ── USA / INDIA ECON PANELS ── */
 .econ-section {{
   padding: 14px 16px;
   border-bottom: 1px solid var(--border);
-  background: #0f0f0f;
+  background: #101010;
   flex-shrink: 0;
 }}
 .econ-hdr {{
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 700;
   letter-spacing: 3px;
   text-transform: uppercase;
@@ -486,10 +489,10 @@ body {{
   align-items: center;
   gap: 8px;
 }}
-.econ-hdr.usa {{ color: #B22234; }}
-.econ-hdr.usa::after {{ content:''; flex:1; height:1px; background: linear-gradient(90deg, rgba(178,34,52,0.5), transparent); }}
-.econ-hdr.india {{ color: #FF9933; }}
-.econ-hdr.india::after {{ content:''; flex:1; height:1px; background: linear-gradient(90deg, rgba(255,153,51,0.5), transparent); }}
+.econ-hdr.usa {{ color: #e05060; }}
+.econ-hdr.usa::after {{ content:''; flex:1; height:1px; background: linear-gradient(90deg, rgba(224,80,96,0.5), transparent); }}
+.econ-hdr.india {{ color: #ffaa44; }}
+.econ-hdr.india::after {{ content:''; flex:1; height:1px; background: linear-gradient(90deg, rgba(255,170,68,0.5), transparent); }}
 
 /* ── CATEGORY TABS ── */
 .cat-tabs {{
@@ -497,19 +500,19 @@ body {{
   gap: 0;
   padding: 0 16px;
   border-bottom: 1px solid var(--border);
-  background: #0f0f0f;
+  background: #101010;
   overflow-x: auto;
   flex-shrink: 0;
   scrollbar-width: none;
 }}
 .cat-tabs::-webkit-scrollbar {{ display:none; }}
 .cat-tab {{
-  padding: 7px 16px;
-  font-size: 9px;
+  padding: 9px 18px;
+  font-size: 11px;
   font-weight: 700;
   letter-spacing: 1.5px;
   text-transform: uppercase;
-  color: var(--muted);
+  color: #999999;
   cursor: pointer;
   border-bottom: 2px solid transparent;
   white-space: nowrap;
@@ -523,23 +526,23 @@ body {{
 }}
 
 /* ── NEWS AREA ── */
-.news-area {{ flex: 1; padding: 14px 16px; overflow-y: auto; }}
+.news-area {{ flex: 1; padding: 16px 18px; overflow-y: auto; }}
 .news-hdr {{
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 12px;
-  padding-bottom: 8px;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
   border-bottom: 1px solid var(--border);
 }}
 .news-hdr-title {{
   color: var(--orange);
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 700;
   letter-spacing: 2px;
   text-transform: uppercase;
 }}
-.news-hdr-meta {{ color: var(--muted); font-size: 10px; }}
+.news-hdr-meta {{ color: #aaaaaa; font-size: 11px; }}
 
 /* ── NEWS TABLE ── */
 .news-table {{ width: 100%; border-collapse: collapse; }}
@@ -548,50 +551,49 @@ body {{
   cursor: pointer;
   transition: background 0.1s;
 }}
-.news-table tbody tr:hover td {{ background: rgba(255,102,0,0.04); }}
-.news-table tbody tr.open td {{ background: rgba(255,102,0,0.06); }}
+.news-table tbody tr:hover td {{ background: rgba(255,106,0,0.05); }}
+.news-table tbody tr.open td {{ background: rgba(255,106,0,0.08); }}
 
 .td-num {{
-  color: var(--muted);
-  font-size: 9px;
-  padding: 10px 8px 10px 4px;
-  width: 28px;
+  color: #888888;
+  font-size: 11px;
+  padding: 11px 8px 11px 4px;
+  width: 30px;
   text-align: right;
   vertical-align: top;
-  padding-top: 11px;
+  font-weight: 600;
 }}
 .td-time {{
-  color: var(--muted);
-  font-size: 10px;
-  width: 76px;
+  color: #aaaaaa;
+  font-size: 11px;
+  width: 88px;
   white-space: nowrap;
-  padding: 10px 8px;
+  padding: 11px 10px;
   vertical-align: top;
-  padding-top: 11px;
+  font-weight: 500;
 }}
 .td-src {{
-  width: 96px;
-  padding: 10px 8px;
+  width: 104px;
+  padding: 11px 10px;
   vertical-align: top;
-  padding-top: 11px;
 }}
 .src-badge {{
   display: inline-block;
   background: var(--orange-dim);
   color: var(--orange);
-  border: 1px solid rgba(255,102,0,0.25);
-  font-size: 9px;
+  border: 1px solid rgba(255,106,0,0.35);
+  font-size: 11px;
   font-weight: 700;
-  padding: 2px 7px;
+  padding: 3px 8px;
   border-radius: 2px;
   white-space: nowrap;
   letter-spacing: 0.5px;
 }}
-.td-title {{ padding: 10px 8px; vertical-align: top; }}
+.td-title {{ padding: 11px 10px; vertical-align: top; }}
 .td-title .headline {{
-  font-size: 12px;
-  color: var(--white);
-  line-height: 1.5;
+  font-size: 13px;
+  color: #f0f0f0;
+  line-height: 1.55;
   letter-spacing: 0.2px;
   font-family: 'IBM Plex Sans', sans-serif;
   font-weight: 400;
@@ -599,58 +601,58 @@ body {{
 .td-title .expand-body {{
   display: none;
   margin-top: 10px;
-  padding: 10px 12px;
-  background: rgba(255,102,0,0.04);
+  padding: 12px 14px;
+  background: rgba(255,106,0,0.05);
   border-left: 2px solid var(--orange);
 }}
 .news-table tbody tr.open .td-title .expand-body {{ display: block; }}
 .expand-summary {{
-  font-size: 11px;
-  color: var(--text);
-  line-height: 1.7;
+  font-size: 13px;
+  color: #d0d0d0;
+  line-height: 1.75;
   font-family: 'IBM Plex Sans', sans-serif;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }}
 .expand-link {{
   display: inline-block;
   color: var(--orange);
-  font-size: 10px;
+  font-size: 11px;
   text-decoration: none;
   letter-spacing: 1px;
-  border-bottom: 1px solid rgba(255,102,0,0.3);
+  border-bottom: 1px solid rgba(255,106,0,0.4);
   padding-bottom: 1px;
   transition: opacity 0.15s;
+  font-weight: 600;
 }}
-.expand-link:hover {{ opacity: 0.7; }}
+.expand-link:hover {{ opacity: 0.75; }}
 .td-arrow {{
-  width: 24px;
-  padding: 10px 4px;
+  width: 26px;
+  padding: 11px 4px;
   vertical-align: top;
-  padding-top: 11px;
   text-align: center;
 }}
 .arrow-icon {{
   color: var(--orange);
-  font-size: 10px;
+  font-size: 11px;
   display: inline-block;
   transition: transform 0.2s;
-  opacity: 0.5;
+  opacity: 0.65;
 }}
 .news-table tbody tr.open .arrow-icon {{
   transform: rotate(180deg);
   opacity: 1;
 }}
 .no-news {{
-  color: var(--muted);
-  font-size: 11px;
-  padding: 20px 4px;
+  color: #aaaaaa;
+  font-size: 13px;
+  padding: 24px 4px;
   font-style: italic;
 }}
 
 /* ── LOADING OVERLAY ── */
 .loading-overlay {{
   position: fixed; top:0; left:0; width:100%; height:100%;
-  background: rgba(10,10,10,0.96);
+  background: rgba(10,10,10,0.97);
   display: flex; flex-direction: column;
   justify-content: center; align-items: center;
   z-index: 9999; opacity: 0; pointer-events: none;
@@ -658,19 +660,20 @@ body {{
 }}
 .loading-overlay.visible {{ opacity:1; pointer-events:all; }}
 .spinner {{
-  width: 36px; height: 36px;
-  border: 2px solid rgba(255,102,0,0.2);
+  width: 38px; height: 38px;
+  border: 2px solid rgba(255,106,0,0.25);
   border-top-color: var(--orange);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }}
 @keyframes spin {{ to {{ transform: rotate(360deg); }} }}
 .loading-text {{
-  margin-top: 16px;
-  font-size: 11px;
+  margin-top: 18px;
+  font-size: 13px;
   letter-spacing: 3px;
   color: var(--orange);
   text-transform: uppercase;
+  font-weight: 600;
 }}
 
 /* ── STATUS BAR ── */
@@ -680,8 +683,8 @@ body {{
   color: #000;
   display: flex;
   justify-content: space-between;
-  padding: 3px 14px;
-  font-size: 9px;
+  padding: 4px 16px;
+  font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.5px;
   z-index: 100;
