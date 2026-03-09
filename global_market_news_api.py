@@ -687,19 +687,19 @@ body {{
   display: grid;
   grid-template-columns: 36px 1fr 24px;
   align-items: center;
-  padding: 9px 12px 9px 0;
+  padding: 11px 12px 11px 0;
   gap: 4px;
 }}
 .nc-num {{
-  font-size: 10px; font-weight: 700;
+  font-size: 12px; font-weight: 700;
   color: var(--orange); opacity: 0.55;
   font-family: 'IBM Plex Mono', monospace;
   text-align: right; padding-right: 4px;
 }}
 .nc-headline {{
   font-family: 'DM Sans', sans-serif;
-  font-size: 13px; font-weight: 500;
-  color: #e8e8e8; line-height: 1.45;
+  font-size: 15px; font-weight: 500;
+  color: #e8e8e8; line-height: 1.5;
   letter-spacing: 0.1px;
 }}
 .nc-arrow {{
@@ -723,16 +723,16 @@ body {{
 }}
 .nc-src {{
   font-family: 'DM Sans', sans-serif;
-  font-size: 9.5px; font-weight: 600; letter-spacing: 0.5px;
+  font-size: 11px; font-weight: 600; letter-spacing: 0.5px;
   padding: 2px 7px; border-radius: 3px;
   background: rgba(255,106,0,0.14); color: var(--orange);
   text-transform: uppercase;
 }}
-.nc-sep {{ color: #444; font-size: 10px; }}
-.nc-time {{ font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: #666; }}
+.nc-sep {{ color: #444; font-size: 11px; }}
+.nc-time {{ font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #666; }}
 .nc-summary {{
   font-family: 'DM Sans', sans-serif;
-  font-size: 12.5px; color: #aaaaaa;
+  font-size: 14px; color: #aaaaaa;
   line-height: 1.7; margin-bottom: 8px;
 }}
 .nc-link {{
