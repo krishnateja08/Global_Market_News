@@ -862,8 +862,8 @@ body {{
         <span class="sb-econ-arrow" id="arrow-usa">▼</span>
       </div>
       <div class="sb-econ-body" id="body-usa">
-        <div class="sb-econ-row"><span class="sb-econ-key">Fed Funds Rate</span><span class="sb-econ-val neu" id="sbv-fedfunds">3.50–3.75%</span></div>
-        <div class="sb-econ-row"><span class="sb-econ-key">FOMC Next</span><span class="sb-econ-val neu" id="sbv-fomc">Hold</span><span class="sb-econ-note" id="sbn-fomc">May 6–7 2025</span></div>
+        <div class="sb-econ-row"><span class="sb-econ-key">Fed Funds Rate</span><span class="sb-econ-val neu" id="sbv-fedfunds">--</span></div>
+        <div class="sb-econ-row"><span class="sb-econ-key">FOMC Next</span><span class="sb-econ-val neu" id="sbv-fomc">--</span><span class="sb-econ-note" id="sbn-fomc">loading…</span></div>
         <div class="sb-econ-row"><span class="sb-econ-key">CPI YoY</span><span class="sb-econ-val neu" id="sbv-cpi">--</span></div>
         <div class="sb-econ-row"><span class="sb-econ-key">Core CPI</span><span class="sb-econ-val neu" id="sbv-corecpi">--</span><span class="sb-econ-note" id="sbn-corecpi">loading…</span></div>
         <div class="sb-econ-row"><span class="sb-econ-key">GDP Growth</span><span class="sb-econ-val neu" id="sbv-gdp">--</span><span class="sb-econ-note" id="sbn-gdp">loading…</span></div>
@@ -1434,18 +1434,131 @@ async function fetchFedRate() {{
     ]);
     if (!rL.ok || !rU.ok) throw new Error('HTTP error');
     const [tL, tU] = await Promise.all([rL.text(), rU.text()]);
-    const lastVal = (txt) => {{
+    const lastLine = (txt) => {{
       const lines = txt.trim().split('\\n').filter(l => l && !l.startsWith('DATE'));
-      return parseFloat(lines[lines.length - 1].split(',')[1]);
+      return lines[lines.length - 1].split(',');
     }};
-    const lower = lastVal(tL);
-    const upper = lastVal(tU);
+    const lL = lastLine(tL), lU = lastLine(tU);
+    const lower = parseFloat(lL[1]);
+    const upper = parseFloat(lU[1]);
     if (isNaN(lower) || isNaN(upper)) throw new Error('Bad values');
     const label = lower.toFixed(2) + '–' + upper.toFixed(2) + '%';
+    const dateLabel = fredLabel(lL[0]);
     const el = document.getElementById('sbv-fedfunds');
     if (el) el.textContent = label;
+    // inject a note span if row supports it
+    const row = el ? el.closest('.sb-econ-row') : null;
+    if (row && !row.querySelector('.sb-econ-note')) {{
+      const note = document.createElement('span');
+      note.className = 'sb-econ-note';
+      note.id = 'sbn-fedfunds';
+      row.appendChild(note);
+    }}
+    const noteEl = document.getElementById('sbn-fedfunds');
+    if (noteEl) noteEl.textContent = dateLabel;
   }} catch(e) {{
-    // keep the hardcoded fallback already in the DOM
+    const el = document.getElementById('sbv-fedfunds');
+    if (el) el.textContent = 'N/A ⚠';
+    const noteEl = document.getElementById('sbn-fedfunds');
+    if (noteEl) noteEl.textContent = 'FRED unavailable';
+  }}
+}}
+
+// ════════════════════════════
+// FOMC NEXT MEETING (Fed Calendar)
+// ════════════════════════════
+async function fetchFOMC() {{
+  const fedUrl = 'https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm';
+  const proxied = 'https://corsproxy.io/?' + encodeURIComponent(fedUrl);
+  try {{
+    const r = await fetch(proxied, {{signal: AbortSignal.timeout(10000)}});
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const html = await r.text();
+
+    // Fed calendar lists meetings as "Month DD-DD, YYYY" or "Month DD, YYYY"
+    const today = new Date();
+    today.setHours(0,0,0,0);
+
+    // Match patterns like: January 28-29, 2025  or  March 18-19, 2026
+    const pattern = /([A-Z][a-z]+)\s+(\d{{1,2}})(?:[-–](\d{{1,2}}))?,\s+(\d{{4}})/g;
+    let match;
+    let nextMeeting = null;
+
+    while ((match = pattern.exec(html)) !== null) {{
+      const month = match[1];
+      const day1 = parseInt(match[2]);
+      const day2 = match[3] ? parseInt(match[3]) : day1;
+      const year = parseInt(match[4]);
+      const months = ['January','February','March','April','May','June',
+                      'July','August','September','October','November','December'];
+      const mIdx = months.indexOf(month);
+      if (mIdx === -1 || year < today.getFullYear()) continue;
+      const meetDate = new Date(year, mIdx, day1);
+      if (meetDate >= today) {{
+        // Format: "Mar 18–19"
+        const shortMonth = month.slice(0,3);
+        const dateStr = day2 > day1 ? shortMonth + ' ' + day1 + '–' + day2 : shortMonth + ' ' + day1;
+        nextMeeting = {{ label: dateStr, year: year }};
+        break;
+      }}
+    }}
+
+    if (!nextMeeting) throw new Error('No upcoming meeting found');
+
+    const el = document.getElementById('sbv-fomc');
+    const note = document.getElementById('sbn-fomc');
+    if (el) el.textContent = nextMeeting.year === today.getFullYear() ? nextMeeting.label : nextMeeting.label + ' ' + nextMeeting.year;
+    if (note) note.textContent = 'federalreserve.gov';
+  }} catch(e) {{
+    const el = document.getElementById('sbv-fomc');
+    const note = document.getElementById('sbn-fomc');
+    if (el) el.textContent = 'N/A ⚠';
+    if (note) note.textContent = 'See federalreserve.gov';
+  }}
+}}
+
+// ════════════════════════════
+// FOMC NEXT MEETING DATE (Fed calendar page)
+// ════════════════════════════
+async function fetchFOMCDate() {{
+  const fedUrl = 'https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm';
+  const proxied = 'https://corsproxy.io/?' + encodeURIComponent(fedUrl);
+  const el  = document.getElementById('sbv-fomc');
+  const note = document.getElementById('sbn-fomc');
+  try {{
+    const r = await fetch(proxied, {{signal: AbortSignal.timeout(10000)}});
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const html = await r.text();
+
+    // Fed page lists meetings as e.g. "April 29-30, 2025" or "June 17-18, 2025"
+    // Pattern: month name + day range + year inside the calendar table
+    const today = new Date();
+    // Match all date patterns like "January 28-29, 2025"
+    const pattern = /([A-Z][a-z]+)\s+(\d{{1,2}})[-–](\d{{1,2}}),\s+(\d{{4}})/g;
+    let match;
+    let nextMeeting = null;
+    while ((match = pattern.exec(html)) !== null) {{
+      const [, month, startDay, endDay, year] = match;
+      const meetingDate = new Date(month + ' ' + endDay + ', ' + year);
+      if (meetingDate >= today) {{
+        nextMeeting = {{ month, startDay, endDay, year }};
+        break;
+      }}
+    }}
+    if (!nextMeeting) throw new Error('No upcoming meeting found');
+    const label = nextMeeting.month.slice(0,3) + ' ' + nextMeeting.startDay + '–' + nextMeeting.endDay;
+    if (el)   el.textContent   = nextMeeting.year;
+    if (note) note.textContent = label;
+  }} catch(e) {{
+    // Can't get meeting date — show a helpful link instead of stale data
+    if (el)   el.textContent   = 'See Fed ↗';
+    if (note) note.textContent = 'federalreserve.gov';
+    // Make it a clickable link
+    const row = el ? el.closest('.sb-econ-row') : null;
+    if (row) {{
+      row.style.cursor = 'pointer';
+      row.onclick = () => window.open('https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm', '_blank');
+    }}
   }}
 }}
 
@@ -1810,6 +1923,8 @@ window.addEventListener('DOMContentLoaded', () => {{
   loadAll();
   fetchCPI();
   fetchFedRate();
+  fetchFOMCDate();
+  fetchFOMC();
   // USA economic indicators (FRED)
   fetchCoreCPI();
   fetchGDPGrowth();
