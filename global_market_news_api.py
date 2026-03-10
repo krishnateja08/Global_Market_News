@@ -862,8 +862,8 @@ body {{
         <span class="sb-econ-arrow" id="arrow-usa">▼</span>
       </div>
       <div class="sb-econ-body" id="body-usa">
-        <div class="sb-econ-row"><span class="sb-econ-key">Fed Funds Rate</span><span class="sb-econ-val neu">4.25–4.50%</span></div>
-        <div class="sb-econ-row"><span class="sb-econ-key">FOMC Next</span><span class="sb-econ-val neu">Hold</span><span class="sb-econ-note">Mar 18–19</span></div>
+        <div class="sb-econ-row"><span class="sb-econ-key">Fed Funds Rate</span><span class="sb-econ-val neu" id="sbv-fedfunds">3.50–3.75%</span></div>
+        <div class="sb-econ-row"><span class="sb-econ-key">FOMC Next</span><span class="sb-econ-val neu">Hold</span><span class="sb-econ-note">Mar 17–18</span></div>
         <div class="sb-econ-row"><span class="sb-econ-key">CPI YoY</span><span class="sb-econ-val neu" id="sbv-cpi">--</span></div>
         <div class="sb-econ-row"><span class="sb-econ-key">Core CPI</span><span class="sb-econ-val neu">3.3%</span><span class="sb-econ-note">Dec 2025</span></div>
         <div class="sb-econ-row"><span class="sb-econ-key">GDP Growth</span><span class="sb-econ-val pos">2.8%</span><span class="sb-econ-note">Q4 2025</span></div>
@@ -1420,6 +1420,36 @@ async function fetchCPI() {{
 }}
 
 // ════════════════════════════
+// FED FUNDS RATE via FRED CSV
+// ════════════════════════════
+async function fetchFedRate() {{
+  // DFEDTARL = lower limit, DFEDTARU = upper limit (daily series)
+  const proxy = 'https://corsproxy.io/?';
+  const lowerUrl = 'https://fred.stlouisfed.org/graph/fredgraph.csv?id=DFEDTARL';
+  const upperUrl = 'https://fred.stlouisfed.org/graph/fredgraph.csv?id=DFEDTARU';
+  try {{
+    const [rL, rU] = await Promise.all([
+      fetch(proxy + encodeURIComponent(lowerUrl), {{signal: AbortSignal.timeout(8000)}}),
+      fetch(proxy + encodeURIComponent(upperUrl), {{signal: AbortSignal.timeout(8000)}}),
+    ]);
+    if (!rL.ok || !rU.ok) throw new Error('HTTP error');
+    const [tL, tU] = await Promise.all([rL.text(), rU.text()]);
+    const lastVal = (txt) => {{
+      const lines = txt.trim().split('\\n').filter(l => l && !l.startsWith('DATE'));
+      return parseFloat(lines[lines.length - 1].split(',')[1]);
+    }};
+    const lower = lastVal(tL);
+    const upper = lastVal(tU);
+    if (isNaN(lower) || isNaN(upper)) throw new Error('Bad values');
+    const label = lower.toFixed(2) + '–' + upper.toFixed(2) + '%';
+    const el = document.getElementById('sbv-fedfunds');
+    if (el) el.textContent = label;
+  }} catch(e) {{
+    // keep the hardcoded fallback already in the DOM
+  }}
+}}
+
+// ════════════════════════════
 // CLOCK & REFRESH
 // ════════════════════════════
 function updateClock() {{
@@ -1479,6 +1509,7 @@ window.addEventListener('DOMContentLoaded', () => {{
 
   loadAll();
   fetchCPI();
+  fetchFedRate();
   setInterval(loadAll, 5 * 60 * 1000);
   setInterval(updateClock, 1000);
 }});
