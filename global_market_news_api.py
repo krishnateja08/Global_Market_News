@@ -863,13 +863,13 @@ body {{
       </div>
       <div class="sb-econ-body" id="body-usa">
         <div class="sb-econ-row"><span class="sb-econ-key">Fed Funds Rate</span><span class="sb-econ-val neu" id="sbv-fedfunds">3.50–3.75%</span></div>
-        <div class="sb-econ-row"><span class="sb-econ-key">FOMC Next</span><span class="sb-econ-val neu">Hold</span><span class="sb-econ-note">Mar 17–18</span></div>
+        <div class="sb-econ-row"><span class="sb-econ-key">FOMC Next</span><span class="sb-econ-val neu" id="sbv-fomc">Hold</span><span class="sb-econ-note" id="sbn-fomc">May 6–7 2025</span></div>
         <div class="sb-econ-row"><span class="sb-econ-key">CPI YoY</span><span class="sb-econ-val neu" id="sbv-cpi">--</span></div>
-        <div class="sb-econ-row"><span class="sb-econ-key">Core CPI</span><span class="sb-econ-val neu">3.3%</span><span class="sb-econ-note">Dec 2025</span></div>
-        <div class="sb-econ-row"><span class="sb-econ-key">GDP Growth</span><span class="sb-econ-val pos">2.8%</span><span class="sb-econ-note">Q4 2025</span></div>
-        <div class="sb-econ-row"><span class="sb-econ-key">Unemployment</span><span class="sb-econ-val pos">4.1%</span><span class="sb-econ-note">Jan 2026</span></div>
-        <div class="sb-econ-row"><span class="sb-econ-key">NFP</span><span class="sb-econ-val pos">+256K</span><span class="sb-econ-note">Jan 2026</span></div>
-        <div class="sb-econ-row"><span class="sb-econ-key">PPI YoY</span><span class="sb-econ-val neu">3.3%</span><span class="sb-econ-note">Dec 2025</span></div>
+        <div class="sb-econ-row"><span class="sb-econ-key">Core CPI</span><span class="sb-econ-val neu" id="sbv-corecpi">--</span><span class="sb-econ-note" id="sbn-corecpi">loading…</span></div>
+        <div class="sb-econ-row"><span class="sb-econ-key">GDP Growth</span><span class="sb-econ-val neu" id="sbv-gdp">--</span><span class="sb-econ-note" id="sbn-gdp">loading…</span></div>
+        <div class="sb-econ-row"><span class="sb-econ-key">Unemployment</span><span class="sb-econ-val neu" id="sbv-unemployment">--</span><span class="sb-econ-note" id="sbn-unemployment">loading…</span></div>
+        <div class="sb-econ-row"><span class="sb-econ-key">NFP</span><span class="sb-econ-val neu" id="sbv-nfp">--</span><span class="sb-econ-note" id="sbn-nfp">loading…</span></div>
+        <div class="sb-econ-row"><span class="sb-econ-key">PPI YoY</span><span class="sb-econ-val neu" id="sbv-ppi">--</span><span class="sb-econ-note" id="sbn-ppi">loading…</span></div>
       </div>
     </div>
 
@@ -880,13 +880,13 @@ body {{
         <span class="sb-econ-arrow" id="arrow-india">▼</span>
       </div>
       <div class="sb-econ-body" id="body-india">
-        <div class="sb-econ-row"><span class="sb-econ-key">Repo Rate</span><span class="sb-econ-val neu">6.25%</span><span class="sb-econ-note">RBI Feb 2026</span></div>
-        <div class="sb-econ-row"><span class="sb-econ-key">CPI</span><span class="sb-econ-val neu">5.22%</span><span class="sb-econ-note">Dec 2025</span></div>
-        <div class="sb-econ-row"><span class="sb-econ-key">WPI</span><span class="sb-econ-val neu">2.4%</span><span class="sb-econ-note">Nov 2025</span></div>
-        <div class="sb-econ-row"><span class="sb-econ-key">IIP</span><span class="sb-econ-val pos">5.2%</span><span class="sb-econ-note">Nov 2025</span></div>
-        <div class="sb-econ-row"><span class="sb-econ-key">Mfg PMI</span><span class="sb-econ-val pos">57.7</span><span class="sb-econ-note">Jan 2026</span></div>
-        <div class="sb-econ-row"><span class="sb-econ-key">GDP Growth</span><span class="sb-econ-val pos">6.4%</span><span class="sb-econ-note">FY25</span></div>
-        <div class="sb-econ-row"><span class="sb-econ-key">Fiscal Deficit</span><span class="sb-econ-val neu">4.9%</span><span class="sb-econ-note">FY25 Target</span></div>
+        <div class="sb-econ-row"><span class="sb-econ-key">Repo Rate</span><span class="sb-econ-val neu" id="sbv-reporate">--</span><span class="sb-econ-note" id="sbn-reporate">loading…</span></div>
+        <div class="sb-econ-row"><span class="sb-econ-key">CPI</span><span class="sb-econ-val neu" id="sbv-india-cpi">--</span><span class="sb-econ-note" id="sbn-india-cpi">loading…</span></div>
+        <div class="sb-econ-row"><span class="sb-econ-key">WPI</span><span class="sb-econ-val neu" id="sbv-india-wpi">--</span><span class="sb-econ-note" id="sbn-india-wpi">loading…</span></div>
+        <div class="sb-econ-row"><span class="sb-econ-key">IIP</span><span class="sb-econ-val pos" id="sbv-india-iip">--</span><span class="sb-econ-note" id="sbn-india-iip">loading…</span></div>
+        <div class="sb-econ-row"><span class="sb-econ-key">Mfg PMI</span><span class="sb-econ-val pos" id="sbv-india-pmi">--</span><span class="sb-econ-note" id="sbn-india-pmi">loading…</span></div>
+        <div class="sb-econ-row"><span class="sb-econ-key">GDP Growth</span><span class="sb-econ-val pos" id="sbv-india-gdp">--</span><span class="sb-econ-note" id="sbn-india-gdp">loading…</span></div>
+        <div class="sb-econ-row"><span class="sb-econ-key">Fiscal Deficit</span><span class="sb-econ-val neu" id="sbv-india-fiscal">--</span><span class="sb-econ-note" id="sbn-india-fiscal">loading…</span></div>
         <div class="sb-econ-row"><span class="sb-econ-key">USD/INR</span><span class="sb-econ-val neu" id="sbv-usdinr2">₹--</span></div>
       </div>
     </div>
@@ -1450,6 +1450,306 @@ async function fetchFedRate() {{
 }}
 
 // ════════════════════════════
+// SHARED FRED CSV HELPER
+// ════════════════════════════
+async function fetchFREDLines(seriesId) {{
+  const csvUrl = 'https://fred.stlouisfed.org/graph/fredgraph.csv?id=' + seriesId;
+  const proxied = 'https://corsproxy.io/?' + encodeURIComponent(csvUrl);
+  const r = await fetch(proxied, {{signal: AbortSignal.timeout(8000)}});
+  if (!r.ok) throw new Error('HTTP ' + r.status);
+  const text = await r.text();
+  return text.trim().split('\\n').filter(l => l && !l.startsWith('DATE'));
+}}
+
+function fredLabel(dateStr) {{
+  const d = new Date(dateStr + 'T12:00:00Z');
+  return d.toLocaleString('en-US', {{month: 'short', year: 'numeric', timeZone: 'UTC'}});
+}}
+
+// ════════════════════════════
+// USA: CORE CPI (CPILFESL)
+// ════════════════════════════
+async function fetchCoreCPI() {{
+  try {{
+    const lines = await fetchFREDLines('CPILFESL');
+    if (lines.length < 13) throw new Error('Not enough data');
+    const last = lines[lines.length - 1].split(',');
+    const prev = lines[lines.length - 13].split(',');
+    const lastVal = parseFloat(last[1]), prevVal = parseFloat(prev[1]);
+    if (isNaN(lastVal) || isNaN(prevVal) || prevVal === 0) throw new Error('Bad values');
+    const yoy = (((lastVal - prevVal) / prevVal) * 100).toFixed(1);
+    const el = document.getElementById('sbv-corecpi');
+    const note = document.getElementById('sbn-corecpi');
+    if (el) {{ el.textContent = yoy + '%'; el.className = 'sb-econ-val ' + (parseFloat(yoy) > 3 ? 'neg' : parseFloat(yoy) <= 2 ? 'pos' : 'neu'); }}
+    if (note) note.textContent = fredLabel(last[0]);
+  }} catch(e) {{
+    const el = document.getElementById('sbv-corecpi');
+    const note = document.getElementById('sbn-corecpi');
+    if (el) el.textContent = '3.3%';
+    if (note) note.textContent = 'Dec 2025 ⚠';
+  }}
+}}
+
+// ════════════════════════════
+// USA: GDP GROWTH (A191RL1Q225SBEA)
+// ════════════════════════════
+async function fetchGDPGrowth() {{
+  try {{
+    const lines = await fetchFREDLines('A191RL1Q225SBEA');
+    const last = lines[lines.length - 1].split(',');
+    const val = parseFloat(last[1]);
+    if (isNaN(val)) throw new Error('Bad value');
+    const d = new Date(last[0] + 'T12:00:00Z');
+    const qtr = Math.ceil((d.getUTCMonth() + 1) / 3);
+    const label = 'Q' + qtr + ' ' + d.getUTCFullYear();
+    const el = document.getElementById('sbv-gdp');
+    const note = document.getElementById('sbn-gdp');
+    if (el) {{ el.textContent = val.toFixed(1) + '%'; el.className = 'sb-econ-val ' + (val > 0 ? 'pos' : 'neg'); }}
+    if (note) note.textContent = label;
+  }} catch(e) {{
+    const el = document.getElementById('sbv-gdp');
+    const note = document.getElementById('sbn-gdp');
+    if (el) el.textContent = '2.8%';
+    if (note) note.textContent = 'Q4 2025 ⚠';
+  }}
+}}
+
+// ════════════════════════════
+// USA: UNEMPLOYMENT (UNRATE)
+// ════════════════════════════
+async function fetchUnemployment() {{
+  try {{
+    const lines = await fetchFREDLines('UNRATE');
+    const last = lines[lines.length - 1].split(',');
+    const val = parseFloat(last[1]);
+    if (isNaN(val)) throw new Error('Bad value');
+    const el = document.getElementById('sbv-unemployment');
+    const note = document.getElementById('sbn-unemployment');
+    if (el) {{ el.textContent = val.toFixed(1) + '%'; el.className = 'sb-econ-val ' + (val < 4 ? 'pos' : val > 5 ? 'neg' : 'neu'); }}
+    if (note) note.textContent = fredLabel(last[0]);
+  }} catch(e) {{
+    const el = document.getElementById('sbv-unemployment');
+    const note = document.getElementById('sbn-unemployment');
+    if (el) el.textContent = '4.1%';
+    if (note) note.textContent = 'Jan 2026 ⚠';
+  }}
+}}
+
+// ════════════════════════════
+// USA: NFP (PAYEMS – MoM change)
+// ════════════════════════════
+async function fetchNFP() {{
+  try {{
+    const lines = await fetchFREDLines('PAYEMS');
+    if (lines.length < 2) throw new Error('Not enough data');
+    const last = lines[lines.length - 1].split(',');
+    const prev = lines[lines.length - 2].split(',');
+    const change = Math.round(parseFloat(last[1]) - parseFloat(prev[1]));
+    if (isNaN(change)) throw new Error('Bad value');
+    const sign = change >= 0 ? '+' : '';
+    const el = document.getElementById('sbv-nfp');
+    const note = document.getElementById('sbn-nfp');
+    if (el) {{ el.textContent = sign + change + 'K'; el.className = 'sb-econ-val ' + (change > 0 ? 'pos' : 'neg'); }}
+    if (note) note.textContent = fredLabel(last[0]);
+  }} catch(e) {{
+    const el = document.getElementById('sbv-nfp');
+    const note = document.getElementById('sbn-nfp');
+    if (el) el.textContent = '+256K';
+    if (note) note.textContent = 'Jan 2026 ⚠';
+  }}
+}}
+
+// ════════════════════════════
+// USA: PPI YoY (PPIFIS)
+// ════════════════════════════
+async function fetchPPI() {{
+  try {{
+    const lines = await fetchFREDLines('PPIFIS');
+    if (lines.length < 13) throw new Error('Not enough data');
+    const last = lines[lines.length - 1].split(',');
+    const prev = lines[lines.length - 13].split(',');
+    const lastVal = parseFloat(last[1]), prevVal = parseFloat(prev[1]);
+    if (isNaN(lastVal) || isNaN(prevVal) || prevVal === 0) throw new Error('Bad values');
+    const yoy = (((lastVal - prevVal) / prevVal) * 100).toFixed(1);
+    const el = document.getElementById('sbv-ppi');
+    const note = document.getElementById('sbn-ppi');
+    if (el) {{ el.textContent = yoy + '%'; el.className = 'sb-econ-val ' + (parseFloat(yoy) > 3 ? 'neg' : parseFloat(yoy) <= 2 ? 'pos' : 'neu'); }}
+    if (note) note.textContent = fredLabel(last[0]);
+  }} catch(e) {{
+    const el = document.getElementById('sbv-ppi');
+    const note = document.getElementById('sbn-ppi');
+    if (el) el.textContent = '3.3%';
+    if (note) note.textContent = 'Dec 2025 ⚠';
+  }}
+}}
+
+// ════════════════════════════
+// INDIA: World Bank API helper
+// ════════════════════════════
+async function fetchWorldBank(indicator, countryCode) {{
+  const url = 'https://api.worldbank.org/v2/country/' + countryCode + '/indicator/' + indicator + '?format=json&mrv=5';
+  const r = await fetch(url, {{signal: AbortSignal.timeout(10000)}});
+  if (!r.ok) throw new Error('HTTP ' + r.status);
+  const d = await r.json();
+  if (!d[1]) throw new Error('No data');
+  const latest = d[1].find(x => x.value !== null);
+  if (!latest) throw new Error('All null');
+  return latest;
+}}
+
+// ════════════════════════════
+// INDIA: CPI (World Bank FP.CPI.TOTL.ZG)
+// ════════════════════════════
+async function fetchIndiaCPI() {{
+  try {{
+    const latest = await fetchWorldBank('FP.CPI.TOTL.ZG', 'IN');
+    const val = parseFloat(latest.value).toFixed(2);
+    const el = document.getElementById('sbv-india-cpi');
+    const note = document.getElementById('sbn-india-cpi');
+    if (el) {{ el.textContent = val + '%'; el.className = 'sb-econ-val ' + (parseFloat(val) > 6 ? 'neg' : parseFloat(val) < 4 ? 'pos' : 'neu'); }}
+    if (note) note.textContent = 'FY' + String(latest.date).slice(2);
+  }} catch(e) {{
+    const el = document.getElementById('sbv-india-cpi');
+    const note = document.getElementById('sbn-india-cpi');
+    if (el) el.textContent = '5.22%';
+    if (note) note.textContent = 'Dec 2025 ⚠';
+  }}
+}}
+
+// ════════════════════════════
+// INDIA: GDP Growth (World Bank NY.GDP.MKTP.KD.ZG)
+// ════════════════════════════
+async function fetchIndiaGDP() {{
+  try {{
+    const latest = await fetchWorldBank('NY.GDP.MKTP.KD.ZG', 'IN');
+    const val = parseFloat(latest.value).toFixed(1);
+    const el = document.getElementById('sbv-india-gdp');
+    const note = document.getElementById('sbn-india-gdp');
+    if (el) {{ el.textContent = val + '%'; el.className = 'sb-econ-val ' + (parseFloat(val) > 5 ? 'pos' : parseFloat(val) < 0 ? 'neg' : 'neu'); }}
+    if (note) note.textContent = 'FY' + String(latest.date).slice(2);
+  }} catch(e) {{
+    const el = document.getElementById('sbv-india-gdp');
+    const note = document.getElementById('sbn-india-gdp');
+    if (el) el.textContent = '6.4%';
+    if (note) note.textContent = 'FY25 ⚠';
+  }}
+}}
+
+// ════════════════════════════
+// INDIA: Unemployment (World Bank SL.UEM.TOTL.ZS)
+// ════════════════════════════
+async function fetchIndiaUnemployment() {{
+  try {{
+    const latest = await fetchWorldBank('SL.UEM.TOTL.ZS', 'IN');
+    const val = parseFloat(latest.value).toFixed(1);
+    const el = document.getElementById('sbv-india-iip');
+    const note = document.getElementById('sbn-india-iip');
+    if (el) {{ el.textContent = val + '%'; el.className = 'sb-econ-val ' + (parseFloat(val) < 5 ? 'pos' : 'neg'); }}
+    if (note) note.textContent = 'Unemp · FY' + String(latest.date).slice(2);
+  }} catch(e) {{
+    const el = document.getElementById('sbv-india-iip');
+    const note = document.getElementById('sbn-india-iip');
+    if (el) el.textContent = '5.2%';
+    if (note) note.textContent = 'IIP Nov 2025 ⚠';
+  }}
+}}
+
+// ════════════════════════════
+// INDIA: Repo Rate via RBI DBIE (corsproxy)
+// ════════════════════════════
+async function fetchIndiaRepoRate() {{
+  // Try RBI DBIE API via proxy
+  try {{
+    const rbiUrl = 'https://rbi.org.in/Scripts/bs_viewcontent.aspx?Id=2118';
+    const proxied = 'https://corsproxy.io/?' + encodeURIComponent(rbiUrl);
+    const r = await fetch(proxied, {{signal: AbortSignal.timeout(8000)}});
+    if (r.ok) {{
+      const html = await r.text();
+      // RBI page lists "Policy Repo Rate" in a table – parse it
+      const match = html.match(/Policy Repo Rate[^%]*?([\d.]+)%/i);
+      if (match) {{
+        const val = parseFloat(match[1]).toFixed(2);
+        const el = document.getElementById('sbv-reporate');
+        const note = document.getElementById('sbn-reporate');
+        if (el) {{ el.textContent = val + '%'; el.className = 'sb-econ-val neu'; }}
+        if (note) note.textContent = 'RBI live';
+        return;
+      }}
+    }}
+  }} catch(e) {{ /* fall through */ }}
+  // Fallback to last known value
+  const el = document.getElementById('sbv-reporate');
+  const note = document.getElementById('sbn-reporate');
+  if (el) el.textContent = '6.25%';
+  if (note) note.textContent = 'RBI Feb 2026 ⚠';
+}}
+
+// ════════════════════════════
+// INDIA: WPI via World Bank (FP.WPI.TOTL)
+// ════════════════════════════
+async function fetchIndiaWPI() {{
+  try {{
+    const latest = await fetchWorldBank('FP.WPI.TOTL', 'IN');
+    // WPI index value — compute YoY %
+    const url = 'https://api.worldbank.org/v2/country/IN/indicator/FP.WPI.TOTL?format=json&mrv=14';
+    const r = await fetch(url, {{signal: AbortSignal.timeout(10000)}});
+    const d = await r.json();
+    const rows = d[1] ? d[1].filter(x => x.value !== null) : [];
+    if (rows.length < 2) throw new Error('Not enough data');
+    const cur = rows[0].value, prev = rows[1].value;
+    const yoy = (((cur - prev) / prev) * 100).toFixed(1);
+    const el = document.getElementById('sbv-india-wpi');
+    const note = document.getElementById('sbn-india-wpi');
+    if (el) {{ el.textContent = yoy + '%'; el.className = 'sb-econ-val neu'; }}
+    if (note) note.textContent = 'FY' + String(rows[0].date).slice(2);
+  }} catch(e) {{
+    const el = document.getElementById('sbv-india-wpi');
+    const note = document.getElementById('sbn-india-wpi');
+    if (el) el.textContent = '2.4%';
+    if (note) note.textContent = 'Nov 2025 ⚠';
+  }}
+}}
+
+// ════════════════════════════
+// INDIA: Mfg PMI — no free official API;
+//   try a proxy to tradingeconomics data
+// ════════════════════════════
+async function fetchIndiaPMI() {{
+  // No reliable free API for India PMI — show last known
+  const el = document.getElementById('sbv-india-pmi');
+  const note = document.getElementById('sbn-india-pmi');
+  try {{
+    // Try World Bank Manufacturing Value Added as proxy
+    const latest = await fetchWorldBank('NV.IND.MANF.KD.ZG', 'IN');
+    const val = parseFloat(latest.value).toFixed(1);
+    if (el) {{ el.textContent = val + '%'; el.className = 'sb-econ-val ' + (parseFloat(val) > 0 ? 'pos' : 'neg'); }}
+    if (note) note.textContent = 'Mfg Gr · FY' + String(latest.date).slice(2);
+  }} catch(e) {{
+    if (el) el.textContent = '57.7';
+    if (note) note.textContent = 'PMI Jan 2026 ⚠';
+  }}
+}}
+
+// ════════════════════════════
+// INDIA: Fiscal Deficit (World Bank GC.BAL.CASH.GD.ZS)
+// ════════════════════════════
+async function fetchIndiaFiscal() {{
+  try {{
+    const latest = await fetchWorldBank('GC.BAL.CASH.GD.ZS', 'IN');
+    const val = Math.abs(parseFloat(latest.value)).toFixed(1);
+    const el = document.getElementById('sbv-india-fiscal');
+    const note = document.getElementById('sbn-india-fiscal');
+    if (el) {{ el.textContent = val + '%'; el.className = 'sb-econ-val neu'; }}
+    if (note) note.textContent = 'of GDP · FY' + String(latest.date).slice(2);
+  }} catch(e) {{
+    const el = document.getElementById('sbv-india-fiscal');
+    const note = document.getElementById('sbn-india-fiscal');
+    if (el) el.textContent = '4.9%';
+    if (note) note.textContent = 'FY25 Target ⚠';
+  }}
+}}
+
+// ════════════════════════════
 // CLOCK & REFRESH
 // ════════════════════════════
 function updateClock() {{
@@ -1510,6 +1810,20 @@ window.addEventListener('DOMContentLoaded', () => {{
   loadAll();
   fetchCPI();
   fetchFedRate();
+  // USA economic indicators (FRED)
+  fetchCoreCPI();
+  fetchGDPGrowth();
+  fetchUnemployment();
+  fetchNFP();
+  fetchPPI();
+  // India economic indicators (World Bank + RBI)
+  fetchIndiaRepoRate();
+  fetchIndiaCPI();
+  fetchIndiaWPI();
+  fetchIndiaUnemployment();
+  fetchIndiaPMI();
+  fetchIndiaGDP();
+  fetchIndiaFiscal();
   setInterval(loadAll, 5 * 60 * 1000);
   setInterval(updateClock, 1000);
 }});
@@ -1524,7 +1838,7 @@ window.addEventListener('DOMContentLoaded', () => {{
 def main():
     print("\n" + "=" * 70)
     print("🚀  GLOBAL MARKET DASHBOARD  –  BLOOMBERG TERMINAL THEME")
-    print("    11 CATEGORIES · 33 RSS SOURCES")
+    print("    13 CATEGORIES · 43 RSS SOURCES")
     print("=" * 70)
 
     all_news = {}
