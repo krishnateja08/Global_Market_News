@@ -363,7 +363,7 @@ body {{
   background: var(--bg);
   color: var(--text);
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 14px;
+  font-size: 16px;
   min-height: 100vh;
   overflow-x: hidden;
 }}
@@ -377,14 +377,14 @@ body {{
   justify-content: space-between;
   padding: 6px 18px;
   font-weight: 700;
-  font-size: 12px;
+  font-size: 14px;
   letter-spacing: 2px;
   position: sticky;
   top: 0;
   z-index: 100;
 }}
 .topbar-left {{ display:flex; align-items:center; gap:16px; }}
-.topbar-right {{ display:flex; gap: 22px; font-weight: 600; font-size: 11px; }}
+.topbar-right {{ display:flex; gap: 22px; font-weight: 600; font-size: 13px; }}
 .topbar-dot {{ width:8px; height:8px; border-radius:50%; background:#000; animation: blink 1.5s step-end infinite; }}
 @keyframes blink {{ 0%,100%{{opacity:1}} 50%{{opacity:0.2}} }}
 
@@ -408,7 +408,7 @@ body {{
   gap: 7px;
   padding: 0 26px;
   border-right: 1px solid var(--border);
-  font-size: 12px;
+  font-size: 14px;
   letter-spacing: 0.3px;
 }}
 .t-sym {{ color: var(--orange); font-weight: 700; }}
@@ -444,7 +444,7 @@ body {{
 .sb-section {{ margin-bottom: 24px; }}
 .sb-label {{
   color: var(--orange);
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 700;
   letter-spacing: 3px;
   text-transform: uppercase;
@@ -463,14 +463,14 @@ body {{
   align-items: center;
   border-left: 3px solid transparent;
   transition: all 0.12s;
-  font-size: 13px;
+  font-size: 15px;
 }}
 .sb-item:hover {{ background: var(--orange-dim); border-left-color: rgba(255,106,0,0.4); }}
 .sb-item.active {{ background: var(--orange-dim); border-left-color: var(--orange); }}
 .sb-item .sb-name {{ color: var(--white); font-weight: 500; }}
 .sb-item .sb-count {{
   color: #cccccc;
-  font-size: 11px;
+  font-size: 13px;
   background: var(--border2);
   padding: 1px 7px;
   border-radius: 2px;
@@ -483,12 +483,12 @@ body {{
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 12px;
+  font-size: 14px;
   border-bottom: 1px solid var(--border2);
 }}
 .sb-ind-row:last-child {{ border-bottom: none; }}
 .sb-ind-name {{ color: #cccccc; font-weight: 400; }}
-.sb-ind-val {{ font-weight: 700; font-size: 12px; }}
+.sb-ind-val {{ font-weight: 700; font-size: 14px; }}
 .sb-ind-val.pos {{ color: var(--green); }}
 .sb-ind-val.neg {{ color: var(--red); }}
 .sb-ind-val.neu {{ color: #aaaaaa; }}
@@ -504,13 +504,13 @@ body {{
 }}
 .sb-econ-hdr:hover {{ background: rgba(255,106,0,0.06); }}
 .sb-econ-title {{
-  font-size: 11px; font-weight: 700; letter-spacing: 2px;
+  font-size: 13px; font-weight: 700; letter-spacing: 2px;
   text-transform: uppercase; display: flex; align-items: center; gap: 6px;
 }}
 .sb-econ-title.usa  {{ color: #e05060; }}
 .sb-econ-title.india {{ color: #ffaa44; }}
 .sb-econ-arrow {{
-  color: var(--orange); font-size: 9px;
+  color: var(--orange); font-size: 11px;
   transition: transform 0.2s; flex-shrink: 0;
 }}
 .sb-econ-arrow.collapsed {{ transform: rotate(-90deg); }}
@@ -521,15 +521,15 @@ body {{
 .sb-econ-row {{
   padding: 5px 14px;
   display: flex; justify-content: space-between; align-items: center;
-  font-size: 11px; border-bottom: 1px solid var(--border2);
+  font-size: 13px; border-bottom: 1px solid var(--border2);
 }}
 .sb-econ-row:last-child {{ border-bottom: none; padding-bottom: 8px; }}
-.sb-econ-key {{ color: #bbbbbb; font-size: 10px; letter-spacing: 0.3px; flex: 1; }}
-.sb-econ-val {{ font-weight: 700; font-size: 11px; white-space: nowrap; margin-left: 6px; }}
+.sb-econ-key {{ color: #bbbbbb; font-size: 12px; letter-spacing: 0.3px; flex: 1; }}
+.sb-econ-val {{ font-weight: 700; font-size: 13px; white-space: nowrap; margin-left: 6px; }}
 .sb-econ-val.pos {{ color: var(--green); }}
 .sb-econ-val.neg {{ color: var(--red); }}
 .sb-econ-val.neu {{ color: #aaaaaa; }}
-.sb-econ-note {{ color: #666; font-size: 9px; margin-left: 4px; white-space: nowrap; }}
+.sb-econ-note {{ color: #666; font-size: 11px; margin-left: 4px; white-space: nowrap; }}
 
 /* ── MAIN CONTENT ── */
 .main {{ overflow-y: auto; display: flex; flex-direction: column; scrollbar-width: thin; scrollbar-color: var(--border) transparent; }}
@@ -539,7 +539,7 @@ body {{
 /* ── INDICATORS / ECON PANELS ── */
 .ind-panel-hdr {{
   color: var(--orange);
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 700;
   letter-spacing: 3px;
   text-transform: uppercase;
@@ -574,7 +574,7 @@ body {{
 
 .ind-name {{
   color: #aaaaaa;
-  font-size: 11px;
+  font-size: 13px;
   letter-spacing: 1.5px;
   text-transform: uppercase;
   margin-bottom: 5px;
@@ -582,14 +582,14 @@ body {{
 }}
 .ind-val {{
   color: var(--white);
-  font-size: 17px;
+  font-size: 20px;
   font-weight: 700;
   margin-bottom: 4px;
   white-space: nowrap;
   letter-spacing: -0.5px;
 }}
 .ind-chg {{
-  font-size: 11px;
+  font-size: 13px;
   letter-spacing: 0.3px;
   white-space: nowrap;
   font-weight: 600;
@@ -606,7 +606,7 @@ body {{
   flex-shrink: 0;
 }}
 .econ-hdr {{
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 700;
   letter-spacing: 3px;
   text-transform: uppercase;
@@ -634,7 +634,7 @@ body {{
 .cat-tabs::-webkit-scrollbar {{ display:none; }}
 .cat-tab {{
   padding: 9px 18px;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 700;
   letter-spacing: 1.5px;
   text-transform: uppercase;
@@ -663,12 +663,12 @@ body {{
 }}
 .news-hdr-title {{
   color: var(--orange);
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 700;
   letter-spacing: 2px;
   text-transform: uppercase;
 }}
-.news-hdr-meta {{ color: #aaaaaa; font-size: 11px; }}
+.news-hdr-meta {{ color: #aaaaaa; font-size: 13px; }}
 
 /* ── NEWSPAPER COLUMN — COMPACT STYLE ── */
 .news-col {{ border: 1px solid var(--border); border-radius: 3px; overflow: hidden; }}
@@ -691,19 +691,19 @@ body {{
   gap: 4px;
 }}
 .nc-num {{
-  font-size: 12px; font-weight: 700;
+  font-size: 14px; font-weight: 700;
   color: var(--orange); opacity: 0.55;
   font-family: 'IBM Plex Mono', monospace;
   text-align: right; padding-right: 4px;
 }}
 .nc-headline {{
   font-family: 'DM Sans', sans-serif;
-  font-size: 17px; font-weight: 500;
+  font-size: 20px; font-weight: 500;
   color: #e8e8e8; line-height: 1.55;
   letter-spacing: 0.1px;
 }}
 .nc-arrow {{
-  color: #555; font-size: 9px;
+  color: #555; font-size: 12px;
   text-align: center; transition: transform 0.2s, color 0.15s;
 }}
 .nc-item:hover .nc-arrow {{ color: var(--orange); }}
@@ -723,22 +723,22 @@ body {{
 }}
 .nc-src {{
   font-family: 'DM Sans', sans-serif;
-  font-size: 12px; font-weight: 600; letter-spacing: 0.5px;
+  font-size: 14px; font-weight: 600; letter-spacing: 0.5px;
   padding: 2px 7px; border-radius: 3px;
   background: rgba(255,106,0,0.14); color: var(--orange);
   text-transform: uppercase;
 }}
-.nc-sep {{ color: #444; font-size: 12px; }}
-.nc-time {{ font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #666; }}
+.nc-sep {{ color: #444; font-size: 14px; }}
+.nc-time {{ font-family: 'IBM Plex Mono', monospace; font-size: 14px; color: #666; }}
 .nc-summary {{
   font-family: 'DM Sans', sans-serif;
-  font-size: 15px; color: #aaaaaa;
+  font-size: 17px; color: #aaaaaa;
   line-height: 1.7; margin-bottom: 8px;
 }}
 .nc-link {{
   display: inline-block;
   font-family: 'DM Sans', sans-serif;
-  color: var(--orange); font-size: 13px; font-weight: 600;
+  color: var(--orange); font-size: 15px; font-weight: 600;
   text-decoration: none; letter-spacing: 0.5px;
   border-bottom: 1px solid rgba(255,106,0,0.3);
   padding-bottom: 1px; transition: opacity 0.15s;
@@ -746,7 +746,7 @@ body {{
 .nc-link:hover {{ opacity: 0.7; }}
 
 .no-news {{
-  color: #777; font-size: 12px;
+  color: #777; font-size: 14px;
   padding: 20px 14px; font-family: 'DM Sans', sans-serif;
 }}
 
@@ -799,18 +799,18 @@ body {{
   .topbar-right span:nth-child(3), .topbar-right span:nth-child(4) {{ display: none; }}
   .ticker-item {{ padding: 0 14px; font-size: 11px; }}
   .cat-tabs {{ padding: 0 6px; }}
-  .cat-tab {{ padding: 8px 10px; font-size: 10px; letter-spacing: 0.5px; }}
+  .cat-tab {{ padding: 8px 10px; font-size: 12px; letter-spacing: 0.5px; }}
   .news-area {{ padding: 10px 8px; }}
   .news-hdr {{ margin-bottom: 10px; padding-bottom: 8px; }}
   .news-hdr-title {{ font-size: 10px; }}
   .news-hdr-meta {{ display: none; }}
   .nc-row {{ padding: 8px 8px 8px 0; }}
-  .nc-headline {{ font-size: 12.5px; }}
+  .nc-headline {{ font-size: 15px; }}
   .nc-expand-body {{ padding: 0 8px 10px 30px; }}
   .statusbar {{ padding: 3px 8px; font-size: 9px; }}
   .statusbar span:first-child {{ display: none; }}
   .ind-cell {{ min-width: 90px; padding: 8px 10px; }}
-  .ind-val {{ font-size: 14px; }}
+  .ind-val {{ font-size: 17px; }}
 }}
 </style>
 </head>
