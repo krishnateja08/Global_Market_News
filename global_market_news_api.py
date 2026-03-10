@@ -687,7 +687,7 @@ body {{
   display: grid;
   grid-template-columns: 36px 1fr 24px;
   align-items: center;
-  padding: 11px 12px 11px 0;
+  padding: 13px 12px 13px 0;
   gap: 4px;
 }}
 .nc-num {{
@@ -698,8 +698,8 @@ body {{
 }}
 .nc-headline {{
   font-family: 'DM Sans', sans-serif;
-  font-size: 15px; font-weight: 500;
-  color: #e8e8e8; line-height: 1.5;
+  font-size: 17px; font-weight: 500;
+  color: #e8e8e8; line-height: 1.55;
   letter-spacing: 0.1px;
 }}
 .nc-arrow {{
@@ -723,22 +723,22 @@ body {{
 }}
 .nc-src {{
   font-family: 'DM Sans', sans-serif;
-  font-size: 11px; font-weight: 600; letter-spacing: 0.5px;
+  font-size: 12px; font-weight: 600; letter-spacing: 0.5px;
   padding: 2px 7px; border-radius: 3px;
   background: rgba(255,106,0,0.14); color: var(--orange);
   text-transform: uppercase;
 }}
-.nc-sep {{ color: #444; font-size: 11px; }}
-.nc-time {{ font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #666; }}
+.nc-sep {{ color: #444; font-size: 12px; }}
+.nc-time {{ font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #666; }}
 .nc-summary {{
   font-family: 'DM Sans', sans-serif;
-  font-size: 14px; color: #aaaaaa;
+  font-size: 15px; color: #aaaaaa;
   line-height: 1.7; margin-bottom: 8px;
 }}
 .nc-link {{
   display: inline-block;
   font-family: 'DM Sans', sans-serif;
-  color: var(--orange); font-size: 11px; font-weight: 600;
+  color: var(--orange); font-size: 13px; font-weight: 600;
   text-decoration: none; letter-spacing: 0.5px;
   border-bottom: 1px solid rgba(255,106,0,0.3);
   padding-bottom: 1px; transition: opacity 0.15s;
