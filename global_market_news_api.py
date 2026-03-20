@@ -388,6 +388,49 @@ body {{
 .topbar-dot {{ width:8px; height:8px; border-radius:50%; background:#000; animation: blink 1.5s step-end infinite; }}
 @keyframes blink {{ 0%,100%{{opacity:1}} 50%{{opacity:0.2}} }}
 
+/* ── CLOCK BAR ── */
+.clockbar {{
+  background: #1a1a1a;
+  border-bottom: 1px solid #333;
+  display: flex;
+  align-items: center;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  overflow: hidden;
+  position: sticky;
+  top: 34px;
+  z-index: 99;
+}}
+.clockbar-tz {{
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 18px;
+  border-right: 1px solid #2e2e2e;
+}}
+.clockbar-tag {{
+  color: var(--orange);
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 2px;
+}}
+.clockbar-val {{
+  color: #e8e8e8;
+  font-weight: 600;
+}}
+.clockbar-dot {{
+  color: var(--orange);
+  font-size: 10px;
+  animation: blink 1.5s step-end infinite;
+}}
+.clockbar-fill {{ flex: 1; }}
+.clockbar-date {{
+  padding: 4px 18px;
+  color: #777;
+  font-size: 11px;
+}}
+
 /* ── TICKER STRIP ── */
 .ticker {{
   background: #1c1c1c;
@@ -425,7 +468,7 @@ body {{
 .shell {{
   display: grid;
   grid-template-columns: 240px 1fr;
-  height: calc(100vh - 56px);
+  height: calc(100vh - 82px);
 }}
 
 /* ── SIDEBAR ── */
@@ -833,10 +876,30 @@ body {{
   </div>
   <div class="topbar-right">
     <span>🔴 LIVE FEED</span>
-    <span id="topClock">--:--:-- IST</span>
     <span>📅 {current_time}</span>
     <span>✅ {total_articles} ARTICLES</span>
   </div>
+</div>
+
+<!-- CLOCK BAR -->
+<div class="clockbar">
+  <div class="clockbar-tz">
+    <span class="clockbar-tag">CST</span>
+    <span class="clockbar-val" id="clockCST">--:--:--</span>
+    <span class="clockbar-dot">●</span>
+  </div>
+  <div class="clockbar-tz">
+    <span class="clockbar-tag">IST</span>
+    <span class="clockbar-val" id="clockIST">--:--:--</span>
+    <span class="clockbar-dot">●</span>
+  </div>
+  <div class="clockbar-tz">
+    <span class="clockbar-tag">SGT</span>
+    <span class="clockbar-val" id="clockSGT">--:--:--</span>
+    <span class="clockbar-dot">●</span>
+  </div>
+  <div class="clockbar-fill"></div>
+  <div class="clockbar-date" id="clockbarDate">--</div>
 </div>
 
 <!-- TICKER STRIP -->
@@ -1754,16 +1817,30 @@ async function fetchIndiaFiscal() {{
 // ════════════════════════════
 function updateClock() {{
   const now = new Date();
-  const opts = {{hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'Asia/Kolkata'}};
-  const ist = now.toLocaleString('en-US', opts);
-  const el = document.getElementById('topClock');
-  if (el) el.textContent = ist + ' IST';
+  const fmtSec = (tz) => now.toLocaleString('en-US', {{hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true, timeZone: tz}});
+  const fmtMin = (tz) => now.toLocaleString('en-US', {{hour: '2-digit', minute: '2-digit', hour12: true, timeZone: tz}});
+
+  const cst = fmtSec('America/Chicago');
+  const ist = fmtSec('Asia/Kolkata');
+  const sgt = fmtSec('Asia/Singapore');
+
+  const elCST = document.getElementById('clockCST');
+  const elIST = document.getElementById('clockIST');
+  const elSGT = document.getElementById('clockSGT');
+  const elDate = document.getElementById('clockbarDate');
+
+  if (elCST) elCST.textContent = cst;
+  if (elIST) elIST.textContent = ist;
+  if (elSGT) elSGT.textContent = sgt;
+  if (elDate) {{
+    elDate.textContent = '📅 ' + now.toLocaleDateString('en-US', {{weekday:'short', month:'short', day:'numeric', year:'numeric', timeZone:'Asia/Kolkata'}});
+  }}
+
   const st = document.getElementById('statusClock');
-  if (st) st.textContent = ist + ' IST';
+  if (st) st.textContent = fmtSec('Asia/Kolkata') + ' IST';
   const ref = document.getElementById('newsSubtitle');
   if (ref) {{
-    const opts2 = {{hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Kolkata'}};
-    ref.textContent = 'Click any headline to expand · Last refresh: ' + now.toLocaleString('en-US', opts2) + ' IST';
+    ref.textContent = 'Click any headline to expand · Last refresh: ' + fmtMin('Asia/Kolkata') + ' IST';
   }}
 }}
 
