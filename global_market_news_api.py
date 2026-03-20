@@ -390,45 +390,53 @@ body {{
 
 /* ── CLOCK BAR ── */
 .clockbar {{
-  background: #1a1a1a;
-  border-bottom: 1px solid #333;
+  background: #161616;
+  border-bottom: 1px solid #2e2e2e;
   display: flex;
   align-items: center;
+  justify-content: center;
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 12px;
-  letter-spacing: 0.5px;
-  overflow: hidden;
+  padding: 8px 18px;
   position: sticky;
   top: 34px;
   z-index: 99;
 }}
+.clockbar-clocks {{
+  display: flex;
+  align-items: center;
+  gap: 0;
+}}
 .clockbar-tz {{
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 4px 18px;
+  gap: 10px;
+  padding: 4px 32px;
   border-right: 1px solid #2e2e2e;
 }}
+.clockbar-tz:last-of-type {{ border-right: none; }}
 .clockbar-tag {{
   color: var(--orange);
   font-weight: 700;
-  font-size: 11px;
-  letter-spacing: 2px;
+  font-size: 13px;
+  letter-spacing: 3px;
 }}
 .clockbar-val {{
-  color: #e8e8e8;
+  color: #f0f0f0;
   font-weight: 600;
+  font-size: 16px;
+  letter-spacing: 1px;
 }}
 .clockbar-dot {{
   color: var(--orange);
-  font-size: 10px;
+  font-size: 9px;
   animation: blink 1.5s step-end infinite;
 }}
-.clockbar-fill {{ flex: 1; }}
 .clockbar-date {{
-  padding: 4px 18px;
-  color: #777;
+  position: absolute;
+  right: 18px;
+  color: #666;
   font-size: 11px;
+  letter-spacing: 0.5px;
 }}
 
 /* ── TICKER STRIP ── */
@@ -468,7 +476,7 @@ body {{
 .shell {{
   display: grid;
   grid-template-columns: 240px 1fr;
-  height: calc(100vh - 82px);
+  height: calc(100vh - 90px);
 }}
 
 /* ── SIDEBAR ── */
@@ -883,22 +891,23 @@ body {{
 
 <!-- CLOCK BAR -->
 <div class="clockbar">
-  <div class="clockbar-tz">
-    <span class="clockbar-tag">CST</span>
-    <span class="clockbar-val" id="clockCST">--:--:--</span>
-    <span class="clockbar-dot">●</span>
+  <div class="clockbar-clocks">
+    <div class="clockbar-tz">
+      <span class="clockbar-tag">CST</span>
+      <span class="clockbar-val" id="clockCST">--:--:--</span>
+      <span class="clockbar-dot">●</span>
+    </div>
+    <div class="clockbar-tz">
+      <span class="clockbar-tag">IST</span>
+      <span class="clockbar-val" id="clockIST">--:--:--</span>
+      <span class="clockbar-dot">●</span>
+    </div>
+    <div class="clockbar-tz">
+      <span class="clockbar-tag">SGT</span>
+      <span class="clockbar-val" id="clockSGT">--:--:--</span>
+      <span class="clockbar-dot">●</span>
+    </div>
   </div>
-  <div class="clockbar-tz">
-    <span class="clockbar-tag">IST</span>
-    <span class="clockbar-val" id="clockIST">--:--:--</span>
-    <span class="clockbar-dot">●</span>
-  </div>
-  <div class="clockbar-tz">
-    <span class="clockbar-tag">SGT</span>
-    <span class="clockbar-val" id="clockSGT">--:--:--</span>
-    <span class="clockbar-dot">●</span>
-  </div>
-  <div class="clockbar-fill"></div>
   <div class="clockbar-date" id="clockbarDate">--</div>
 </div>
 
