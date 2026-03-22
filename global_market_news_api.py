@@ -192,9 +192,12 @@ def fetch_category_news(category: str, urls: list[str]) -> list[dict]:
         for fmt in DATE_FMTS:
             try:
                 pub = datetime.strptime(pub_date_str.strip(), fmt)
+                # Always normalize to naive UTC before comparing with cutoff
                 if pub.tzinfo is not None:
-                    pub = pub.utctimetuple()
-                    pub = datetime(*pub[:6])
+                    # Convert tz-aware datetime to UTC, then strip tzinfo
+                    import calendar
+                    pub = datetime(*pub.utctimetuple()[:6])
+                # cutoff is already datetime.utcnow() based — comparison is safe
                 return pub >= cutoff
             except ValueError:
                 continue
@@ -219,10 +222,10 @@ def fetch_category_news(category: str, urls: list[str]) -> list[dict]:
     # Pass 1: last 24 hours
     _collect(datetime.utcnow() - timedelta(hours=24))
 
-    # Pass 2 fallback: extend to 7 days if fewer than 5 articles
+    # Pass 2 fallback: extend to 2 days if fewer than 5 articles
     if len(results) < 5:
-        print(f"  ⚠  Only {len(results)} articles in 24h for [{category}] — extending to 7-day window…")
-        _collect(datetime.utcnow() - timedelta(days=7))
+        print(f"  ⚠  Only {len(results)} articles in 24h for [{category}] — extending to 2-day window…")
+        _collect(datetime.utcnow() - timedelta(days=2))
 
     return results[:MAX_NEWS_PER_CATEGORY]
 
@@ -231,23 +234,28 @@ def format_pub_date(raw: str) -> str:
     if not raw:
         return "Just now"
     for fmt in ["%a, %d %b %Y %H:%M:%S %z", "%a, %d %b %Y %H:%M:%S %Z",
-                "%Y-%m-%dT%H:%M:%S%z", "%Y-%m-%d"]:
+                "%Y-%m-%dT%H:%M:%S%z", "%Y-%m-%dT%H:%M:%SZ", "%Y-%m-%d"]:
         try:
             dt = datetime.strptime(raw.strip(), fmt)
-            now = datetime.now(dt.tzinfo) if dt.tzinfo else datetime.utcnow()
+            # Always normalize to naive UTC so diff is always accurate
+            if dt.tzinfo is not None:
+                dt_utc = dt.utctimetuple()
+                dt = datetime(*dt_utc[:6])
+            now = datetime.utcnow()
             diff = now - dt
-            if diff.days == 0:
-                hours = diff.seconds // 3600
-                mins = (diff.seconds % 3600) // 60
-                if hours == 0:
-                    return f"{mins} min ago" if mins > 1 else "Just now"
+            total_seconds = diff.total_seconds()
+            if total_seconds < 0:
+                return "Just now"
+            if total_seconds < 3600:
+                mins = int(total_seconds // 60)
+                return f"{mins} min ago" if mins > 1 else "Just now"
+            if total_seconds < 86400:
+                hours = int(total_seconds // 3600)
                 return f"{hours} hour{'s' if hours > 1 else ''} ago"
-            elif diff.days == 1:
+            if diff.days == 1:
                 return "1 day ago"
-            elif diff.days < 7:
-                return f"{diff.days} days ago"
-            else:
-                return dt.strftime("%b %d, %Y")
+            # For anything 2+ days old, show the actual date — never lie
+            return dt.strftime("%b %d, %Y")
         except ValueError:
             continue
     return raw[:20]
