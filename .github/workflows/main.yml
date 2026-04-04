@@ -84,8 +84,14 @@ jobs:
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Actions Bot"
           
-          # Pull latest changes FIRST before staging anything
+          # Stash the generated index.html before pulling
+          git stash push -u -m "dashboard update"
+          
+          # Pull latest remote changes cleanly
           git pull --rebase origin main
+          
+          # Restore our generated index.html on top
+          git stash pop
           
           # Re-check if index.html still differs after rebase
           if git diff --quiet index.html; then
@@ -100,7 +106,9 @@ jobs:
           for i in 1 2 3; do
             git push && break
             echo "⚠️ Push failed, retrying ($i/3)..."
+            git stash push -u -m "dashboard update"
             git pull --rebase origin main
+            git stash pop
             sleep 5
           done
         env:
