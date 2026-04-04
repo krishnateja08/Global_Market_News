@@ -1,9 +1,8 @@
 name: Update Market Data
 on:
   schedule:
-    # Run every 17 minutes, 24/7, every day
-    # Standard cron: triggers at :00, :17, :34, and :51 of every hour.
-    - cron: '*/17 * * * *'
+    # Run every 1 hour
+    - cron: '0 * * * *'
   
   # Allow manual trigger from Actions tab
   workflow_dispatch:
@@ -12,6 +11,7 @@ on:
   push:
     branches:
       - main
+
 jobs:
   update-data:
     runs-on: ubuntu-latest
@@ -83,10 +83,26 @@ jobs:
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Actions Bot"
+          
+          # Pull latest changes FIRST before staging anything
+          git pull --rebase origin main
+          
+          # Re-check if index.html still differs after rebase
+          if git diff --quiet index.html; then
+            echo "⏭️ No changes after rebase, skipping commit."
+            exit 0
+          fi
+          
           git add index.html
           git commit -m "🔄 Auto-update market data - $(date -u +'%Y-%m-%d %H:%M:%S UTC')"
-          git pull --rebase origin main
-          git push
+          
+          # Push with retry in case of simultaneous runs
+          for i in 1 2 3; do
+            git push && break
+            echo "⚠️ Push failed, retrying ($i/3)..."
+            git pull --rebase origin main
+            sleep 5
+          done
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
