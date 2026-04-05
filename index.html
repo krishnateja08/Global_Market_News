@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NexusFeed – Global Market Intelligence</title>
+<title>NexusFeed – Global Market Intelligence v2</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;600;700&family=IBM+Plex+Sans:wght@300;400;600&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 /* ══════════════════════════════════════════
@@ -124,6 +124,7 @@ body {
   display: inline-flex;
   gap: 0;
   animation: scroll-ticker 60s linear infinite;
+  will-change: transform;
 }
 .ticker-track:hover { animation-play-state: paused; }
 .ticker-item {
@@ -479,6 +480,48 @@ body {
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 
+/* ── LOADING OVERLAY ── */
+.loading-overlay {
+  position: fixed; inset: 0;
+  background: rgba(13,13,13,0.97);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  z-index: 500;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.3s;
+}
+.loading-overlay.visible { opacity: 1; pointer-events: all; }
+.spinner {
+  width: 36px; height: 36px;
+  border: 3px solid var(--border);
+  border-top-color: var(--orange);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-bottom: 14px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-text {
+  color: var(--orange); font-size: 13px;
+  letter-spacing: 2px; text-transform: uppercase;
+  font-weight: 600;
+}
+
+/* ── STATUS BAR ── */
+.statusbar {
+  background: #161616;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 18px;
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.5px;
+  position: sticky;
+  bottom: 0;
+  z-index: 98;
+}
+
 /* ── HAMBURGER BUTTON ── */
 .hamburger {
   display: none;
@@ -536,6 +579,117 @@ body {
   .ind-cell { min-width: 90px; padding: 8px 10px; }
   .ind-val { font-size: 17px; }
 }
+
+/* ── LIGHT MODE ── */
+body.light {
+  --bg: #f0f1f4;
+  --panel: #ffffff;
+  --panel2: #f7f7f8;
+  --border: #d0d4db;
+  --border2: #e2e5ea;
+  --muted: #666666;
+  --muted2: #999999;
+  --text: #1a1a1a;
+  --white: #111111;
+}
+body.light .topbar { background: #ff7a1a; }
+body.light .clockbar { background: #e8eaef; border-color: #d0d4db; }
+body.light .ticker { background: #e2e5ea; }
+body.light .statusbar { background: #e2e5ea; color: #444; }
+body.light .nc-headline { color: #111; }
+body.light .nc-summary { color: #555; }
+body.light .nc-expand-body { border-color: #d0d4db; }
+body.light .sb-econ-key { color: #555; }
+body.light .sb-ind-name { color: #555; }
+body.light .clockbar-val { color: #111; }
+body.light .cat-tab { color: #666; }
+body.light .cat-tab.active { color: var(--orange); }
+body.light .cat-tabs { background: #f0f1f4; }
+body.light .econ-section { background: #f5f5f7; }
+body.light .loading-overlay { background: rgba(240,241,244,0.97); }
+body.light .loading-text { color: #333; }
+
+/* ── THEME TOGGLE ── */
+.theme-toggle {
+  cursor: pointer; font-size: 16px; padding: 2px 6px;
+  border-radius: 4px; transition: background 0.15s;
+  user-select: none;
+}
+.theme-toggle:hover { background: rgba(0,0,0,0.15); }
+
+/* ── SEARCH BOX ── */
+.news-search {
+  padding: 0 18px 10px;
+  flex-shrink: 0;
+}
+.news-search input {
+  width: 100%;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  color: var(--white);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  padding: 9px 14px 9px 36px;
+  border-radius: 4px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.news-search input::placeholder { color: var(--muted2); }
+.news-search input:focus { border-color: var(--orange); }
+.news-search-wrap {
+  position: relative;
+}
+.news-search-icon {
+  position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+  color: var(--muted2); font-size: 14px; pointer-events: none;
+}
+
+/* ── SCROLL-TO-TOP BUTTON ── */
+.scroll-top {
+  position: fixed; bottom: 40px; right: 20px;
+  width: 40px; height: 40px;
+  background: var(--orange);
+  color: #000; font-weight: 700; font-size: 18px;
+  border: none; border-radius: 50%;
+  cursor: pointer; z-index: 90;
+  display: none; align-items: center; justify-content: center;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.4);
+  transition: opacity 0.2s, transform 0.2s;
+}
+.scroll-top.visible { display: flex; }
+.scroll-top:hover { transform: scale(1.1); }
+
+/* ── TAB SCROLL FADE ── */
+.cat-tabs-wrap {
+  position: relative; flex-shrink: 0;
+}
+.cat-tabs-wrap::after {
+  content: ''; position: absolute;
+  top: 0; right: 0; bottom: 0; width: 50px;
+  background: linear-gradient(90deg, transparent, #101010);
+  pointer-events: none; z-index: 1;
+}
+body.light .cat-tabs-wrap::after {
+  background: linear-gradient(90deg, transparent, #f0f1f4);
+}
+
+/* ── STALE DATA BADGE ── */
+.stale-badge {
+  display: inline-block;
+  background: rgba(255,51,85,0.15);
+  color: var(--red);
+  font-size: 9px; font-weight: 700;
+  padding: 1px 5px; border-radius: 2px;
+  letter-spacing: 0.5px;
+  margin-left: 4px;
+  text-transform: uppercase;
+}
+
+/* ── KEYBOARD FOCUS ── */
+.sb-item:focus-visible, .nc-item:focus-visible, .cat-tab:focus-visible {
+  outline: 2px solid var(--orange);
+  outline-offset: -2px;
+}
 </style>
 </head>
 <body>
@@ -557,8 +711,9 @@ body {
   </div>
   <div class="topbar-right">
     <span>🔴 LIVE FEED</span>
-    <span>📅 April 05, 2026 at 09:02 PM IST</span>
-    <span>✅ 104 ARTICLES</span>
+    <span>📅 April 05, 2026 at 09:18 PM IST</span>
+    <span>✅ 113 ARTICLES</span>
+    <span class="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark mode">🌓</span>
   </div>
 </div>
 
@@ -608,7 +763,7 @@ body {
       </div>
       <div class="sb-econ-body" id="body-usa">
         <div class="sb-econ-row"><span class="sb-econ-key">Fed Funds Rate</span><span class="sb-econ-val neu" id="sbv-fedfunds">3.50–3.75%</span></div>
-        <div class="sb-econ-row"><span class="sb-econ-key">FOMC Next</span><span class="sb-econ-val neu" id="sbv-fomc">Hold</span><span class="sb-econ-note" id="sbn-fomc">May 6–7 2025</span></div>
+        <div class="sb-econ-row"><span class="sb-econ-key">FOMC Next</span><span class="sb-econ-val neu" id="sbv-fomc">Hold</span><span class="sb-econ-note" id="sbn-fomc">Jun 17–18 2025</span></div>
         <div class="sb-econ-row"><span class="sb-econ-key">CPI YoY</span><span class="sb-econ-val neu" id="sbv-cpi">--</span></div>
         <div class="sb-econ-row"><span class="sb-econ-key">Core CPI</span><span class="sb-econ-val neu" id="sbv-corecpi">--</span><span class="sb-econ-note" id="sbn-corecpi">loading…</span></div>
         <div class="sb-econ-row"><span class="sb-econ-key">GDP Growth</span><span class="sb-econ-val neu" id="sbv-gdp">--</span><span class="sb-econ-note" id="sbn-gdp">loading…</span></div>
@@ -628,7 +783,7 @@ body {
         <div class="sb-econ-row"><span class="sb-econ-key">Repo Rate</span><span class="sb-econ-val neu" id="sbv-reporate">--</span><span class="sb-econ-note" id="sbn-reporate">loading…</span></div>
         <div class="sb-econ-row"><span class="sb-econ-key">CPI</span><span class="sb-econ-val neu" id="sbv-india-cpi">--</span><span class="sb-econ-note" id="sbn-india-cpi">loading…</span></div>
         <div class="sb-econ-row"><span class="sb-econ-key">WPI</span><span class="sb-econ-val neu" id="sbv-india-wpi">--</span><span class="sb-econ-note" id="sbn-india-wpi">loading…</span></div>
-        <div class="sb-econ-row"><span class="sb-econ-key">IIP</span><span class="sb-econ-val pos" id="sbv-india-iip">--</span><span class="sb-econ-note" id="sbn-india-iip">loading…</span></div>
+        <div class="sb-econ-row"><span class="sb-econ-key">Unemployment</span><span class="sb-econ-val neu" id="sbv-india-unemp">--</span><span class="sb-econ-note" id="sbn-india-unemp">loading…</span></div>
         <div class="sb-econ-row"><span class="sb-econ-key">Mfg PMI</span><span class="sb-econ-val pos" id="sbv-india-pmi">--</span><span class="sb-econ-note" id="sbn-india-pmi">loading…</span></div>
         <div class="sb-econ-row"><span class="sb-econ-key">GDP Growth</span><span class="sb-econ-val pos" id="sbv-india-gdp">--</span><span class="sb-econ-note" id="sbn-india-gdp">loading…</span></div>
         <div class="sb-econ-row"><span class="sb-econ-key">Fiscal Deficit</span><span class="sb-econ-val neu" id="sbv-india-fiscal">--</span><span class="sb-econ-note" id="sbn-india-fiscal">loading…</span></div>
@@ -642,6 +797,9 @@ body {
       <div class="sb-ind-row"><span class="sb-ind-name">S&amp;P 500</span>    <span class="sb-ind-val neu" id="sbv-sp500">--</span></div>
       <div class="sb-ind-row"><span class="sb-ind-name">Dow Jones</span>   <span class="sb-ind-val neu" id="sbv-dow">--</span></div>
       <div class="sb-ind-row"><span class="sb-ind-name">Nasdaq</span>      <span class="sb-ind-val neu" id="sbv-nasdaq">--</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">VIX</span>         <span class="sb-ind-val neu" id="sbv-vix">--</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">10Y Yield</span>   <span class="sb-ind-val neu" id="sbv-us10y">--</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">2Y Yield</span>    <span class="sb-ind-val neu" id="sbv-us2y">--</span></div>
       <div class="sb-ind-row"><span class="sb-ind-name">Nifty 50</span>    <span class="sb-ind-val neu" id="sbv-nifty">--</span></div>
       <div class="sb-ind-row"><span class="sb-ind-name">Sensex</span>      <span class="sb-ind-val neu" id="sbv-sensex">--</span></div>
       <div class="sb-ind-row"><span class="sb-ind-name">USD/INR</span>     <span class="sb-ind-val neu" id="sbv-usdinr">--</span></div>
@@ -654,57 +812,61 @@ body {
     <!-- 4. CATEGORIES ── -->
     <div class="sb-section">
       <div class="sb-label">▶ CATEGORIES</div>
-      <div class="sb-item active" id="sb-markets"            onclick="switchCat('markets',this)">
+      <div class="sb-item active" id="sb-markets"            onclick="switchCat('markets',this)" tabindex="0" role="button">
         <span class="sb-name">📊 Markets</span>
         <span class="sb-count">10</span>
       </div>
-      <div class="sb-item" id="sb-macro_policy"      onclick="switchCat('macro_policy',this)">
+      <div class="sb-item" id="sb-macro_policy"      onclick="switchCat('macro_policy',this)" tabindex="0" role="button">
         <span class="sb-name">💰 Macro & Policy</span>
         <span class="sb-count">6</span>
       </div>
-      <div class="sb-item" id="sb-banking_fx"        onclick="switchCat('banking_fx',this)">
+      <div class="sb-item" id="sb-banking_fx"        onclick="switchCat('banking_fx',this)" tabindex="0" role="button">
         <span class="sb-name">🏦 Banking & FX</span>
         <span class="sb-count">4</span>
       </div>
-      <div class="sb-item" id="sb-commodities_energy" onclick="switchCat('commodities_energy',this)">
+      <div class="sb-item" id="sb-bonds_rates"       onclick="switchCat('bonds_rates',this)" tabindex="0" role="button">
+        <span class="sb-name">📈 Bonds & Rates</span>
+        <span class="sb-count">10</span>
+      </div>
+      <div class="sb-item" id="sb-commodities_energy" onclick="switchCat('commodities_energy',this)" tabindex="0" role="button">
         <span class="sb-name">📦 Commodities & Energy</span>
         <span class="sb-count">8</span>
       </div>
-      <div class="sb-item" id="sb-india"             onclick="switchCat('india',this)">
+      <div class="sb-item" id="sb-india"             onclick="switchCat('india',this)" tabindex="0" role="button">
         <span class="sb-name">🇮🇳 India</span>
         <span class="sb-count">10</span>
       </div>
-      <div class="sb-item" id="sb-trending"          onclick="switchCat('trending',this)">
-        <span class="sb-name">🔥 Trending</span>
-        <span class="sb-count">10</span>
-      </div>
-      <div class="sb-item" id="sb-corporate"         onclick="switchCat('corporate',this)">
+      <div class="sb-item" id="sb-corporate"         onclick="switchCat('corporate',this)" tabindex="0" role="button">
         <span class="sb-name">🏢 Corporate</span>
         <span class="sb-count">8</span>
       </div>
-      <div class="sb-item" id="sb-geopolitical"      onclick="switchCat('geopolitical',this)">
+      <div class="sb-item" id="sb-geopolitical"      onclick="switchCat('geopolitical',this)" tabindex="0" role="button">
         <span class="sb-name">🌍 Geopolitical</span>
         <span class="sb-count">5</span>
       </div>
-      <div class="sb-item" id="sb-crypto"            onclick="switchCat('crypto',this)">
+      <div class="sb-item" id="sb-crypto"            onclick="switchCat('crypto',this)" tabindex="0" role="button">
         <span class="sb-name">📉 Crypto & Web3</span>
         <span class="sb-count">10</span>
       </div>
-      <div class="sb-item" id="sb-tech_ai"           onclick="switchCat('tech_ai',this)">
+      <div class="sb-item" id="sb-tech_ai"           onclick="switchCat('tech_ai',this)" tabindex="0" role="button">
         <span class="sb-name">🤖 Tech & AI</span>
         <span class="sb-count">10</span>
       </div>
-      <div class="sb-item" id="sb-asia_china"        onclick="switchCat('asia_china',this)">
+      <div class="sb-item" id="sb-asia_china"        onclick="switchCat('asia_china',this)" tabindex="0" role="button">
         <span class="sb-name">🌏 Asia & China</span>
-        <span class="sb-count">10</span>
+        <span class="sb-count">9</span>
       </div>
-      <div class="sb-item" id="sb-europe_uk"         onclick="switchCat('europe_uk',this)">
+      <div class="sb-item" id="sb-europe_uk"         onclick="switchCat('europe_uk',this)" tabindex="0" role="button">
         <span class="sb-name">🇪🇺 Europe & UK</span>
         <span class="sb-count">6</span>
       </div>
-      <div class="sb-item" id="sb-esg_climate"       onclick="switchCat('esg_climate',this)">
+      <div class="sb-item" id="sb-esg_climate"       onclick="switchCat('esg_climate',this)" tabindex="0" role="button">
         <span class="sb-name">🌱 ESG & Climate</span>
         <span class="sb-count">7</span>
+      </div>
+      <div class="sb-item" id="sb-latam"             onclick="switchCat('latam',this)" tabindex="0" role="button">
+        <span class="sb-name">🌎 LATAM</span>
+        <span class="sb-count">10</span>
       </div>
     </div>
 
@@ -736,6 +898,9 @@ body {
       <span id="card-dow"></span><span id="val-dow"></span><span id="chg-dow"></span>
       <span id="card-sp500"></span><span id="val-sp500"></span><span id="chg-sp500"></span>
       <span id="card-nasdaq"></span><span id="val-nasdaq"></span><span id="chg-nasdaq"></span>
+      <span id="card-vix"></span><span id="val-vix"></span><span id="chg-vix"></span>
+      <span id="card-us10y"></span><span id="val-us10y"></span><span id="chg-us10y"></span>
+      <span id="card-us2y"></span><span id="val-us2y"></span><span id="chg-us2y"></span>
       <span id="card-oil"></span><span id="val-oil"></span><span id="chg-oil"></span>
       <span id="card-dollar"></span><span id="val-dollar"></span><span id="chg-dollar"></span>
       <span id="card-gold"></span><span id="val-gold"></span><span id="chg-gold"></span>
@@ -743,27 +908,38 @@ body {
     </div>
 
     <!-- ── CATEGORY TABS ── -->
+    <div class="cat-tabs-wrap">
     <div class="cat-tabs" id="catTabs">
-      <div class="cat-tab active" id="tab-markets"           onclick="switchCat('markets',null)">📊 MARKETS</div>
-      <div class="cat-tab"        id="tab-macro_policy"      onclick="switchCat('macro_policy',null)">💰 MACRO</div>
-      <div class="cat-tab"        id="tab-banking_fx"        onclick="switchCat('banking_fx',null)">🏦 BANKING & FX</div>
-      <div class="cat-tab"        id="tab-commodities_energy" onclick="switchCat('commodities_energy',null)">📦 COMMODITIES</div>
-      <div class="cat-tab"        id="tab-india"             onclick="switchCat('india',null)">🇮🇳 INDIA</div>
-      <div class="cat-tab"        id="tab-trending"          onclick="switchCat('trending',null)">🔥 TRENDING</div>
-      <div class="cat-tab"        id="tab-corporate"         onclick="switchCat('corporate',null)">🏢 CORPORATE</div>
-      <div class="cat-tab"        id="tab-geopolitical"      onclick="switchCat('geopolitical',null)">🌍 GEOPOLITICAL</div>
-      <div class="cat-tab"        id="tab-crypto"            onclick="switchCat('crypto',null)">📉 CRYPTO</div>
-      <div class="cat-tab"        id="tab-tech_ai"           onclick="switchCat('tech_ai',null)">🤖 TECH & AI</div>
-      <div class="cat-tab"        id="tab-asia_china"        onclick="switchCat('asia_china',null)">🌏 ASIA & CHINA</div>
-      <div class="cat-tab"        id="tab-europe_uk"         onclick="switchCat('europe_uk',null)">🇪🇺 EUROPE & UK</div>
-      <div class="cat-tab"        id="tab-esg_climate"       onclick="switchCat('esg_climate',null)">🌱 ESG & CLIMATE</div>
+      <div class="cat-tab active" id="tab-markets"           onclick="switchCat('markets',null)" tabindex="0" role="tab">📊 MARKETS</div>
+      <div class="cat-tab"        id="tab-macro_policy"      onclick="switchCat('macro_policy',null)" tabindex="0" role="tab">💰 MACRO</div>
+      <div class="cat-tab"        id="tab-banking_fx"        onclick="switchCat('banking_fx',null)" tabindex="0" role="tab">🏦 BANKING & FX</div>
+      <div class="cat-tab"        id="tab-bonds_rates"       onclick="switchCat('bonds_rates',null)" tabindex="0" role="tab">📈 BONDS</div>
+      <div class="cat-tab"        id="tab-commodities_energy" onclick="switchCat('commodities_energy',null)" tabindex="0" role="tab">📦 COMMODITIES</div>
+      <div class="cat-tab"        id="tab-india"             onclick="switchCat('india',null)" tabindex="0" role="tab">🇮🇳 INDIA</div>
+      <div class="cat-tab"        id="tab-corporate"         onclick="switchCat('corporate',null)" tabindex="0" role="tab">🏢 CORPORATE</div>
+      <div class="cat-tab"        id="tab-geopolitical"      onclick="switchCat('geopolitical',null)" tabindex="0" role="tab">🌍 GEOPOLITICAL</div>
+      <div class="cat-tab"        id="tab-crypto"            onclick="switchCat('crypto',null)" tabindex="0" role="tab">📉 CRYPTO</div>
+      <div class="cat-tab"        id="tab-tech_ai"           onclick="switchCat('tech_ai',null)" tabindex="0" role="tab">🤖 TECH & AI</div>
+      <div class="cat-tab"        id="tab-asia_china"        onclick="switchCat('asia_china',null)" tabindex="0" role="tab">🌏 ASIA & CHINA</div>
+      <div class="cat-tab"        id="tab-europe_uk"         onclick="switchCat('europe_uk',null)" tabindex="0" role="tab">🇪🇺 EUROPE & UK</div>
+      <div class="cat-tab"        id="tab-esg_climate"       onclick="switchCat('esg_climate',null)" tabindex="0" role="tab">🌱 ESG & CLIMATE</div>
+      <div class="cat-tab"        id="tab-latam"             onclick="switchCat('latam',null)" tabindex="0" role="tab">🌎 LATAM</div>
+    </div>
+    </div>
+
+    <!-- ── SEARCH BOX ── -->
+    <div class="news-search">
+      <div class="news-search-wrap">
+        <span class="news-search-icon">🔍</span>
+        <input type="text" id="newsSearchInput" placeholder="Filter headlines…" oninput="filterNews()" />
+      </div>
     </div>
 
     <!-- ── NEWS AREA ── -->
     <div class="news-area">
       <div class="news-hdr">
         <span class="news-hdr-title" id="newsTitle">▶ MARKET UPDATES</span>
-        <span class="news-hdr-meta" id="newsSubtitle">Click headline to expand · April 05, 2026 at 09:02 PM IST</span>
+        <span class="news-hdr-meta" id="newsSubtitle">Click headline to expand · April 05, 2026 at 09:18 PM IST</span>
       </div>
       <div class="news-col" id="newsCol"></div>
     </div>
@@ -773,16 +949,19 @@ body {
 
 <!-- STATUS BAR -->
 <div class="statusbar">
-  <span>NEXUSFEED · RSS FEEDS: 43 SOURCES · 13 CATEGORIES · AUTO-REFRESH: 5 MIN · NOT FINANCIAL ADVICE</span>
+  <span>NEXUSFEED v2 · RSS FEEDS: 46 SOURCES · 14 CATEGORIES · AUTO-REFRESH: 5 MIN · NOT FINANCIAL ADVICE</span>
   <span id="statusClock">--:-- IST</span>
 </div>
+
+<!-- SCROLL-TO-TOP -->
+<button class="scroll-top" id="scrollTopBtn" onclick="scrollToTop()" title="Back to top">↑</button>
 
 <!-- ══════════════════════════════════════════
      SCRIPTS
 ══════════════════════════════════════════ -->
 <script>
 // ── All news injected by Python ──
-const NEWS_DATA = {"markets": {"label": "📊 MARKETS & EARNINGS", "items": [{"title": "&#x27;Wouldn&#x27;t be shocked&#x27; if bull market continues: Wall Street aims to look past Iran conflict", "source": "Yahoo Finance", "time": "31 min ago", "summary": "Despite soaring oil prices and ongoing Middle East tensions, earnings estimates have held steady and the broader market has largely avoided a sharp decline.", "link": "https://finance.yahoo.com/news/wouldnt-be-shocked-if-bull-market-continues-wall-street-aims-to-look-past-iran-conflict-150025546.html?.tsrc=rss"}, {"title": "Dow Jones Futures: Trump Threatens &#x27;Hell&#x27; If Iran Doesn&#x27;t Open Hormuz; Sandisk Leads 7 Stocks To Watch", "source": "Yahoo Finance", "time": "50 min ago", "summary": "President Trump threatened huge Tuesday attacks, saying Iran will be &quot;in hell&quot; if the Strait of Hormuz isn&#x27;t opened. A market rally attempt is underway, but look for this signal.", "link": "https://finance.yahoo.com/m/7b231c75-cfb6-380b-bdd2-878fe84b548a/dow-jones-futures%3A-trump.html?.tsrc=rss"}, {"title": "This ETF Might Double Again This Year After SpaceX’s IPO", "source": "Yahoo Finance", "time": "2 hours ago", "summary": "UFO returned 66.36% in 2025 while the S&amp;P 500 gained a fourth of that. With a SpaceX IPO looking increasingly likely before year-end, the question is whether the fund can repeat that performance in 2026 — and whether investors understand what they’re actually buying. What UFO Is Built to Do Procure Space ETF (NYSEARCA:UFO) tracks ... This ETF Might Double Again This Year After SpaceX’s IPO", "link": "https://247wallst.com/investing/2026/04/05/this-etf-might-double-again-this-year-after-spacexs-ipo/?.tsrc=rss"}, {"title": "The S&amp;P 500 Is Down 4% in 2026. Here Is What Long-Term Investors Should Do Now.", "source": "Yahoo Finance", "time": "3 hours ago", "summary": "It&#x27;s the reaction to market turbulence that separates the average investors from the great ones.", "link": "https://www.fool.com/investing/2026/04/05/sp-500-down-4-2026-long-term-investors-do-now/?.tsrc=rss"}, {"title": "Inflation readings, oil volatility, and airline earnings: What to watch this week", "source": "Yahoo Finance", "time": "4 hours ago", "summary": "Inflation readings, Delta earnings, and more Middle East volatility are set to headline the week ahead.", "link": "https://finance.yahoo.com/news/inflation-readings-oil-volatility-and-airline-earnings-what-to-watch-this-week-100027649.html?.tsrc=rss"}, {"title": "Is the Trump Bull Market in Its Final Act? History Offers a Decisive Answer.", "source": "Yahoo Finance", "time": "4 hours ago", "summary": "Historical precedent may be the insurmountable headwind that Wall Street&#x27;s bull market can&#x27;t overcome.", "link": "https://www.fool.com/investing/2026/04/05/trump-bull-market-final-act-history-clear-answer/?.tsrc=rss"}, {"title": "VOO Is Down 7% From Its January High. The Case for Staying Put Has Never Been Stronger", "source": "Yahoo Finance", "time": "5 hours ago", "summary": "The current pullback in the S&amp;P 500 may be uncomfortable. But it&#x27;s also common and presents a buying opportunity for savvy investors.", "link": "https://www.fool.com/investing/2026/04/05/voo-down-7-january-high-case-stay-put-market/?.tsrc=rss"}, {"title": "One of the Stock Market’s Last Havens Is Now at Risk", "source": "Yahoo Finance", "time": "6 hours ago", "summary": "Value stocks, or shares trading at low multiples of their book value, have quietly marched toward a banner year.  Now the war in the Middle East is threatening to upend the trade, leaving investors few places to find refuge from fears over everything from rapid advances in artificial intelligence to geopolitical conflict.  The Russell 1000 Value Index is up 2.4% so far this year, beating the Russell 1000 Growth Index, which is down 9.1%, by the largest margin since 2022.", "link": "https://finance.yahoo.com/m/287f8bb3-04bf-30fe-ad4f-470ba0da8e5b/one-of-the-stock-market%E2%80%99s.html?.tsrc=rss"}, {"title": "Opinion: If You Think the End of the Iran War Will Lead to a &quot;Trump Bump&quot; on Wall Street, You&#x27;ll Be Sorely Disappointed", "source": "Yahoo Finance", "time": "7 hours ago", "summary": "While an eventual end to conflict in the Middle East will stem near-term uncertainty, it ignores the bigger picture.", "link": "https://www.fool.com/investing/2026/04/05/end-iran-war-trump-bump-wall-street-disappointed/?.tsrc=rss"}, {"title": "Copper Miners ETF Is Showing Why You Need to Tread with Caution", "source": "Yahoo Finance", "time": "8 hours ago", "summary": "You shouldn&#x27;t ignore that the Copper Miners ETF is focused on a highly volatile commodity niche.", "link": "https://www.fool.com/investing/2026/04/05/copper-miners-etf-is-showing-why-you-need-to-tread/?.tsrc=rss"}]}, "macro_policy": {"label": "💰 MACRO & POLICY", "items": [{"title": "Turning Point Near for Global Trade? - WWD", "source": "Google News", "time": "17 hours ago", "summary": "Turning Point Near for Global Trade?  WWD", "link": "https://news.google.com/rss/articles/CBMitgFBVV95cUxQRXh6YXh2b2VvLS1kTDdrZzQ4ekV4RnFveS1YV1ljOHJnZTVvZlYxclNGNTNnVUlnUnhMTV9GdTlVampzMVpQajd5R0pnemhMeWx1WWlydkN4Tk0tTnI4NDBrRGhMWFNyQU5MQXVtdzYtaXI0ZkYwZUdodGZwRkFKWWFVUXVVa0ViVFJ4V0RCTlhZSm5lLWVRVTJBT0ZqR1hGeWdNdUNranNNMHF3T0V3MGJzc1Badw?oc=5"}, {"title": "Explainer-What is the World Trade Organization e-commerce moratorium? - AOL.com", "source": "Google News", "time": "1 hour ago", "summary": "Explainer-What is the World Trade Organization e-commerce moratorium?  AOL.com", "link": "https://news.google.com/rss/articles/CBMihAJBVV95cUxOYzJ0OUVMOTdDWW9NTDdfYmtaSEIteGVWTnMydFdWaTY2cXhMSGgzeG5hYzJsLUV4WDJGUHU1WlVkY2ViNE9sVVNhMlk1SWYtT3ZfRDBtaThnTldoazJ6TFY0cURQZC1xaUZ0V1FoOXNGbXN0eTJ3YjF1ZERwUFd5TW1STElOMnl6dDBsbmRvVGpBajhZZG1YTF96X3hFYlp0OEtxd0twalQtNExQUGhGak9aWW1FXzFEMDJjRmVPaWp2R196ZDVmVGZWd0lobGlOMXc0TktzdnM4MWthTnRvc3lMZkp5aDRIUExCbEFKT21TaktSbWlxSS1EeHcyZHRSRVdVUQ?oc=5"}, {"title": "WTO Goods Trade Barometer Indicates Supply Chain Disruptions Cramping Growth - WWD", "source": "Google News", "time": "17 hours ago", "summary": "WTO Goods Trade Barometer Indicates Supply Chain Disruptions Cramping Growth  WWD", "link": "https://news.google.com/rss/articles/CBMinAFBVV95cUxPV0lFUExMRjZUenB0eldBWnlnYUxFX2pnN1ZRcHVndE8wM0tDcHZ4bE1LWWJpV0VCWEJrZXUwVUxneE83WWRaaEtlWlFFdVdWbWlvb05XSWZkYllKSGhMQm5xTXFFbk1UTndPeG94UDg0YmUtLWdqSFVqLTJ3SUtZT1hUYVpocFFYM012cERQS0NzR29nOVFyQldtTnA?oc=5"}, {"title": "WTO talks end in deadlock after Brazil blocks deal on e-commerce duties - AOL.com", "source": "Google News", "time": "16 hours ago", "summary": "WTO talks end in deadlock after Brazil blocks deal on e-commerce duties  AOL.com", "link": "https://news.google.com/rss/articles/CBMiugFBVV95cUxQRFd4Qjhhd0h3MEFnRXJmWXE0NGY3cHZiOWJNSk9PQkxQV2oyRnlia1liZlpTaFdWaXdjMVpyXzA4Qjd5ck5lN1dWcnV6VXVzNHRraUh3Um5LcWNRRU9YcThVbWNReFpINV9GS2s2a1ZwLUpvR1g2TlpnYlhBZjZPNGRONklGTExFTlUxSUJpdmExSHFQVi1kSWE1bk1zNldXQUhNX19iVWxTTm1WNXByVndyaXZpV3pnbUE?oc=5"}, {"title": "From 26% US tariffs to interim deal: How India navigated Trump’s trade war - MSN", "source": "Google News", "time": "12 hours ago", "summary": "From 26% US tariffs to interim deal: How India navigated Trump’s trade war  MSN", "link": "https://news.google.com/rss/articles/CBMi9gJBVV95cUxNNHpfUU4yempqQjhOTVhCTkppcF9hTXktMTVyX3ktTXBuR3E4N0NWTlV0OHFrX1gtd01hR0JvTi1BQWVKbmdlUGZWQ2hjTjdBNWtDUDU2TjJKOXJfcm1UTlM4bjUwTzRPeU5rLU9fRG9iMlRBbGV5U3ZBWnJKdkZQeFB3bTIyb25uZGlnRHp0UUNxSG9nVV9NNWpaS2VvamxWZTZEeTB2ZlQzR0Q2UzBPY1F2UlEwZjd6SGU5dDhVU3hzalpIS2gxY0tlRGtHUUc2QUZQbXNIZ2NzdjZLS0pLajhGZkVZbTU1bDA2bUpkWlpRaWxJYi1fNE9zcXYzR1RTdWk1a3lLSF83Vmt4UXNaSmNHMVRhbkdpcWViSzQ2aVBJYTBfVlQ1d29KdDhVcXN5dHlUamFVQ0xFVUI3OWFrdmZrYkxEWTZwSl9MT0oxTmMzYWt1bnE2REluUXdDSjBndVRWdWc2RW83d2o2bDJZX2p3UWpzQQ?oc=5"}, {"title": "New U.S. Tariffs on Aircraft Parts Push Airline Operating Costs Higher as Boeing and Airbus Warn of Supply Chain Disruption - altitudesmagazine.com", "source": "Google News", "time": "19 hours ago", "summary": "New U.S. Tariffs on Aircraft Parts Push Airline Operating Costs Higher as Boeing and Airbus Warn of Supply Chain Disruption  altitudesmagazine.com", "link": "https://news.google.com/rss/articles/CBMingFBVV95cUxPbnluVVRjaVNNSHJsN0FPNExkZDQ4R3NTT3R3SEdZUXhVaEg1ZUxBSDQ1TV9reEFCdFNIVk5fLURQdzdVM1dQQjRndGoxSkxmaERHcXBJbXRVWnVKMkFYNHgwbHNzLUd6bTE0eGZaZ2NVUl84ajJ1SFVuM2pHSFFpVDNuY2k4OUFBZU1NUmZ2OWc4anRLLVRqZ1dpWTZKUQ?oc=5"}]}, "banking_fx": {"label": "🏦 BANKING & FX", "items": [{"title": "Euro Technical Forecast: EUR/USD Coils Below Resistance—Breakout Setup Builds - FOREX.com", "source": "Google News", "time": "14 hours ago", "summary": "Euro Technical Forecast: EUR/USD Coils Below Resistance—Breakout Setup Builds  FOREX.com", "link": "https://news.google.com/rss/articles/CBMi1AFBVV95cUxPME1oSjhYZ0h0QWVXQWNfV1R4ZW8wdU1fUmwwWUVwQll2TUNuaHpOSVJGOTV2dzEwTERJQURuTkMzcFBKbHdLTVhISGtYLXRCZ1hiMUZfZFdVYnVnMUtoazl6WWE1M3QtN29ybDZsNmRlYl9kbmljRmJmUjJKRE44MGJTUHBYRVlkaWg2dE9VcVNUS19BdW5oMkFmX0ZGaEZMc0I2NTVLdlVXQTRtbURRMzdrajN2bEJwUTlFWm9VWGo1Y3Y5cE5JWDV3dE1vM0wxbWM3MtIB1AFBVV95cUxPME1oSjhYZ0h0QWVXQWNfV1R4ZW8wdU1fUmwwWUVwQll2TUNuaHpOSVJGOTV2dzEwTERJQURuTkMzcFBKbHdLTVhISGtYLXRCZ1hiMUZfZFdVYnVnMUtoazl6WWE1M3QtN29ybDZsNmRlYl9kbmljRmJmUjJKRE44MGJTUHBYRVlkaWg2dE9VcVNUS19BdW5oMkFmX0ZGaEZMc0I2NTVLdlVXQTRtbURRMzdrajN2bEJwUTlFWm9VWGo1Y3Y5cE5JWDV3dE1vM0wxbWM3Mg?oc=5"}, {"title": "Official exchange rates on selected date | Bank of Russia - Центральный Банк России", "source": "Google News", "time": "10 hours ago", "summary": "Official exchange rates on selected date | Bank of Russia  Центральный Банк России", "link": "https://news.google.com/rss/articles/CBMiVkFVX3lxTE5YcldQcEpOMEd0OGVlTzFTZnlKM2lYZ1JxQ2FvLUVUMDI2WnQ0bnk2SzlEV01pb2RKNW40WVJTTzNUTTdDeFJmSDFJN3pnZE5tS3QtakRR?oc=5"}, {"title": "EUR/USD Forecast: Sellers regain control on risk-aversion - FXStreet", "source": "Google News", "time": "19 hours ago", "summary": "EUR/USD Forecast: Sellers regain control on risk-aversion  FXStreet", "link": "https://news.google.com/rss/articles/CBMitwFBVV95cUxOUkVhMWJoVXliQ0F5NUMyZFl2MFdnWURMVElSYkgxbE9qUXRGWkQ1b3JjdkNTZE16RjJkWkJtMnVfckFsOGNfcVhKd3NBTDFpY2V4Mm1KTVFuR1RhLTJXOGFoZEhEOGRHNHd2X2UxYnFrZ3J0aTJEU1RhY2x4cFNXR0V4c1VsV2pFZUZjTzJDWkV1N0d1NEJPQzhrbFU0T0JTVjNaYU5oQlk2NFpaZE5XNXFpMWY1T0E?oc=5"}, {"title": "Convert still believe to Canadian dollar (BELIEVE to CAD) - BeInCrypto", "source": "Google News", "time": "20 hours ago", "summary": "Convert still believe to Canadian dollar (BELIEVE to CAD)  BeInCrypto", "link": "https://news.google.com/rss/articles/CBMiYkFVX3lxTE03NFRGWG84WWRLVnBDR2FPWXcyMTg0VHZxY2lLZTRTWHZzcHE5U1BVRzJpdDE2UXo0b1VBd2hkOHJ0ckNXczZoUXVVcE1odmtnM0ZrLXFieVlETzlkSDRlazZ3?oc=5"}]}, "commodities_energy": {"label": "📦 COMMODITIES & ENERGY", "items": [{"title": "StoneX Commodity Index Market Report - stonex.com", "source": "Google News", "time": "19 hours ago", "summary": "StoneX Commodity Index Market Report  stonex.com", "link": "https://news.google.com/rss/articles/CBMiiwFBVV95cUxOSXJjVm9GTlgxYWhkVENKVUMwSnh2RVhkQktOX0VnLVVIV3kwOGRRMTlZbFFueGJzOUp0MFEzZU1jQnlHSnY1bUdyMzZXbW1PZERrRzg3eUxGXzF6MjJaRjRTU2hCd1JjWGhtOFY4d1FDQ1B5WldkYmRVOG1nX0w4amJMR21tTjBza0hj?oc=5"}, {"title": "Systemic Commodity Chain Disruption Threatens Global Markets in 2026 - Discovery Alert", "source": "Google News", "time": "19 hours ago", "summary": "Systemic Commodity Chain Disruption Threatens Global Markets in 2026  Discovery Alert", "link": "https://news.google.com/rss/articles/CBMilwFBVV95cUxOTlpGNGtxNGVzYlFleVJJeS0taEdQOXlPeFRTb0tRLUt4bXlRdnpTdTB4MnM0TGp2Y05MYm9yckpBZV9nVUk3b2dkRnhpc0ZmS0JXT2JZVHgxdnlPLTZkYmxvYUU3TVJKV2lEWWhJVzJoT0dYbWJIMnNaTXByTmxRTEYzVTl3SUwxZXhZb3JYNzJKZVpWTzlB?oc=5"}, {"title": "PMEX daily trading report - Business Recorder", "source": "Google News", "time": "18 hours ago", "summary": "PMEX daily trading report  Business Recorder", "link": "https://news.google.com/rss/articles/CBMiVkFVX3lxTE1XVEt2SlFwdU9UejVSV3FRUm5rVncxaW9vX3NCUDJnUmU0YXNOWmF2UlhkZ0QwMEkzdGxKckN3MjgtaHBDck1tX2U1UkhCamFfSkdRSjl30gFWQVVfeXFMTVdUS3ZKUXB1T1R6NVJXcVFSbmtWdzFpb29fc0JQMmdSZTRhc05aYXZSWGRnRDAwSTN0bEpyQ3cyOC1ocENyTW1fZTVSSEJqYV9KR1FKOXc?oc=5"}, {"title": "OPEC+ Production Increase May 2026: Market Impact Analysis - Discovery Alert", "source": "Google News", "time": "3 hours ago", "summary": "OPEC+ Production Increase May 2026: Market Impact Analysis  Discovery Alert", "link": "https://news.google.com/rss/articles/CBMiiwFBVV95cUxPUGdCYlZad29zUFRtTmpBeGotR2s3T015VnVjZFNYQXhGRlFVQ0Z2THFqTUI0YzRQNmdNUklYZ0pDeTJLdVBUaTVZZEh6UGhJS2F2X1Y3WV9GM05zdjVSZG9ULXdSWWpjMHFUWFlNTW9ic0tLZ3dMamM2M2NFZUczLXhlNTMwNUZVX3FN?oc=5"}, {"title": "Iran targets key infrastructure in Kuwait, Bahrain and UAE - thenationalnews.com", "source": "Google News", "time": "8 hours ago", "summary": "Iran targets key infrastructure in Kuwait, Bahrain and UAE  thenationalnews.com", "link": "https://news.google.com/rss/articles/CBMixgFBVV95cUxNTjJsZXM4UzFvS0NUSU9yUkFZamgxSE9sWHlCX2pBMVRIMGJDN1dzZHZKZk1tY0w2aWw5NjNYVjFjMkFILXRScktRd2JSTVlBTEE4eURyRUVVc1dJOUR2VlEtLXRwd003SkhoNVVMS3N4czFhTC1tN3M2LU16d096NGppdE9fVjhIR255NUt6VVRsMnBaS1BzLU1pZV9GQ3l1MHN1VG9jbjk2cUlnZmJvV0ZPN1NuMzBRNmF1QTMtUGxRcEtTZ1E?oc=5"}, {"title": "Clean Energy Transition Cuts Global Oil Demand Forecasts - Discovery Alert", "source": "Google News", "time": "21 hours ago", "summary": "Clean Energy Transition Cuts Global Oil Demand Forecasts  Discovery Alert", "link": "https://news.google.com/rss/articles/CBMigwFBVV95cUxQaDdyWEtjNkdyNXRLaFM2cXdKV1M3UFZTbGZBbk4zVWVXS3NDX3hFcThlYW9vTmtEN0ZqZ3dzTUtfa2J3clN4bDI5SDRwd25WbWw1V0p4OGY4TU9HbVRWeDR5WHkxekF3XzRiTmlZRlJxZnpPR3J1YVU0ZXZ4LTRYaVBUOA?oc=5"}, {"title": "Opinion | China’s growing North Africa presence a structural challenge for Europe - South China Morning Post", "source": "Google News", "time": "18 hours ago", "summary": "Opinion | China’s growing North Africa presence a structural challenge for Europe  South China Morning Post", "link": "https://news.google.com/rss/articles/CBMiwAFBVV95cUxPM3BZVnVWUWVRcGR6WkdWSWE2ZlIxVTNGel92NFNxV1E2Nl9hWGlXVjVRUFdqN3ZwZGR0TkZ3SEMyM0gwX1ctU3F4aEhCWEhPV3ZYclUwdmhCd2VsZmRjQjQxamV2NzVPdUp6VlhFc2IyYmxqam81LV84dmF0TWl4bVlxakVzQm80WWpNUDNHZ3JqWEZoM29FTGhLcDJ5TmRYTlJneG5GelptRi03STgxS0xVNTNZejVNdGNnaHBkUGnSAcABQVVfeXFMTzNwWVZ1VlFlUXBkelpHVklhNmZSMVUzRnpfdjRTcVdRNjZfYVhpV1Y1UVBXajd2cGRkdE5Gd0hDMjNIMF9XLVNxeGhIQlhIT1d2WHJVMHZoQndlbGZkY0I0MWpldjc1T3VKelZYRXNiMmJsampvNS1fOHZhdE1peG1ZcWpFc0JvNFlqTVAzR2dyalhGaDNvRUxoS3AyeU5kWE5SZ3huRnpabUYtN0k4MUtMVTUzWXo1TXRjZ2hwZFBp?oc=5"}, {"title": "Opec+ holds output steady amid Iran conflict and volatile oil markets - thenationalnews.com", "source": "Google News", "time": "43 min ago", "summary": "Opec+ holds output steady amid Iran conflict and volatile oil markets  thenationalnews.com", "link": "https://news.google.com/rss/articles/CBMi0gFBVV95cUxQS3UwOGhhb290NDh0QW5TN3lLWTRlSUtYczJuSzFyOEg3cjlaejg3NVNyZlBMR25jQV92b2sxaWtUU29KWWFOQW95V095NHhhdE11UEhIbEdoU1VzcFh6bU1FNVJra3lDcEVXVFZVZlZNWDRnRFdIaXBDdktwRDVtQzZtcVlTRDhvbzAyWVctaXVnUjBNTVZfbUpwZE04cmEyS0NwNGVHVDQ3VUhaaXg3Z3M2WkY0c1RaMmVrN1Q5czBuUEh6aUxZcmR4ejBjU1dBcFE?oc=5"}]}, "india": {"label": "🇮🇳 INDIA MARKETS", "items": [{"title": "Ahead of Market: 10 things that will decide D-Street action on Monday", "source": "Economic Times", "time": "4 hours ago", "summary": "Bulls staged a sharp rebound on Thursday, lifting Sensex and Nifty to a second straight gain despite high volatility. IT stocks led the recovery, while India VIX edged higher. Analysts see near-term upside but caution that broader weakness and elevated volatility persist. Market sentiment remains positive, supported by strong breadth and selective buying interest.", "link": "https://economictimes.indiatimes.com/markets/stocks/news/ahead-of-market-10-things-that-will-decide-d-street-action-on-monday/articleshow/130037775.cms"}, {"title": "Stocks braced for volatility as RBI policy, West Asia conflict take centre stage, say analysts", "source": "Economic Times", "time": "4 hours ago", "summary": "The domestic stock market is expected to remain volatile this week as investors track the Reserve Bank&#x27;s monetary policy decision, key global macroeconomic data and the impact of the West Asia conflict, analysts said.", "link": "https://economictimes.indiatimes.com/markets/stocks/news/stocks-braced-for-volatility-as-rbi-policy-west-asia-conflict-take-centre-stage-say-analysts/articleshow/130037689.cms"}, {"title": "M-cap of 6 of top 10 most valued firms drops nearly by Rs 65,000 cr; Bharti Airtel biggest laggard", "source": "Economic Times", "time": "7 hours ago", "summary": "The combined market valuation of six of the top-10 most valued firms declined by Rs 64,734.46 crore in a holiday-shortened last week, with Bharti Airtel taking the biggest hit, reflecting the broader weakness in the equities market.", "link": "https://economictimes.indiatimes.com/markets/stocks/news/m-cap-of-6-of-top-10-most-valued-firms-drops-nearly-by-rs-65000-cror-bharti-airtel-biggest-laggard/articleshow/130035445.cms"}, {"title": "11 IPO stocks to see lock-in expiry worth Rs 2,378 crore in next two months. Do you own any?", "source": "Economic Times", "time": "8 hours ago", "summary": "Rs 2,378 crore in IPO anchor shares unlocking across 11 firms during April–May may create supply pressure, with clustered expiries potentially impacting stock prices and short-term market sentiment significantly.", "link": "https://economictimes.indiatimes.com/markets/stocks/news/11-ipo-stocks-to-see-lock-in-expiry-worth-rs-2378-crore-in-next-two-months-do-you-own-any/slideshow/130035542.cms"}, {"title": "How to trade Nifty Bank amid RBI monetary policy: Anand James shares his playbook", "source": "Economic Times", "time": "8 hours ago", "summary": "Bank Nifty is at a critical juncture ahead of the RBI policy, showing early signs of stabilization after recent volatility. Easing selling pressure and improving technical indicators suggest a potential short-term rebound. Traders are advised to monitor key levels and historical trends for positioning.", "link": "https://economictimes.indiatimes.com/markets/stocks/news/how-to-trade-nifty-bank-amid-rbi-monetary-policy-anand-james-shares-his-playbook/articleshow/130034999.cms"}, {"title": "IPO pipeline strengthens; 38 cos file draft papers in March", "source": "Economic Times", "time": "9 hours ago", "summary": "As many as 38 companies, including SBI Funds Management and Manipal Health Enterprises, filed preliminary IPO papers with Sebi in March 2026, signalling improving issuer sentiment even as regulatory timelines contributed to the surge.", "link": "https://economictimes.indiatimes.com/markets/ipos/fpos/ipo-pipeline-strengthens-38-cos-file-draft-papers-in-march/articleshow/130034483.cms"}, {"title": "Chasing trends or buying value? The strategy that wins over time", "source": "Economic Times", "time": "9 hours ago", "summary": "The global stock market landscape has become increasingly complex, shaped by macroeconomic uncertainty, geopolitical risks, and shifting liquidity conditions. Yet, amid this volatility, timeless investing principles, such as those advocated by Joel Greenblatt offer a structured lens to interpret market behavior and identify opportunities.", "link": "https://economictimes.indiatimes.com/markets/stocks/news/chasing-trends-or-buying-value-the-strategy-that-wins-over-time/articleshow/130034440.cms"}, {"title": "IPO calendar stays muted with just 2 issues opening this week. Check details", "source": "Economic Times", "time": "10 hours ago", "summary": "Primary market activity remains muted, with just two offerings next week, a Rs 48 crore SME IPO by Safety Controls and Devices and PropShare Celestia REIT worth Rs 245 crore. Rising volatility, weak listings, and cautious investor sentiment have slowed IPO momentum, prompting companies to delay launches or trim valuations despite a broader pipeline remaining intact.", "link": "https://economictimes.indiatimes.com/markets/ipos/fpos/ipo-calendar-stays-muted-with-just-2-issues-opening-this-week-check-details/articleshow/130034213.cms"}, {"title": "YES Bank Q4 biz update: Loans rise 11%, deposits grow 12% YoY", "source": "Economic Times", "time": "10 hours ago", "summary": "YES Bank reported steady Q4 growth, with advances rising 6% QoQ and deposits outpacing at 9%, improving its CD ratio to 85.4%. Strong CASA traction supported margins, though reliance on certificates of deposit increased. Liquidity remained comfortable. Overall, improving deposit quality and a stronger liability franchise signal a more balanced outlook despite measured loan growth.", "link": "https://economictimes.indiatimes.com/markets/stocks/earnings/yes-bank-q4-biz-update-loans-rise-11-deposits-grow-12-yoy/articleshow/130034185.cms"}, {"title": "FPIs extend selloff in April; pull out Rs 19,837 crore in just 2 sessions", "source": "Economic Times", "time": "10 hours ago", "summary": "Foreign investors continued to exit Indian equities, withdrawing Rs 19,837 crore (USD 2.1 billion) in the first two trading sessions of April, weighed down by the West Asia conflict, rising crude oil prices, and persistent rupee depreciation.", "link": "https://economictimes.indiatimes.com/markets/stocks/news/fpis-extend-selloff-in-april-pull-out-rs-19837-crore-in-just-2-sessions/articleshow/130034089.cms"}]}, "trending": {"label": "🔥 TRENDING", "items": [{"title": "Stock market holidays next week: NSE, BSE closed on these 2 days - check dates - MSN", "source": "Google News", "time": "2 hours ago", "summary": "Stock market holidays next week: NSE, BSE closed on these 2 days - check dates  MSN", "link": "https://news.google.com/rss/articles/CBMioANBVV95cUxQanc2cHZ5MThFeG9SODhLcmpEVzhCQlFfOW41TWx3SmY4MDZScDdWdGU4bTZYM1FHY2hDdlJXQUNGcDhwNmlaM0JIVzNrTVNlVHZrZUJDZTR0eUlNOWZVT180UlNpX3F0VlRKLUVrbDVCWEtadUtjOWJ2ekpSRm8yY2tCT1UxU2RTNGxRSmtQOW1laU5WeDJPVEoyNExEVUNmXy1UcUxObU8xOTFSSUcwb0JHS3RfeUFoTUZLMFRSYkFPV1BOV0NIVlBNOXprNTROa2JqdFF1QjZxM29QQzhVVXJjXzdPR1ZBaXBmeU9QTC1Gb3JQSDhWSDVyMnlQRV9wYlBCcUt6UnFDUmpTZlZSbF94aG04SWZyc2xua2ZiQjAxd1QxbmFMZERFczFrNzdFSXpzYnRscUJFUXNnTlZ6UTlYemxfb2pvTVViUFFyTllCeE80X09kNEtHeTE2V0llNGdvMUlTZ2stdHRCX0s3bHZMaVNuRnpUWnBHVXAtLXR4aGJ6cmxuVGxtMXBpNW5GdDhkUGJtdnNhazZROUtPNQ?oc=5"}, {"title": "Indian stock markets gain in early trade over positive Asian cues - DD News", "source": "Google News", "time": "7 hours ago", "summary": "Indian stock markets gain in early trade over positive Asian cues  DD News", "link": "https://news.google.com/rss/articles/CBMilgFBVV95cUxPd21vYlZhMy1tdHVnSmFtUVhvUm5QbDZxUXJSWjVxcFIyZ1NHNHc5QTdsNHZtR1gtLUw3YmtvTUxCaG5RZXpiVWNLVmFiUWFhY3EwQWRTcmhvQk5wLVdhbl8wdUU4X1ZlMDFQeko4STJnVjUtWWpwWlFFSExyWnp1WWMtMmZua3ptc19OZXFiNmhUbENVQlE?oc=5"}, {"title": "Stock Market Holiday 2026: Will BSE, NSE Be Open For Six Days Next Week? Special Live Trading Session On Sat? - Goodreturns", "source": "Google News", "time": "12 hours ago", "summary": "Stock Market Holiday 2026: Will BSE, NSE Be Open For Six Days Next Week? Special Live Trading Session On Sat?  Goodreturns", "link": "https://news.google.com/rss/articles/CBMi3AFBVV95cUxQNThUckVoRU9fbk1INnZqRG1NV05CM1JpTXVhY0JjdnhTVXk0elczQllSMGRrWS13TTVXeUlyQjlIZFlxUkZPQWtHX0Q1V0VCVVJFR0c0enV4RFZOeXhpY1B5TGdPeUZNQVQ5ZTZzOWk2Q0NwZFBlRkhvaGRJek5jRmtkUEt0blpmSkFMNDE0QllYeDVMMFJTTXVzSWtmaVhKQ1h4N3YwZ2d1WGZMVHZ1OXB0UmRLZnlMU1NVVDVPTEg0eFp4ZnBfUjZwLUtKMzg5NlNZNFRjMHZyTmhu?oc=5"}, {"title": "Stocks braced for volatility as RBI policy, West Asia conflict take centre stage, say analysts - BusinessLine", "source": "Google News", "time": "4 hours ago", "summary": "Stocks braced for volatility as RBI policy, West Asia conflict take centre stage, say analysts  BusinessLine", "link": "https://news.google.com/rss/articles/CBMi7gFBVV95cUxOOGJqcDJvd01WU0RIdGFNR2NIaDlndFNHZGc1WlZVWnR0a20zUk1walJ1VUJnb05DQ281LVZnZll1Q1U0RGhRSEFLUU4xd19UX1VwVWpwOXFEQ1RMUnlKQW43cVd2NWN2bWZxeDhUa2p2X21YYmY2djgyZWdGdjB4dmp1czZZVmdPVlB6bVNwTWhIOC1IZS1XVmFXc0RFaGRZMzZMRnpLQlRtZ21ZLUZFNkdqV05VU1M4ZjNoTGRnZVVkZWpFYTQ4QnF5a2puNGdweFN6TFBCVVEzMFk4SGEtUUtsaGNyWkRoeHdqOEdR0gH0AUFVX3lxTE9qVWxXbXdaOXRmUGJWTC1nUmNzMUJhYXRQSzl0T1FxVHpaaHpOQ0c2eVlwRWVIaHFVMWZnTWk0QmVxTHE4ZEFmQ1ZHLWR5ZzlKVlZWT3AzcEppdGhLZ3QzMUdKNmF0MUoweTlEeGdnYmpZZHpzZ0xKYnRxYm5rb1BMa0hITHFpR2JPbVRfUmNoNGV4TnRHX2pMNGlab3RCNmd6SlVCQTNxNW9tU0lfcmIteGszamd4b3Q0cFd3U0d4em9jVnFwczRMUzB0ZEh0TG1DRnhWUkJwN29QNVR1MGhJUkVvQm5VSG1MdmtmQXVxUlZ0Y1k?oc=5"}, {"title": "Ahead of Market: 10 things that will decide D-Street action on Monday - The Economic Times", "source": "Google News", "time": "4 hours ago", "summary": "Ahead of Market: 10 things that will decide D-Street action on Monday  The Economic Times", "link": "https://news.google.com/rss/articles/CBMi3wFBVV95cUxOeVlpUUd5ZUt2Q2JVZ1lZQm1ZSzRsbzd5eXU0bDdMWEtwYkt0MDVneTNiak9EOVhYZnBtU1pFTE5ibHhieUhVaS00MnlPUjNGM3BYZDhNbUE3Y1p2M2M2R0d6LTFOdjVPY1B1djZtX3E1UmdFWllXbmZKU29tYk9uTzB4amdNYWVBMEdsU0FIMHVsVi1IeHpFb2dVclphZGVxRlZ5NFdZc092ZmpaZ0pITGJ2MzVXUXpsZVpRMEhyczQ5dUNueDRlY09VNGRKR2s1ejZvVHQtM1lfZkRnLTVn0gHfAUFVX3lxTE55WWlRR3llS3ZDYlVnWVlCbVlLNGxvN3l5dTRsN0xYS3BiS3QwNWd5M2JqT0Q5WFhmcG1TWkVMTmJseGJ5SFVpLTQyeU9SM0YzcFhkOE1tQTdjWnYzYzZHR3otMU52NU9jUHV2Nm1fcTVSZ0VaWVduZkpTb21iT25PMHhqZ01hZUEwR2xTQUgwdWxWLUh4ekVvZ1VyWmFkZXFGVnk0V1lzT3ZmalpnSkhMYnYzNVdRemxlWlEwSHJzNDl1Q254NGVjT1U0ZEpHazV6Nm9UdC0zWV9mRGctNWc?oc=5"}, {"title": "Indian Listed New-Age Tech Company Tracker: Market Cap, Revenue &amp; More - Inc42", "source": "Google News", "time": "11 hours ago", "summary": "Indian Listed New-Age Tech Company Tracker: Market Cap, Revenue &amp; More  Inc42", "link": "https://news.google.com/rss/articles/CBMimgFBVV95cUxPVU94dFhyMVNPZFBOeklEbER6NHMwNzZpZDdzamhwdXpTYWZjWkh1cVN6WFhGV2UxZWlyVEZrOUlRak5NSFQ5UWstcjFjMHNzWFNuTzZaRUFVWXVhM0YzU0F6clJYMWp1VlBSOTV2SEdTYlVFbTZkYTJQMzYyNzRZWllNaWhDWFduSmhKcmxicm51d1JuMGVjR3R3?oc=5"}, {"title": "Poddar Pigments Files Newspaper Publication Intimation Under Regulation 30 - scanx.trade", "source": "Google News", "time": "4 hours ago", "summary": "Poddar Pigments Files Newspaper Publication Intimation Under Regulation 30  scanx.trade", "link": "https://news.google.com/rss/articles/CBMizAFBVV95cUxNb1c1NmtnWmJab2V5Q3BIZlhyZGI0a1doYlhYaTB0UlN1ZGtvU2x5SFVqQmZWSGRXYVlSa2pYOEhjRmZDVlhrSEswd2xWTFZKc2VDM2llcEFZbEREZ2JYZ2tRMDZDcTk2cHhmWW9wOWpkZkI2YkdmbGVUVzVYQ0FyTFFIRVlKcHdKQTBzbUZuRnB4ZW0zZGZuYXRjQWRVMkNaaTRSZzdBOEZmQXdpR3BzMVV4Q2I1dXhLR2ZBeG1HOEIxR1hQeGVJOEFJSVc?oc=5"}, {"title": "Top Firms See Market Valuation Erosion Amid Market Volatility - Devdiscourse", "source": "Google News", "time": "8 hours ago", "summary": "Top Firms See Market Valuation Erosion Amid Market Volatility  Devdiscourse", "link": "https://news.google.com/rss/articles/CBMivAFBVV95cUxQeTRoZ2NYVVczQVpyQzBEc1NsaDgybHo4N09NOWFzc3hjSHVLOVFTUjM5NF9OUDdiMG12MDhSbnR2YzAyM2NteFVKUjNsT3AtUFpfZU1fR3hmMlgzOHE2V3NSaVlOeTk2UXVCak1XNG9fMm1yUzFDSVNhOEhWcUFoNGhBWG1BTHJSb0FJZXVOUkVpNHNCNDNEMG5Ub2RpV1ZORnVRd1B3cXZscVZ6VUMxSXdMckVjOUNJVVVENNIBvAFBVV95cUxQeTRoZ2NYVVczQVpyQzBEc1NsaDgybHo4N09NOWFzc3hjSHVLOVFTUjM5NF9OUDdiMG12MDhSbnR2YzAyM2NteFVKUjNsT3AtUFpfZU1fR3hmMlgzOHE2V3NSaVlOeTk2UXVCak1XNG9fMm1yUzFDSVNhOEhWcUFoNGhBWG1BTHJSb0FJZXVOUkVpNHNCNDNEMG5Ub2RpV1ZORnVRd1B3cXZscVZ6VUMxSXdMckVjOUNJVVVENA?oc=5"}, {"title": "Stock market open or closed today? - MSN", "source": "Google News", "time": "17 hours ago", "summary": "Stock market open or closed today?  MSN", "link": "https://news.google.com/rss/articles/CBMikgFBVV95cUxOWFdlMnR4cm8wNkxtdk1ZVUE0NXlZZ0xUREZaeEtISWx6eHBwaEE4eTJKSjRCV2REc0IyeXg0bHZWaGZfQTZ1VG8xb3hmMzk2LXlVWE5GQjQ2Z3o2bmZJbnhqa0YxeHVCZUFuLVNZYkZJQ3N0SWlFb2NRWlRoOUJzMDlYZHNXSlpNZktsMGhuRFBKQQ?oc=5"}, {"title": "#WestAsiaConflict | Iran rejects Trump&#x27;s 48-hour ultimatum as &#x27;helpless&#x27; and &#x27;unbalanced&#x27; Read More: https://lnkd.in/g_pbmApk #Iran #US #DonaldTrump - LinkedIn", "source": "Google News", "time": "12 hours ago", "summary": "#WestAsiaConflict | Iran rejects Trump&#x27;s 48-hour ultimatum as &#x27;helpless&#x27; and &#x27;unbalanced&#x27; Read More: https://lnkd.in/g_pbmApk #Iran #US #DonaldTrump  LinkedIn", "link": "https://news.google.com/rss/articles/CBMipAFBVV95cUxPTjNhV0kzdG1RZEk1eHp1M2JBcnhoVEFUb2ttbE5HaUlLZTctcnF3aVJkdEx3ZExZT2t1eGNyYU9BTWN6TldWWjVrSW9nSnZVU19kUmFjVWJrQUk3TWdXWTljUmwtRk5TclJac3RYUzB1LUdueENYVDRTeGg2NkEtS3czUlBXeTFMbDRmSGxWTzJWcTBmSVlKZmx3NE5IbUZGSi1jWA?oc=5"}]}, "corporate": {"label": "🏢 CORPORATE NEWS", "items": [{"title": "TMC Stock Is Up With Retail Investors as the U.S. and Japan Team Up to Challenge China&#x27;s Grip on Critical Minerals", "source": "Yahoo Finance", "time": "7 min ago", "summary": "Click to read the full article.", "link": "https://finance.yahoo.com/markets/stocks/articles/tmc-stock-retail-investors-u-152500011.html"}, {"title": "&#x27;Wouldn&#x27;t be shocked&#x27; if bull market continues: Wall Street aims to look past Iran conflict", "source": "Yahoo Finance", "time": "31 min ago", "summary": "Click to read the full article.", "link": "https://finance.yahoo.com/news/wouldnt-be-shocked-if-bull-market-continues-wall-street-aims-to-look-past-iran-conflict-150025546.html"}, {"title": "A Gen Z woman couldn&#x27;t afford rent, so she bought a duplex instead — and cut her housing costs in half", "source": "Yahoo Finance", "time": "32 min ago", "summary": "Click to read the full article.", "link": "https://finance.yahoo.com/markets/stocks/articles/gen-z-woman-couldnt-afford-150000716.html"}, {"title": "Dow Jones Futures: Trump Threatens &#x27;Hell&#x27; If Iran Doesn&#x27;t Open Hormuz; Sandisk Leads 7 Stocks To Watch", "source": "Yahoo Finance", "time": "50 min ago", "summary": "Click to read the full article.", "link": "https://www.investors.com/market-trend/stock-market-today/dow-jones-futures-trump-threatens-iran-hell-hormuz-oil-prices-sandisk/?src=A00220&amp;yptr=yahoo"}, {"title": "Retiring head of FINRA foundation: FOMO is investors&#x27; biggest mistake", "source": "Yahoo Finance", "time": "1 hour ago", "summary": "Click to read the full article.", "link": "https://finance.yahoo.com/news/retiring-head-of-finra-foundation-fomo-is-investors-biggest-mistake-143053886.html"}, {"title": "A Talos Energy (TALO) Insider Sold 2.3 Million Shares for $38.5 Million. Should You Follow Their Lead?", "source": "Yahoo Finance", "time": "12 min ago", "summary": "Click to read the full article.", "link": "https://finance.yahoo.com/markets/stocks/articles/talos-energy-talo-insider-sold-151954022.html"}, {"title": "A couple in Alabama says they owes $40,000 on a car worth only $27,000 — here’s how", "source": "Yahoo Finance", "time": "1 hour ago", "summary": "Click to read the full article.", "link": "https://finance.yahoo.com/markets/options/articles/couple-alabama-says-owes-40-140000649.html"}, {"title": "10 investing lessons I learned over the last 20 years", "source": "Yahoo Finance", "time": "3 hours ago", "summary": "Click to read the full article.", "link": "https://finance.yahoo.com/news/10-investing-lessons-i-learned-over-the-last-20-years-123033012.html"}]}, "geopolitical": {"label": "🌍 GEOPOLITICAL", "items": [{"title": "Trump vows Iran will be &#x27;living in Hell&#x27; by Tuesday if Strait of Hormuz deadline missed", "source": "CNBC", "time": "45 min ago", "summary": "&quot;Tuesday will be Power Plant Day, and Bridge Day, all wrapped up in one, in Iran. There will be nothing like it!!!&quot; Trump said in a Truth Social post.", "link": "https://www.cnbc.com/2026/04/05/us-trump-confirms-missing-us-pilot-rescued.html"}, {"title": "&#x27;Silent killers&#x27;: How AI start-ups are trying to solve one of the retail industry&#x27;s biggest problems", "source": "CNBC", "time": "2 hours ago", "summary": "The rapid evolution of generative AI has finally made these applications good enough to meaningfully impact retailers&#x27; bottom lines.", "link": "https://www.cnbc.com/2026/04/05/ai-retail-start-ups-virtual-try-on-tech-margins.html"}, {"title": "&#x27;Anything but autos&#x27;: Can defense save Europe’s ailing car industry?", "source": "CNBC", "time": "10 hours ago", "summary": "The transition from wheels to weapons is achievable in part because many of the underlying skills are highly transferable, according to experts.", "link": "https://www.cnbc.com/2026/04/05/autos-defense-europe-car-industry.html"}, {"title": "Buffett may end donations to Gates charity over Bill&#x27;s ties to Epstein", "source": "CNBC", "time": "1 day ago", "summary": "Revelations about Jeffrey Epstein&#x27;s ties to Bill Gates have strained his friendship with Warren Buffett and the Omaha billionaire&#x27;s annual multi-billion-dollar donations to the Gates Foundation.", "link": "https://www.cnbc.com/2026/04/04/buffett-may-end-donations-to-gates-charity-over-bills-ties-to-epstein.html"}, {"title": "Asian travelers seek respite in other options as Middle East travel plans stay grounded", "source": "CNBC", "time": "1 day ago", "summary": "Ticket prices across airlines in Asia increase in the midst of Iran War tensions, Asian travelers look elsewhere to relax", "link": "https://www.cnbc.com/2026/04/04/asian-travelers-seek-other-options-as-middle-east-plans-stay-grounded.html"}]}, "crypto": {"label": "📉 CRYPTO & WEB3", "items": [{"title": "Here’s what happened in crypto today", "source": "CoinTelegraph", "time": "3 hours ago", "summary": "Need to know what happened in crypto today? Here is the latest news on daily trends and events impacting Bitcoin price, blockchain, DeFi, NFTs, Web3 and crypto regulation.", "link": "https://cointelegraph.com/news/what-happened-in-crypto-today?utm_source=rss_feed&amp;utm_medium=rss&amp;utm_campaign=rss_partner_inbound"}, {"title": "Robert Kiyosaki recommends Bitcoin, gold as 1974 shift comes full circle", "source": "CoinTelegraph", "time": "3 hours ago", "summary": "The Rich Dad Poor Dad author continues to back Bitcoin, gold and silver as alternatives to traditional money.", "link": "https://cointelegraph.com/news/robert-kiyosaki-1974-shift-bitcoin-gold-real-money?utm_source=rss_feed&amp;utm_medium=rss&amp;utm_campaign=rss_partner_inbound"}, {"title": "New Bitcoin price lows &#x27;matter of time&#x27; says trader with BTC stuck at $67K", "source": "CoinTelegraph", "time": "3 hours ago", "summary": "Bitcoin added downside BTC price warnings as Binance order-book data showed multiple investor classes selling coins into the weekend.", "link": "https://cointelegraph.com/news/new-bitcoin-price-lows-matter-of-time-says-trader-btc-stuck-67k?utm_source=rss_feed&amp;utm_medium=rss&amp;utm_campaign=rss_partner_inbound"}, {"title": "‘Existential’ token problem seen as supply outpaces value creation", "source": "CoinTelegraph", "time": "5 hours ago", "summary": "Blockworks&#x27; Michael Ippolito sees surge in token supply diluting returns, breaking the link between fundamentals and price while raising concerns about crypto’s long-term model.", "link": "https://cointelegraph.com/news/crypto-existential-token-problem-supply-outpaces-value-creation?utm_source=rss_feed&amp;utm_medium=rss&amp;utm_campaign=rss_partner_inbound"}, {"title": "Anthropic launches PAC amid tensions with Trump administration over AI policy", "source": "CoinTelegraph", "time": "7 hours ago", "summary": "AI firm Anthropic forms an employee-funded PAC while facing questions over political balance and a growing dispute with the Pentagon over AI use.", "link": "https://cointelegraph.com/news/anthropic-launches-pac-ai-policy-tensions-washington?utm_source=rss_feed&amp;utm_medium=rss&amp;utm_campaign=rss_partner_inbound"}, {"title": "Drift Protocol $280M exploit took &#x27;months of deliberate preparation&#x27;", "source": "CoinTelegraph", "time": "8 hours ago", "summary": "Drift Protocol said, with “medium-high confidence,” that the recent attack was carried out by the same actors responsible for the $58 million Radiant Capital hack in October 2024.", "link": "https://cointelegraph.com/news/drift-protocol-exploit-preparation-preliminary-findings?utm_source=rss_feed&amp;utm_medium=rss&amp;utm_campaign=rss_partner_inbound"}, {"title": "Bitcoin bearish social chatter reaches 5-week high: Santiment", "source": "CoinTelegraph", "time": "11 hours ago", "summary": "Santiment said bearish Bitcoin comments on social media have climbed to a five-week high, which could signal a reversal sooner rather than later.", "link": "https://cointelegraph.com/news/bitcoin-bearish-social-media-chatter-low-price-btc-stagnant-santiment?utm_source=rss_feed&amp;utm_medium=rss&amp;utm_campaign=rss_partner_inbound"}, {"title": "Telegram founder Pavel Durov says Iranian government&#x27;s ban backfired", "source": "CoinTelegraph", "time": "20 hours ago", "summary": "Thousands of software developers are currently developing virtual private networks to circumvent state control of the internet, Durov said.", "link": "https://cointelegraph.com/news/telegram-durov-iran-ban-backfire?utm_source=rss_feed&amp;utm_medium=rss&amp;utm_campaign=rss_partner_inbound"}, {"title": "Jimmy Song explains why Bitcoin needs a &#x27;conservative&#x27; node client", "source": "CoinTelegraph", "time": "21 hours ago", "summary": "The Bitcoin advocate is the co-founder of ProductionReady, a non-profit initiative to fund open source development of BTC software and education.", "link": "https://cointelegraph.com/news/jimmy-song-bitcoin-conservative-node-client?utm_source=rss_feed&amp;utm_medium=rss&amp;utm_campaign=rss_partner_inbound"}, {"title": "AI is making crypto&#x27;s security problem even worse, Ledger CTO warns", "source": "CoinDesk", "time": "1 hour ago", "summary": "Ledger’s Charles Guillemet says artificial intelligence is making hacks cheaper and faster, forcing a rethink of how crypto systems stay secure.", "link": "https://www.coindesk.com/tech/2026/04/05/ai-is-making-crypto-s-security-problem-even-worse-ledger-cto-warns"}]}, "tech_ai": {"label": "🤖 TECH & AI", "items": [{"title": "Who Decides How America Uses AI in War? - Stanford HAI", "source": "Google News", "time": "10 hours ago", "summary": "Who Decides How America Uses AI in War?  Stanford HAI", "link": "https://news.google.com/rss/articles/CBMid0FVX3lxTE14dk1hMzI5Z1R5emNKd1lXTDRtNXJPUFFTSklwSXNtVHcyVjZwQnhiVDQ2UndoOW1xeUloZ0ZLTVNTcENLOTY3REU4NEpLTFNPQTN4MklLQTVIdDBxc0g3bWlTbDhLbU8tSWlwVlhzZnJoYURxUkI4?oc=5"}, {"title": "The Artificial Intelligence (AI) Hype Is Fading, and That&#x27;s Creating the Best Buying Opportunity of 2026 - AOL.com", "source": "Google News", "time": "1 hour ago", "summary": "The Artificial Intelligence (AI) Hype Is Fading, and That&#x27;s Creating the Best Buying Opportunity of 2026  AOL.com", "link": "https://news.google.com/rss/articles/CBMiigFBVV95cUxNYm1kZFExX1FwTnNMQkFiRW9GVzNQVjdlQ1FPa1dfWks2c2doa3pRVXVQTDJOVzlMS21qZ0JZNXlBZTk3NVQ4bXBpdmFHN0Jid212aVAyTk1DOF9BWEx5ckFYbVNUVUJtMXloUEFpS2ZoX0QzWlN3N2lITWgwUGxzR3RIYkRfd1RiOWc?oc=5"}, {"title": "​Beyond the Code: Reclaiming Human Agency in an AI-First World - Fair Observer", "source": "Google News", "time": "4 hours ago", "summary": "​Beyond the Code: Reclaiming Human Agency in an AI-First World  Fair Observer", "link": "https://news.google.com/rss/articles/CBMiogFBVV95cUxPWk1NZUw2S2JsSU5CRWQ5TzUyeURuY3g4RGRiOWNBamlnYlZhOFE0elpmUVFKam92eW41ckVCcG5iLUhzV1B1SXoxOUJlTHgxc1l1Z3k4Z1BJQjlNU05zQmZ1MVBublBLZVdRb3hrMUF3QllCejJGWEhidUcwdDhPdm5aRHpjemUyUVQyR2NWbGFyMHFPa0lvNjdoTUxXb21WWmc?oc=5"}, {"title": "&#x27;Silent killers&#x27;: How AI start-ups are trying to solve one of the retail industry&#x27;s biggest problems - CNBC", "source": "Google News", "time": "2 hours ago", "summary": "&#x27;Silent killers&#x27;: How AI start-ups are trying to solve one of the retail industry&#x27;s biggest problems  CNBC", "link": "https://news.google.com/rss/articles/CBMikgFBVV95cUxNYjd5VE85RlFWQTFqbnNHS0xuRERxMlVNdmxkd21jMWg5ampRX2I3ZEIwOXJmNlBHa3JmVlQ3NHVhUF9kZ1lkTU1xNzh0ekFqM0ZQRzBYX1JJZzVsNDZMY3ViVlRoTkJMc3NaTXJFN0dwUEo4WTY3V2ZDUlJUSm9nbnFWOEJlNFhEUVFHOUNoS1ptZ9IBkgFBVV95cUxNYjd5VE85RlFWQTFqbnNHS0xuRERxMlVNdmxkd21jMWg5ampRX2I3ZEIwOXJmNlBHa3JmVlQ3NHVhUF9kZ1lkTU1xNzh0ekFqM0ZQRzBYX1JJZzVsNDZMY3ViVlRoTkJMc3NaTXJFN0dwUEo4WTY3V2ZDUlJUSm9nbnFWOEJlNFhEUVFHOUNoS1ptZw?oc=5"}, {"title": "AI is breaking crypto security by making hacks cheaper and easier, Ledger CTO warns - CoinDesk", "source": "Google News", "time": "1 hour ago", "summary": "AI is breaking crypto security by making hacks cheaper and easier, Ledger CTO warns  CoinDesk", "link": "https://news.google.com/rss/articles/CBMiqwFBVV95cUxPQnNRNWxoR0hfMkFhSmMxMnNJemRwVlJNOHV2SlRNekZSYkNiSlc0clBEQUxYV2RMN2VPU1lLdXc0N1RGV1l5YkIyUmlKZ3NCTFRvR0lEX19wUkxqY09DX0tHTnctYzdnRTYyM0xodXBHcDNYamg5OUlVNFNYQlJXLXp3YXBWU3k2VHk5NE83ODFLVDZncDNVNlZHbkhsQjdMNl94ZWtDWi1JNlU?oc=5"}, {"title": "I quit tech, bought 22 acres, and didn&#x27;t look at my computer for years — until AI brought me back - Business Insider", "source": "Google News", "time": "6 hours ago", "summary": "I quit tech, bought 22 acres, and didn&#x27;t look at my computer for years — until AI brought me back  Business Insider", "link": "https://news.google.com/rss/articles/CBMihwFBVV95cUxORWFsNDdtSGQwUzA1UV9qYUtiemY4SmxBU2ZzVHB3WGpFaWw2Tlh6emkzWlpiZ1BkT0dpenVQSGJPNmQ1WmJ3V2RuN0wxaFpMdUVVNldhM1pOWkxWYWFablhocmJXX0FPWVdYTExNYW4xcU5fUnFmbUd5ZEhlQzZHV2E1NG5GLU0?oc=5"}, {"title": "Inside the Creative Artificial Intelligence (AI) Stack: Where Human Vision and Artificial Intelligence Meet to Design Future Fashion - MarkTechPost", "source": "Google News", "time": "6 hours ago", "summary": "Inside the Creative Artificial Intelligence (AI) Stack: Where Human Vision and Artificial Intelligence Meet to Design Future Fashion  MarkTechPost", "link": "https://news.google.com/rss/articles/CBMi_wFBVV95cUxNYnMwRWNjOFNDN3hpZTNsLXNjek5VbW9FSGE5UzRMS0xnbUxaUG8za1hZWGRYOWhCZlZGdTY0eGNNOVAyTkNvX2Y0MnQ4LWVrRFJtY1ZJTHJnb0VxSDEwcTlIZWs5QW5NMmxFRDA2NmVUQS13MFE0MnJNMlR0LWxTVnplR3hRMUR3cFAxbEM1bl9pT2dWa2YwZ1VYNU8yZ3lMczdmbmhxdW50bjBhYTlYeVQwY29OS2hCWlpqNFd5Z3p0bFRPRVp3Rk5SWDNNRW90V0dnVmk1aUxKeWI1ZTVKX3ViUGRNQU5tQUh6akZUZGRpTVJBQmhVbi14bm5LOWvSAYQCQVVfeXFMTzQ3b18zYjBrODMyVDZmWUQ3NUE3R0E1ZXg0dWRTUUpjc2lNeUlkMldGMHNxbnNmNURhRHVmMzRWT2ZYZ1E5cUpRc19RcHQ0RGdWNmJoQkJCbU91ZEQwM2Q1ek4zWXp5Y0V6cUpYdWg3bk0xa21IZGFOOHFEaG5DbnhYTjBodThJUzBYX0ZDbkJHRm54ajVNUWN3OHRtZ2JtQ0VOVGxLT1c3R2lqZW15cHVwZURpeHNuaGlwWWVsZHo2SDZzblBiTU5NRXdoMHFrekI3bmZKRzJOX1FxNllOby1qSGtLWmFBYXpPaHV2U1NpUUw5T09ua1NOczV2MVZmeTAwNjI?oc=5"}, {"title": "I’m Worried About the Helpless AI Disruptors of the Future - Gizmodo", "source": "Google News", "time": "6 hours ago", "summary": "I’m Worried About the Helpless AI Disruptors of the Future  Gizmodo", "link": "https://news.google.com/rss/articles/CBMikgFBVV95cUxOZ3Y0Z3BRYkJ5VjdVYXo0aHVNbGRfU29lMWJjUm5FMTg1QVNNem5JdS1VelVaWVY0MmZ1Q1pLS0Qwb2hsMG96clZVZElzMXg0WThHdGNqUnF6akxzQ3pNYXRzQmhHbllsbmxnc0dVYVR3V2dVTWhCTkJoVEVDU2hSTGpsaWNncFpQb1UzaUVWYzg1Zw?oc=5"}, {"title": "What can digital technology do for your manufacturing operations? - Today&#x27;s Medical Developments", "source": "Google News", "time": "10 hours ago", "summary": "What can digital technology do for your manufacturing operations?  Today&#x27;s Medical Developments", "link": "https://news.google.com/rss/articles/CBMisgFBVV95cUxPcW5OZWNqUU9wR2luYjk1NklmM0xQc0c0MlNaZjFEb0t2VlQtbFFBbGROVFJhb1Q3OV9UZDBDWDlHY1E2S0FYNnNHWWlGcFlxUHNtNXd2bUlsRlVVQmc2WGlLT2pUYkFFdFVZMXhZZy1ROUtwNEUwaHFOLUlvZDJMVGxoMVZ5aXJmbU5iejFqRUFyT09XNGZBenBvTWJxMXAtaDUtdGNuNUM5dUpNekxLVUJR?oc=5"}, {"title": "OpenAI Is Bleeding Cash. Its Solution? Military Contracts. - Jacobin", "source": "Google News", "time": "1 hour ago", "summary": "OpenAI Is Bleeding Cash. Its Solution? Military Contracts.  Jacobin", "link": "https://news.google.com/rss/articles/CBMid0FVX3lxTFBwOURZcHg1Q2Zudm1zbEQ4MWRGSUxpQkFMWng0TVhXall0eUx3MTZKT25hZG1DOTV1c3hhcDRRQ09kTVNNbWFNY0pMbGF5T0JFbGJ4M2R3UjdveHdIQnlJaEV6UzdLaXlLQ0N6Mzd0S0NrVVJiSWFB?oc=5"}]}, "asia_china": {"label": "🌏 ASIA & CHINA", "items": [{"title": "Hong Kong Stock Exchange Index Falls as Houthi Escalation and US-China Tensions Compound Iran War Pressure on Hang Seng - BBN Times", "source": "Google News", "time": "3 hours ago", "summary": "Hong Kong Stock Exchange Index Falls as Houthi Escalation and US-China Tensions Compound Iran War Pressure on Hang Seng  BBN Times", "link": "https://news.google.com/rss/articles/CBMi6gFBVV95cUxPME9IMWlNVmJld1VLSkNEV0txUVV6eHh4aTRKZmZBZWtSLTBLX2w3aEZqVE4yRDdpWFNubXR0OE55ZjVUUnpGWnloVEZmZTBCY1Z0Z2MzN1NOYVladm1fOUIzRGJCeDlVWVdwT29YQngwX1FpNG5jdl9ZX25taC1xZHVWaGpwNEkxZ2VfWkhZRFRaVlBoc3dDM1VBSGxTcWF0VTlvZWsxODVvWTRBUVRpd2dUT2kzZmI2UG1veFVkQ0RfQ213dEtaV1BCdkNnWEhIcmxxTXVkSmVxbjlJSmROR0hGQWlQMml1TFE?oc=5"}, {"title": "HSBC Holdings plc (0005.HK) stock price, news, quote and history - Yahoo Finance Singapore", "source": "Google News", "time": "11 hours ago", "summary": "HSBC Holdings plc (0005.HK) stock price, news, quote and history  Yahoo Finance Singapore", "link": "https://news.google.com/rss/articles/CBMiVkFVX3lxTFBDTmVicEhIdTZQaHNIUHBMRUtBME1WanMwcUZLV2ZlQmVJSk5VTFBpaUR1X3QwUGtzQVYzRzd5bmhWVGR2bmZVbnhoR0drbVpyZWlZRnF3?oc=5"}, {"title": "Hong Kong Stock Market Review: Hang Seng Tech Index fell by 1.84%, while aluminum and gold stocks surged against the trend! - 富途牛牛", "source": "Google News", "time": "11 hours ago", "summary": "Hong Kong Stock Market Review: Hang Seng Tech Index fell by 1.84%, while aluminum and gold stocks surged against the trend!  富途牛牛", "link": "https://news.google.com/rss/articles/CBMinAFBVV95cUxONno4VEk4M1VLLWxtRzBuTDBKd2EyQUdGMXpQT2w2V25XcVFNTzBnUEVGek00X3JkOUdLZm43N3V0TWFlcTUxVWFLTmhJd2ZUd2pZb0xWUHVoUUhSbHRybXRjMXNPbXEyNG5oNDlaYkpDYTdPeHpYakxnUlE1RGdONkxHYnVJZG1mQzRZWER3cE10NVd6a0xLV1M3V24?oc=5"}, {"title": "Hang Seng Shares Rally After Goldman Predicts Index Could Hit 29,000 - Yahoo", "source": "Google News", "time": "23 hours ago", "summary": "Hang Seng Shares Rally After Goldman Predicts Index Could Hit 29,000  Yahoo", "link": "https://news.google.com/rss/articles/CBMipAFBVV95cUxPQXFDbkFvNjJfT0FJSjJIMXc5cnlTUzkwN2xuRWk2c0k1S3NpX2dicEFUMkNWcXJtMXJYblM3dzVNNzJoeHBLLVg5NDMtQWRaeS0zbWFEUko5WUZMM0ZYYVRWQVFldUNJRjg5YTVRNnZLNWMzbWVmODd2MzJsZDJKNUxIblhwN0xSRmlqcHNzM21lZWstV2RlbVczVEtiV3p3cjZHWA?oc=5"}, {"title": "Oil price surges, Asian stocks fall as Trump vows to continue Iran attacks - hiiraan.com", "source": "Google News", "time": "9 hours ago", "summary": "Oil price surges, Asian stocks fall as Trump vows to continue Iran attacks  hiiraan.com", "link": "https://news.google.com/rss/articles/CBMiwwFBVV95cUxQa3dIajRWd0tVR2lTaWwtZzZIZUxTYnVEZThpOTFyOVIwSmJDMlBtd3dRQUR6MVl4emlRTzVNc1VHbGw0d3lBMHA5ZHphRDVScmRwMGw3ejhaTjBkWGQ3aXhDR1lDbEFnaFZWRkJWQnlQM2tTekFIalE3eUp6YUsyWUo4RFJRTDBFZkZuTGtTSEFUdzg4X2V4WlhZVzhtUU9PeExKdV9ILVNjYVJVek5GVUcyZmJxeU5BRWUzYVdpN2JQcjg?oc=5"}, {"title": "Indian stock markets gain in early trade over positive Asian cues - DD News", "source": "Google News", "time": "7 hours ago", "summary": "Indian stock markets gain in early trade over positive Asian cues  DD News", "link": "https://news.google.com/rss/articles/CBMilgFBVV95cUxPd21vYlZhMy1tdHVnSmFtUVhvUm5QbDZxUXJSWjVxcFIyZ1NHNHc5QTdsNHZtR1gtLUw3YmtvTUxCaG5RZXpiVWNLVmFiUWFhY3EwQWRTcmhvQk5wLVdhbl8wdUU4X1ZlMDFQeko4STJnVjUtWWpwWlFFSExyWnp1WWMtMmZua3ptc19OZXFiNmhUbENVQlE?oc=5"}, {"title": "Tencent Holdings Limited (0700.HK) Stock Price, News, Quote &amp; History - Yahoo! Finance Canada", "source": "Google News", "time": "5 hours ago", "summary": "Tencent Holdings Limited (0700.HK) Stock Price, News, Quote &amp; History  Yahoo! Finance Canada", "link": "https://news.google.com/rss/articles/CBMiVkFVX3lxTE1yandpalBscEhnS1UtV3AxYXNOMGVVdjA0U3RMcGc4VjRrTl94aFlFbjBtYy0xREZvQVNyc0pUNmExRGZ4RkdjNzlESFM1T0xVdmxFUlV3?oc=5"}, {"title": "Most Asian stock indices end in positive territory today - News On AIR", "source": "Google News", "time": "8 hours ago", "summary": "Most Asian stock indices end in positive territory today  News On AIR", "link": "https://news.google.com/rss/articles/CBMijwFBVV95cUxOS1M2OUhaQU5nRVEtMURFRHZFMl92RU5rS0h1bU5WQmtSaF9QNXZFV2l6V3Y3OE5GNGJIbkllTkk1SU9qSnk2eWh2ME9fckNiXzM2S0RZMFpSR3VqSUEtTUFUdDJVLXNXU3lrY0VqMlNOLThSVHI5YXFRM2JOLUpnb0lsdS1fSTloUEhuZGtKVQ?oc=5"}, {"title": "China promotes use of yuan among Southeast Asian nations - AOL.com", "source": "Google News", "time": "10 hours ago", "summary": "China promotes use of yuan among Southeast Asian nations  AOL.com", "link": "https://news.google.com/rss/articles/CBMimgFBVV95cUxPU2Ntb1FHRUVLblktbUVMODlZZTNQa0h4T2Q4SXJYN25ZenYwN1V2YkJoWUJqUkY5ZmNRVHo1MEhhMmlOVTZJZjRNakw1bGhHWGFZeXVfV2dFSm5WUzhZYmNKblBKSjBHMmMwMFJuVnE4NHZrS3dsbjZfQndmM3pMTFZuT041NnNVTUFTVG9DSVJFS0RqLWRkWTVR?oc=5"}, {"title": "Japan&#x27;s corporate bond issuance hits record high on retail investors - Nikkei Asia", "source": "Google News", "time": "20 hours ago", "summary": "Japan&#x27;s corporate bond issuance hits record high on retail investors  Nikkei Asia", "link": "https://news.google.com/rss/articles/CBMitgFBVV95cUxORlp5QWFwMzRkWmNMVDY0bDNrWEo4RGEydEZwZnRCSjRFLW9xMEotMFd2aXFXc2x6VXJIcXlMQmZWVUdnZE9ILWFXU2FXZkJEVVY3TFhGLThPUm1JbG1UUEFHUlhKcURaRWdUdlBhVEduYU9LUlFzZlBhM3RuT2pjV2I4bUZXU2FiWl9mdVA4bkxCTUM5Q2gyRlgyU1Jja2RiR21JVW5iYTZNeXAxakdlWHZFemhtQQ?oc=5"}]}, "europe_uk": {"label": "🇪🇺 EUROPE & UK", "items": [{"title": "Pain at the Pump Should Mean Pain in the Economy, Not Higher Rates - WSJ", "source": "Google News", "time": "6 hours ago", "summary": "Pain at the Pump Should Mean Pain in the Economy, Not Higher Rates  WSJ", "link": "https://news.google.com/rss/articles/CBMivwNBVV95cUxPQl8ydWZUY190aTdTdUhrckozVVkweGZCRC1qM1o4TmNrUWRXa0xqaUFFelZ2Uk9OMGFZOG5wcTVmLXp6Unc3a0Z1N015aDBUUUNMdWctbjZXM0JRZ1ZjOUdpYmprdWtEWk5BUnR1aEViVmdXR0JWM3RVVzd0UlJ1dXpITGlzeWRnVDM4TTA1akNpREJfcURSU2ZvSHJyZ1dYOXZpdFdSYU9yVERNYWJTMnpjZFQxeE5BZVJuTFJiemp1Ti1uWl9NZ29xWmxZSUdWYkl2dURDWk5oRVU4NEVMUlZOdkxhQjFqdWFteGFjTmlUN1JIX1NCSXdfV1hhZUQ5dVppU1U1RS1WZFVpal9ZSTFkem5mQlhsdWpUdjJ3bUFZb2lyVHhyanBNS05CQ3ZpSTZObzlTazhPa1QzeXNMTmc0TkpFdEg5MUc4MWpPQzNzR29aMWxvZC0yQWQ1U1FuR2ZBVmNHNTBpbWtVSG1DQ19JVUY3eTFEQngwZ1AtMHVNV3NfZzBRRDFFVzNzUjZrY3pkd1pXcGJ3d2d1dXlCM1JkeEdaXzk5MHNxd1ZfMzdnem14ODdLczlOWVVrRUU?oc=5"}, {"title": "Current Mortgage Rates: US Rises 6.46%, UK Hits 5.56%, EU 3.4% - CryptoRank", "source": "Google News", "time": "17 hours ago", "summary": "Current Mortgage Rates: US Rises 6.46%, UK Hits 5.56%, EU 3.4%  CryptoRank", "link": "https://news.google.com/rss/articles/CBMimgFBVV95cUxPZnZlZ2xZRjJYbEhhNElyTm8zQWx5MjNUNE40c0Z6RGVVTEJQTFNCWDc0bmxlaU4zQWlka2ljSGVMVlJJY0VQcUNXNEFwdXUwX2lWdHVfQkFBOS1YbmV6Qy1uUHFpVG9nUmFlZmVSSFRaMDlENW1XMFBpME1SQWNULUt4amVaLVZDTkk2MXQ1Tkd5dmZXaEZGT3RR?oc=5"}, {"title": "Central banks’ inflation mood puzzle: more judgment than science - BusinessWorld - BusinessWorld Online", "source": "Google News", "time": "7 hours ago", "summary": "Central banks’ inflation mood puzzle: more judgment than science  BusinessWorld - BusinessWorld Online", "link": "https://news.google.com/rss/articles/CBMixAFBVV95cUxPM2RUY084ZVAtU3FfVFdDeHZCTzMxcGNWeFlXNDc2b1JlNHFfMk1FV1IxeGY4dmIyeWRuQ05neG1lQ0dQYXR0VTR4WHVJZnBvSzhhaEZfZDRFdDJwOHowd0lBV2ZvUTFLWmU4dUk0N0ZMSDMzSnpkQm5mT25GUzNKbTZReFBPdnBrcmdhV0ZPbzNCZl90SzI4a0ozRDhlb2Jhc2l0NXdyWUZVMjU2RVlPUWttbDVXVGdfREYyMEVEalZUQWtl?oc=5"}, {"title": "FTSE 100 edges higher but remains below recent levels as Iran conflict pressures markets and sterling - DirectorsTalk Interviews", "source": "Google News", "time": "20 hours ago", "summary": "FTSE 100 edges higher but remains below recent levels as Iran conflict pressures markets and sterling  DirectorsTalk Interviews", "link": "https://news.google.com/rss/articles/CBMi5wFBVV95cUxOT0tKRHlyZEV0djFISk5yT1hMZHRuSjBBdFR4LXRMOHZBeUNDT1ZoeVBleFNIOXVmYXNSbk9vaUNxcXpRVkNXLTRtRjVpdGljdjNhcXBhVWc5cFBqMHVsWFgyMEtlOVBOUG0wR2FqZHdoSUZrb2R6ZmRHdWJJeXBCbVJYN0lsdnNSd0V0TUJSZC1aaDcxOHBfVGpUUE12T0UwemJ1SlhSNUlQQWJqSnhtNmhHN3l4OUNIcE5OUnRYRDZ3NjlxNTNZeG41ZzRvV2xIT2V4WHVHaGdqS2VDenJmdHhPWUhualE?oc=5"}, {"title": "Is the FTSE 100 heading for an epic stock market crash? - Fool UK", "source": "Google News", "time": "8 hours ago", "summary": "Is the FTSE 100 heading for an epic stock market crash?  Fool UK", "link": "https://news.google.com/rss/articles/CBMikwFBVV95cUxNUWNJQTFmdUJES25LU0cxUnhJWERWMm5jMHU1aGNyMlJRVHpjNUZSc1NLLVdlRnRRZm5zT0VPNTAtQklHd0FEcU85VW1HUVV2MVd4ejh2dDJjUVZpY1NRT09MN0NncmFuX05wTWt1N1dYS3VXM01sYm1yRnF3bUVEOExsWWtlZ0FkTkRpa0E3SjhJdFU?oc=5"}, {"title": "It’s time we all took a long, cold look at the Lloyds share price - Fool UK", "source": "Google News", "time": "7 hours ago", "summary": "It’s time we all took a long, cold look at the Lloyds share price  Fool UK", "link": "https://news.google.com/rss/articles/CBMinwFBVV95cUxOUXhCLWdYSDlxRXBWVFo4RjQ5OERkeWo2RkhfTFQzd0NIMmVISlVYQ0tVWWdodjlKXzRkZDNROVY4eC14R3dsb0NGWndNTUF4WlJNVG5mNWh6N3Z0WWs2b0U5WkpPc05mUXhsSVRabXJpdUkyVThjQVlzVTJIR3p0eEl5aVhyQVNNOVVpRUdhZ3V2Tm91NkQxNUFQMlh2R3c?oc=5"}]}, "esg_climate": {"label": "🌱 ESG & CLIMATE", "items": [{"title": "The Evolving Economic Landscape for Foreign Investors in the UAE - BBN Times", "source": "Google News", "time": "21 hours ago", "summary": "The Evolving Economic Landscape for Foreign Investors in the UAE  BBN Times", "link": "https://news.google.com/rss/articles/CBMioAFBVV95cUxQZExEUnl6dlI1YVVlVE9KVVVoSWE2MU91WjBjaUx0ZERpREluS0VlclRYWE53SmZscVFDaEVNYjJJNk1ETWJJYlNmM3FfLWF3YV9YdDRRM09zSUhwNmh1ZEVSUUlVMUtSR1Zrcmthcm9TRENSc0VuZnNjbWh4am9oQ0xiSXYtLXhGaS10OGtyMTctU1JLU3JNdXV2ZW5UNWg4?oc=5"}, {"title": "Amorphous Metal Cores Market Forecast Points Higher Toward 2035, Driven by Grid Modernization - IndexBox", "source": "Google News", "time": "9 hours ago", "summary": "Amorphous Metal Cores Market Forecast Points Higher Toward 2035, Driven by Grid Modernization  IndexBox", "link": "https://news.google.com/rss/articles/CBMivwFBVV95cUxPNldHdXNPdzlDdUNvdG1GV2xiWDBKY1JiMzNiTmNVWTZnUEpwRlg3LVRtM0VBWU9tYVZFdzhSWE9CZWVqRjQyR1FkLXdKZEhxX2JmVUZPdTY5Q1VqY3FEREVrX3hzVVVhRjByXy1taWZoQTU1eEFPZzk2MHFBbXZIcjdTdUh2eU5kMnM5eEhIMDlKMlNOTUxhd0czeFVPbmxyaVpSQURiQ00ya3JzNF9UUEl2N2ZhN2ZGa29GeUgxNA?oc=5"}, {"title": "Passive And Interconnecting Electronic Components Market Forecast Points Higher Toward 2035 - News and Statistics - IndexBox", "source": "Google News", "time": "10 hours ago", "summary": "Passive And Interconnecting Electronic Components Market Forecast Points Higher Toward 2035 - News and Statistics  IndexBox", "link": "https://news.google.com/rss/articles/CBMi4wFBVV95cUxNN2pIMmRiallBcGFPYmUyX3M1VWNxSTFaYldmVFpTREJjZDNhemk4Z0NQd3o4VHRzVGhvS1pVNi1xajlWT2plcjltVUY1eFNTanpMUHRMbnBJeGVLdUtleTlDZ3ZmOEZrcHNoeF94aXhUZ3pUaFV3cFFiMjRKa1QtYVdsR0dVS0J3bkI1YVhCMm13RXR4Q1FuNlNuWXBHOEVKWmJVeXdxWDVQQ1ByR0dCdVM5eWNNQ284bkloYmNiN1dKb29hTzRIeG1LZG54cV9yQUtRTDZDLWdYSlNMemxPUllCOA?oc=5"}, {"title": "The new Chinese century - Daily Kos", "source": "Google News", "time": "22 hours ago", "summary": "The new Chinese century  Daily Kos", "link": "https://news.google.com/rss/articles/CBMifEFVX3lxTE04a0tNNDdNZUp0MWo5YjB4X2NiaGt5amdVQUZCWTRiejRYc1dBSmROeGJaNzFMYVllSGJuSU16NkdUMWdJeTBfT0ZBRXhvT09objlSamZ6TU1Oa3Nla3RYbHAxZVVpaVBLXzRrOVp0YU1IZUk3UHVBazczUFY?oc=5"}, {"title": "The environmental price of the US-Israeli war on Iran - Focus - Al-Ahram Weekly - Ahram Online", "source": "Google News", "time": "6 hours ago", "summary": "The environmental price of the US-Israeli war on Iran - Focus - Al-Ahram Weekly  Ahram Online", "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTFBCR1hXaHZQcGNOQkNRd3JRWk53UGw4cXdoZE0wdEdQQUtiOG1LUWJzbmthRFVNdWJ3MU5wOEpQUTJRdkdyT1VkV2NaSUVFVWxua09mZGQyMTI?oc=5"}, {"title": "After 5-year hiatus, Indian biz delegation visits China - MSN", "source": "Google News", "time": "12 hours ago", "summary": "After 5-year hiatus, Indian biz delegation visits China  MSN", "link": "https://news.google.com/rss/articles/CBMinAFBVV95cUxOQzRKTW45ZkN2MmNlQ3VYMElSREItWGppNFdxYzNtV3J0dUFFU1NsMHFfQ3BTNGVtWm1aRVdSdzRFc2NERzZuOUx0c1YxSW96a1NxeTNBQS1pYV9kUVNYR0o5Rmo5NnZpS2xmbU12dG1GblYzc3lRdENOTnhtaTZZM2lvaHppR0pOX3hCejRyYkpjNlpuczY1Nk9Id0g?oc=5"}, {"title": "MERC Sets Rooftop Solar Surplus Tariff at INR 2.82/kWh, Retains Competitive Bidding for New RE Projects - Energetica India Magazine", "source": "Google News", "time": "19 hours ago", "summary": "MERC Sets Rooftop Solar Surplus Tariff at INR 2.82/kWh, Retains Competitive Bidding for New RE Projects  Energetica India Magazine", "link": "https://news.google.com/rss/articles/CBMi1AFBVV95cUxNVmhkeVBZQlo1aDFxVnNmUkZvV3B4b083LUFNTVE2VHZ3ZTZDbXlFU25EUkFGdXloYk8yNC1oMm5JRGp4Nlg0NlpnRXpfcFh3MHNWMURIX1UtM1VkUVh3aWZyeHdUVjNhbGNPOWp5ODluT0RGMzJxTDd2VFh6UE55OHhiaWJFcDhhNHBrT3Vfejdld25RMUlZcWFLeFVpUy1aZU1weG9pZ3drSUpWc08tNDVJTFIwQndQVDNIcDF5LUk1dXNSbzdOV3hDSXhkZXU2Wkg3Vw?oc=5"}]}};
+const NEWS_DATA = {"markets": {"label": "📊 MARKETS & EARNINGS", "items": [{"title": "Dow Jones Futures: Trump Threatens &#x27;Hell&#x27; If Iran Doesn&#x27;t Open Hormuz; Sandisk Leads 7 Stocks To Watch", "source": "Yahoo Finance", "time": "12 min ago", "summary": "President Trump threatened huge Tuesday attacks, saying Iran will be &quot;in hell&quot; if the Strait of Hormuz isn&#x27;t opened. A market rally attempt is underway, but look for this signal.", "link": "https://finance.yahoo.com/m/7b231c75-cfb6-380b-bdd2-878fe84b548a/dow-jones-futures%3A-trump.html?.tsrc=rss"}, {"title": "Why Some Investors Are Moving to Cash in 2026: Is That a Mistake?", "source": "Yahoo Finance", "time": "13 min ago", "summary": "Moving out of stocks and into cash based on short-term events is usually a bad move.", "link": "https://www.fool.com/investing/2026/04/05/why-some-investors-moving-to-cash-in-2026-mistake/?.tsrc=rss"}, {"title": "&#x27;Wouldn&#x27;t be shocked&#x27; if bull market continues: Wall Street aims to look past Iran conflict", "source": "Yahoo Finance", "time": "48 min ago", "summary": "Despite soaring oil prices and ongoing Middle East tensions, earnings estimates have held steady and the broader market has largely avoided a sharp decline.", "link": "https://finance.yahoo.com/news/wouldnt-be-shocked-if-bull-market-continues-wall-street-aims-to-look-past-iran-conflict-150025546.html?.tsrc=rss"}, {"title": "This ETF Might Double Again This Year After SpaceX’s IPO", "source": "Yahoo Finance", "time": "2 hours ago", "summary": "UFO returned 66.36% in 2025 while the S&amp;P 500 gained a fourth of that. With a SpaceX IPO looking increasingly likely before year-end, the question is whether the fund can repeat that performance in 2026 — and whether investors understand what they’re actually buying. What UFO Is Built to Do Procure Space ETF (NYSEARCA:UFO) tracks ... This ETF Might Double Again This Year After SpaceX’s IPO", "link": "https://247wallst.com/investing/2026/04/05/this-etf-might-double-again-this-year-after-spacexs-ipo/?.tsrc=rss"}, {"title": "The S&amp;P 500 Is Down 4% in 2026. Here Is What Long-Term Investors Should Do Now.", "source": "Yahoo Finance", "time": "3 hours ago", "summary": "It&#x27;s the reaction to market turbulence that separates the average investors from the great ones.", "link": "https://www.fool.com/investing/2026/04/05/sp-500-down-4-2026-long-term-investors-do-now/?.tsrc=rss"}, {"title": "Inflation readings, oil volatility, and airline earnings: What to watch this week", "source": "Yahoo Finance", "time": "4 hours ago", "summary": "Inflation readings, Delta earnings, and more Middle East volatility are set to headline the week ahead.", "link": "https://finance.yahoo.com/news/inflation-readings-oil-volatility-and-airline-earnings-what-to-watch-this-week-100027649.html?.tsrc=rss"}, {"title": "Is the Trump Bull Market in Its Final Act? History Offers a Decisive Answer.", "source": "Yahoo Finance", "time": "4 hours ago", "summary": "Historical precedent may be the insurmountable headwind that Wall Street&#x27;s bull market can&#x27;t overcome.", "link": "https://www.fool.com/investing/2026/04/05/trump-bull-market-final-act-history-clear-answer/?.tsrc=rss"}, {"title": "VOO Is Down 7% From Its January High. The Case for Staying Put Has Never Been Stronger", "source": "Yahoo Finance", "time": "5 hours ago", "summary": "The current pullback in the S&amp;P 500 may be uncomfortable. But it&#x27;s also common and presents a buying opportunity for savvy investors.", "link": "https://www.fool.com/investing/2026/04/05/voo-down-7-january-high-case-stay-put-market/?.tsrc=rss"}, {"title": "One of the Stock Market’s Last Havens Is Now at Risk", "source": "Yahoo Finance", "time": "6 hours ago", "summary": "Value stocks, or shares trading at low multiples of their book value, have quietly marched toward a banner year.  Now the war in the Middle East is threatening to upend the trade, leaving investors few places to find refuge from fears over everything from rapid advances in artificial intelligence to geopolitical conflict.  The Russell 1000 Value Index is up 2.4% so far this year, beating the Russell 1000 Growth Index, which is down 9.1%, by the largest margin since 2022.", "link": "https://finance.yahoo.com/m/287f8bb3-04bf-30fe-ad4f-470ba0da8e5b/one-of-the-stock-market%E2%80%99s.html?.tsrc=rss"}, {"title": "Opinion: If You Think the End of the Iran War Will Lead to a &quot;Trump Bump&quot; on Wall Street, You&#x27;ll Be Sorely Disappointed", "source": "Yahoo Finance", "time": "7 hours ago", "summary": "While an eventual end to conflict in the Middle East will stem near-term uncertainty, it ignores the bigger picture.", "link": "https://www.fool.com/investing/2026/04/05/end-iran-war-trump-bump-wall-street-disappointed/?.tsrc=rss"}]}, "macro_policy": {"label": "💰 MACRO & POLICY", "items": [{"title": "Turning Point Near for Global Trade? - WWD", "source": "Google News", "time": "18 hours ago", "summary": "Turning Point Near for Global Trade?  WWD", "link": "https://news.google.com/rss/articles/CBMitgFBVV95cUxQRXh6YXh2b2VvLS1kTDdrZzQ4ekV4RnFveS1YV1ljOHJnZTVvZlYxclNGNTNnVUlnUnhMTV9GdTlVampzMVpQajd5R0pnemhMeWx1WWlydkN4Tk0tTnI4NDBrRGhMWFNyQU5MQXVtdzYtaXI0ZkYwZUdodGZwRkFKWWFVUXVVa0ViVFJ4V0RCTlhZSm5lLWVRVTJBT0ZqR1hGeWdNdUNranNNMHF3T0V3MGJzc1Badw?oc=5"}, {"title": "Explainer-What is the World Trade Organization e-commerce moratorium? - AOL.com", "source": "Google News", "time": "1 hour ago", "summary": "Explainer-What is the World Trade Organization e-commerce moratorium?  AOL.com", "link": "https://news.google.com/rss/articles/CBMihAJBVV95cUxOYzJ0OUVMOTdDWW9NTDdfYmtaSEIteGVWTnMydFdWaTY2cXhMSGgzeG5hYzJsLUV4WDJGUHU1WlVkY2ViNE9sVVNhMlk1SWYtT3ZfRDBtaThnTldoazJ6TFY0cURQZC1xaUZ0V1FoOXNGbXN0eTJ3YjF1ZERwUFd5TW1STElOMnl6dDBsbmRvVGpBajhZZG1YTF96X3hFYlp0OEtxd0twalQtNExQUGhGak9aWW1FXzFEMDJjRmVPaWp2R196ZDVmVGZWd0lobGlOMXc0TktzdnM4MWthTnRvc3lMZkp5aDRIUExCbEFKT21TaktSbWlxSS1EeHcyZHRSRVdVUQ?oc=5"}, {"title": "WTO Goods Trade Barometer Indicates Supply Chain Disruptions Cramping Growth - WWD", "source": "Google News", "time": "18 hours ago", "summary": "WTO Goods Trade Barometer Indicates Supply Chain Disruptions Cramping Growth  WWD", "link": "https://news.google.com/rss/articles/CBMinAFBVV95cUxPV0lFUExMRjZUenB0eldBWnlnYUxFX2pnN1ZRcHVndE8wM0tDcHZ4bE1LWWJpV0VCWEJrZXUwVUxneE83WWRaaEtlWlFFdVdWbWlvb05XSWZkYllKSGhMQm5xTXFFbk1UTndPeG94UDg0YmUtLWdqSFVqLTJ3SUtZT1hUYVpocFFYM012cERQS0NzR29nOVFyQldtTnA?oc=5"}, {"title": "WTO talks end in deadlock after Brazil blocks deal on e-commerce duties - AOL.com", "source": "Google News", "time": "16 hours ago", "summary": "WTO talks end in deadlock after Brazil blocks deal on e-commerce duties  AOL.com", "link": "https://news.google.com/rss/articles/CBMiugFBVV95cUxQRFd4Qjhhd0h3MEFnRXJmWXE0NGY3cHZiOWJNSk9PQkxQV2oyRnlia1liZlpTaFdWaXdjMVpyXzA4Qjd5ck5lN1dWcnV6VXVzNHRraUh3Um5LcWNRRU9YcThVbWNReFpINV9GS2s2a1ZwLUpvR1g2TlpnYlhBZjZPNGRONklGTExFTlUxSUJpdmExSHFQVi1kSWE1bk1zNldXQUhNX19iVWxTTm1WNXByVndyaXZpV3pnbUE?oc=5"}, {"title": "From 26% US tariffs to interim deal: How India navigated Trump’s trade war - MSN", "source": "Google News", "time": "12 hours ago", "summary": "From 26% US tariffs to interim deal: How India navigated Trump’s trade war  MSN", "link": "https://news.google.com/rss/articles/CBMi9gJBVV95cUxNNHpfUU4yempqQjhOTVhCTkppcF9hTXktMTVyX3ktTXBuR3E4N0NWTlV0OHFrX1gtd01hR0JvTi1BQWVKbmdlUGZWQ2hjTjdBNWtDUDU2TjJKOXJfcm1UTlM4bjUwTzRPeU5rLU9fRG9iMlRBbGV5U3ZBWnJKdkZQeFB3bTIyb25uZGlnRHp0UUNxSG9nVV9NNWpaS2VvamxWZTZEeTB2ZlQzR0Q2UzBPY1F2UlEwZjd6SGU5dDhVU3hzalpIS2gxY0tlRGtHUUc2QUZQbXNIZ2NzdjZLS0pLajhGZkVZbTU1bDA2bUpkWlpRaWxJYi1fNE9zcXYzR1RTdWk1a3lLSF83Vmt4UXNaSmNHMVRhbkdpcWViSzQ2aVBJYTBfVlQ1d29KdDhVcXN5dHlUamFVQ0xFVUI3OWFrdmZrYkxEWTZwSl9MT0oxTmMzYWt1bnE2REluUXdDSjBndVRWdWc2RW83d2o2bDJZX2p3UWpzQQ?oc=5"}, {"title": "New U.S. Tariffs on Aircraft Parts Push Airline Operating Costs Higher as Boeing and Airbus Warn of Supply Chain Disruption - altitudesmagazine.com", "source": "Google News", "time": "19 hours ago", "summary": "New U.S. Tariffs on Aircraft Parts Push Airline Operating Costs Higher as Boeing and Airbus Warn of Supply Chain Disruption  altitudesmagazine.com", "link": "https://news.google.com/rss/articles/CBMingFBVV95cUxPbnluVVRjaVNNSHJsN0FPNExkZDQ4R3NTT3R3SEdZUXhVaEg1ZUxBSDQ1TV9reEFCdFNIVk5fLURQdzdVM1dQQjRndGoxSkxmaERHcXBJbXRVWnVKMkFYNHgwbHNzLUd6bTE0eGZaZ2NVUl84ajJ1SFVuM2pHSFFpVDNuY2k4OUFBZU1NUmZ2OWc4anRLLVRqZ1dpWTZKUQ?oc=5"}]}, "banking_fx": {"label": "🏦 BANKING & FX", "items": [{"title": "Euro Technical Forecast: EUR/USD Coils Below Resistance—Breakout Setup Builds - FOREX.com", "source": "Google News", "time": "14 hours ago", "summary": "Euro Technical Forecast: EUR/USD Coils Below Resistance—Breakout Setup Builds  FOREX.com", "link": "https://news.google.com/rss/articles/CBMi1AFBVV95cUxPME1oSjhYZ0h0QWVXQWNfV1R4ZW8wdU1fUmwwWUVwQll2TUNuaHpOSVJGOTV2dzEwTERJQURuTkMzcFBKbHdLTVhISGtYLXRCZ1hiMUZfZFdVYnVnMUtoazl6WWE1M3QtN29ybDZsNmRlYl9kbmljRmJmUjJKRE44MGJTUHBYRVlkaWg2dE9VcVNUS19BdW5oMkFmX0ZGaEZMc0I2NTVLdlVXQTRtbURRMzdrajN2bEJwUTlFWm9VWGo1Y3Y5cE5JWDV3dE1vM0wxbWM3MtIB1AFBVV95cUxPME1oSjhYZ0h0QWVXQWNfV1R4ZW8wdU1fUmwwWUVwQll2TUNuaHpOSVJGOTV2dzEwTERJQURuTkMzcFBKbHdLTVhISGtYLXRCZ1hiMUZfZFdVYnVnMUtoazl6WWE1M3QtN29ybDZsNmRlYl9kbmljRmJmUjJKRE44MGJTUHBYRVlkaWg2dE9VcVNUS19BdW5oMkFmX0ZGaEZMc0I2NTVLdlVXQTRtbURRMzdrajN2bEJwUTlFWm9VWGo1Y3Y5cE5JWDV3dE1vM0wxbWM3Mg?oc=5"}, {"title": "Official exchange rates on selected date | Bank of Russia - cbr.ru", "source": "Google News", "time": "10 hours ago", "summary": "Official exchange rates on selected date | Bank of Russia  cbr.ru", "link": "https://news.google.com/rss/articles/CBMiVkFVX3lxTE5YcldQcEpOMEd0OGVlTzFTZnlKM2lYZ1JxQ2FvLUVUMDI2WnQ0bnk2SzlEV01pb2RKNW40WVJTTzNUTTdDeFJmSDFJN3pnZE5tS3QtakRR?oc=5"}, {"title": "EUR/USD Forecast: Sellers regain control on risk-aversion - FXStreet", "source": "Google News", "time": "20 hours ago", "summary": "EUR/USD Forecast: Sellers regain control on risk-aversion  FXStreet", "link": "https://news.google.com/rss/articles/CBMitwFBVV95cUxOUkVhMWJoVXliQ0F5NUMyZFl2MFdnWURMVElSYkgxbE9qUXRGWkQ1b3JjdkNTZE16RjJkWkJtMnVfckFsOGNfcVhKd3NBTDFpY2V4Mm1KTVFuR1RhLTJXOGFoZEhEOGRHNHd2X2UxYnFrZ3J0aTJEU1RhY2x4cFNXR0V4c1VsV2pFZUZjTzJDWkV1N0d1NEJPQzhrbFU0T0JTVjNaYU5oQlk2NFpaZE5XNXFpMWY1T0E?oc=5"}, {"title": "Convert still believe to Canadian dollar (BELIEVE to CAD) - BeInCrypto", "source": "Google News", "time": "21 hours ago", "summary": "Convert still believe to Canadian dollar (BELIEVE to CAD)  BeInCrypto", "link": "https://news.google.com/rss/articles/CBMiYkFVX3lxTE03NFRGWG84WWRLVnBDR2FPWXcyMTg0VHZxY2lLZTRTWHZzcHE5U1BVRzJpdDE2UXo0b1VBd2hkOHJ0ckNXczZoUXVVcE1odmtnM0ZrLXFieVlETzlkSDRlazZ3?oc=5"}]}, "bonds_rates": {"label": "📈 BONDS & RATES", "items": [{"title": "Treasury Yields Snapshot: April 2, 2026 - Seeking Alpha", "source": "Google News", "time": "11 hours ago", "summary": "Treasury Yields Snapshot: April 2, 2026  Seeking Alpha", "link": "https://news.google.com/rss/articles/CBMihAFBVV95cUxQWkhHUmZzbDE2NTh6V0F6dG5iOWdpaVJUZmdLazdiUkpZTEhBdjVHRVB0S05wNDRrd2dlcmdTZVl6RXFpb2dVMG1UTGJIeFhoWlFxeEhCcGRySkJDeUk5aGtKQkJjN1FNQURjRnpPSUdjaV91UnJvcTdjX3I3Y1VoNG52YWk?oc=5"}, {"title": "Bond Market Gets Nervous about Rising Inflation, Ballooning Debt, Sees Rate Hike. Mortgage Rates Jump to 6.46% - Wolf Street", "source": "Google News", "time": "14 hours ago", "summary": "Bond Market Gets Nervous about Rising Inflation, Ballooning Debt, Sees Rate Hike. Mortgage Rates Jump to 6.46%  Wolf Street", "link": "https://news.google.com/rss/articles/CBMi2AFBVV95cUxPTTJsWlRvUEVfZFZrcHNyNVFGN0pnalU5Q2lUaFZlMlpXd1Z1bXVWWFlKZ0JWd0NSZUJSWkE4VExJZzBROWxBQy1WZU03T3V6MXVjQ3NEOFlEckZvTy1YcXg2RUh1THNqUXZxdW5yQld2eGh0b1JZY1UwVTJINUZrdkwtbDdmWkNqV1JtVDVaakhfbEhOVjlXVVJsZVlXR1N0ekpzT0pnSkhuV3FyWFFQdFFKNWlyV2tCSjQ2dWpyYjRBV2VXWkJSMWJzRzZQcUZrZjN4TEV2RTM?oc=5"}, {"title": "AOR Has Returned 113.6% Over 10 Years With Built-In Rebalancing and a 2.6% Yield - AOL.com", "source": "Google News", "time": "8 hours ago", "summary": "AOR Has Returned 113.6% Over 10 Years With Built-In Rebalancing and a 2.6% Yield  AOL.com", "link": "https://news.google.com/rss/articles/CBMidEFVX3lxTE9xTFBreDFUQllnTExqVFh5VGk2SUM3dUhabkdKY1lpRFVzaVFJVUgwNFp4eDU2eHFLVHZBM1UzUUJlUG1HaFFqYWQycGU5dFlqSUNQVjQzeUxxMGhHejdGM0kxdk9MbWVsZXU5cHo5VlJvTDhm?oc=5"}, {"title": "Government bond yields may move sideways as the March CPI becomes a key factor. - Moomoo", "source": "Google News", "time": "17 hours ago", "summary": "Government bond yields may move sideways as the March CPI becomes a key factor.  Moomoo", "link": "https://news.google.com/rss/articles/CBMioAFBVV95cUxPT1g1QUZGQWlNelhBTTdqbkF1eTZzUHBQYlBCcDF0UzBBdDM4d013THF0b3dOU1FrY09JUkQ4SU15TG1ibjEwRjN6VTFlWl9BUloxd2xsOHYtMWVjY3RzODBMNnRsbm1hY0k3UlB3LU1mMjhOSTlKTnNzY19jbm1mX0gwcUQwd29NelBoZ015RW9VeHNBVkp4S2dLVzRWWXFY?oc=5"}, {"title": "Dow futures jump on buoyant payrolls news - The Standard (HK)", "source": "Google News", "time": "14 hours ago", "summary": "Dow futures jump on buoyant payrolls news  The Standard (HK)", "link": "https://news.google.com/rss/articles/CBMimwFBVV95cUxQY08yRUpyamx1MzZEMUlYQzYxTWt0TDRhRGpnUk1Cam9pT1BYZnVmRU5lTDllNUJEY1E0UGo1bDFLdUdNREdUQmpYOG9EQlMxZ3dRX3ZUNEJTOXZ5VWVRZTBuWmphVFZwcVlscXhJb1VkbkNUamh6TVJxYVYzY1ljN1lELW1NS3E2aTRPc29GUV9RZzhuYjJiTUdfZw?oc=5"}, {"title": "Asian stocks today: Markets slip on AI valuation fears; Nvidia earnings weigh on tech sentiment - MSN", "source": "Google News", "time": "6 hours ago", "summary": "Asian stocks today: Markets slip on AI valuation fears; Nvidia earnings weigh on tech sentiment  MSN", "link": "https://news.google.com/rss/articles/CBMi9AJBVV95cUxNb0FJX24tOEQ4QjFuVWJuX1Q0MFcwZnBDcklYTmV0NmFLX1lRSTdVRlhrcU5fdkFRbkNUUWlINnltZmVabmFkY3lkNkM4bkVRd2x2UXZIQ3FndnBfOW9FcmJWNTRRT2NXakFCdUpodUlQTm1yZUNFZ3lFM3d0VTZJQ1oycnFlalZucGQ4UFRpZ3B5M0t0bE1EekJGTE03Zmp1bmlkYk5ZTkhjOXAtSnhidVlUY1ZzeFpMeGVYSVBwNlVVa1RUZktzTzBZQUdOcW1kMktHaDYyWnBfcFJaaUlnZU1GMmN2aWhTS0lnMGZTVWMta3BWblF0aUlYelQ5Z1dLeTl4azdXVFp2OXF6eGFBb2lnOXlaeWV2U2lYb3IyaUxDR1BhS3JBSHc1V0o4eUR4Rk13OF9WX2dHQUNMYlJpM3dRQmxSbUk3Q3NEeVZhcVNwQVctNHhhSERfaWxTc1hZYmpVajNEemloZno0OXpEcEY2WWw?oc=5"}, {"title": "Japan’s Bond Shock Could Trigger the Next Global Crypto Sell-Off - Live Bitcoin News", "source": "Google News", "time": "9 hours ago", "summary": "Japan’s Bond Shock Could Trigger the Next Global Crypto Sell-Off  Live Bitcoin News", "link": "https://news.google.com/rss/articles/CBMinAFBVV95cUxNVUI0cURCSGk4bE4tVzh1ZDNCUm00THlpTGFiYXlKX0VGZzQ1TE1hSVRjMFd1cE5BMThrWXVYVjc5TU5aUTNsdVQ2Ynk0VjYteUJ6aHJDbnROQzBmWU5IV2tvalJEd19PQlFwRkRSdFZBaUFMQkVOZXVBTE9ReGV3QTQ5MHg5VnZrdXV5Y0haVDlyZEVCel9URnlRN2g?oc=5"}, {"title": "Current Mortgage Rates: US Rises 6.46%, UK Hits 5.56%, EU 3.4% - Coinpaper", "source": "Google News", "time": "21 hours ago", "summary": "Current Mortgage Rates: US Rises 6.46%, UK Hits 5.56%, EU 3.4%  Coinpaper", "link": "https://news.google.com/rss/articles/CBMijAFBVV95cUxOeFJtTVQ3ZXF1cTQxSGlZaXBHNkQ5aVJvWHozMzQyZ21nRlk2RlNtcG9VZVgyLTJiaDRpbkRyUFR0SW1la05fX1k0M1JkTXc4cklKYnRpOWNBc1ZINHhEbDBIbGZtSTJLTUdRWGdoRVl6M0xTWGxPUlhsRzVwelJha25xbVFzMU9SLWdYbA?oc=5"}, {"title": "Yields have fallen, and the effects of the unexpected rate cut continue. - 富途牛牛", "source": "Google News", "time": "17 hours ago", "summary": "Yields have fallen, and the effects of the unexpected rate cut continue.  富途牛牛", "link": "https://news.google.com/rss/articles/CBMinwFBVV95cUxQU1gtNlFma2lCWU4tbmIxZVFmLThIc0hJZVFkY1pSS3ZfOW5rN2FuUUNiSWM3UE83Vmw5LWZRTGdISGZGOXNHbmthNDRSRk50NFpaZ0szVUtENHdQcXFrc3duWjJMMXl2S3lKdDEwbXYzSndqMnF6S0M4djJGNjdyR0dwZkVnOW1UTmJRVF82RFhaREk3REhaa2N2c3cyRUk?oc=5"}, {"title": "Institutional investors shift funds to high-grade bonds and undervalued equities to mitigate sequence-of-returns risk in retirement portfolios - Bitget", "source": "Google News", "time": "19 hours ago", "summary": "Institutional investors shift funds to high-grade bonds and undervalued equities to mitigate sequence-of-returns risk in retirement portfolios  Bitget", "link": "https://news.google.com/rss/articles/CBMiY0FVX3lxTE5tXzk0ZTEtRTExbGdIWEViOXlVZWttZnl0SXhfc29WVVo5N1NfVksyUWtSTGJnTlRUWWN0UjR0eTFPRDJub2IxaUN4cEpmeXVHWUR1NDRaZHhzeXo1ZE9PMFFsWdIBY0FVX3lxTE5tXzk0ZTEtRTExbGdIWEViOXlVZWttZnl0SXhfc29WVVo5N1NfVksyUWtSTGJnTlRUWWN0UjR0eTFPRDJub2IxaUN4cEpmeXVHWUR1NDRaZHhzeXo1ZE9PMFFsWQ?oc=5"}]}, "commodities_energy": {"label": "📦 COMMODITIES & ENERGY", "items": [{"title": "StoneX Commodity Index Market Report - stonex.com", "source": "Google News", "time": "19 hours ago", "summary": "StoneX Commodity Index Market Report  stonex.com", "link": "https://news.google.com/rss/articles/CBMiiwFBVV95cUxOSXJjVm9GTlgxYWhkVENKVUMwSnh2RVhkQktOX0VnLVVIV3kwOGRRMTlZbFFueGJzOUp0MFEzZU1jQnlHSnY1bUdyMzZXbW1PZERrRzg3eUxGXzF6MjJaRjRTU2hCd1JjWGhtOFY4d1FDQ1B5WldkYmRVOG1nX0w4amJMR21tTjBza0hj?oc=5"}, {"title": "Systemic Commodity Chain Disruption Threatens Global Markets in 2026 - Discovery Alert", "source": "Google News", "time": "20 hours ago", "summary": "Systemic Commodity Chain Disruption Threatens Global Markets in 2026  Discovery Alert", "link": "https://news.google.com/rss/articles/CBMilwFBVV95cUxOTlpGNGtxNGVzYlFleVJJeS0taEdQOXlPeFRTb0tRLUt4bXlRdnpTdTB4MnM0TGp2Y05MYm9yckpBZV9nVUk3b2dkRnhpc0ZmS0JXT2JZVHgxdnlPLTZkYmxvYUU3TVJKV2lEWWhJVzJoT0dYbWJIMnNaTXByTmxRTEYzVTl3SUwxZXhZb3JYNzJKZVpWTzlB?oc=5"}, {"title": "PMEX daily trading report - Business Recorder", "source": "Google News", "time": "18 hours ago", "summary": "PMEX daily trading report  Business Recorder", "link": "https://news.google.com/rss/articles/CBMiVkFVX3lxTE1XVEt2SlFwdU9UejVSV3FRUm5rVncxaW9vX3NCUDJnUmU0YXNOWmF2UlhkZ0QwMEkzdGxKckN3MjgtaHBDck1tX2U1UkhCamFfSkdRSjl30gFWQVVfeXFMTVdUS3ZKUXB1T1R6NVJXcVFSbmtWdzFpb29fc0JQMmdSZTRhc05aYXZSWGRnRDAwSTN0bEpyQ3cyOC1ocENyTW1fZTVSSEJqYV9KR1FKOXc?oc=5"}, {"title": "Opec+ holds output steady amid Iran conflict and volatile oil markets - The National", "source": "Google News", "time": "1 hour ago", "summary": "Opec+ holds output steady amid Iran conflict and volatile oil markets  The National", "link": "https://news.google.com/rss/articles/CBMi0gFBVV95cUxQS3UwOGhhb290NDh0QW5TN3lLWTRlSUtYczJuSzFyOEg3cjlaejg3NVNyZlBMR25jQV92b2sxaWtUU29KWWFOQW95V095NHhhdE11UEhIbEdoU1VzcFh6bU1FNVJra3lDcEVXVFZVZlZNWDRnRFdIaXBDdktwRDVtQzZtcVlTRDhvbzAyWVctaXVnUjBNTVZfbUpwZE04cmEyS0NwNGVHVDQ3VUhaaXg3Z3M2WkY0c1RaMmVrN1Q5czBuUEh6aUxZcmR4ejBjU1dBcFE?oc=5"}, {"title": "OPEC+ Production Increase May 2026: Market Impact Analysis - Discovery Alert", "source": "Google News", "time": "4 hours ago", "summary": "OPEC+ Production Increase May 2026: Market Impact Analysis  Discovery Alert", "link": "https://news.google.com/rss/articles/CBMiiwFBVV95cUxPUGdCYlZad29zUFRtTmpBeGotR2s3T015VnVjZFNYQXhGRlFVQ0Z2THFqTUI0YzRQNmdNUklYZ0pDeTJLdVBUaTVZZEh6UGhJS2F2X1Y3WV9GM05zdjVSZG9ULXdSWWpjMHFUWFlNTW9ic0tLZ3dMamM2M2NFZUczLXhlNTMwNUZVX3FN?oc=5"}, {"title": "Opinion | China’s growing North Africa presence a structural challenge for Europe - South China Morning Post", "source": "Google News", "time": "18 hours ago", "summary": "Opinion | China’s growing North Africa presence a structural challenge for Europe  South China Morning Post", "link": "https://news.google.com/rss/articles/CBMiwAFBVV95cUxPM3BZVnVWUWVRcGR6WkdWSWE2ZlIxVTNGel92NFNxV1E2Nl9hWGlXVjVRUFdqN3ZwZGR0TkZ3SEMyM0gwX1ctU3F4aEhCWEhPV3ZYclUwdmhCd2VsZmRjQjQxamV2NzVPdUp6VlhFc2IyYmxqam81LV84dmF0TWl4bVlxakVzQm80WWpNUDNHZ3JqWEZoM29FTGhLcDJ5TmRYTlJneG5GelptRi03STgxS0xVNTNZejVNdGNnaHBkUGnSAcABQVVfeXFMTzNwWVZ1VlFlUXBkelpHVklhNmZSMVUzRnpfdjRTcVdRNjZfYVhpV1Y1UVBXajd2cGRkdE5Gd0hDMjNIMF9XLVNxeGhIQlhIT1d2WHJVMHZoQndlbGZkY0I0MWpldjc1T3VKelZYRXNiMmJsampvNS1fOHZhdE1peG1ZcWpFc0JvNFlqTVAzR2dyalhGaDNvRUxoS3AyeU5kWE5SZ3huRnpabUYtN0k4MUtMVTUzWXo1TXRjZ2hwZFBp?oc=5"}, {"title": "Iran targets key infrastructure in Kuwait, Bahrain and UAE - The National", "source": "Google News", "time": "8 hours ago", "summary": "Iran targets key infrastructure in Kuwait, Bahrain and UAE  The National", "link": "https://news.google.com/rss/articles/CBMixgFBVV95cUxNTjJsZXM4UzFvS0NUSU9yUkFZamgxSE9sWHlCX2pBMVRIMGJDN1dzZHZKZk1tY0w2aWw5NjNYVjFjMkFILXRScktRd2JSTVlBTEE4eURyRUVVc1dJOUR2VlEtLXRwd003SkhoNVVMS3N4czFhTC1tN3M2LU16d096NGppdE9fVjhIR255NUt6VVRsMnBaS1BzLU1pZV9GQ3l1MHN1VG9jbjk2cUlnZmJvV0ZPN1NuMzBRNmF1QTMtUGxRcEtTZ1E?oc=5"}, {"title": "Clean Energy Transition Cuts Global Oil Demand Forecasts - Discovery Alert", "source": "Google News", "time": "21 hours ago", "summary": "Clean Energy Transition Cuts Global Oil Demand Forecasts  Discovery Alert", "link": "https://news.google.com/rss/articles/CBMigwFBVV95cUxQaDdyWEtjNkdyNXRLaFM2cXdKV1M3UFZTbGZBbk4zVWVXS3NDX3hFcThlYW9vTmtEN0ZqZ3dzTUtfa2J3clN4bDI5SDRwd25WbWw1V0p4OGY4TU9HbVRWeDR5WHkxekF3XzRiTmlZRlJxZnpPR3J1YVU0ZXZ4LTRYaVBUOA?oc=5"}]}, "india": {"label": "🇮🇳 INDIA MARKETS", "items": [{"title": "Ahead of Market: 10 things that will decide D-Street action on Monday", "source": "Economic Times", "time": "5 hours ago", "summary": "Bulls staged a sharp rebound on Thursday, lifting Sensex and Nifty to a second straight gain despite high volatility. IT stocks led the recovery, while India VIX edged higher. Analysts see near-term upside but caution that broader weakness and elevated volatility persist. Market sentiment remains positive, supported by strong breadth and selective buying interest.", "link": "https://economictimes.indiatimes.com/markets/stocks/news/ahead-of-market-10-things-that-will-decide-d-street-action-on-monday/articleshow/130037775.cms"}, {"title": "Stocks braced for volatility as RBI policy, West Asia conflict take centre stage, say analysts", "source": "Economic Times", "time": "5 hours ago", "summary": "The domestic stock market is expected to remain volatile this week as investors track the Reserve Bank&#x27;s monetary policy decision, key global macroeconomic data and the impact of the West Asia conflict, analysts said.", "link": "https://economictimes.indiatimes.com/markets/stocks/news/stocks-braced-for-volatility-as-rbi-policy-west-asia-conflict-take-centre-stage-say-analysts/articleshow/130037689.cms"}, {"title": "M-cap of 6 of top 10 most valued firms drops nearly by Rs 65,000 cr; Bharti Airtel biggest laggard", "source": "Economic Times", "time": "7 hours ago", "summary": "The combined market valuation of six of the top-10 most valued firms declined by Rs 64,734.46 crore in a holiday-shortened last week, with Bharti Airtel taking the biggest hit, reflecting the broader weakness in the equities market.", "link": "https://economictimes.indiatimes.com/markets/stocks/news/m-cap-of-6-of-top-10-most-valued-firms-drops-nearly-by-rs-65000-cror-bharti-airtel-biggest-laggard/articleshow/130035445.cms"}, {"title": "11 IPO stocks to see lock-in expiry worth Rs 2,378 crore in next two months. Do you own any?", "source": "Economic Times", "time": "8 hours ago", "summary": "Rs 2,378 crore in IPO anchor shares unlocking across 11 firms during April–May may create supply pressure, with clustered expiries potentially impacting stock prices and short-term market sentiment significantly.", "link": "https://economictimes.indiatimes.com/markets/stocks/news/11-ipo-stocks-to-see-lock-in-expiry-worth-rs-2378-crore-in-next-two-months-do-you-own-any/slideshow/130035542.cms"}, {"title": "How to trade Nifty Bank amid RBI monetary policy: Anand James shares his playbook", "source": "Economic Times", "time": "8 hours ago", "summary": "Bank Nifty is at a critical juncture ahead of the RBI policy, showing early signs of stabilization after recent volatility. Easing selling pressure and improving technical indicators suggest a potential short-term rebound. Traders are advised to monitor key levels and historical trends for positioning.", "link": "https://economictimes.indiatimes.com/markets/stocks/news/how-to-trade-nifty-bank-amid-rbi-monetary-policy-anand-james-shares-his-playbook/articleshow/130034999.cms"}, {"title": "IPO pipeline strengthens; 38 cos file draft papers in March", "source": "Economic Times", "time": "9 hours ago", "summary": "As many as 38 companies, including SBI Funds Management and Manipal Health Enterprises, filed preliminary IPO papers with Sebi in March 2026, signalling improving issuer sentiment even as regulatory timelines contributed to the surge.", "link": "https://economictimes.indiatimes.com/markets/ipos/fpos/ipo-pipeline-strengthens-38-cos-file-draft-papers-in-march/articleshow/130034483.cms"}, {"title": "Chasing trends or buying value? The strategy that wins over time", "source": "Economic Times", "time": "9 hours ago", "summary": "The global stock market landscape has become increasingly complex, shaped by macroeconomic uncertainty, geopolitical risks, and shifting liquidity conditions. Yet, amid this volatility, timeless investing principles, such as those advocated by Joel Greenblatt offer a structured lens to interpret market behavior and identify opportunities.", "link": "https://economictimes.indiatimes.com/markets/stocks/news/chasing-trends-or-buying-value-the-strategy-that-wins-over-time/articleshow/130034440.cms"}, {"title": "IPO calendar stays muted with just 2 issues opening this week. Check details", "source": "Economic Times", "time": "10 hours ago", "summary": "Primary market activity remains muted, with just two offerings next week, a Rs 48 crore SME IPO by Safety Controls and Devices and PropShare Celestia REIT worth Rs 245 crore. Rising volatility, weak listings, and cautious investor sentiment have slowed IPO momentum, prompting companies to delay launches or trim valuations despite a broader pipeline remaining intact.", "link": "https://economictimes.indiatimes.com/markets/ipos/fpos/ipo-calendar-stays-muted-with-just-2-issues-opening-this-week-check-details/articleshow/130034213.cms"}, {"title": "YES Bank Q4 biz update: Loans rise 11%, deposits grow 12% YoY", "source": "Economic Times", "time": "10 hours ago", "summary": "YES Bank reported steady Q4 growth, with advances rising 6% QoQ and deposits outpacing at 9%, improving its CD ratio to 85.4%. Strong CASA traction supported margins, though reliance on certificates of deposit increased. Liquidity remained comfortable. Overall, improving deposit quality and a stronger liability franchise signal a more balanced outlook despite measured loan growth.", "link": "https://economictimes.indiatimes.com/markets/stocks/earnings/yes-bank-q4-biz-update-loans-rise-11-deposits-grow-12-yoy/articleshow/130034185.cms"}, {"title": "FPIs extend selloff in April; pull out Rs 19,837 crore in just 2 sessions", "source": "Economic Times", "time": "10 hours ago", "summary": "Foreign investors continued to exit Indian equities, withdrawing Rs 19,837 crore (USD 2.1 billion) in the first two trading sessions of April, weighed down by the West Asia conflict, rising crude oil prices, and persistent rupee depreciation.", "link": "https://economictimes.indiatimes.com/markets/stocks/news/fpis-extend-selloff-in-april-pull-out-rs-19837-crore-in-just-2-sessions/articleshow/130034089.cms"}]}, "corporate": {"label": "🏢 CORPORATE NEWS", "items": [{"title": "TMC Stock Is Up With Retail Investors as the U.S. and Japan Team Up to Challenge China&#x27;s Grip on Critical Minerals", "source": "Yahoo Finance", "time": "23 min ago", "summary": "Click to read the full article.", "link": "https://finance.yahoo.com/markets/stocks/articles/tmc-stock-retail-investors-u-152500011.html"}, {"title": "&#x27;Wouldn&#x27;t be shocked&#x27; if bull market continues: Wall Street aims to look past Iran conflict", "source": "Yahoo Finance", "time": "48 min ago", "summary": "Click to read the full article.", "link": "https://finance.yahoo.com/news/wouldnt-be-shocked-if-bull-market-continues-wall-street-aims-to-look-past-iran-conflict-150025546.html"}, {"title": "A Gen Z woman couldn&#x27;t afford rent, so she bought a duplex instead — and cut her housing costs in half", "source": "Yahoo Finance", "time": "48 min ago", "summary": "Click to read the full article.", "link": "https://finance.yahoo.com/markets/stocks/articles/gen-z-woman-couldnt-afford-150000716.html"}, {"title": "Dow Jones Futures: Trump Threatens &#x27;Hell&#x27; If Iran Doesn&#x27;t Open Hormuz; Sandisk Leads 7 Stocks To Watch", "source": "Yahoo Finance", "time": "1 hour ago", "summary": "Click to read the full article.", "link": "https://www.investors.com/market-trend/stock-market-today/dow-jones-futures-trump-threatens-iran-hell-hormuz-oil-prices-sandisk/?src=A00220&amp;yptr=yahoo"}, {"title": "Retiring head of FINRA foundation: FOMO is investors&#x27; biggest mistake", "source": "Yahoo Finance", "time": "1 hour ago", "summary": "Click to read the full article.", "link": "https://finance.yahoo.com/news/retiring-head-of-finra-foundation-fomo-is-investors-biggest-mistake-143053886.html"}, {"title": "A Talos Energy (TALO) Insider Sold 2.3 Million Shares for $38.5 Million. Should You Follow Their Lead?", "source": "Yahoo Finance", "time": "29 min ago", "summary": "Click to read the full article.", "link": "https://finance.yahoo.com/markets/stocks/articles/talos-energy-talo-insider-sold-151954022.html"}, {"title": "A couple in Alabama says they owes $40,000 on a car worth only $27,000 — here’s how", "source": "Yahoo Finance", "time": "1 hour ago", "summary": "Click to read the full article.", "link": "https://finance.yahoo.com/markets/options/articles/couple-alabama-says-owes-40-140000649.html"}, {"title": "10 investing lessons I learned over the last 20 years", "source": "Yahoo Finance", "time": "3 hours ago", "summary": "Click to read the full article.", "link": "https://finance.yahoo.com/news/10-investing-lessons-i-learned-over-the-last-20-years-123033012.html"}]}, "geopolitical": {"label": "🌍 GEOPOLITICAL", "items": [{"title": "Trump vows Iran will be &#x27;living in Hell&#x27; by Tuesday if Strait of Hormuz deadline missed", "source": "CNBC", "time": "1 hour ago", "summary": "&quot;Tuesday will be Power Plant Day, and Bridge Day, all wrapped up in one, in Iran. There will be nothing like it!!!&quot; Trump said in a Truth Social post.", "link": "https://www.cnbc.com/2026/04/05/us-trump-confirms-missing-us-pilot-rescued.html"}, {"title": "&#x27;Silent killers&#x27;: How AI start-ups are trying to solve one of the retail industry&#x27;s biggest problems", "source": "CNBC", "time": "3 hours ago", "summary": "The rapid evolution of generative AI has finally made these applications good enough to meaningfully impact retailers&#x27; bottom lines.", "link": "https://www.cnbc.com/2026/04/05/ai-retail-start-ups-virtual-try-on-tech-margins.html"}, {"title": "&#x27;Anything but autos&#x27;: Can defense save Europe’s ailing car industry?", "source": "CNBC", "time": "10 hours ago", "summary": "The transition from wheels to weapons is achievable in part because many of the underlying skills are highly transferable, according to experts.", "link": "https://www.cnbc.com/2026/04/05/autos-defense-europe-car-industry.html"}, {"title": "Buffett may end donations to Gates charity over Bill&#x27;s ties to Epstein", "source": "CNBC", "time": "1 day ago", "summary": "Revelations about Jeffrey Epstein&#x27;s ties to Bill Gates have strained his friendship with Warren Buffett and the Omaha billionaire&#x27;s annual multi-billion-dollar donations to the Gates Foundation.", "link": "https://www.cnbc.com/2026/04/04/buffett-may-end-donations-to-gates-charity-over-bills-ties-to-epstein.html"}, {"title": "Asian travelers seek respite in other options as Middle East travel plans stay grounded", "source": "CNBC", "time": "1 day ago", "summary": "Ticket prices across airlines in Asia increase in the midst of Iran War tensions, Asian travelers look elsewhere to relax", "link": "https://www.cnbc.com/2026/04/04/asian-travelers-seek-other-options-as-middle-east-plans-stay-grounded.html"}]}, "crypto": {"label": "📉 CRYPTO & WEB3", "items": [{"title": "Here’s what happened in crypto today", "source": "CoinTelegraph", "time": "3 hours ago", "summary": "Need to know what happened in crypto today? Here is the latest news on daily trends and events impacting Bitcoin price, blockchain, DeFi, NFTs, Web3 and crypto regulation.", "link": "https://cointelegraph.com/news/what-happened-in-crypto-today?utm_source=rss_feed&amp;utm_medium=rss&amp;utm_campaign=rss_partner_inbound"}, {"title": "Robert Kiyosaki recommends Bitcoin, gold as 1974 shift comes full circle", "source": "CoinTelegraph", "time": "3 hours ago", "summary": "The Rich Dad Poor Dad author continues to back Bitcoin, gold and silver as alternatives to traditional money.", "link": "https://cointelegraph.com/news/robert-kiyosaki-1974-shift-bitcoin-gold-real-money?utm_source=rss_feed&amp;utm_medium=rss&amp;utm_campaign=rss_partner_inbound"}, {"title": "New Bitcoin price lows &#x27;matter of time&#x27; says trader with BTC stuck at $67K", "source": "CoinTelegraph", "time": "3 hours ago", "summary": "Bitcoin added downside BTC price warnings as Binance order-book data showed multiple investor classes selling coins into the weekend.", "link": "https://cointelegraph.com/news/new-bitcoin-price-lows-matter-of-time-says-trader-btc-stuck-67k?utm_source=rss_feed&amp;utm_medium=rss&amp;utm_campaign=rss_partner_inbound"}, {"title": "‘Existential’ token problem seen as supply outpaces value creation", "source": "CoinTelegraph", "time": "6 hours ago", "summary": "Blockworks&#x27; Michael Ippolito sees surge in token supply diluting returns, breaking the link between fundamentals and price while raising concerns about crypto’s long-term model.", "link": "https://cointelegraph.com/news/crypto-existential-token-problem-supply-outpaces-value-creation?utm_source=rss_feed&amp;utm_medium=rss&amp;utm_campaign=rss_partner_inbound"}, {"title": "Anthropic launches PAC amid tensions with Trump administration over AI policy", "source": "CoinTelegraph", "time": "7 hours ago", "summary": "AI firm Anthropic forms an employee-funded PAC while facing questions over political balance and a growing dispute with the Pentagon over AI use.", "link": "https://cointelegraph.com/news/anthropic-launches-pac-ai-policy-tensions-washington?utm_source=rss_feed&amp;utm_medium=rss&amp;utm_campaign=rss_partner_inbound"}, {"title": "Drift Protocol $280M exploit took &#x27;months of deliberate preparation&#x27;", "source": "CoinTelegraph", "time": "8 hours ago", "summary": "Drift Protocol said, with “medium-high confidence,” that the recent attack was carried out by the same actors responsible for the $58 million Radiant Capital hack in October 2024.", "link": "https://cointelegraph.com/news/drift-protocol-exploit-preparation-preliminary-findings?utm_source=rss_feed&amp;utm_medium=rss&amp;utm_campaign=rss_partner_inbound"}, {"title": "Bitcoin bearish social chatter reaches 5-week high: Santiment", "source": "CoinTelegraph", "time": "11 hours ago", "summary": "Santiment said bearish Bitcoin comments on social media have climbed to a five-week high, which could signal a reversal sooner rather than later.", "link": "https://cointelegraph.com/news/bitcoin-bearish-social-media-chatter-low-price-btc-stagnant-santiment?utm_source=rss_feed&amp;utm_medium=rss&amp;utm_campaign=rss_partner_inbound"}, {"title": "Telegram founder Pavel Durov says Iranian government&#x27;s ban backfired", "source": "CoinTelegraph", "time": "20 hours ago", "summary": "Thousands of software developers are currently developing virtual private networks to circumvent Tehran&#x27;s control of local internet access, Durov said.", "link": "https://cointelegraph.com/news/telegram-durov-iran-ban-backfire?utm_source=rss_feed&amp;utm_medium=rss&amp;utm_campaign=rss_partner_inbound"}, {"title": "Jimmy Song explains why Bitcoin needs a &#x27;conservative&#x27; node client", "source": "CoinTelegraph", "time": "21 hours ago", "summary": "The Bitcoin advocate is the co-founder of ProductionReady, a non-profit initiative to fund open source development of BTC software and education.", "link": "https://cointelegraph.com/news/jimmy-song-bitcoin-conservative-node-client?utm_source=rss_feed&amp;utm_medium=rss&amp;utm_campaign=rss_partner_inbound"}, {"title": "AI is making crypto&#x27;s security problem even worse, Ledger CTO warns", "source": "CoinDesk", "time": "1 hour ago", "summary": "Ledger’s Charles Guillemet says artificial intelligence is making hacks cheaper and faster, forcing a rethink of how crypto systems stay secure.", "link": "https://www.coindesk.com/tech/2026/04/05/ai-is-making-crypto-s-security-problem-even-worse-ledger-cto-warns"}]}, "tech_ai": {"label": "🤖 TECH & AI", "items": [{"title": "Who Decides How America Uses AI in War? - Stanford HAI", "source": "Google News", "time": "10 hours ago", "summary": "Who Decides How America Uses AI in War?  Stanford HAI", "link": "https://news.google.com/rss/articles/CBMid0FVX3lxTE14dk1hMzI5Z1R5emNKd1lXTDRtNXJPUFFTSklwSXNtVHcyVjZwQnhiVDQ2UndoOW1xeUloZ0ZLTVNTcENLOTY3REU4NEpLTFNPQTN4MklLQTVIdDBxc0g3bWlTbDhLbU8tSWlwVlhzZnJoYURxUkI4?oc=5"}, {"title": "​Beyond the Code: Reclaiming Human Agency in an AI-First World - Fair Observer", "source": "Google News", "time": "5 hours ago", "summary": "​Beyond the Code: Reclaiming Human Agency in an AI-First World  Fair Observer", "link": "https://news.google.com/rss/articles/CBMiogFBVV95cUxPWk1NZUw2S2JsSU5CRWQ5TzUyeURuY3g4RGRiOWNBamlnYlZhOFE0elpmUVFKam92eW41ckVCcG5iLUhzV1B1SXoxOUJlTHgxc1l1Z3k4Z1BJQjlNU05zQmZ1MVBublBLZVdRb3hrMUF3QllCejJGWEhidUcwdDhPdm5aRHpjemUyUVQyR2NWbGFyMHFPa0lvNjdoTUxXb21WWmc?oc=5"}, {"title": "&#x27;Silent killers&#x27;: How AI start-ups are trying to solve one of the retail industry&#x27;s biggest problems - CNBC", "source": "Google News", "time": "3 hours ago", "summary": "&#x27;Silent killers&#x27;: How AI start-ups are trying to solve one of the retail industry&#x27;s biggest problems  CNBC", "link": "https://news.google.com/rss/articles/CBMikgFBVV95cUxNYjd5VE85RlFWQTFqbnNHS0xuRERxMlVNdmxkd21jMWg5ampRX2I3ZEIwOXJmNlBHa3JmVlQ3NHVhUF9kZ1lkTU1xNzh0ekFqM0ZQRzBYX1JJZzVsNDZMY3ViVlRoTkJMc3NaTXJFN0dwUEo4WTY3V2ZDUlJUSm9nbnFWOEJlNFhEUVFHOUNoS1ptZ9IBkgFBVV95cUxNYjd5VE85RlFWQTFqbnNHS0xuRERxMlVNdmxkd21jMWg5ampRX2I3ZEIwOXJmNlBHa3JmVlQ3NHVhUF9kZ1lkTU1xNzh0ekFqM0ZQRzBYX1JJZzVsNDZMY3ViVlRoTkJMc3NaTXJFN0dwUEo4WTY3V2ZDUlJUSm9nbnFWOEJlNFhEUVFHOUNoS1ptZw?oc=5"}, {"title": "This Underrated Artificial Intelligence (AI) Infrastructure Stock Has Surged 80% in a Year. It Can Still Surge 53%. - AOL.com", "source": "Google News", "time": "45 min ago", "summary": "This Underrated Artificial Intelligence (AI) Infrastructure Stock Has Surged 80% in a Year. It Can Still Surge 53%.  AOL.com", "link": "https://news.google.com/rss/articles/CBMinAFBVV95cUxQRUdyOEhhbWxXbXBMY0RITW5BSHhWWVZqNWtwbGdfWmtCUXlDN3pKZVZSQ2p5dURJM2Jjbk5tczRnanZhb0QwUTdyRkp4TGVKVTBubUdZMmZya21mLXdVZklMVUZwbEI5U3ZHMWtQX1JqM2ZSbzFoSmdJNTY1Z0ViYnFzdWgxRzNTbko5RnVhVHNSWFZnMVU1blh0VVo?oc=5"}, {"title": "AI is breaking crypto security by making hacks cheaper and easier, Ledger CTO warns - CoinDesk", "source": "Google News", "time": "1 hour ago", "summary": "AI is breaking crypto security by making hacks cheaper and easier, Ledger CTO warns  CoinDesk", "link": "https://news.google.com/rss/articles/CBMiqwFBVV95cUxPQnNRNWxoR0hfMkFhSmMxMnNJemRwVlJNOHV2SlRNekZSYkNiSlc0clBEQUxYV2RMN2VPU1lLdXc0N1RGV1l5YkIyUmlKZ3NCTFRvR0lEX19wUkxqY09DX0tHTnctYzdnRTYyM0xodXBHcDNYamg5OUlVNFNYQlJXLXp3YXBWU3k2VHk5NE83ODFLVDZncDNVNlZHbkhsQjdMNl94ZWtDWi1JNlU?oc=5"}, {"title": "I quit tech, bought 22 acres, and didn&#x27;t look at my computer for years — until AI brought me back - businessinsider.com", "source": "Google News", "time": "6 hours ago", "summary": "I quit tech, bought 22 acres, and didn&#x27;t look at my computer for years — until AI brought me back  businessinsider.com", "link": "https://news.google.com/rss/articles/CBMihwFBVV95cUxORWFsNDdtSGQwUzA1UV9qYUtiemY4SmxBU2ZzVHB3WGpFaWw2Tlh6emkzWlpiZ1BkT0dpenVQSGJPNmQ1WmJ3V2RuN0wxaFpMdUVVNldhM1pOWkxWYWFablhocmJXX0FPWVdYTExNYW4xcU5fUnFmbUd5ZEhlQzZHV2E1NG5GLU0?oc=5"}, {"title": "Inside the Creative Artificial Intelligence (AI) Stack: Where Human Vision and Artificial Intelligence Meet to Design Future Fashion - MarkTechPost", "source": "Google News", "time": "7 hours ago", "summary": "Inside the Creative Artificial Intelligence (AI) Stack: Where Human Vision and Artificial Intelligence Meet to Design Future Fashion  MarkTechPost", "link": "https://news.google.com/rss/articles/CBMi_wFBVV95cUxNYnMwRWNjOFNDN3hpZTNsLXNjek5VbW9FSGE5UzRMS0xnbUxaUG8za1hZWGRYOWhCZlZGdTY0eGNNOVAyTkNvX2Y0MnQ4LWVrRFJtY1ZJTHJnb0VxSDEwcTlIZWs5QW5NMmxFRDA2NmVUQS13MFE0MnJNMlR0LWxTVnplR3hRMUR3cFAxbEM1bl9pT2dWa2YwZ1VYNU8yZ3lMczdmbmhxdW50bjBhYTlYeVQwY29OS2hCWlpqNFd5Z3p0bFRPRVp3Rk5SWDNNRW90V0dnVmk1aUxKeWI1ZTVKX3ViUGRNQU5tQUh6akZUZGRpTVJBQmhVbi14bm5LOWvSAYQCQVVfeXFMTzQ3b18zYjBrODMyVDZmWUQ3NUE3R0E1ZXg0dWRTUUpjc2lNeUlkMldGMHNxbnNmNURhRHVmMzRWT2ZYZ1E5cUpRc19RcHQ0RGdWNmJoQkJCbU91ZEQwM2Q1ek4zWXp5Y0V6cUpYdWg3bk0xa21IZGFOOHFEaG5DbnhYTjBodThJUzBYX0ZDbkJHRm54ajVNUWN3OHRtZ2JtQ0VOVGxLT1c3R2lqZW15cHVwZURpeHNuaGlwWWVsZHo2SDZzblBiTU5NRXdoMHFrekI3bmZKRzJOX1FxNllOby1qSGtLWmFBYXpPaHV2U1NpUUw5T09ua1NOczV2MVZmeTAwNjI?oc=5"}, {"title": "I’m Worried About the Helpless AI Disruptors of the Future - Gizmodo", "source": "Google News", "time": "6 hours ago", "summary": "I’m Worried About the Helpless AI Disruptors of the Future  Gizmodo", "link": "https://news.google.com/rss/articles/CBMikgFBVV95cUxOZ3Y0Z3BRYkJ5VjdVYXo0aHVNbGRfU29lMWJjUm5FMTg1QVNNem5JdS1VelVaWVY0MmZ1Q1pLS0Qwb2hsMG96clZVZElzMXg0WThHdGNqUnF6akxzQ3pNYXRzQmhHbllsbmxnc0dVYVR3V2dVTWhCTkJoVEVDU2hSTGpsaWNncFpQb1UzaUVWYzg1Zw?oc=5"}, {"title": "What can digital technology do for your manufacturing operations? - Today&#x27;s Medical Developments", "source": "Google News", "time": "10 hours ago", "summary": "What can digital technology do for your manufacturing operations?  Today&#x27;s Medical Developments", "link": "https://news.google.com/rss/articles/CBMisgFBVV95cUxPcW5OZWNqUU9wR2luYjk1NklmM0xQc0c0MlNaZjFEb0t2VlQtbFFBbGROVFJhb1Q3OV9UZDBDWDlHY1E2S0FYNnNHWWlGcFlxUHNtNXd2bUlsRlVVQmc2WGlLT2pUYkFFdFVZMXhZZy1ROUtwNEUwaHFOLUlvZDJMVGxoMVZ5aXJmbU5iejFqRUFyT09XNGZBenBvTWJxMXAtaDUtdGNuNUM5dUpNekxLVUJR?oc=5"}, {"title": "OpenAI Is Bleeding Cash. Its Solution? Military Contracts. - Jacobin", "source": "Google News", "time": "1 hour ago", "summary": "OpenAI Is Bleeding Cash. Its Solution? Military Contracts.  Jacobin", "link": "https://news.google.com/rss/articles/CBMid0FVX3lxTFBwOURZcHg1Q2Zudm1zbEQ4MWRGSUxpQkFMWng0TVhXall0eUx3MTZKT25hZG1DOTV1c3hhcDRRQ09kTVNNbWFNY0pMbGF5T0JFbGJ4M2R3UjdveHdIQnlJaEV6UzdLaXlLQ0N6Mzd0S0NrVVJiSWFB?oc=5"}]}, "asia_china": {"label": "🌏 ASIA & CHINA", "items": [{"title": "Hong Kong Stock Exchange Index Falls as Houthi Escalation and US-China Tensions Compound Iran War Pressure on Hang Seng - BBN Times", "source": "Google News", "time": "3 hours ago", "summary": "Hong Kong Stock Exchange Index Falls as Houthi Escalation and US-China Tensions Compound Iran War Pressure on Hang Seng  BBN Times", "link": "https://news.google.com/rss/articles/CBMi6gFBVV95cUxPME9IMWlNVmJld1VLSkNEV0txUVV6eHh4aTRKZmZBZWtSLTBLX2w3aEZqVE4yRDdpWFNubXR0OE55ZjVUUnpGWnloVEZmZTBCY1Z0Z2MzN1NOYVladm1fOUIzRGJCeDlVWVdwT29YQngwX1FpNG5jdl9ZX25taC1xZHVWaGpwNEkxZ2VfWkhZRFRaVlBoc3dDM1VBSGxTcWF0VTlvZWsxODVvWTRBUVRpd2dUT2kzZmI2UG1veFVkQ0RfQ213dEtaV1BCdkNnWEhIcmxxTXVkSmVxbjlJSmROR0hGQWlQMml1TFE?oc=5"}, {"title": "HSBC Holdings plc (0005.HK) stock price, news, quote and history - Yahoo Finance Singapore", "source": "Google News", "time": "12 hours ago", "summary": "HSBC Holdings plc (0005.HK) stock price, news, quote and history  Yahoo Finance Singapore", "link": "https://news.google.com/rss/articles/CBMiVkFVX3lxTFBDTmVicEhIdTZQaHNIUHBMRUtBME1WanMwcUZLV2ZlQmVJSk5VTFBpaUR1X3QwUGtzQVYzRzd5bmhWVGR2bmZVbnhoR0drbVpyZWlZRnF3?oc=5"}, {"title": "Hong Kong Stock Market Review: Hang Seng Tech Index fell by 1.84%, while aluminum and gold stocks surged against the trend! - 富途牛牛", "source": "Google News", "time": "12 hours ago", "summary": "Hong Kong Stock Market Review: Hang Seng Tech Index fell by 1.84%, while aluminum and gold stocks surged against the trend!  富途牛牛", "link": "https://news.google.com/rss/articles/CBMinAFBVV95cUxONno4VEk4M1VLLWxtRzBuTDBKd2EyQUdGMXpQT2w2V25XcVFNTzBnUEVGek00X3JkOUdLZm43N3V0TWFlcTUxVWFLTmhJd2ZUd2pZb0xWUHVoUUhSbHRybXRjMXNPbXEyNG5oNDlaYkpDYTdPeHpYakxnUlE1RGdONkxHYnVJZG1mQzRZWER3cE10NVd6a0xLV1M3V24?oc=5"}, {"title": "Hang Seng Shares Rally After Goldman Predicts Index Could Hit 29,000 - Yahoo", "source": "Google News", "time": "23 hours ago", "summary": "Hang Seng Shares Rally After Goldman Predicts Index Could Hit 29,000  Yahoo", "link": "https://news.google.com/rss/articles/CBMipAFBVV95cUxPQXFDbkFvNjJfT0FJSjJIMXc5cnlTUzkwN2xuRWk2c0k1S3NpX2dicEFUMkNWcXJtMXJYblM3dzVNNzJoeHBLLVg5NDMtQWRaeS0zbWFEUko5WUZMM0ZYYVRWQVFldUNJRjg5YTVRNnZLNWMzbWVmODd2MzJsZDJKNUxIblhwN0xSRmlqcHNzM21lZWstV2RlbVczVEtiV3p3cjZHWA?oc=5"}, {"title": "Oil price surges, Asian stocks fall as Trump vows to continue Iran attacks - hiiraan.com", "source": "Google News", "time": "9 hours ago", "summary": "Oil price surges, Asian stocks fall as Trump vows to continue Iran attacks  hiiraan.com", "link": "https://news.google.com/rss/articles/CBMiwwFBVV95cUxQa3dIajRWd0tVR2lTaWwtZzZIZUxTYnVEZThpOTFyOVIwSmJDMlBtd3dRQUR6MVl4emlRTzVNc1VHbGw0d3lBMHA5ZHphRDVScmRwMGw3ejhaTjBkWGQ3aXhDR1lDbEFnaFZWRkJWQnlQM2tTekFIalE3eUp6YUsyWUo4RFJRTDBFZkZuTGtTSEFUdzg4X2V4WlhZVzhtUU9PeExKdV9ILVNjYVJVek5GVUcyZmJxeU5BRWUzYVdpN2JQcjg?oc=5"}, {"title": "Indian stock markets gain in early trade over positive Asian cues - DD News", "source": "Google News", "time": "7 hours ago", "summary": "Indian stock markets gain in early trade over positive Asian cues  DD News", "link": "https://news.google.com/rss/articles/CBMilgFBVV95cUxPd21vYlZhMy1tdHVnSmFtUVhvUm5QbDZxUXJSWjVxcFIyZ1NHNHc5QTdsNHZtR1gtLUw3YmtvTUxCaG5RZXpiVWNLVmFiUWFhY3EwQWRTcmhvQk5wLVdhbl8wdUU4X1ZlMDFQeko4STJnVjUtWWpwWlFFSExyWnp1WWMtMmZua3ptc19OZXFiNmhUbENVQlE?oc=5"}, {"title": "Tencent Holdings Limited (0700.HK) Stock Price, News, Quote &amp; History - Yahoo! Finance Canada", "source": "Google News", "time": "5 hours ago", "summary": "Tencent Holdings Limited (0700.HK) Stock Price, News, Quote &amp; History  Yahoo! Finance Canada", "link": "https://news.google.com/rss/articles/CBMiVkFVX3lxTE1yandpalBscEhnS1UtV3AxYXNOMGVVdjA0U3RMcGc4VjRrTl94aFlFbjBtYy0xREZvQVNyc0pUNmExRGZ4RkdjNzlESFM1T0xVdmxFUlV3?oc=5"}, {"title": "Most Asian stock indices end in positive territory today - News On AIR", "source": "Google News", "time": "8 hours ago", "summary": "Most Asian stock indices end in positive territory today  News On AIR", "link": "https://news.google.com/rss/articles/CBMijwFBVV95cUxOS1M2OUhaQU5nRVEtMURFRHZFMl92RU5rS0h1bU5WQmtSaF9QNXZFV2l6V3Y3OE5GNGJIbkllTkk1SU9qSnk2eWh2ME9fckNiXzM2S0RZMFpSR3VqSUEtTUFUdDJVLXNXU3lrY0VqMlNOLThSVHI5YXFRM2JOLUpnb0lsdS1fSTloUEhuZGtKVQ?oc=5"}, {"title": "Japan&#x27;s corporate bond issuance hits record high on retail investors - Nikkei Asia", "source": "Google News", "time": "20 hours ago", "summary": "Japan&#x27;s corporate bond issuance hits record high on retail investors  Nikkei Asia", "link": "https://news.google.com/rss/articles/CBMitgFBVV95cUxORlp5QWFwMzRkWmNMVDY0bDNrWEo4RGEydEZwZnRCSjRFLW9xMEotMFd2aXFXc2x6VXJIcXlMQmZWVUdnZE9ILWFXU2FXZkJEVVY3TFhGLThPUm1JbG1UUEFHUlhKcURaRWdUdlBhVEduYU9LUlFzZlBhM3RuT2pjV2I4bUZXU2FiWl9mdVA4bkxCTUM5Q2gyRlgyU1Jja2RiR21JVW5iYTZNeXAxakdlWHZFemhtQQ?oc=5"}]}, "europe_uk": {"label": "🇪🇺 EUROPE & UK", "items": [{"title": "Pain at the Pump Should Mean Pain in the Economy, Not Higher Rates - WSJ", "source": "Google News", "time": "6 hours ago", "summary": "Pain at the Pump Should Mean Pain in the Economy, Not Higher Rates  WSJ", "link": "https://news.google.com/rss/articles/CBMivwNBVV95cUxNal9TVjRvS0I5c3RGMFFHM3FIcDJoY2JTUUFWcVdPclV5M25hdWlDdXg5SVVCMEEyZGQ2QXc1emhZZE1laVduMzE4U2VQcWdxVUNsRDFBWEN4OTRNVElQSERrTS13cWIxYWNwcWt3Smxaa1JObmxYUk9NNHc2cVhDcHEwV20tckZjZlZYZ2stRFQwQ1JBV1Vha2Q0TFRMVnJBTzFtYlBJZ2p0VDZheUVhX09yNGhIZi03eGpMdjlCc3J6RXJTbmdmMjU4TGhYb25LWEJKR0dRTDF3Qjc5OFl1a1hPejU5TFRnUXgyc1FyWEdNZUl5S1JCTlVONzJBXzNKTUNSNHVxNkxHaDhrdFFmdWFpU0pBY3pFYzN2N3JNdmdPaFpLU2N5MEJ2M3diemZEVE54NEtxcUJlRE5jeFpQbXkxZFZjbUxrZTVKYWZtWnh6M3psdTBIa3E5d3pNb3ZlT3FhWDY0UE1zc3FlbFJCaUc5eklqeE1tcXBxR3NscDY4dENnVUJlaWNqWUtwMl82aXNiYzJzTXZ0U3o5Ml80SEw4eGJMMmxKQmx1ZER0OFVnQ1B2dkViMk9VVFktdTA?oc=5"}, {"title": "Central banks’ inflation mood puzzle: more judgment than science - BusinessWorld - BusinessWorld Online", "source": "Google News", "time": "8 hours ago", "summary": "Central banks’ inflation mood puzzle: more judgment than science  BusinessWorld - BusinessWorld Online", "link": "https://news.google.com/rss/articles/CBMixAFBVV95cUxPM2RUY084ZVAtU3FfVFdDeHZCTzMxcGNWeFlXNDc2b1JlNHFfMk1FV1IxeGY4dmIyeWRuQ05neG1lQ0dQYXR0VTR4WHVJZnBvSzhhaEZfZDRFdDJwOHowd0lBV2ZvUTFLWmU4dUk0N0ZMSDMzSnpkQm5mT25GUzNKbTZReFBPdnBrcmdhV0ZPbzNCZl90SzI4a0ozRDhlb2Jhc2l0NXdyWUZVMjU2RVlPUWttbDVXVGdfREYyMEVEalZUQWtl?oc=5"}, {"title": "Current Mortgage Rates: US Rises 6.46%, UK Hits 5.56%, EU 3.4% - Coinpaper", "source": "Google News", "time": "21 hours ago", "summary": "Current Mortgage Rates: US Rises 6.46%, UK Hits 5.56%, EU 3.4%  Coinpaper", "link": "https://news.google.com/rss/articles/CBMijAFBVV95cUxOeFJtTVQ3ZXF1cTQxSGlZaXBHNkQ5aVJvWHozMzQyZ21nRlk2RlNtcG9VZVgyLTJiaDRpbkRyUFR0SW1la05fX1k0M1JkTXc4cklKYnRpOWNBc1ZINHhEbDBIbGZtSTJLTUdRWGdoRVl6M0xTWGxPUlhsRzVwelJha25xbVFzMU9SLWdYbA?oc=5"}, {"title": "FTSE 100 edges higher but remains below recent levels as Iran conflict pressures markets and sterling - DirectorsTalk Interviews", "source": "Google News", "time": "20 hours ago", "summary": "FTSE 100 edges higher but remains below recent levels as Iran conflict pressures markets and sterling  DirectorsTalk Interviews", "link": "https://news.google.com/rss/articles/CBMi5wFBVV95cUxOT0tKRHlyZEV0djFISk5yT1hMZHRuSjBBdFR4LXRMOHZBeUNDT1ZoeVBleFNIOXVmYXNSbk9vaUNxcXpRVkNXLTRtRjVpdGljdjNhcXBhVWc5cFBqMHVsWFgyMEtlOVBOUG0wR2FqZHdoSUZrb2R6ZmRHdWJJeXBCbVJYN0lsdnNSd0V0TUJSZC1aaDcxOHBfVGpUUE12T0UwemJ1SlhSNUlQQWJqSnhtNmhHN3l4OUNIcE5OUnRYRDZ3NjlxNTNZeG41ZzRvV2xIT2V4WHVHaGdqS2VDenJmdHhPWUhualE?oc=5"}, {"title": "Is the FTSE 100 heading for an epic stock market crash? - Fool UK", "source": "Google News", "time": "8 hours ago", "summary": "Is the FTSE 100 heading for an epic stock market crash?  Fool UK", "link": "https://news.google.com/rss/articles/CBMikwFBVV95cUxNUWNJQTFmdUJES25LU0cxUnhJWERWMm5jMHU1aGNyMlJRVHpjNUZSc1NLLVdlRnRRZm5zT0VPNTAtQklHd0FEcU85VW1HUVV2MVd4ejh2dDJjUVZpY1NRT09MN0NncmFuX05wTWt1N1dYS3VXM01sYm1yRnF3bUVEOExsWWtlZ0FkTkRpa0E3SjhJdFU?oc=5"}, {"title": "It’s time we all took a long, cold look at the Lloyds share price - Fool UK", "source": "Google News", "time": "7 hours ago", "summary": "It’s time we all took a long, cold look at the Lloyds share price  Fool UK", "link": "https://news.google.com/rss/articles/CBMinwFBVV95cUxOUXhCLWdYSDlxRXBWVFo4RjQ5OERkeWo2RkhfTFQzd0NIMmVISlVYQ0tVWWdodjlKXzRkZDNROVY4eC14R3dsb0NGWndNTUF4WlJNVG5mNWh6N3Z0WWs2b0U5WkpPc05mUXhsSVRabXJpdUkyVThjQVlzVTJIR3p0eEl5aVhyQVNNOVVpRUdhZ3V2Tm91NkQxNUFQMlh2R3c?oc=5"}]}, "esg_climate": {"label": "🌱 ESG & CLIMATE", "items": [{"title": "The Evolving Economic Landscape for Foreign Investors in the UAE - BBN Times", "source": "Google News", "time": "21 hours ago", "summary": "The Evolving Economic Landscape for Foreign Investors in the UAE  BBN Times", "link": "https://news.google.com/rss/articles/CBMioAFBVV95cUxQZExEUnl6dlI1YVVlVE9KVVVoSWE2MU91WjBjaUx0ZERpREluS0VlclRYWE53SmZscVFDaEVNYjJJNk1ETWJJYlNmM3FfLWF3YV9YdDRRM09zSUhwNmh1ZEVSUUlVMUtSR1Zrcmthcm9TRENSc0VuZnNjbWh4am9oQ0xiSXYtLXhGaS10OGtyMTctU1JLU3JNdXV2ZW5UNWg4?oc=5"}, {"title": "Amorphous Metal Cores Market Forecast Points Higher Toward 2035, Driven by Grid Modernization - IndexBox", "source": "Google News", "time": "9 hours ago", "summary": "Amorphous Metal Cores Market Forecast Points Higher Toward 2035, Driven by Grid Modernization  IndexBox", "link": "https://news.google.com/rss/articles/CBMivwFBVV95cUxPNldHdXNPdzlDdUNvdG1GV2xiWDBKY1JiMzNiTmNVWTZnUEpwRlg3LVRtM0VBWU9tYVZFdzhSWE9CZWVqRjQyR1FkLXdKZEhxX2JmVUZPdTY5Q1VqY3FEREVrX3hzVVVhRjByXy1taWZoQTU1eEFPZzk2MHFBbXZIcjdTdUh2eU5kMnM5eEhIMDlKMlNOTUxhd0czeFVPbmxyaVpSQURiQ00ya3JzNF9UUEl2N2ZhN2ZGa29GeUgxNA?oc=5"}, {"title": "Passive And Interconnecting Electronic Components Market Forecast Points Higher Toward 2035 - News and Statistics - IndexBox", "source": "Google News", "time": "10 hours ago", "summary": "Passive And Interconnecting Electronic Components Market Forecast Points Higher Toward 2035 - News and Statistics  IndexBox", "link": "https://news.google.com/rss/articles/CBMi4wFBVV95cUxNN2pIMmRiallBcGFPYmUyX3M1VWNxSTFaYldmVFpTREJjZDNhemk4Z0NQd3o4VHRzVGhvS1pVNi1xajlWT2plcjltVUY1eFNTanpMUHRMbnBJeGVLdUtleTlDZ3ZmOEZrcHNoeF94aXhUZ3pUaFV3cFFiMjRKa1QtYVdsR0dVS0J3bkI1YVhCMm13RXR4Q1FuNlNuWXBHOEVKWmJVeXdxWDVQQ1ByR0dCdVM5eWNNQ284bkloYmNiN1dKb29hTzRIeG1LZG54cV9yQUtRTDZDLWdYSlNMemxPUllCOA?oc=5"}, {"title": "The new Chinese century - Daily Kos", "source": "Google News", "time": "23 hours ago", "summary": "The new Chinese century  Daily Kos", "link": "https://news.google.com/rss/articles/CBMifEFVX3lxTE04a0tNNDdNZUp0MWo5YjB4X2NiaGt5amdVQUZCWTRiejRYc1dBSmROeGJaNzFMYVllSGJuSU16NkdUMWdJeTBfT0ZBRXhvT09objlSamZ6TU1Oa3Nla3RYbHAxZVVpaVBLXzRrOVp0YU1IZUk3UHVBazczUFY?oc=5"}, {"title": "The environmental price of the US-Israeli war on Iran - Focus - Al-Ahram Weekly - Ahram Online", "source": "Google News", "time": "7 hours ago", "summary": "The environmental price of the US-Israeli war on Iran - Focus - Al-Ahram Weekly  Ahram Online", "link": "https://news.google.com/rss/articles/CBMiWEFVX3lxTFBCR1hXaHZQcGNOQkNRd3JRWk53UGw4cXdoZE0wdEdQQUtiOG1LUWJzbmthRFVNdWJ3MU5wOEpQUTJRdkdyT1VkV2NaSUVFVWxua09mZGQyMTI?oc=5"}, {"title": "MERC Sets Rooftop Solar Surplus Tariff at INR 2.82/kWh, Retains Competitive Bidding for New RE Projects - Energetica India Magazine", "source": "Google News", "time": "19 hours ago", "summary": "MERC Sets Rooftop Solar Surplus Tariff at INR 2.82/kWh, Retains Competitive Bidding for New RE Projects  Energetica India Magazine", "link": "https://news.google.com/rss/articles/CBMi1AFBVV95cUxNVmhkeVBZQlo1aDFxVnNmUkZvV3B4b083LUFNTVE2VHZ3ZTZDbXlFU25EUkFGdXloYk8yNC1oMm5JRGp4Nlg0NlpnRXpfcFh3MHNWMURIX1UtM1VkUVh3aWZyeHdUVjNhbGNPOWp5ODluT0RGMzJxTDd2VFh6UE55OHhiaWJFcDhhNHBrT3Vfejdld25RMUlZcWFLeFVpUy1aZU1weG9pZ3drSUpWc08tNDVJTFIwQndQVDNIcDF5LUk1dXNSbzdOV3hDSXhkZXU2Wkg3Vw?oc=5"}, {"title": "After 5-year hiatus, Indian biz delegation visits China - MSN", "source": "Google News", "time": "13 hours ago", "summary": "After 5-year hiatus, Indian biz delegation visits China  MSN", "link": "https://news.google.com/rss/articles/CBMinAFBVV95cUxOQzRKTW45ZkN2MmNlQ3VYMElSREItWGppNFdxYzNtV3J0dUFFU1NsMHFfQ3BTNGVtWm1aRVdSdzRFc2NERzZuOUx0c1YxSW96a1NxeTNBQS1pYV9kUVNYR0o5Rmo5NnZpS2xmbU12dG1GblYzc3lRdENOTnhtaTZZM2lvaHppR0pOX3hCejRyYkpjNlpuczY1Nk9Id0g?oc=5"}]}, "latam": {"label": "🌎 LATAM", "items": [{"title": "Uniao Pet Participacoes&#x27; (BVMF:AUAU3) Conservative Accounting Might Explain Soft Earnings - simplywall.st", "source": "Google News", "time": "4 hours ago", "summary": "Uniao Pet Participacoes&#x27; (BVMF:AUAU3) Conservative Accounting Might Explain Soft Earnings  simplywall.st", "link": "https://news.google.com/rss/articles/CBMi4wFBVV95cUxOMlYyR0ZRZy1XSHU0TThfTi1IVkV5cDNTNkl4WWJqX29YNGcwTUpWd2x4bjhEbXE5bUVFY25HSjdwWWplUHVPT0RWS2N3TTl5R19xeHduVHdqOUM4WW5IY1ZheVAzTk1jSktoenhCQjRNV09zNTZnSkUxRF95N0pYeVU3d3p5YTRCTXl6WDNGdUFFVlVxUnJCdkMxUUkzRnB1Ql9vM0tHbXRISG93VV80X01BQWpTOU5SSnFPTEUwYUt0azZ2TnpmX05WRXAzQkVHV0R1Q00wVHFOMHM1ajYxM1ZqQdIB6AFBVV95cUxPZnZtWDZJSVdDUzFkMGplZTVPMVRnazVZZnFYRVpOVGpjNlk0eXBPWFQ3YzduSTRQeVJvSUtZQmhsYlhzdEZKa0ZHMXpHVXRGR1B0SHA4cHZMcjFWbTgxdVVYaHdvQ1Q3ZDVWMmV3UDVvSVNlRFEtakNaVnBSMVZDcDlfTC1mLUNTWElJX3N0U3YtV2loM0hSNEFfZV95QTdCRi0wY2hMRE9USER5eEhFaVdQZUFtVlNGWGZGZTAyS3p1d2l4LXpXeWVIdlZtMXNfNmRqNVFBQTMzUGtrVExqWHd1ZGJqQXd3?oc=5"}, {"title": "Industrial Pipe Insulation Market Demand to Accelerate by 2035 Amid Global Energy Transition - News and Statistics - IndexBox", "source": "Google News", "time": "6 hours ago", "summary": "Industrial Pipe Insulation Market Demand to Accelerate by 2035 Amid Global Energy Transition - News and Statistics  IndexBox", "link": "https://news.google.com/rss/articles/CBMi0AFBVV95cUxPTXQ3QWxiRHdGb3QxVDhmS1pIdjQ1WHZHS0hHY3oxN185SlVhV1hsUGxaaXJsVXhMaTgyb2pWTkFjWmwtVno5X3d3Q1dvZDlmdEdZVXh6SlpDNnZHbkViYmxwak5faHFSakxhclFmMVEtakhHeFpNN3h5dlBUWC1iT3JmRGJLZE1pVloxUllHWFBEQzFqQi1BakJhX2pyMXVXNDRfVURfdTB3dzdVLU5ZSi1mdG9DeXJZczlJNXNiOHlzQjVEU1E3bE9MMFhWQXlp?oc=5"}, {"title": "&#x27;Brown-Forman is a defensive, quality company&#x27; - Il Sole 24 ORE", "source": "Google News", "time": "7 hours ago", "summary": "&#x27;Brown-Forman is a defensive, quality company&#x27;  Il Sole 24 ORE", "link": "https://news.google.com/rss/articles/CBMikAFBVV95cUxQcEg1T2o1amM1bnZIV0FqeHgzdEY0RzNYaEV3dGtCeUN3OHFMLTJPdjlqYm0yS3NZTWp5aVI5TTg3Rm9rLVJ3c19IbGxtYUZTVTVJQ2ZkbVZHUHVkT2Z6NnFja1VDaUl5NWd3VHNsTHhaaFpIX3ltTjFQV2VaaS1LQXZtdUljbUdwaHJGVjBIMHQ?oc=5"}, {"title": "Nvidia-Backed Arm and MercadoLibre: A Hedge Fund’s 430% and 150% Upside Cases - TradingKey", "source": "Google News", "time": "14 hours ago", "summary": "Nvidia-Backed Arm and MercadoLibre: A Hedge Fund’s 430% and 150% Upside Cases  TradingKey", "link": "https://news.google.com/rss/articles/CBMizwFBVV95cUxOMzVCOTJUczBmZVZQWEl4bXg3VnNZNktwTXphNlIxeDlWS0xLRVgweHZqTXdHTDBNQVlzemRyZElWMVNEdmpROXl6WFZQZmZ3Z3NWUEVYWFpia1FvU1VTY25BR2tIZ3ludENXVFFQeTlBYm43aktlcGpFeG80RlJlQm96eVJKbldvLXdIankxS013ZzMzczBfdXlHV3NFZ0pjSktPOHhOS2s2WldITlB3dW1CZE5zQ1hKeGFFOUgwUTN3Y0Nab25aRHJKZTZHcVE?oc=5"}, {"title": "Pharmaceutical Grade Sodium Chloride Market Forecast Points Higher Toward 2035, Driven by Biologics Expansion - IndexBox", "source": "Google News", "time": "9 hours ago", "summary": "Pharmaceutical Grade Sodium Chloride Market Forecast Points Higher Toward 2035, Driven by Biologics Expansion  IndexBox", "link": "https://news.google.com/rss/articles/CBMi1AFBVV95cUxNQm1oQ3dCV0cwQnF2aFgxSGQzMm05TjB0WG41VVhUeUFGdnF2b19fa3ZRYWZqR0xTblRrQVNHTHQ5SE12WlhNNUpDRlZ5WFZBRl9BX0JwcUpRQzVXaWJLUlBmSmhJWWpBdGZQMnpQaXVJczJmM0oyYk5qR2tPV2Q1VDRkU0MwRlo2ZXdLWHUtdTZibTBjdTlJS1huYVVmVzdVM0dEakJXbEhwaWxDUlZVeWthNFpYdXpTNF9uVnR6N0pRUEhhbktiZE9uMW1RQWtUNWNLMw?oc=5"}, {"title": "US inflation seen spiking in first snapshot since Iran war - Moneycontrol.com", "source": "Google News", "time": "11 hours ago", "summary": "US inflation seen spiking in first snapshot since Iran war  Moneycontrol.com", "link": "https://news.google.com/rss/articles/CBMiuwFBVV95cUxQS0UxNGVMQ29iRlF6VXhYOFJlUnRWd25pNFo3bjUwbExSbzBXTTJtaUxvUzl2NnQ1QkZMemFBUTVDQTNPQncyVEdHeEt1eDM4RTdXeUlXWFhxcW9DTnJ5Zjl3cWdhOWRsT3dfMVhJd0UyMWJUSHczRXQ1VXpYeWZIekV1NkZvZlk1YWJXVk1JZ2x4TEtrVDYwZUFlVktxVlZlRXVlb21TanFHYVVPR2gzN29LWkNWSWE4WVpr0gG7AUFVX3lxTFBLRTE0ZUxDb2JGUXpVeFg4UmVSdFZ3bmk0WjduNTBsTFJvMFdNMm1pTG9TOXY2dDVCRkx6YUFRNUNBM09CdzJUR0d4S3V4MzhFN1d5SVdYWHFxb0NOcnlmOXdxZ2E5ZGxPd18xWEl3RTIxYlRIdzNFdDVVelh5Zkh6RXU2Rm9mWTVhYldWTUlnbHhMS2tUNjBlQWVWS3FWVmVFdWVvbVNqcUdhVU9HaDM3b0taQ1ZJYThZWms?oc=5"}, {"title": "Food crisis after fuel shock? Which countries may be at risk of wheat, rice, and cooking oil shortages amid the US–Israel war - MSN", "source": "Google News", "time": "3 hours ago", "summary": "Food crisis after fuel shock? Which countries may be at risk of wheat, rice, and cooking oil shortages amid the US–Israel war  MSN", "link": "https://news.google.com/rss/articles/CBMiwgJBVV95cUxPcjVpQVVDSmlScUJjZmZJY3ZKM1lRSlp5NHIwX19GSjRRYVVIUmdyMk1aR3RfOGhTUlpydzdGQ09OMXI1TC1MUk5yNGhUUy1uVFY5THdsUC1iM01hTVFRRnJsLXdCa04wMG1SYWJRNVA1b0RkazFFSy00RG5iWWxoOVAzSDJFcC1JZkttbkFKaDFveUNvOVg3dFpGb0hBbUJlZTdnblRpSGlDNzczRFNQU1NWZTVnY3VDRFhmYVFQOXFLYTR3N0JKUHd3dlV4d2hoOG9yUWVfbDhYbjdzRWJVbENEM1BYZExnVHYwNVRHWFlGRVNnV1JLam4tbGJwS0o4LVd2NTdvbk5LdnhOTUZpbHAtZFNLMndSQTFTOXUtQ2k5NS00dVhaOENRbUNzSUxfcGxLOTFMcFMxRGNlNk9LaGh3?oc=5"}, {"title": "World Baby Teeth Care Products - Market Analysis, Forecast, Size, Trends and Insights - IndexBox", "source": "Google News", "time": "10 hours ago", "summary": "World Baby Teeth Care Products - Market Analysis, Forecast, Size, Trends and Insights  IndexBox", "link": "https://news.google.com/rss/articles/CBMi0gFBVV95cUxPbC1ucTh5cFpwREt4YTMtaWJEaVBJcEduaXdWLUx0WWNRTFRJOVRReWtnV2o3dkFrOHN3bENlZmhwTTNKSGNRMUtTczNlMnZka3Z5Mk0xNk9BaTdITEZ3UjZOajAwNVQ1ZlIyeTNibUl3M0pFdjdmM2pZSEllRmlUM3FydkszOXR0ZFZHQWppNEUxbGdRZEZaQUZWTVNjMWJNemVORXBCWDNOT09hQmNNTkVzckdvclFjdkF4SGNQanZFb3Y3aEd4NGtSVTN5UTg1R0E?oc=5"}, {"title": "Sanitizer Packaging Market to 2035 Driven by Enduring Hygiene Protocols in Healthcare and Food Service - IndexBox", "source": "Google News", "time": "9 hours ago", "summary": "Sanitizer Packaging Market to 2035 Driven by Enduring Hygiene Protocols in Healthcare and Food Service  IndexBox", "link": "https://news.google.com/rss/articles/CBMizAFBVV95cUxPcHhxdHFLT3ZkY25RdWlxczhNcTlmQlJ0bi1XTk13U1ZibTFlUFlibTVxS2xxTWpENGU0U2VHWEx5X1dTUFZkWjR6UkZhSzdsc3pyYmlSQWMwZzdrcjBZZGt2em5kTWVpcXJwMWM0VDhyNXRudkVEYzRseXlvOEVnd3h6LXRQdThmYy04ZmNObk44ZlNPdjByT2lQbFBqM3ZHODZVNm5YU0tZSVowMnhqXzlqRjZPODRNUm1wSjFDTHJSRkFmLTJxVGhxdks?oc=5"}, {"title": "World Bubble Wrap Packaging - Market Analysis, Forecast, Size, Trends and Insights - IndexBox", "source": "Google News", "time": "19 hours ago", "summary": "World Bubble Wrap Packaging - Market Analysis, Forecast, Size, Trends and Insights  IndexBox", "link": "https://news.google.com/rss/articles/CBMizgFBVV95cUxNQ2RfY0FSNzdoMnZmRWEyV2pGeEU3RGs4cHZMZnJxQnVJcXl3b0tuUFRkZnZHUFJ0Mkl2S1lMWmhMRkhMTTF1V25Fc094OHRXM2JGVUdFVHNPYm9Ta2FUUk54al9lNXhrTS1HMnBwS2hkWGdUYTZuX0J6N21lM1poMzRhaUZ1VlN5ZFFsQXBjOE9Qc1k3SjhJaFRLbUV0dEhERGhBOUdadUpuaDM4WS1rQ0ZzREJTODBTQjM1UGVNMUs5MVhUTjJnR01pU3RrZw?oc=5"}]}};
 
 // ── Current active category ──
 let currentCat = 'markets';
@@ -795,19 +974,26 @@ function renderNews(cat) {
   if (!d) return;
   const col = document.getElementById('newsCol');
   const items = d.items;
+  const query = (document.getElementById('newsSearchInput')?.value || '').toLowerCase();
 
-  if (!items || items.length === 0) {
-    col.innerHTML = '<div class="no-news">No articles available for this category.</div>';
+  // Filter items if search query present
+  const filtered = query
+    ? items.filter(item => item.title.toLowerCase().includes(query) || item.summary.toLowerCase().includes(query) || item.source.toLowerCase().includes(query))
+    : items;
+
+  if (!filtered || filtered.length === 0) {
+    col.innerHTML = '<div class="no-news">' + (query ? 'No articles match your filter.' : 'No articles available for this category.') + '</div>';
     document.getElementById('newsTitle').textContent = '▶ ' + d.label + ' — 0 ARTICLES';
     return;
   }
 
-  col.innerHTML = items.map((item, i) => {
+  // Build HTML safely — titles/sources are already escaped by Python
+  col.innerHTML = filtered.map((item, i) => {
     const num = String(i + 1).padStart(2, '0');
     const link = item.link && item.link !== '#'
       ? `<a class="nc-link" href="${item.link}" target="_blank" rel="noopener">Read Full Article ↗</a>`
       : '';
-    return `<div class="nc-item" onclick="toggleNC(this)" id="nc-${cat}-${i}">
+    return `<div class="nc-item" onclick="toggleNC(this)" tabindex="0" role="button" aria-expanded="false" id="nc-${cat}-${i}">
   <div class="nc-row">
     <span class="nc-num">${num}</span>
     <span class="nc-headline">${item.title}</span>
@@ -825,13 +1011,49 @@ function renderNews(cat) {
 </div>`;
   }).join('');
 
-  document.getElementById('newsTitle').textContent = '▶ ' + d.label + ' — ' + items.length + ' ARTICLES';
+  document.getElementById('newsTitle').textContent = '▶ ' + d.label + ' — ' + filtered.length + (query ? '/' + items.length : '') + ' ARTICLES';
 }
 function toggleNC(row) {
   row.classList.toggle('open');
   const exp = row.querySelector('.nc-expand-body');
   if (exp) exp.classList.toggle('open');
+  row.setAttribute('aria-expanded', row.classList.contains('open'));
 }
+
+// ════════════════════════════
+// SEARCH / FILTER NEWS
+// ════════════════════════════
+function filterNews() {
+  renderNews(currentCat);
+}
+
+// ════════════════════════════
+// THEME TOGGLE (DARK ↔ LIGHT)
+// ════════════════════════════
+function toggleTheme() {
+  document.body.classList.toggle('light');
+  const isLight = document.body.classList.contains('light');
+  localStorage.setItem('nf-theme', isLight ? 'light' : 'dark');
+}
+// Restore theme from last visit
+if (localStorage.getItem('nf-theme') === 'light') document.body.classList.add('light');
+
+// ════════════════════════════
+// SCROLL-TO-TOP
+// ════════════════════════════
+function scrollToTop() {
+  const mainEl = document.querySelector('.main');
+  if (mainEl) mainEl.scrollTo({ top: 0, behavior: 'smooth' });
+}
+(function() {
+  const mainEl = document.querySelector('.main');
+  const btn = document.getElementById('scrollTopBtn');
+  if (mainEl && btn) {
+    mainEl.addEventListener('scroll', () => {
+      btn.classList.toggle('visible', mainEl.scrollTop > 300);
+    });
+  }
+})();
 
 // ════════════════════════════
 // HAMBURGER / SIDEBAR DRAWER
@@ -888,6 +1110,9 @@ const TICKER_SYMBOLS = [
   ['DOW',    'dow'],
   ['S&P 500','sp500'],
   ['NASDAQ', 'nasdaq'],
+  ['VIX',    'vix'],
+  ['10Y',    'us10y'],
+  ['2Y',     'us2y'],
   ['CRUDE',  'oil'],
   ['GOLD',   'gold'],
   ['SILVER', 'silver'],
@@ -900,25 +1125,22 @@ function buildTicker() {
   // Double for seamless loop
   const items = [...TICKER_SYMBOLS, ...TICKER_SYMBOLS];
   track.innerHTML = items.map(([name, key]) => `
-    <span class="ticker-item" id="tick-${key}">
+    <span class="ticker-item" data-key="${key}">
       <span class="t-sym">${name}</span>
-      <span class="t-val t-neu" id="tv-${key}">--</span>
+      <span class="t-val t-neu" data-tv="${key}">--</span>
     </span>
   `).join('');
 }
 
 function updateTicker(key, val, pct) {
-  const el = document.getElementById('tv-' + key);
-  if (!el) return;
+  const els = document.querySelectorAll('[data-tv="' + key + '"]');
+  if (!els.length) return;
   const p = parseFloat(pct);
-  el.textContent = val + (pct ? ' (' + (p >= 0 ? '+' : '') + pct + '%)' : '');
-  el.className = 't-val ' + (p > 0 ? 't-pos' : p < 0 ? 't-neg' : 't-neu');
-
-  // Update duplicate ticker item too
-  const els = document.querySelectorAll('[id="tv-' + key + '"]');
+  const text = val + (pct ? ' (' + (p >= 0 ? '+' : '') + pct + '%)' : '');
+  const cls = 't-val ' + (p > 0 ? 't-pos' : p < 0 ? 't-neg' : 't-neu');
   els.forEach(e => {
-    e.textContent = el.textContent;
-    e.className = el.className;
+    e.textContent = text;
+    e.className = cls;
   });
 }
 
@@ -955,6 +1177,9 @@ const SYMBOLS = {
   'dow':    '^DJI',
   'sp500':  '^GSPC',
   'nasdaq': '^IXIC',
+  'vix':    '^VIX',
+  'us10y':  '^TNX',
+  'us2y':   '^IRX',
   'oil':    'CL=F',
   'dollar': 'DX-Y.NYB',
   'gold':   'GC=F',
@@ -962,16 +1187,31 @@ const SYMBOLS = {
   'usdinr': 'INR=X'
 };
 
+// Multiple CORS proxies for resilience
+const CORS_PROXIES = [
+  (u) => 'https://corsproxy.io/?' + encodeURIComponent(u),
+  (u) => 'https://api.allorigins.win/get?url=' + encodeURIComponent(u),
+  (u) => u  // direct (may work for some APIs)
+];
+
+async function fetchWithProxies(url, opts = {}) {
+  for (const mkProxy of CORS_PROXIES) {
+    try {
+      const proxied = mkProxy(url);
+      const r = await fetch(proxied, { mode: 'cors', signal: AbortSignal.timeout(8000), ...opts });
+      if (!r.ok) continue;
+      return r;
+    } catch(e) { /* try next */ }
+  }
+  throw new Error('All proxies failed for ' + url);
+}
+
 async function fetchYahoo(key, sym) {
   const url = `https://query1.finance.yahoo.com/v8/finance/chart/${sym}?interval=1d&range=1d`;
-  const proxies = [
-    'https://corsproxy.io/?' + encodeURIComponent(url),
-    'https://api.allorigins.win/get?url=' + encodeURIComponent(url),
-    url
-  ];
-  for (const u of proxies) {
+  for (const mkProxy of CORS_PROXIES) {
     try {
-      const r = await fetch(u, {mode: 'cors'});
+      const u = mkProxy(url);
+      const r = await fetch(u, {mode: 'cors', signal: AbortSignal.timeout(8000)});
       if (!r.ok) continue;
       let d = await r.json();
       if (d.contents) d = JSON.parse(d.contents);
@@ -982,13 +1222,22 @@ async function fetchYahoo(key, sym) {
       if (!cur || !prev) continue;
       const chg = (cur - prev).toFixed(2);
       const pct = (((cur - prev) / prev) * 100).toFixed(2);
-      let val = ['dow', 'sp500', 'nasdaq'].includes(key)
-        ? cur.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})
-        : key === 'dollar' ? cur.toFixed(2)
-        : key === 'usdinr' ? '₹' + cur.toFixed(2)
-        : '$' + cur.toFixed(2);
+      let val;
+      if (['dow', 'sp500', 'nasdaq'].includes(key)) {
+        val = cur.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+      } else if (key === 'vix') {
+        val = cur.toFixed(2);
+      } else if (['us10y', 'us2y'].includes(key)) {
+        val = cur.toFixed(2) + '%';
+      } else if (key === 'dollar') {
+        val = cur.toFixed(2);
+      } else if (key === 'usdinr') {
+        val = '₹' + cur.toFixed(2);
+      } else {
+        val = '$' + cur.toFixed(2);
+      }
       updateCard(key, val, chg, pct);
-      // Extra sidebar updates for nifty/sensex placeholder
+      // Extra sidebar updates for usdinr
       if (key === 'usdinr') {
         const sbEl = document.getElementById('sbv-usdinr');
         if (sbEl) { sbEl.textContent = '₹' + cur.toFixed(2); }
@@ -1126,11 +1375,10 @@ async function fetchGiftNifty() {
 // ════════════════════════════
 async function fetchCPI() {
   const csvUrl = 'https://fred.stlouisfed.org/graph/fredgraph.csv?id=CPIAUCSL';
-  const proxied = 'https://corsproxy.io/?' + encodeURIComponent(csvUrl);
   try {
-    const r = await fetch(proxied, {signal: AbortSignal.timeout(8000)});
-    if (!r.ok) throw new Error('HTTP ' + r.status);
-    const text = await r.text();
+    const r = await fetchWithProxies(csvUrl);
+    let text = await r.text();
+    try { const j = JSON.parse(text); if (j.contents) text = j.contents; } catch(e) {}
     const lines = text.trim().split('\n').filter(l => l && !l.startsWith('DATE'));
     if (lines.length < 13) throw new Error('Not enough data');
     const lastLine = lines[lines.length - 1].split(',');
@@ -1157,10 +1405,10 @@ async function fetchCPI() {
   } catch (e) {
     const vEl = document.getElementById('val-cpi');
     const cEl = document.getElementById('chg-cpi');
-    if (vEl) vEl.textContent = '2.9%';
-    if (cEl) cEl.textContent = 'YoY · Dec 2025 (cached)';
+    if (vEl) vEl.textContent = '—';
+    if (cEl) cEl.textContent = 'Unavailable';
     const sbCpi = document.getElementById('sbv-cpi');
-    if (sbCpi) { sbCpi.textContent = '2.9%'; }
+    if (sbCpi) { sbCpi.textContent = '—'; }
   }
 }
 
@@ -1168,17 +1416,16 @@ async function fetchCPI() {
 // FED FUNDS RATE via FRED CSV
 // ════════════════════════════
 async function fetchFedRate() {
-  // DFEDTARL = lower limit, DFEDTARU = upper limit (daily series)
-  const proxy = 'https://corsproxy.io/?';
   const lowerUrl = 'https://fred.stlouisfed.org/graph/fredgraph.csv?id=DFEDTARL';
   const upperUrl = 'https://fred.stlouisfed.org/graph/fredgraph.csv?id=DFEDTARU';
   try {
     const [rL, rU] = await Promise.all([
-      fetch(proxy + encodeURIComponent(lowerUrl), {signal: AbortSignal.timeout(8000)}),
-      fetch(proxy + encodeURIComponent(upperUrl), {signal: AbortSignal.timeout(8000)}),
+      fetchWithProxies(lowerUrl),
+      fetchWithProxies(upperUrl),
     ]);
-    if (!rL.ok || !rU.ok) throw new Error('HTTP error');
-    const [tL, tU] = await Promise.all([rL.text(), rU.text()]);
+    let [tL, tU] = await Promise.all([rL.text(), rU.text()]);
+    try { const j = JSON.parse(tL); if (j.contents) tL = j.contents; } catch(e) {}
+    try { const j = JSON.parse(tU); if (j.contents) tU = j.contents; } catch(e) {}
     const lastVal = (txt) => {
       const lines = txt.trim().split('\n').filter(l => l && !l.startsWith('DATE'));
       return parseFloat(lines[lines.length - 1].split(',')[1]);
@@ -1199,11 +1446,12 @@ async function fetchFedRate() {
 // ════════════════════════════
 async function fetchFREDLines(seriesId) {
   const csvUrl = 'https://fred.stlouisfed.org/graph/fredgraph.csv?id=' + seriesId;
-  const proxied = 'https://corsproxy.io/?' + encodeURIComponent(csvUrl);
-  const r = await fetch(proxied, {signal: AbortSignal.timeout(8000)});
-  if (!r.ok) throw new Error('HTTP ' + r.status);
+  const r = await fetchWithProxies(csvUrl);
   const text = await r.text();
-  return text.trim().split('\n').filter(l => l && !l.startsWith('DATE'));
+  // Handle allorigins wrapper
+  let raw = text;
+  try { const j = JSON.parse(text); if (j.contents) raw = j.contents; } catch(e) {}
+  return raw.trim().split('\n').filter(l => l && !l.startsWith('DATE'));
 }
 
 function fredLabel(dateStr) {
@@ -1230,8 +1478,8 @@ async function fetchCoreCPI() {
   } catch(e) {
     const el = document.getElementById('sbv-corecpi');
     const note = document.getElementById('sbn-corecpi');
-    if (el) el.textContent = '3.3%';
-    if (note) note.textContent = 'Dec 2025 ⚠';
+    if (el) el.textContent = '—';
+    if (note) note.textContent = 'Unavailable';
   }
 }
 
@@ -1254,8 +1502,8 @@ async function fetchGDPGrowth() {
   } catch(e) {
     const el = document.getElementById('sbv-gdp');
     const note = document.getElementById('sbn-gdp');
-    if (el) el.textContent = '2.8%';
-    if (note) note.textContent = 'Q4 2025 ⚠';
+    if (el) el.textContent = '—';
+    if (note) note.textContent = 'Unavailable';
   }
 }
 
@@ -1275,8 +1523,8 @@ async function fetchUnemployment() {
   } catch(e) {
     const el = document.getElementById('sbv-unemployment');
     const note = document.getElementById('sbn-unemployment');
-    if (el) el.textContent = '4.1%';
-    if (note) note.textContent = 'Jan 2026 ⚠';
+    if (el) el.textContent = '—';
+    if (note) note.textContent = 'Unavailable';
   }
 }
 
@@ -1299,8 +1547,8 @@ async function fetchNFP() {
   } catch(e) {
     const el = document.getElementById('sbv-nfp');
     const note = document.getElementById('sbn-nfp');
-    if (el) el.textContent = '+256K';
-    if (note) note.textContent = 'Jan 2026 ⚠';
+    if (el) el.textContent = '—';
+    if (note) note.textContent = 'Unavailable';
   }
 }
 
@@ -1323,8 +1571,8 @@ async function fetchPPI() {
   } catch(e) {
     const el = document.getElementById('sbv-ppi');
     const note = document.getElementById('sbn-ppi');
-    if (el) el.textContent = '3.3%';
-    if (note) note.textContent = 'Dec 2025 ⚠';
+    if (el) el.textContent = '—';
+    if (note) note.textContent = 'Unavailable';
   }
 }
 
@@ -1352,12 +1600,12 @@ async function fetchIndiaCPI() {
     const el = document.getElementById('sbv-india-cpi');
     const note = document.getElementById('sbn-india-cpi');
     if (el) { el.textContent = val + '%'; el.className = 'sb-econ-val ' + (parseFloat(val) > 6 ? 'neg' : parseFloat(val) < 4 ? 'pos' : 'neu'); }
-    if (note) note.textContent = 'FY' + String(latest.date).slice(2);
+    if (note) note.innerHTML = 'FY' + String(latest.date).slice(2) + ' <span class="stale-badge">annual</span>';
   } catch(e) {
     const el = document.getElementById('sbv-india-cpi');
     const note = document.getElementById('sbn-india-cpi');
-    if (el) el.textContent = '5.22%';
-    if (note) note.textContent = 'Dec 2025 ⚠';
+    if (el) el.textContent = '—';
+    if (note) note.textContent = 'Unavailable';
   }
 }
 
@@ -1371,12 +1619,12 @@ async function fetchIndiaGDP() {
     const el = document.getElementById('sbv-india-gdp');
     const note = document.getElementById('sbn-india-gdp');
     if (el) { el.textContent = val + '%'; el.className = 'sb-econ-val ' + (parseFloat(val) > 5 ? 'pos' : parseFloat(val) < 0 ? 'neg' : 'neu'); }
-    if (note) note.textContent = 'FY' + String(latest.date).slice(2);
+    if (note) note.innerHTML = 'FY' + String(latest.date).slice(2) + ' <span class="stale-badge">annual</span>';
   } catch(e) {
     const el = document.getElementById('sbv-india-gdp');
     const note = document.getElementById('sbn-india-gdp');
-    if (el) el.textContent = '6.4%';
-    if (note) note.textContent = 'FY25 ⚠';
+    if (el) el.textContent = '—';
+    if (note) note.textContent = 'Unavailable';
   }
 }
 
@@ -1387,15 +1635,15 @@ async function fetchIndiaUnemployment() {
   try {
     const latest = await fetchWorldBank('SL.UEM.TOTL.ZS', 'IN');
     const val = parseFloat(latest.value).toFixed(1);
-    const el = document.getElementById('sbv-india-iip');
-    const note = document.getElementById('sbn-india-iip');
+    const el = document.getElementById('sbv-india-unemp');
+    const note = document.getElementById('sbn-india-unemp');
     if (el) { el.textContent = val + '%'; el.className = 'sb-econ-val ' + (parseFloat(val) < 5 ? 'pos' : 'neg'); }
-    if (note) note.textContent = 'Unemp · FY' + String(latest.date).slice(2);
+    if (note) note.textContent = 'FY' + String(latest.date).slice(2) + ' <span class="stale-badge">annual</span>';
   } catch(e) {
-    const el = document.getElementById('sbv-india-iip');
-    const note = document.getElementById('sbn-india-iip');
-    if (el) el.textContent = '5.2%';
-    if (note) note.textContent = 'IIP Nov 2025 ⚠';
+    const el = document.getElementById('sbv-india-unemp');
+    const note = document.getElementById('sbn-india-unemp');
+    if (el) el.textContent = '—';
+    if (note) note.textContent = 'Unavailable';
   }
 }
 
@@ -1403,15 +1651,14 @@ async function fetchIndiaUnemployment() {
 // INDIA: Repo Rate via RBI DBIE (corsproxy)
 // ════════════════════════════
 async function fetchIndiaRepoRate() {
-  // Try RBI DBIE API via proxy
   try {
     const rbiUrl = 'https://rbi.org.in/Scripts/bs_viewcontent.aspx?Id=2118';
-    const proxied = 'https://corsproxy.io/?' + encodeURIComponent(rbiUrl);
-    const r = await fetch(proxied, {signal: AbortSignal.timeout(8000)});
+    const r = await fetchWithProxies(rbiUrl);
     if (r.ok) {
-      const html = await r.text();
+      let html = await r.text();
+      try { const j = JSON.parse(html); if (j.contents) html = j.contents; } catch(e) {}
       // RBI page lists "Policy Repo Rate" in a table – parse it
-      const match = html.match(/Policy Repo Rate[^%]*?([\d.]+)%/i);
+      const match = html.match(/Policy Repo Rate[^%]*?([0-9.]+)%/i);
       if (match) {
         const val = parseFloat(match[1]).toFixed(2);
         const el = document.getElementById('sbv-reporate');
@@ -1425,8 +1672,8 @@ async function fetchIndiaRepoRate() {
   // Fallback to last known value
   const el = document.getElementById('sbv-reporate');
   const note = document.getElementById('sbn-reporate');
-  if (el) el.textContent = '6.25%';
-  if (note) note.textContent = 'RBI Feb 2026 ⚠';
+  if (el) el.textContent = '—';
+  if (note) note.textContent = 'Unavailable';
 }
 
 // ════════════════════════════
@@ -1450,8 +1697,8 @@ async function fetchIndiaWPI() {
   } catch(e) {
     const el = document.getElementById('sbv-india-wpi');
     const note = document.getElementById('sbn-india-wpi');
-    if (el) el.textContent = '2.4%';
-    if (note) note.textContent = 'Nov 2025 ⚠';
+    if (el) el.textContent = '—';
+    if (note) note.textContent = 'Unavailable';
   }
 }
 
@@ -1470,8 +1717,8 @@ async function fetchIndiaPMI() {
     if (el) { el.textContent = val + '%'; el.className = 'sb-econ-val ' + (parseFloat(val) > 0 ? 'pos' : 'neg'); }
     if (note) note.textContent = 'Mfg Gr · FY' + String(latest.date).slice(2);
   } catch(e) {
-    if (el) el.textContent = '57.7';
-    if (note) note.textContent = 'PMI Jan 2026 ⚠';
+    if (el) el.textContent = '—';
+    if (note) note.textContent = 'PMI Unavailable';
   }
 }
 
@@ -1485,12 +1732,12 @@ async function fetchIndiaFiscal() {
     const el = document.getElementById('sbv-india-fiscal');
     const note = document.getElementById('sbn-india-fiscal');
     if (el) { el.textContent = val + '%'; el.className = 'sb-econ-val neu'; }
-    if (note) note.textContent = 'of GDP · FY' + String(latest.date).slice(2);
+    if (note) note.innerHTML = 'of GDP · FY' + String(latest.date).slice(2) + ' <span class="stale-badge">annual</span>';
   } catch(e) {
     const el = document.getElementById('sbv-india-fiscal');
     const note = document.getElementById('sbn-india-fiscal');
-    if (el) el.textContent = '4.9%';
-    if (note) note.textContent = 'FY25 Target ⚠';
+    if (el) el.textContent = '—';
+    if (note) note.textContent = 'Unavailable';
   }
 }
 
@@ -1549,6 +1796,24 @@ async function loadAll() {
 }
 
 // ════════════════════════════
+// KEYBOARD NAVIGATION
+// ════════════════════════════
+document.addEventListener('keydown', (e) => {
+  if (e.target.classList.contains('sb-item') && (e.key === 'Enter' || e.key === ' ')) {
+    e.preventDefault();
+    e.target.click();
+  }
+  if (e.target.classList.contains('nc-item') && (e.key === 'Enter' || e.key === ' ')) {
+    e.preventDefault();
+    toggleNC(e.target);
+  }
+  if (e.target.classList.contains('cat-tab') && (e.key === 'Enter' || e.key === ' ')) {
+    e.preventDefault();
+    e.target.click();
+  }
+});
+
+// ════════════════════════════
 // INIT
 // ════════════════════════════
 window.addEventListener('DOMContentLoaded', () => {
@@ -1585,6 +1850,15 @@ window.addEventListener('DOMContentLoaded', () => {
   fetchIndiaFiscal();
   setInterval(loadAll, 5 * 60 * 1000);
   setInterval(updateClock, 1000);
+
+  // Scroll-to-top observer
+  const mainEl = document.querySelector('.main');
+  const btn = document.getElementById('scrollTopBtn');
+  if (mainEl && btn) {
+    mainEl.addEventListener('scroll', () => {
+      btn.classList.toggle('visible', mainEl.scrollTop > 300);
+    });
+  }
 });
 </script>
 </body>
