@@ -11,9 +11,20 @@ import urllib.request
 import urllib.parse
 import urllib.error
 import xml.etree.ElementTree as ET
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import html as html_module
 import re
+import calendar
+import logging
+
+# ─────────────────────────────────────────────
+#  LOGGING SETUP
+# ─────────────────────────────────────────────
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s  %(message)s",
+    datefmt="%H:%M:%S",
+)
 
 # ─────────────────────────────────────────────
 #  NEWS SOURCES  (RSS feeds – no API key needed)
@@ -47,17 +58,19 @@ RSS_SOURCES = {
         "https://www.cnbc.com/id/10000113/device/rss/rss.html",
         "https://news.google.com/rss/search?q=OPEC+oil+energy+renewables+when:1d&hl=en-US&gl=US&ceid=US:en",
     ],
-    # 5 ── India Markets
+    # 5 ── India Markets (includes trending)
     "india": [
         "https://economictimes.indiatimes.com/markets/rssfeeds/1977021501.cms",
         "https://www.moneycontrol.com/rss/marketreports.xml",
         "https://economictimes.indiatimes.com/rssfeeds/1373380680.cms",
-    ],
-    # 6 ── Trending (India Google)
-    "trending": [
-        "https://news.google.com/rss/search?q=NSE+BSE+stock+market+when:1d&hl=en-IN&gl=IN&ceid=IN:en",
-        "https://news.google.com/rss/search?q=Nifty+Sensex+today+when:1d&hl=en-IN&gl=IN&ceid=IN:en",
+        "https://news.google.com/rss/search?q=NSE+BSE+Nifty+Sensex+stock+market+when:1d&hl=en-IN&gl=IN&ceid=IN:en",
         "https://news.google.com/rss/search?q=india+stocks+trending+today+when:1d&hl=en-IN&gl=IN&ceid=IN:en",
+    ],
+    # 6 ── Bonds & Rates (NEW)
+    "bonds_rates": [
+        "https://news.google.com/rss/search?q=treasury+yields+10+year+bond+when:1d&hl=en-US&gl=US&ceid=US:en",
+        "https://news.google.com/rss/search?q=yield+curve+sovereign+debt+credit+spread+when:1d&hl=en-US&gl=US&ceid=US:en",
+        "https://feeds.marketwatch.com/marketwatch/bonds/",
     ],
     # 7 ── Corporate News
     "corporate": [
@@ -102,6 +115,12 @@ RSS_SOURCES = {
         "https://news.google.com/rss/search?q=ESG+green+bonds+sustainable+investing+when:1d&hl=en-US&gl=US&ceid=US:en",
         "https://news.google.com/rss/search?q=carbon+market+climate+change+COP+when:1d&hl=en-US&gl=US&ceid=US:en",
         "https://news.google.com/rss/search?q=renewable+energy+solar+wind+EV+when:1d&hl=en-US&gl=US&ceid=US:en",
+    ],
+    # 14 ── Latin America (NEW)
+    "latam": [
+        "https://news.google.com/rss/search?q=Bovespa+Brazil+stock+market+when:1d&hl=en-US&gl=US&ceid=US:en",
+        "https://news.google.com/rss/search?q=Mexico+IPC+Argentina+peso+LATAM+economy+when:1d&hl=en-US&gl=US&ceid=US:en",
+        "https://news.google.com/rss/search?q=Latin+America+emerging+markets+commodities+when:1d&hl=en-US&gl=US&ceid=US:en",
     ],
 }
 
@@ -170,7 +189,7 @@ def fetch_rss(url: str) -> list[dict]:
                     "source": source,
                 })
     except Exception as e:
-        print(f"    ⚠  Could not fetch {url}: {e}")
+        logging.warning(f"Could not fetch {url}: {e}")
     return items
 
 
@@ -194,10 +213,8 @@ def fetch_category_news(category: str, urls: list[str]) -> list[dict]:
                 pub = datetime.strptime(pub_date_str.strip(), fmt)
                 # Always normalize to naive UTC before comparing with cutoff
                 if pub.tzinfo is not None:
-                    # Convert tz-aware datetime to UTC, then strip tzinfo
-                    import calendar
                     pub = datetime(*pub.utctimetuple()[:6])
-                # cutoff is already datetime.utcnow() based — comparison is safe
+                # cutoff is already datetime.now(timezone.utc).replace(tzinfo=None) based — comparison is safe
                 return pub >= cutoff
             except ValueError:
                 continue
@@ -205,7 +222,7 @@ def fetch_category_news(category: str, urls: list[str]) -> list[dict]:
 
     def _collect(cutoff: datetime) -> None:
         for url in urls:
-            print(f"  Fetching {url[:60]}...")
+            logging.info(f"  Fetching {url[:60]}")
             for item in fetch_rss(url):
                 key = item["title"].lower()[:60]
                 if key in seen_titles:
@@ -220,12 +237,12 @@ def fetch_category_news(category: str, urls: list[str]) -> list[dict]:
                 return
 
     # Pass 1: last 24 hours
-    _collect(datetime.utcnow() - timedelta(hours=24))
+    _collect(datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(hours=24))
 
     # Pass 2 fallback: extend to 2 days if fewer than 5 articles
     if len(results) < 5:
-        print(f"  ⚠  Only {len(results)} articles in 24h for [{category}] — extending to 2-day window…")
-        _collect(datetime.utcnow() - timedelta(days=2))
+        logging.warning(f"Only {len(results)} articles in 24h for [{category}] — extending to 2-day window")
+        _collect(datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(days=2))
 
     return results[:MAX_NEWS_PER_CATEGORY]
 
@@ -241,7 +258,7 @@ def format_pub_date(raw: str) -> str:
             if dt.tzinfo is not None:
                 dt_utc = dt.utctimetuple()
                 dt = datetime(*dt_utc[:6])
-            now = datetime.utcnow()
+            now = datetime.now(timezone.utc).replace(tzinfo=None)
             diff = now - dt
             total_seconds = diff.total_seconds()
             if total_seconds < 0:
@@ -265,7 +282,7 @@ def format_pub_date(raw: str) -> str:
 #  HTML GENERATION
 # ─────────────────────────────────────────────
 def get_ist_time() -> str:
-    utc_time = datetime.utcnow()
+    utc_time = datetime.now(timezone.utc).replace(tzinfo=None)
     ist_time = utc_time + timedelta(hours=5, minutes=30)
     return ist_time.strftime("%B %d, %Y at %I:%M %p IST")
 
@@ -280,9 +297,9 @@ def build_news_json(all_news: dict) -> str:
         "markets":            "📊 MARKETS & EARNINGS",
         "macro_policy":       "💰 MACRO & POLICY",
         "banking_fx":         "🏦 BANKING & FX",
+        "bonds_rates":        "📈 BONDS & RATES",
         "commodities_energy": "📦 COMMODITIES & ENERGY",
         "india":              "🇮🇳 INDIA MARKETS",
-        "trending":           "🔥 TRENDING",
         "corporate":          "🏢 CORPORATE NEWS",
         "geopolitical":       "🌍 GEOPOLITICAL",
         "crypto":             "📉 CRYPTO & WEB3",
@@ -290,6 +307,7 @@ def build_news_json(all_news: dict) -> str:
         "asia_china":         "🌏 ASIA & CHINA",
         "europe_uk":          "🇪🇺 EUROPE & UK",
         "esg_climate":        "🌱 ESG & CLIMATE",
+        "latam":              "🌎 LATAM",
     }
 
     out = {}
@@ -321,9 +339,9 @@ def generate_complete_html(all_news: dict) -> str:
         "markets":            len(all_news.get("markets", [])),
         "macro_policy":       len(all_news.get("macro_policy", [])),
         "banking_fx":         len(all_news.get("banking_fx", [])),
+        "bonds_rates":        len(all_news.get("bonds_rates", [])),
         "commodities_energy": len(all_news.get("commodities_energy", [])),
         "india":              len(all_news.get("india", [])),
-        "trending":           len(all_news.get("trending", [])),
         "corporate":          len(all_news.get("corporate", [])),
         "geopolitical":       len(all_news.get("geopolitical", [])),
         "crypto":             len(all_news.get("crypto", [])),
@@ -331,6 +349,7 @@ def generate_complete_html(all_news: dict) -> str:
         "asia_china":         len(all_news.get("asia_china", [])),
         "europe_uk":          len(all_news.get("europe_uk", [])),
         "esg_climate":        len(all_news.get("esg_climate", [])),
+        "latam":              len(all_news.get("latam", [])),
     }
 
     return f"""<!DOCTYPE html>
@@ -338,7 +357,7 @@ def generate_complete_html(all_news: dict) -> str:
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NexusFeed – Global Market Intelligence</title>
+<title>NexusFeed – Global Market Intelligence v2</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;600;700&family=IBM+Plex+Sans:wght@300;400;600&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 /* ══════════════════════════════════════════
@@ -459,6 +478,7 @@ body {{
   display: inline-flex;
   gap: 0;
   animation: scroll-ticker 60s linear infinite;
+  will-change: transform;
 }}
 .ticker-track:hover {{ animation-play-state: paused; }}
 .ticker-item {{
@@ -814,6 +834,48 @@ body {{
 ::-webkit-scrollbar-track {{ background: transparent; }}
 ::-webkit-scrollbar-thumb {{ background: var(--border); border-radius: 2px; }}
 
+/* ── LOADING OVERLAY ── */
+.loading-overlay {{
+  position: fixed; inset: 0;
+  background: rgba(13,13,13,0.97);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  z-index: 500;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.3s;
+}}
+.loading-overlay.visible {{ opacity: 1; pointer-events: all; }}
+.spinner {{
+  width: 36px; height: 36px;
+  border: 3px solid var(--border);
+  border-top-color: var(--orange);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-bottom: 14px;
+}}
+@keyframes spin {{ to {{ transform: rotate(360deg); }} }}
+.loading-text {{
+  color: var(--orange); font-size: 13px;
+  letter-spacing: 2px; text-transform: uppercase;
+  font-weight: 600;
+}}
+
+/* ── STATUS BAR ── */
+.statusbar {{
+  background: #161616;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 18px;
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.5px;
+  position: sticky;
+  bottom: 0;
+  z-index: 98;
+}}
+
 /* ── HAMBURGER BUTTON ── */
 .hamburger {{
   display: none;
@@ -871,6 +933,117 @@ body {{
   .ind-cell {{ min-width: 90px; padding: 8px 10px; }}
   .ind-val {{ font-size: 17px; }}
 }}
+
+/* ── LIGHT MODE ── */
+body.light {{
+  --bg: #f0f1f4;
+  --panel: #ffffff;
+  --panel2: #f7f7f8;
+  --border: #d0d4db;
+  --border2: #e2e5ea;
+  --muted: #666666;
+  --muted2: #999999;
+  --text: #1a1a1a;
+  --white: #111111;
+}}
+body.light .topbar {{ background: #ff7a1a; }}
+body.light .clockbar {{ background: #e8eaef; border-color: #d0d4db; }}
+body.light .ticker {{ background: #e2e5ea; }}
+body.light .statusbar {{ background: #e2e5ea; color: #444; }}
+body.light .nc-headline {{ color: #111; }}
+body.light .nc-summary {{ color: #555; }}
+body.light .nc-expand-body {{ border-color: #d0d4db; }}
+body.light .sb-econ-key {{ color: #555; }}
+body.light .sb-ind-name {{ color: #555; }}
+body.light .clockbar-val {{ color: #111; }}
+body.light .cat-tab {{ color: #666; }}
+body.light .cat-tab.active {{ color: var(--orange); }}
+body.light .cat-tabs {{ background: #f0f1f4; }}
+body.light .econ-section {{ background: #f5f5f7; }}
+body.light .loading-overlay {{ background: rgba(240,241,244,0.97); }}
+body.light .loading-text {{ color: #333; }}
+
+/* ── THEME TOGGLE ── */
+.theme-toggle {{
+  cursor: pointer; font-size: 16px; padding: 2px 6px;
+  border-radius: 4px; transition: background 0.15s;
+  user-select: none;
+}}
+.theme-toggle:hover {{ background: rgba(0,0,0,0.15); }}
+
+/* ── SEARCH BOX ── */
+.news-search {{
+  padding: 0 18px 10px;
+  flex-shrink: 0;
+}}
+.news-search input {{
+  width: 100%;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  color: var(--white);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  padding: 9px 14px 9px 36px;
+  border-radius: 4px;
+  outline: none;
+  transition: border-color 0.15s;
+}}
+.news-search input::placeholder {{ color: var(--muted2); }}
+.news-search input:focus {{ border-color: var(--orange); }}
+.news-search-wrap {{
+  position: relative;
+}}
+.news-search-icon {{
+  position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+  color: var(--muted2); font-size: 14px; pointer-events: none;
+}}
+
+/* ── SCROLL-TO-TOP BUTTON ── */
+.scroll-top {{
+  position: fixed; bottom: 40px; right: 20px;
+  width: 40px; height: 40px;
+  background: var(--orange);
+  color: #000; font-weight: 700; font-size: 18px;
+  border: none; border-radius: 50%;
+  cursor: pointer; z-index: 90;
+  display: none; align-items: center; justify-content: center;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.4);
+  transition: opacity 0.2s, transform 0.2s;
+}}
+.scroll-top.visible {{ display: flex; }}
+.scroll-top:hover {{ transform: scale(1.1); }}
+
+/* ── TAB SCROLL FADE ── */
+.cat-tabs-wrap {{
+  position: relative; flex-shrink: 0;
+}}
+.cat-tabs-wrap::after {{
+  content: ''; position: absolute;
+  top: 0; right: 0; bottom: 0; width: 50px;
+  background: linear-gradient(90deg, transparent, #101010);
+  pointer-events: none; z-index: 1;
+}}
+body.light .cat-tabs-wrap::after {{
+  background: linear-gradient(90deg, transparent, #f0f1f4);
+}}
+
+/* ── STALE DATA BADGE ── */
+.stale-badge {{
+  display: inline-block;
+  background: rgba(255,51,85,0.15);
+  color: var(--red);
+  font-size: 9px; font-weight: 700;
+  padding: 1px 5px; border-radius: 2px;
+  letter-spacing: 0.5px;
+  margin-left: 4px;
+  text-transform: uppercase;
+}}
+
+/* ── KEYBOARD FOCUS ── */
+.sb-item:focus-visible, .nc-item:focus-visible, .cat-tab:focus-visible {{
+  outline: 2px solid var(--orange);
+  outline-offset: -2px;
+}}
 </style>
 </head>
 <body>
@@ -894,6 +1067,7 @@ body {{
     <span>🔴 LIVE FEED</span>
     <span>📅 {current_time}</span>
     <span>✅ {total_articles} ARTICLES</span>
+    <span class="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark mode">🌓</span>
   </div>
 </div>
 
@@ -943,7 +1117,7 @@ body {{
       </div>
       <div class="sb-econ-body" id="body-usa">
         <div class="sb-econ-row"><span class="sb-econ-key">Fed Funds Rate</span><span class="sb-econ-val neu" id="sbv-fedfunds">3.50–3.75%</span></div>
-        <div class="sb-econ-row"><span class="sb-econ-key">FOMC Next</span><span class="sb-econ-val neu" id="sbv-fomc">Hold</span><span class="sb-econ-note" id="sbn-fomc">May 6–7 2025</span></div>
+        <div class="sb-econ-row"><span class="sb-econ-key">FOMC Next</span><span class="sb-econ-val neu" id="sbv-fomc">Hold</span><span class="sb-econ-note" id="sbn-fomc">Jun 17–18 2025</span></div>
         <div class="sb-econ-row"><span class="sb-econ-key">CPI YoY</span><span class="sb-econ-val neu" id="sbv-cpi">--</span></div>
         <div class="sb-econ-row"><span class="sb-econ-key">Core CPI</span><span class="sb-econ-val neu" id="sbv-corecpi">--</span><span class="sb-econ-note" id="sbn-corecpi">loading…</span></div>
         <div class="sb-econ-row"><span class="sb-econ-key">GDP Growth</span><span class="sb-econ-val neu" id="sbv-gdp">--</span><span class="sb-econ-note" id="sbn-gdp">loading…</span></div>
@@ -963,7 +1137,7 @@ body {{
         <div class="sb-econ-row"><span class="sb-econ-key">Repo Rate</span><span class="sb-econ-val neu" id="sbv-reporate">--</span><span class="sb-econ-note" id="sbn-reporate">loading…</span></div>
         <div class="sb-econ-row"><span class="sb-econ-key">CPI</span><span class="sb-econ-val neu" id="sbv-india-cpi">--</span><span class="sb-econ-note" id="sbn-india-cpi">loading…</span></div>
         <div class="sb-econ-row"><span class="sb-econ-key">WPI</span><span class="sb-econ-val neu" id="sbv-india-wpi">--</span><span class="sb-econ-note" id="sbn-india-wpi">loading…</span></div>
-        <div class="sb-econ-row"><span class="sb-econ-key">IIP</span><span class="sb-econ-val pos" id="sbv-india-iip">--</span><span class="sb-econ-note" id="sbn-india-iip">loading…</span></div>
+        <div class="sb-econ-row"><span class="sb-econ-key">Unemployment</span><span class="sb-econ-val neu" id="sbv-india-unemp">--</span><span class="sb-econ-note" id="sbn-india-unemp">loading…</span></div>
         <div class="sb-econ-row"><span class="sb-econ-key">Mfg PMI</span><span class="sb-econ-val pos" id="sbv-india-pmi">--</span><span class="sb-econ-note" id="sbn-india-pmi">loading…</span></div>
         <div class="sb-econ-row"><span class="sb-econ-key">GDP Growth</span><span class="sb-econ-val pos" id="sbv-india-gdp">--</span><span class="sb-econ-note" id="sbn-india-gdp">loading…</span></div>
         <div class="sb-econ-row"><span class="sb-econ-key">Fiscal Deficit</span><span class="sb-econ-val neu" id="sbv-india-fiscal">--</span><span class="sb-econ-note" id="sbn-india-fiscal">loading…</span></div>
@@ -977,6 +1151,9 @@ body {{
       <div class="sb-ind-row"><span class="sb-ind-name">S&amp;P 500</span>    <span class="sb-ind-val neu" id="sbv-sp500">--</span></div>
       <div class="sb-ind-row"><span class="sb-ind-name">Dow Jones</span>   <span class="sb-ind-val neu" id="sbv-dow">--</span></div>
       <div class="sb-ind-row"><span class="sb-ind-name">Nasdaq</span>      <span class="sb-ind-val neu" id="sbv-nasdaq">--</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">VIX</span>         <span class="sb-ind-val neu" id="sbv-vix">--</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">10Y Yield</span>   <span class="sb-ind-val neu" id="sbv-us10y">--</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">2Y Yield</span>    <span class="sb-ind-val neu" id="sbv-us2y">--</span></div>
       <div class="sb-ind-row"><span class="sb-ind-name">Nifty 50</span>    <span class="sb-ind-val neu" id="sbv-nifty">--</span></div>
       <div class="sb-ind-row"><span class="sb-ind-name">Sensex</span>      <span class="sb-ind-val neu" id="sbv-sensex">--</span></div>
       <div class="sb-ind-row"><span class="sb-ind-name">USD/INR</span>     <span class="sb-ind-val neu" id="sbv-usdinr">--</span></div>
@@ -989,57 +1166,61 @@ body {{
     <!-- 4. CATEGORIES ── -->
     <div class="sb-section">
       <div class="sb-label">▶ CATEGORIES</div>
-      <div class="sb-item active" id="sb-markets"            onclick="switchCat('markets',this)">
+      <div class="sb-item active" id="sb-markets"            onclick="switchCat('markets',this)" tabindex="0" role="button">
         <span class="sb-name">📊 Markets</span>
         <span class="sb-count">{cat_counts["markets"]}</span>
       </div>
-      <div class="sb-item" id="sb-macro_policy"      onclick="switchCat('macro_policy',this)">
+      <div class="sb-item" id="sb-macro_policy"      onclick="switchCat('macro_policy',this)" tabindex="0" role="button">
         <span class="sb-name">💰 Macro & Policy</span>
         <span class="sb-count">{cat_counts["macro_policy"]}</span>
       </div>
-      <div class="sb-item" id="sb-banking_fx"        onclick="switchCat('banking_fx',this)">
+      <div class="sb-item" id="sb-banking_fx"        onclick="switchCat('banking_fx',this)" tabindex="0" role="button">
         <span class="sb-name">🏦 Banking & FX</span>
         <span class="sb-count">{cat_counts["banking_fx"]}</span>
       </div>
-      <div class="sb-item" id="sb-commodities_energy" onclick="switchCat('commodities_energy',this)">
+      <div class="sb-item" id="sb-bonds_rates"       onclick="switchCat('bonds_rates',this)" tabindex="0" role="button">
+        <span class="sb-name">📈 Bonds & Rates</span>
+        <span class="sb-count">{cat_counts["bonds_rates"]}</span>
+      </div>
+      <div class="sb-item" id="sb-commodities_energy" onclick="switchCat('commodities_energy',this)" tabindex="0" role="button">
         <span class="sb-name">📦 Commodities & Energy</span>
         <span class="sb-count">{cat_counts["commodities_energy"]}</span>
       </div>
-      <div class="sb-item" id="sb-india"             onclick="switchCat('india',this)">
+      <div class="sb-item" id="sb-india"             onclick="switchCat('india',this)" tabindex="0" role="button">
         <span class="sb-name">🇮🇳 India</span>
         <span class="sb-count">{cat_counts["india"]}</span>
       </div>
-      <div class="sb-item" id="sb-trending"          onclick="switchCat('trending',this)">
-        <span class="sb-name">🔥 Trending</span>
-        <span class="sb-count">{cat_counts["trending"]}</span>
-      </div>
-      <div class="sb-item" id="sb-corporate"         onclick="switchCat('corporate',this)">
+      <div class="sb-item" id="sb-corporate"         onclick="switchCat('corporate',this)" tabindex="0" role="button">
         <span class="sb-name">🏢 Corporate</span>
         <span class="sb-count">{cat_counts["corporate"]}</span>
       </div>
-      <div class="sb-item" id="sb-geopolitical"      onclick="switchCat('geopolitical',this)">
+      <div class="sb-item" id="sb-geopolitical"      onclick="switchCat('geopolitical',this)" tabindex="0" role="button">
         <span class="sb-name">🌍 Geopolitical</span>
         <span class="sb-count">{cat_counts["geopolitical"]}</span>
       </div>
-      <div class="sb-item" id="sb-crypto"            onclick="switchCat('crypto',this)">
+      <div class="sb-item" id="sb-crypto"            onclick="switchCat('crypto',this)" tabindex="0" role="button">
         <span class="sb-name">📉 Crypto & Web3</span>
         <span class="sb-count">{cat_counts["crypto"]}</span>
       </div>
-      <div class="sb-item" id="sb-tech_ai"           onclick="switchCat('tech_ai',this)">
+      <div class="sb-item" id="sb-tech_ai"           onclick="switchCat('tech_ai',this)" tabindex="0" role="button">
         <span class="sb-name">🤖 Tech & AI</span>
         <span class="sb-count">{cat_counts["tech_ai"]}</span>
       </div>
-      <div class="sb-item" id="sb-asia_china"        onclick="switchCat('asia_china',this)">
+      <div class="sb-item" id="sb-asia_china"        onclick="switchCat('asia_china',this)" tabindex="0" role="button">
         <span class="sb-name">🌏 Asia & China</span>
         <span class="sb-count">{cat_counts["asia_china"]}</span>
       </div>
-      <div class="sb-item" id="sb-europe_uk"         onclick="switchCat('europe_uk',this)">
+      <div class="sb-item" id="sb-europe_uk"         onclick="switchCat('europe_uk',this)" tabindex="0" role="button">
         <span class="sb-name">🇪🇺 Europe & UK</span>
         <span class="sb-count">{cat_counts["europe_uk"]}</span>
       </div>
-      <div class="sb-item" id="sb-esg_climate"       onclick="switchCat('esg_climate',this)">
+      <div class="sb-item" id="sb-esg_climate"       onclick="switchCat('esg_climate',this)" tabindex="0" role="button">
         <span class="sb-name">🌱 ESG & Climate</span>
         <span class="sb-count">{cat_counts["esg_climate"]}</span>
+      </div>
+      <div class="sb-item" id="sb-latam"             onclick="switchCat('latam',this)" tabindex="0" role="button">
+        <span class="sb-name">🌎 LATAM</span>
+        <span class="sb-count">{cat_counts["latam"]}</span>
       </div>
     </div>
 
@@ -1071,6 +1252,9 @@ body {{
       <span id="card-dow"></span><span id="val-dow"></span><span id="chg-dow"></span>
       <span id="card-sp500"></span><span id="val-sp500"></span><span id="chg-sp500"></span>
       <span id="card-nasdaq"></span><span id="val-nasdaq"></span><span id="chg-nasdaq"></span>
+      <span id="card-vix"></span><span id="val-vix"></span><span id="chg-vix"></span>
+      <span id="card-us10y"></span><span id="val-us10y"></span><span id="chg-us10y"></span>
+      <span id="card-us2y"></span><span id="val-us2y"></span><span id="chg-us2y"></span>
       <span id="card-oil"></span><span id="val-oil"></span><span id="chg-oil"></span>
       <span id="card-dollar"></span><span id="val-dollar"></span><span id="chg-dollar"></span>
       <span id="card-gold"></span><span id="val-gold"></span><span id="chg-gold"></span>
@@ -1078,20 +1262,31 @@ body {{
     </div>
 
     <!-- ── CATEGORY TABS ── -->
+    <div class="cat-tabs-wrap">
     <div class="cat-tabs" id="catTabs">
-      <div class="cat-tab active" id="tab-markets"           onclick="switchCat('markets',null)">📊 MARKETS</div>
-      <div class="cat-tab"        id="tab-macro_policy"      onclick="switchCat('macro_policy',null)">💰 MACRO</div>
-      <div class="cat-tab"        id="tab-banking_fx"        onclick="switchCat('banking_fx',null)">🏦 BANKING & FX</div>
-      <div class="cat-tab"        id="tab-commodities_energy" onclick="switchCat('commodities_energy',null)">📦 COMMODITIES</div>
-      <div class="cat-tab"        id="tab-india"             onclick="switchCat('india',null)">🇮🇳 INDIA</div>
-      <div class="cat-tab"        id="tab-trending"          onclick="switchCat('trending',null)">🔥 TRENDING</div>
-      <div class="cat-tab"        id="tab-corporate"         onclick="switchCat('corporate',null)">🏢 CORPORATE</div>
-      <div class="cat-tab"        id="tab-geopolitical"      onclick="switchCat('geopolitical',null)">🌍 GEOPOLITICAL</div>
-      <div class="cat-tab"        id="tab-crypto"            onclick="switchCat('crypto',null)">📉 CRYPTO</div>
-      <div class="cat-tab"        id="tab-tech_ai"           onclick="switchCat('tech_ai',null)">🤖 TECH & AI</div>
-      <div class="cat-tab"        id="tab-asia_china"        onclick="switchCat('asia_china',null)">🌏 ASIA & CHINA</div>
-      <div class="cat-tab"        id="tab-europe_uk"         onclick="switchCat('europe_uk',null)">🇪🇺 EUROPE & UK</div>
-      <div class="cat-tab"        id="tab-esg_climate"       onclick="switchCat('esg_climate',null)">🌱 ESG & CLIMATE</div>
+      <div class="cat-tab active" id="tab-markets"           onclick="switchCat('markets',null)" tabindex="0" role="tab">📊 MARKETS</div>
+      <div class="cat-tab"        id="tab-macro_policy"      onclick="switchCat('macro_policy',null)" tabindex="0" role="tab">💰 MACRO</div>
+      <div class="cat-tab"        id="tab-banking_fx"        onclick="switchCat('banking_fx',null)" tabindex="0" role="tab">🏦 BANKING & FX</div>
+      <div class="cat-tab"        id="tab-bonds_rates"       onclick="switchCat('bonds_rates',null)" tabindex="0" role="tab">📈 BONDS</div>
+      <div class="cat-tab"        id="tab-commodities_energy" onclick="switchCat('commodities_energy',null)" tabindex="0" role="tab">📦 COMMODITIES</div>
+      <div class="cat-tab"        id="tab-india"             onclick="switchCat('india',null)" tabindex="0" role="tab">🇮🇳 INDIA</div>
+      <div class="cat-tab"        id="tab-corporate"         onclick="switchCat('corporate',null)" tabindex="0" role="tab">🏢 CORPORATE</div>
+      <div class="cat-tab"        id="tab-geopolitical"      onclick="switchCat('geopolitical',null)" tabindex="0" role="tab">🌍 GEOPOLITICAL</div>
+      <div class="cat-tab"        id="tab-crypto"            onclick="switchCat('crypto',null)" tabindex="0" role="tab">📉 CRYPTO</div>
+      <div class="cat-tab"        id="tab-tech_ai"           onclick="switchCat('tech_ai',null)" tabindex="0" role="tab">🤖 TECH & AI</div>
+      <div class="cat-tab"        id="tab-asia_china"        onclick="switchCat('asia_china',null)" tabindex="0" role="tab">🌏 ASIA & CHINA</div>
+      <div class="cat-tab"        id="tab-europe_uk"         onclick="switchCat('europe_uk',null)" tabindex="0" role="tab">🇪🇺 EUROPE & UK</div>
+      <div class="cat-tab"        id="tab-esg_climate"       onclick="switchCat('esg_climate',null)" tabindex="0" role="tab">🌱 ESG & CLIMATE</div>
+      <div class="cat-tab"        id="tab-latam"             onclick="switchCat('latam',null)" tabindex="0" role="tab">🌎 LATAM</div>
+    </div>
+    </div>
+
+    <!-- ── SEARCH BOX ── -->
+    <div class="news-search">
+      <div class="news-search-wrap">
+        <span class="news-search-icon">🔍</span>
+        <input type="text" id="newsSearchInput" placeholder="Filter headlines…" oninput="filterNews()" />
+      </div>
     </div>
 
     <!-- ── NEWS AREA ── -->
@@ -1108,9 +1303,12 @@ body {{
 
 <!-- STATUS BAR -->
 <div class="statusbar">
-  <span>NEXUSFEED · RSS FEEDS: 43 SOURCES · 13 CATEGORIES · AUTO-REFRESH: 5 MIN · NOT FINANCIAL ADVICE</span>
+  <span>NEXUSFEED v2 · RSS FEEDS: 46 SOURCES · 14 CATEGORIES · AUTO-REFRESH: 5 MIN · NOT FINANCIAL ADVICE</span>
   <span id="statusClock">--:-- IST</span>
 </div>
+
+<!-- SCROLL-TO-TOP -->
+<button class="scroll-top" id="scrollTopBtn" onclick="scrollToTop()" title="Back to top">↑</button>
 
 <!-- ══════════════════════════════════════════
      SCRIPTS
@@ -1130,19 +1328,26 @@ function renderNews(cat) {{
   if (!d) return;
   const col = document.getElementById('newsCol');
   const items = d.items;
+  const query = (document.getElementById('newsSearchInput')?.value || '').toLowerCase();
 
-  if (!items || items.length === 0) {{
-    col.innerHTML = '<div class="no-news">No articles available for this category.</div>';
+  // Filter items if search query present
+  const filtered = query
+    ? items.filter(item => item.title.toLowerCase().includes(query) || item.summary.toLowerCase().includes(query) || item.source.toLowerCase().includes(query))
+    : items;
+
+  if (!filtered || filtered.length === 0) {{
+    col.innerHTML = '<div class="no-news">' + (query ? 'No articles match your filter.' : 'No articles available for this category.') + '</div>';
     document.getElementById('newsTitle').textContent = '▶ ' + d.label + ' — 0 ARTICLES';
     return;
   }}
 
-  col.innerHTML = items.map((item, i) => {{
+  // Build HTML safely — titles/sources are already escaped by Python
+  col.innerHTML = filtered.map((item, i) => {{
     const num = String(i + 1).padStart(2, '0');
     const link = item.link && item.link !== '#'
       ? `<a class="nc-link" href="${{item.link}}" target="_blank" rel="noopener">Read Full Article ↗</a>`
       : '';
-    return `<div class="nc-item" onclick="toggleNC(this)" id="nc-${{cat}}-${{i}}">
+    return `<div class="nc-item" onclick="toggleNC(this)" tabindex="0" role="button" aria-expanded="false" id="nc-${{cat}}-${{i}}">
   <div class="nc-row">
     <span class="nc-num">${{num}}</span>
     <span class="nc-headline">${{item.title}}</span>
@@ -1160,13 +1365,49 @@ function renderNews(cat) {{
 </div>`;
   }}).join('');
 
-  document.getElementById('newsTitle').textContent = '▶ ' + d.label + ' — ' + items.length + ' ARTICLES';
+  document.getElementById('newsTitle').textContent = '▶ ' + d.label + ' — ' + filtered.length + (query ? '/' + items.length : '') + ' ARTICLES';
 }}
 function toggleNC(row) {{
   row.classList.toggle('open');
   const exp = row.querySelector('.nc-expand-body');
   if (exp) exp.classList.toggle('open');
+  row.setAttribute('aria-expanded', row.classList.contains('open'));
 }}
+
+// ════════════════════════════
+// SEARCH / FILTER NEWS
+// ════════════════════════════
+function filterNews() {{
+  renderNews(currentCat);
+}}
+
+// ════════════════════════════
+// THEME TOGGLE (DARK ↔ LIGHT)
+// ════════════════════════════
+function toggleTheme() {{
+  document.body.classList.toggle('light');
+  const isLight = document.body.classList.contains('light');
+  localStorage.setItem('nf-theme', isLight ? 'light' : 'dark');
+}}
+// Restore theme from last visit
+if (localStorage.getItem('nf-theme') === 'light') document.body.classList.add('light');
+
+// ════════════════════════════
+// SCROLL-TO-TOP
+// ════════════════════════════
+function scrollToTop() {{
+  const mainEl = document.querySelector('.main');
+  if (mainEl) mainEl.scrollTo({{ top: 0, behavior: 'smooth' }});
+}}
+(function() {{
+  const mainEl = document.querySelector('.main');
+  const btn = document.getElementById('scrollTopBtn');
+  if (mainEl && btn) {{
+    mainEl.addEventListener('scroll', () => {{
+      btn.classList.toggle('visible', mainEl.scrollTop > 300);
+    }});
+  }}
+}})();
 
 // ════════════════════════════
 // HAMBURGER / SIDEBAR DRAWER
@@ -1223,6 +1464,9 @@ const TICKER_SYMBOLS = [
   ['DOW',    'dow'],
   ['S&P 500','sp500'],
   ['NASDAQ', 'nasdaq'],
+  ['VIX',    'vix'],
+  ['10Y',    'us10y'],
+  ['2Y',     'us2y'],
   ['CRUDE',  'oil'],
   ['GOLD',   'gold'],
   ['SILVER', 'silver'],
@@ -1235,25 +1479,22 @@ function buildTicker() {{
   // Double for seamless loop
   const items = [...TICKER_SYMBOLS, ...TICKER_SYMBOLS];
   track.innerHTML = items.map(([name, key]) => `
-    <span class="ticker-item" id="tick-${{key}}">
+    <span class="ticker-item" data-key="${{key}}">
       <span class="t-sym">${{name}}</span>
-      <span class="t-val t-neu" id="tv-${{key}}">--</span>
+      <span class="t-val t-neu" data-tv="${{key}}">--</span>
     </span>
   `).join('');
 }}
 
 function updateTicker(key, val, pct) {{
-  const el = document.getElementById('tv-' + key);
-  if (!el) return;
+  const els = document.querySelectorAll('[data-tv="' + key + '"]');
+  if (!els.length) return;
   const p = parseFloat(pct);
-  el.textContent = val + (pct ? ' (' + (p >= 0 ? '+' : '') + pct + '%)' : '');
-  el.className = 't-val ' + (p > 0 ? 't-pos' : p < 0 ? 't-neg' : 't-neu');
-
-  // Update duplicate ticker item too
-  const els = document.querySelectorAll('[id="tv-' + key + '"]');
+  const text = val + (pct ? ' (' + (p >= 0 ? '+' : '') + pct + '%)' : '');
+  const cls = 't-val ' + (p > 0 ? 't-pos' : p < 0 ? 't-neg' : 't-neu');
   els.forEach(e => {{
-    e.textContent = el.textContent;
-    e.className = el.className;
+    e.textContent = text;
+    e.className = cls;
   }});
 }}
 
@@ -1290,6 +1531,9 @@ const SYMBOLS = {{
   'dow':    '^DJI',
   'sp500':  '^GSPC',
   'nasdaq': '^IXIC',
+  'vix':    '^VIX',
+  'us10y':  '^TNX',
+  'us2y':   '^IRX',
   'oil':    'CL=F',
   'dollar': 'DX-Y.NYB',
   'gold':   'GC=F',
@@ -1297,16 +1541,31 @@ const SYMBOLS = {{
   'usdinr': 'INR=X'
 }};
 
+// Multiple CORS proxies for resilience
+const CORS_PROXIES = [
+  (u) => 'https://corsproxy.io/?' + encodeURIComponent(u),
+  (u) => 'https://api.allorigins.win/get?url=' + encodeURIComponent(u),
+  (u) => u  // direct (may work for some APIs)
+];
+
+async function fetchWithProxies(url, opts = {{}}) {{
+  for (const mkProxy of CORS_PROXIES) {{
+    try {{
+      const proxied = mkProxy(url);
+      const r = await fetch(proxied, {{ mode: 'cors', signal: AbortSignal.timeout(8000), ...opts }});
+      if (!r.ok) continue;
+      return r;
+    }} catch(e) {{ /* try next */ }}
+  }}
+  throw new Error('All proxies failed for ' + url);
+}}
+
 async function fetchYahoo(key, sym) {{
   const url = `https://query1.finance.yahoo.com/v8/finance/chart/${{sym}}?interval=1d&range=1d`;
-  const proxies = [
-    'https://corsproxy.io/?' + encodeURIComponent(url),
-    'https://api.allorigins.win/get?url=' + encodeURIComponent(url),
-    url
-  ];
-  for (const u of proxies) {{
+  for (const mkProxy of CORS_PROXIES) {{
     try {{
-      const r = await fetch(u, {{mode: 'cors'}});
+      const u = mkProxy(url);
+      const r = await fetch(u, {{mode: 'cors', signal: AbortSignal.timeout(8000)}});
       if (!r.ok) continue;
       let d = await r.json();
       if (d.contents) d = JSON.parse(d.contents);
@@ -1317,13 +1576,22 @@ async function fetchYahoo(key, sym) {{
       if (!cur || !prev) continue;
       const chg = (cur - prev).toFixed(2);
       const pct = (((cur - prev) / prev) * 100).toFixed(2);
-      let val = ['dow', 'sp500', 'nasdaq'].includes(key)
-        ? cur.toLocaleString('en-US', {{minimumFractionDigits: 2, maximumFractionDigits: 2}})
-        : key === 'dollar' ? cur.toFixed(2)
-        : key === 'usdinr' ? '₹' + cur.toFixed(2)
-        : '$' + cur.toFixed(2);
+      let val;
+      if (['dow', 'sp500', 'nasdaq'].includes(key)) {{
+        val = cur.toLocaleString('en-US', {{minimumFractionDigits: 2, maximumFractionDigits: 2}});
+      }} else if (key === 'vix') {{
+        val = cur.toFixed(2);
+      }} else if (['us10y', 'us2y'].includes(key)) {{
+        val = cur.toFixed(2) + '%';
+      }} else if (key === 'dollar') {{
+        val = cur.toFixed(2);
+      }} else if (key === 'usdinr') {{
+        val = '₹' + cur.toFixed(2);
+      }} else {{
+        val = '$' + cur.toFixed(2);
+      }}
       updateCard(key, val, chg, pct);
-      // Extra sidebar updates for nifty/sensex placeholder
+      // Extra sidebar updates for usdinr
       if (key === 'usdinr') {{
         const sbEl = document.getElementById('sbv-usdinr');
         if (sbEl) {{ sbEl.textContent = '₹' + cur.toFixed(2); }}
@@ -1461,11 +1729,10 @@ async function fetchGiftNifty() {{
 // ════════════════════════════
 async function fetchCPI() {{
   const csvUrl = 'https://fred.stlouisfed.org/graph/fredgraph.csv?id=CPIAUCSL';
-  const proxied = 'https://corsproxy.io/?' + encodeURIComponent(csvUrl);
   try {{
-    const r = await fetch(proxied, {{signal: AbortSignal.timeout(8000)}});
-    if (!r.ok) throw new Error('HTTP ' + r.status);
-    const text = await r.text();
+    const r = await fetchWithProxies(csvUrl);
+    let text = await r.text();
+    try {{ const j = JSON.parse(text); if (j.contents) text = j.contents; }} catch(e) {{}}
     const lines = text.trim().split('\\n').filter(l => l && !l.startsWith('DATE'));
     if (lines.length < 13) throw new Error('Not enough data');
     const lastLine = lines[lines.length - 1].split(',');
@@ -1492,10 +1759,10 @@ async function fetchCPI() {{
   }} catch (e) {{
     const vEl = document.getElementById('val-cpi');
     const cEl = document.getElementById('chg-cpi');
-    if (vEl) vEl.textContent = '2.9%';
-    if (cEl) cEl.textContent = 'YoY · Dec 2025 (cached)';
+    if (vEl) vEl.textContent = '—';
+    if (cEl) cEl.textContent = 'Unavailable';
     const sbCpi = document.getElementById('sbv-cpi');
-    if (sbCpi) {{ sbCpi.textContent = '2.9%'; }}
+    if (sbCpi) {{ sbCpi.textContent = '—'; }}
   }}
 }}
 
@@ -1503,17 +1770,16 @@ async function fetchCPI() {{
 // FED FUNDS RATE via FRED CSV
 // ════════════════════════════
 async function fetchFedRate() {{
-  // DFEDTARL = lower limit, DFEDTARU = upper limit (daily series)
-  const proxy = 'https://corsproxy.io/?';
   const lowerUrl = 'https://fred.stlouisfed.org/graph/fredgraph.csv?id=DFEDTARL';
   const upperUrl = 'https://fred.stlouisfed.org/graph/fredgraph.csv?id=DFEDTARU';
   try {{
     const [rL, rU] = await Promise.all([
-      fetch(proxy + encodeURIComponent(lowerUrl), {{signal: AbortSignal.timeout(8000)}}),
-      fetch(proxy + encodeURIComponent(upperUrl), {{signal: AbortSignal.timeout(8000)}}),
+      fetchWithProxies(lowerUrl),
+      fetchWithProxies(upperUrl),
     ]);
-    if (!rL.ok || !rU.ok) throw new Error('HTTP error');
-    const [tL, tU] = await Promise.all([rL.text(), rU.text()]);
+    let [tL, tU] = await Promise.all([rL.text(), rU.text()]);
+    try {{ const j = JSON.parse(tL); if (j.contents) tL = j.contents; }} catch(e) {{}}
+    try {{ const j = JSON.parse(tU); if (j.contents) tU = j.contents; }} catch(e) {{}}
     const lastVal = (txt) => {{
       const lines = txt.trim().split('\\n').filter(l => l && !l.startsWith('DATE'));
       return parseFloat(lines[lines.length - 1].split(',')[1]);
@@ -1534,11 +1800,12 @@ async function fetchFedRate() {{
 // ════════════════════════════
 async function fetchFREDLines(seriesId) {{
   const csvUrl = 'https://fred.stlouisfed.org/graph/fredgraph.csv?id=' + seriesId;
-  const proxied = 'https://corsproxy.io/?' + encodeURIComponent(csvUrl);
-  const r = await fetch(proxied, {{signal: AbortSignal.timeout(8000)}});
-  if (!r.ok) throw new Error('HTTP ' + r.status);
+  const r = await fetchWithProxies(csvUrl);
   const text = await r.text();
-  return text.trim().split('\\n').filter(l => l && !l.startsWith('DATE'));
+  // Handle allorigins wrapper
+  let raw = text;
+  try {{ const j = JSON.parse(text); if (j.contents) raw = j.contents; }} catch(e) {{}}
+  return raw.trim().split('\\n').filter(l => l && !l.startsWith('DATE'));
 }}
 
 function fredLabel(dateStr) {{
@@ -1565,8 +1832,8 @@ async function fetchCoreCPI() {{
   }} catch(e) {{
     const el = document.getElementById('sbv-corecpi');
     const note = document.getElementById('sbn-corecpi');
-    if (el) el.textContent = '3.3%';
-    if (note) note.textContent = 'Dec 2025 ⚠';
+    if (el) el.textContent = '—';
+    if (note) note.textContent = 'Unavailable';
   }}
 }}
 
@@ -1589,8 +1856,8 @@ async function fetchGDPGrowth() {{
   }} catch(e) {{
     const el = document.getElementById('sbv-gdp');
     const note = document.getElementById('sbn-gdp');
-    if (el) el.textContent = '2.8%';
-    if (note) note.textContent = 'Q4 2025 ⚠';
+    if (el) el.textContent = '—';
+    if (note) note.textContent = 'Unavailable';
   }}
 }}
 
@@ -1610,8 +1877,8 @@ async function fetchUnemployment() {{
   }} catch(e) {{
     const el = document.getElementById('sbv-unemployment');
     const note = document.getElementById('sbn-unemployment');
-    if (el) el.textContent = '4.1%';
-    if (note) note.textContent = 'Jan 2026 ⚠';
+    if (el) el.textContent = '—';
+    if (note) note.textContent = 'Unavailable';
   }}
 }}
 
@@ -1634,8 +1901,8 @@ async function fetchNFP() {{
   }} catch(e) {{
     const el = document.getElementById('sbv-nfp');
     const note = document.getElementById('sbn-nfp');
-    if (el) el.textContent = '+256K';
-    if (note) note.textContent = 'Jan 2026 ⚠';
+    if (el) el.textContent = '—';
+    if (note) note.textContent = 'Unavailable';
   }}
 }}
 
@@ -1658,8 +1925,8 @@ async function fetchPPI() {{
   }} catch(e) {{
     const el = document.getElementById('sbv-ppi');
     const note = document.getElementById('sbn-ppi');
-    if (el) el.textContent = '3.3%';
-    if (note) note.textContent = 'Dec 2025 ⚠';
+    if (el) el.textContent = '—';
+    if (note) note.textContent = 'Unavailable';
   }}
 }}
 
@@ -1687,12 +1954,12 @@ async function fetchIndiaCPI() {{
     const el = document.getElementById('sbv-india-cpi');
     const note = document.getElementById('sbn-india-cpi');
     if (el) {{ el.textContent = val + '%'; el.className = 'sb-econ-val ' + (parseFloat(val) > 6 ? 'neg' : parseFloat(val) < 4 ? 'pos' : 'neu'); }}
-    if (note) note.textContent = 'FY' + String(latest.date).slice(2);
+    if (note) note.innerHTML = 'FY' + String(latest.date).slice(2) + ' <span class="stale-badge">annual</span>';
   }} catch(e) {{
     const el = document.getElementById('sbv-india-cpi');
     const note = document.getElementById('sbn-india-cpi');
-    if (el) el.textContent = '5.22%';
-    if (note) note.textContent = 'Dec 2025 ⚠';
+    if (el) el.textContent = '—';
+    if (note) note.textContent = 'Unavailable';
   }}
 }}
 
@@ -1706,12 +1973,12 @@ async function fetchIndiaGDP() {{
     const el = document.getElementById('sbv-india-gdp');
     const note = document.getElementById('sbn-india-gdp');
     if (el) {{ el.textContent = val + '%'; el.className = 'sb-econ-val ' + (parseFloat(val) > 5 ? 'pos' : parseFloat(val) < 0 ? 'neg' : 'neu'); }}
-    if (note) note.textContent = 'FY' + String(latest.date).slice(2);
+    if (note) note.innerHTML = 'FY' + String(latest.date).slice(2) + ' <span class="stale-badge">annual</span>';
   }} catch(e) {{
     const el = document.getElementById('sbv-india-gdp');
     const note = document.getElementById('sbn-india-gdp');
-    if (el) el.textContent = '6.4%';
-    if (note) note.textContent = 'FY25 ⚠';
+    if (el) el.textContent = '—';
+    if (note) note.textContent = 'Unavailable';
   }}
 }}
 
@@ -1722,15 +1989,15 @@ async function fetchIndiaUnemployment() {{
   try {{
     const latest = await fetchWorldBank('SL.UEM.TOTL.ZS', 'IN');
     const val = parseFloat(latest.value).toFixed(1);
-    const el = document.getElementById('sbv-india-iip');
-    const note = document.getElementById('sbn-india-iip');
+    const el = document.getElementById('sbv-india-unemp');
+    const note = document.getElementById('sbn-india-unemp');
     if (el) {{ el.textContent = val + '%'; el.className = 'sb-econ-val ' + (parseFloat(val) < 5 ? 'pos' : 'neg'); }}
-    if (note) note.textContent = 'Unemp · FY' + String(latest.date).slice(2);
+    if (note) note.textContent = 'FY' + String(latest.date).slice(2) + ' <span class="stale-badge">annual</span>';
   }} catch(e) {{
-    const el = document.getElementById('sbv-india-iip');
-    const note = document.getElementById('sbn-india-iip');
-    if (el) el.textContent = '5.2%';
-    if (note) note.textContent = 'IIP Nov 2025 ⚠';
+    const el = document.getElementById('sbv-india-unemp');
+    const note = document.getElementById('sbn-india-unemp');
+    if (el) el.textContent = '—';
+    if (note) note.textContent = 'Unavailable';
   }}
 }}
 
@@ -1738,15 +2005,14 @@ async function fetchIndiaUnemployment() {{
 // INDIA: Repo Rate via RBI DBIE (corsproxy)
 // ════════════════════════════
 async function fetchIndiaRepoRate() {{
-  // Try RBI DBIE API via proxy
   try {{
     const rbiUrl = 'https://rbi.org.in/Scripts/bs_viewcontent.aspx?Id=2118';
-    const proxied = 'https://corsproxy.io/?' + encodeURIComponent(rbiUrl);
-    const r = await fetch(proxied, {{signal: AbortSignal.timeout(8000)}});
+    const r = await fetchWithProxies(rbiUrl);
     if (r.ok) {{
-      const html = await r.text();
+      let html = await r.text();
+      try {{ const j = JSON.parse(html); if (j.contents) html = j.contents; }} catch(e) {{}}
       // RBI page lists "Policy Repo Rate" in a table – parse it
-      const match = html.match(/Policy Repo Rate[^%]*?([\d.]+)%/i);
+      const match = html.match(/Policy Repo Rate[^%]*?([0-9.]+)%/i);
       if (match) {{
         const val = parseFloat(match[1]).toFixed(2);
         const el = document.getElementById('sbv-reporate');
@@ -1760,8 +2026,8 @@ async function fetchIndiaRepoRate() {{
   // Fallback to last known value
   const el = document.getElementById('sbv-reporate');
   const note = document.getElementById('sbn-reporate');
-  if (el) el.textContent = '6.25%';
-  if (note) note.textContent = 'RBI Feb 2026 ⚠';
+  if (el) el.textContent = '—';
+  if (note) note.textContent = 'Unavailable';
 }}
 
 // ════════════════════════════
@@ -1785,8 +2051,8 @@ async function fetchIndiaWPI() {{
   }} catch(e) {{
     const el = document.getElementById('sbv-india-wpi');
     const note = document.getElementById('sbn-india-wpi');
-    if (el) el.textContent = '2.4%';
-    if (note) note.textContent = 'Nov 2025 ⚠';
+    if (el) el.textContent = '—';
+    if (note) note.textContent = 'Unavailable';
   }}
 }}
 
@@ -1805,8 +2071,8 @@ async function fetchIndiaPMI() {{
     if (el) {{ el.textContent = val + '%'; el.className = 'sb-econ-val ' + (parseFloat(val) > 0 ? 'pos' : 'neg'); }}
     if (note) note.textContent = 'Mfg Gr · FY' + String(latest.date).slice(2);
   }} catch(e) {{
-    if (el) el.textContent = '57.7';
-    if (note) note.textContent = 'PMI Jan 2026 ⚠';
+    if (el) el.textContent = '—';
+    if (note) note.textContent = 'PMI Unavailable';
   }}
 }}
 
@@ -1820,12 +2086,12 @@ async function fetchIndiaFiscal() {{
     const el = document.getElementById('sbv-india-fiscal');
     const note = document.getElementById('sbn-india-fiscal');
     if (el) {{ el.textContent = val + '%'; el.className = 'sb-econ-val neu'; }}
-    if (note) note.textContent = 'of GDP · FY' + String(latest.date).slice(2);
+    if (note) note.innerHTML = 'of GDP · FY' + String(latest.date).slice(2) + ' <span class="stale-badge">annual</span>';
   }} catch(e) {{
     const el = document.getElementById('sbv-india-fiscal');
     const note = document.getElementById('sbn-india-fiscal');
-    if (el) el.textContent = '4.9%';
-    if (note) note.textContent = 'FY25 Target ⚠';
+    if (el) el.textContent = '—';
+    if (note) note.textContent = 'Unavailable';
   }}
 }}
 
@@ -1884,6 +2150,24 @@ async function loadAll() {{
 }}
 
 // ════════════════════════════
+// KEYBOARD NAVIGATION
+// ════════════════════════════
+document.addEventListener('keydown', (e) => {{
+  if (e.target.classList.contains('sb-item') && (e.key === 'Enter' || e.key === ' ')) {{
+    e.preventDefault();
+    e.target.click();
+  }}
+  if (e.target.classList.contains('nc-item') && (e.key === 'Enter' || e.key === ' ')) {{
+    e.preventDefault();
+    toggleNC(e.target);
+  }}
+  if (e.target.classList.contains('cat-tab') && (e.key === 'Enter' || e.key === ' ')) {{
+    e.preventDefault();
+    e.target.click();
+  }}
+}});
+
+// ════════════════════════════
 // INIT
 // ════════════════════════════
 window.addEventListener('DOMContentLoaded', () => {{
@@ -1920,6 +2204,15 @@ window.addEventListener('DOMContentLoaded', () => {{
   fetchIndiaFiscal();
   setInterval(loadAll, 5 * 60 * 1000);
   setInterval(updateClock, 1000);
+
+  // Scroll-to-top observer
+  const mainEl = document.querySelector('.main');
+  const btn = document.getElementById('scrollTopBtn');
+  if (mainEl && btn) {{
+    mainEl.addEventListener('scroll', () => {{
+      btn.classList.toggle('visible', mainEl.scrollTop > 300);
+    }});
+  }}
 }});
 </script>
 </body>
@@ -1930,33 +2223,34 @@ window.addEventListener('DOMContentLoaded', () => {{
 #  MAIN
 # ─────────────────────────────────────────────
 def main():
-    print("\n" + "=" * 70)
-    print("🚀  GLOBAL MARKET DASHBOARD  –  BLOOMBERG TERMINAL THEME")
-    print("    13 CATEGORIES · 43 RSS SOURCES")
-    print("=" * 70)
+    logging.info("")
+    logging.info("=" * 70)
+    logging.info("GLOBAL MARKET DASHBOARD v2 – BLOOMBERG TERMINAL THEME")
+    logging.info("  14 CATEGORIES · 46+ RSS SOURCES")
+    logging.info("=" * 70)
 
     all_news = {}
     for category, urls in RSS_SOURCES.items():
-        print(f"\n📂 Fetching [{category.upper()}] news …")
+        logging.info(f"Fetching [{category.upper()}] news …")
         items = fetch_category_news(category, urls)
         all_news[category] = items
-        print(f"   ✓ {len(items)} articles collected")
+        logging.info(f"  {len(items)} articles collected")
 
     total = sum(len(v) for v in all_news.values())
-    print(f"\n📊 Total articles fetched: {total}")
+    logging.info(f"Total articles fetched: {total}")
 
-    print("\n🖊  Generating index.html …")
+    logging.info("Generating index.html …")
     html = generate_complete_html(all_news)
 
     output = "index.html"
     with open(output, "w", encoding="utf-8") as f:
         f.write(html)
 
-    print("\n" + "=" * 70)
-    print(f"✅  SUCCESS!  Dashboard written to: {output}")
-    print("=" * 70)
-    print("\n💡 Every time you run this script the news refreshes automatically.")
-    print("   Click any headline in the browser to expand and read the summary.\n")
+    logging.info("=" * 70)
+    logging.info(f"SUCCESS! Dashboard written to: {output}")
+    logging.info("=" * 70)
+    logging.info("Every time you run this script the news refreshes automatically.")
+    logging.info("Click any headline in the browser to expand and read the summary.")
     return 0
 
 
