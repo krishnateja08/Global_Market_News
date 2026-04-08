@@ -1412,8 +1412,8 @@ body.light .cat-tabs-wrap::after {{
   display: flex; align-items: center; justify-content: space-between;
   flex-shrink: 0;
 }}
-.ecal-title {{ color: var(--orange); font-size: 13px; font-weight: 700; letter-spacing: 2px; }}
-.ecal-subtitle {{ color: var(--muted); font-size: 11px; }}
+.ecal-title {{ color: var(--orange); font-size: 16px; font-weight: 700; letter-spacing: 2px; }}
+.ecal-subtitle {{ color: var(--muted); font-size: 12px; }}
 
 .ecal-filters {{
   display: flex; gap: 6px; padding: 10px 20px;
@@ -1423,7 +1423,7 @@ body.light .cat-tabs-wrap::after {{
 .ecal-filter-btn {{
   background: var(--panel2); border: 1px solid var(--border);
   color: var(--muted); font-family: 'IBM Plex Mono', monospace;
-  font-size: 11px; padding: 5px 12px; border-radius: 3px;
+  font-size: 13px; padding: 6px 14px; border-radius: 3px;
   cursor: pointer; transition: all 0.15s; letter-spacing: 0.5px;
 }}
 .ecal-filter-btn:hover {{ border-color: var(--orange); color: var(--text); }}
@@ -1436,8 +1436,8 @@ body.light .cat-tabs-wrap::after {{
   margin-bottom: 18px;
 }}
 .ecal-month-label {{
-  color: var(--orange); font-size: 12px; font-weight: 700;
-  letter-spacing: 2px; padding: 6px 0 8px;
+  color: var(--orange); font-size: 15px; font-weight: 700;
+  letter-spacing: 2px; padding: 8px 0 10px;
   border-bottom: 1px solid var(--border2);
   margin-bottom: 6px;
   position: sticky; top: 0;
@@ -1447,9 +1447,9 @@ body.light .ecal-month-label {{ background: var(--bg); }}
 
 .ecal-event {{
   display: grid;
-  grid-template-columns: 90px 1fr auto;
-  gap: 10px; align-items: center;
-  padding: 9px 8px;
+  grid-template-columns: 105px 1fr auto;
+  gap: 12px; align-items: center;
+  padding: 11px 10px;
   border-bottom: 1px solid var(--border2);
   transition: background 0.12s;
   border-radius: 3px;
@@ -1458,19 +1458,19 @@ body.light .ecal-month-label {{ background: var(--bg); }}
 
 .ecal-date {{
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 12px; color: var(--muted); font-weight: 600;
+  font-size: 14px; color: var(--muted); font-weight: 600;
   white-space: nowrap;
 }}
 .ecal-event-title {{
   font-family: 'DM Sans', sans-serif;
-  font-size: 14px; color: var(--text); line-height: 1.4;
+  font-size: 16px; color: var(--text); line-height: 1.4;
 }}
 .ecal-event-meta {{
   display: flex; align-items: center; gap: 8px; flex-shrink: 0;
 }}
 .ecal-impact {{
-  font-size: 10px; font-weight: 700; letter-spacing: 0.5px;
-  padding: 2px 7px; border-radius: 2px;
+  font-size: 12px; font-weight: 700; letter-spacing: 0.5px;
+  padding: 3px 9px; border-radius: 3px;
   white-space: nowrap;
 }}
 .ecal-impact.high {{ background: rgba(255,51,85,0.15); color: var(--red); }}
@@ -1479,8 +1479,8 @@ body.light .ecal-month-label {{ background: var(--bg); }}
 
 .ecal-status {{
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 10px; font-weight: 700; letter-spacing: 0.5px;
-  padding: 2px 7px; border-radius: 2px;
+  font-size: 12px; font-weight: 700; letter-spacing: 0.5px;
+  padding: 3px 9px; border-radius: 3px;
 }}
 .ecal-status.today {{ background: rgba(255,51,85,0.2); color: var(--red); animation: blink 1.5s step-end infinite; }}
 .ecal-status.thisweek {{ background: rgba(255,106,0,0.2); color: var(--orange); }}
@@ -1488,7 +1488,7 @@ body.light .ecal-month-label {{ background: var(--bg); }}
 .ecal-status.scheduled {{ background: rgba(255,255,255,0.05); color: var(--muted); }}
 
 .ecal-region-badge {{
-  font-size: 10px; font-weight: 600; padding: 2px 6px;
+  font-size: 12px; font-weight: 600; padding: 2px 8px;
   border-radius: 2px; letter-spacing: 0.5px;
   background: rgba(255,255,255,0.06); color: var(--muted);
 }}
@@ -1498,7 +1498,7 @@ body.light .ecal-month-label {{ background: var(--bg); }}
   border-top: 2px solid var(--orange-dim);
 }}
 .ecal-news-title {{
-  color: var(--orange); font-size: 12px; font-weight: 700;
+  color: var(--orange); font-size: 14px; font-weight: 700;
   letter-spacing: 2px; margin-bottom: 12px;
 }}
 .ecal-news-item {{
