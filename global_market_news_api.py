@@ -627,6 +627,211 @@ def format_pub_date(raw: str) -> str:
 # ─────────────────────────────────────────────
 #  HTML GENERATION
 # ─────────────────────────────────────────────
+# ─────────────────────────────────────────────
+#  SERVER-SIDE ECONOMIC DATA FETCHER
+#  Fetches all indicators from Python directly
+#  (no CORS proxy needed — always fresh)
+# ─────────────────────────────────────────────
+ECON_FETCH_TIMEOUT = 12
+
+
+def _fetch_json(url: str):
+    req = urllib.request.Request(url, headers={
+        "User-Agent": "Mozilla/5.0 (compatible; MarketDashboard/2.0)",
+        "Accept": "application/json",
+    })
+    with urllib.request.urlopen(req, timeout=ECON_FETCH_TIMEOUT) as resp:
+        return json.loads(resp.read().decode("utf-8", errors="replace"))
+
+
+def _fetch_text(url: str) -> str:
+    req = urllib.request.Request(url, headers={
+        "User-Agent": "Mozilla/5.0 (compatible; MarketDashboard/2.0)",
+    })
+    with urllib.request.urlopen(req, timeout=ECON_FETCH_TIMEOUT) as resp:
+        return resp.read().decode("utf-8", errors="replace")
+
+
+def _fred_csv_last_rows(series_id: str, n: int = 14) -> list[list[str]]:
+    """Fetch FRED CSV and return last n rows as [date, value] pairs."""
+    text = _fetch_text(f"https://fred.stlouisfed.org/graph/fredgraph.csv?id={series_id}")
+    lines = [l for l in text.strip().split("\n") if l and not l.startswith("DATE")]
+    return [l.split(",") for l in lines[-n:]]
+
+
+def _fred_yoy(series_id: str) -> tuple[str, str, str]:
+    """Compute YoY % from FRED monthly series. Returns (yoy_str, date_label, raw_date)."""
+    rows = _fred_csv_last_rows(series_id, 14)
+    if len(rows) < 13:
+        raise ValueError("Not enough data")
+    last_val = float(rows[-1][1])
+    prev_val = float(rows[-13][1])
+    if prev_val == 0:
+        raise ValueError("Zero denominator")
+    yoy = ((last_val - prev_val) / prev_val) * 100
+    d = datetime.strptime(rows[-1][0], "%Y-%m-%d")
+    label = d.strftime("%b %Y")
+    return f"{yoy:.1f}", label, rows[-1][0]
+
+
+def _world_bank(indicator: str, country: str = "IN", mrv: int = 2):
+    """Fetch latest value from World Bank API."""
+    url = f"https://api.worldbank.org/v2/country/{country}/indicator/{indicator}?format=json&mrv={mrv}"
+    data = _fetch_json(url)
+    rows = [r for r in (data[1] or []) if r.get("value") is not None]
+    if not rows:
+        raise ValueError("No data")
+    return rows
+
+
+def fetch_all_economic_data() -> dict:
+    """
+    Fetch all economic indicators server-side.
+    Returns a dict with all values, ready to inject into HTML as JSON.
+    Each indicator: {value, note, css_class}
+    """
+    result = {}
+
+    def safe(key, fn):
+        try:
+            result[key] = fn()
+            logging.info(f"    ✓ {key}")
+        except Exception as e:
+            logging.warning(f"    ✗ {key}: {e}")
+            result[key] = None
+
+    # ── USA: CPI YoY ──
+    def fetch_cpi():
+        yoy, label, _ = _fred_yoy("CPIAUCSL")
+        v = float(yoy)
+        return {"value": f"{yoy}%", "note": f"YoY · {label}",
+                "css": "neg" if v > 3 else ("pos" if v <= 2 else "neu")}
+    safe("us_cpi", fetch_cpi)
+
+    # ── USA: Core CPI YoY ──
+    def fetch_core_cpi():
+        yoy, label, _ = _fred_yoy("CPILFESL")
+        v = float(yoy)
+        return {"value": f"{yoy}%", "note": label,
+                "css": "neg" if v > 3 else ("pos" if v <= 2 else "neu")}
+    safe("us_core_cpi", fetch_core_cpi)
+
+    # ── USA: Fed Funds Rate ──
+    def fetch_fed_rate():
+        lower_rows = _fred_csv_last_rows("DFEDTARL", 2)
+        upper_rows = _fred_csv_last_rows("DFEDTARU", 2)
+        lower = float(lower_rows[-1][1])
+        upper = float(upper_rows[-1][1])
+        return {"value": f"{lower:.2f}–{upper:.2f}%", "note": "", "css": "neu"}
+    safe("us_fedfunds", fetch_fed_rate)
+
+    # ── USA: GDP Growth ──
+    def fetch_gdp():
+        rows = _fred_csv_last_rows("A191RL1Q225SBEA", 4)
+        val = float(rows[-1][1])
+        d = datetime.strptime(rows[-1][0], "%Y-%m-%d")
+        qtr = (d.month - 1) // 3 + 1
+        return {"value": f"{val:.1f}%", "note": f"Q{qtr} {d.year}",
+                "css": "pos" if val > 0 else "neg"}
+    safe("us_gdp", fetch_gdp)
+
+    # ── USA: Unemployment ──
+    def fetch_unemp():
+        rows = _fred_csv_last_rows("UNRATE", 2)
+        val = float(rows[-1][1])
+        d = datetime.strptime(rows[-1][0], "%Y-%m-%d")
+        return {"value": f"{val:.1f}%", "note": d.strftime("%b %Y"),
+                "css": "pos" if val < 4 else ("neg" if val > 5 else "neu")}
+    safe("us_unemployment", fetch_unemp)
+
+    # ── USA: NFP (MoM change) ──
+    def fetch_nfp():
+        rows = _fred_csv_last_rows("PAYEMS", 3)
+        change = round(float(rows[-1][1]) - float(rows[-2][1]))
+        sign = "+" if change >= 0 else ""
+        d = datetime.strptime(rows[-1][0], "%Y-%m-%d")
+        return {"value": f"{sign}{change}K", "note": d.strftime("%b %Y"),
+                "css": "pos" if change > 0 else "neg"}
+    safe("us_nfp", fetch_nfp)
+
+    # ── USA: PPI YoY ──
+    def fetch_ppi():
+        yoy, label, _ = _fred_yoy("PPIFIS")
+        v = float(yoy)
+        return {"value": f"{yoy}%", "note": label,
+                "css": "neg" if v > 3 else ("pos" if v <= 2 else "neu")}
+    safe("us_ppi", fetch_ppi)
+
+    # ── INDIA: CPI ──
+    def fetch_india_cpi():
+        rows = _world_bank("FP.CPI.TOTL.ZG", "IN", 2)
+        val = float(rows[0]["value"])
+        return {"value": f"{val:.2f}%", "note": f"FY{str(rows[0]['date'])[2:]}",
+                "css": "neg" if val > 6 else ("pos" if val < 4 else "neu")}
+    safe("india_cpi", fetch_india_cpi)
+
+    # ── INDIA: GDP Growth ──
+    def fetch_india_gdp():
+        rows = _world_bank("NY.GDP.MKTP.KD.ZG", "IN", 2)
+        val = float(rows[0]["value"])
+        return {"value": f"{val:.1f}%", "note": f"FY{str(rows[0]['date'])[2:]}",
+                "css": "pos" if val > 5 else ("neg" if val < 0 else "neu")}
+    safe("india_gdp", fetch_india_gdp)
+
+    # ── INDIA: Unemployment ──
+    def fetch_india_unemp():
+        rows = _world_bank("SL.UEM.TOTL.ZS", "IN", 2)
+        val = float(rows[0]["value"])
+        return {"value": f"{val:.1f}%", "note": f"FY{str(rows[0]['date'])[2:]}",
+                "css": "pos" if val < 5 else "neg"}
+    safe("india_unemp", fetch_india_unemp)
+
+    # ── INDIA: WPI ──
+    def fetch_india_wpi():
+        rows = _world_bank("FP.WPI.TOTL", "IN", 3)
+        if len(rows) >= 2:
+            cur, prev = float(rows[0]["value"]), float(rows[1]["value"])
+            yoy = ((cur - prev) / prev) * 100
+            return {"value": f"{yoy:.1f}%", "note": f"FY{str(rows[0]['date'])[2:]}",
+                    "css": "neu"}
+        raise ValueError("Not enough data")
+    safe("india_wpi", fetch_india_wpi)
+
+    # ── INDIA: Mfg PMI (proxy via World Bank manufacturing growth) ──
+    def fetch_india_pmi():
+        rows = _world_bank("NV.IND.MANF.KD.ZG", "IN", 2)
+        val = float(rows[0]["value"])
+        return {"value": f"{val:.1f}%", "note": f"Mfg Gr · FY{str(rows[0]['date'])[2:]}",
+                "css": "pos" if val > 0 else "neg"}
+    safe("india_pmi", fetch_india_pmi)
+
+    # ── INDIA: Fiscal Deficit ──
+    def fetch_india_fiscal():
+        rows = _world_bank("GC.BAL.CASH.GD.ZS", "IN", 2)
+        val = abs(float(rows[0]["value"]))
+        return {"value": f"{val:.1f}%", "note": f"of GDP · FY{str(rows[0]['date'])[2:]}",
+                "css": "neu"}
+    safe("india_fiscal", fetch_india_fiscal)
+
+    # ── INDIA: Repo Rate (scrape RBI page) ──
+    def fetch_repo():
+        html_text = _fetch_text("https://rbi.org.in/Scripts/bs_viewcontent.aspx?Id=2118")
+        match = re.search(r'Policy Repo Rate[^%]*?([0-9.]+)%', html_text, re.IGNORECASE)
+        if match:
+            return {"value": f"{float(match.group(1)):.2f}%", "note": "RBI live", "css": "neu"}
+        raise ValueError("Pattern not found")
+    safe("india_repo", fetch_repo)
+
+    return result
+
+
+def build_econ_data_json(data: dict) -> str:
+    return json.dumps(data, ensure_ascii=False)
+
+
+# ─────────────────────────────────────────────
+#  TIME UTILS
+# ─────────────────────────────────────────────
 def get_ist_time() -> str:
     utc_time = datetime.now(timezone.utc).replace(tzinfo=None)
     ist_time = utc_time + timedelta(hours=5, minutes=30)
@@ -675,14 +880,16 @@ def build_news_json(all_news: dict) -> str:
     return json.dumps(out, ensure_ascii=False)
 
 
-def generate_complete_html(all_news: dict, event_calendar=None, event_news=None) -> str:
+def generate_complete_html(all_news: dict, event_calendar=None, event_news=None, econ_data=None) -> str:
     current_time = get_ist_time()
     total_articles = sum(len(v) for v in all_news.values())
     news_json = build_news_json(all_news)
     event_calendar = event_calendar or []
     event_news = event_news or []
+    econ_data = econ_data or {}
     event_cal_json = build_event_calendar_json(event_calendar)
     event_news_json = build_event_news_json(event_news)
+    econ_json = build_econ_data_json(econ_data)
 
     # Count per category for sidebar
     cat_counts = {
@@ -1840,6 +2047,44 @@ body.light .ecal-month-label {{ background: var(--bg); }}
 const NEWS_DATA = {news_json};
 const EVENT_CALENDAR = {event_cal_json};
 const EVENT_NEWS = {event_news_json};
+const ECON_DATA = {econ_json};
+
+// ════════════════════════════
+// HYDRATE SIDEBAR FROM SERVER-SIDE DATA
+// (Python-fetched, always fresh, no CORS needed)
+// ════════════════════════════
+function hydrateEconData() {{
+  const map = {{
+    'us_fedfunds':     {{ val: 'sbv-fedfunds', note: null }},
+    'us_cpi':          {{ val: 'sbv-cpi', note: null }},
+    'us_core_cpi':     {{ val: 'sbv-corecpi', note: 'sbn-corecpi' }},
+    'us_gdp':          {{ val: 'sbv-gdp', note: 'sbn-gdp' }},
+    'us_unemployment': {{ val: 'sbv-unemployment', note: 'sbn-unemployment' }},
+    'us_nfp':          {{ val: 'sbv-nfp', note: 'sbn-nfp' }},
+    'us_ppi':          {{ val: 'sbv-ppi', note: 'sbn-ppi' }},
+    'india_repo':      {{ val: 'sbv-reporate', note: 'sbn-reporate' }},
+    'india_cpi':       {{ val: 'sbv-india-cpi', note: 'sbn-india-cpi' }},
+    'india_wpi':       {{ val: 'sbv-india-wpi', note: 'sbn-india-wpi' }},
+    'india_unemp':     {{ val: 'sbv-india-unemp', note: 'sbn-india-unemp' }},
+    'india_pmi':       {{ val: 'sbv-india-pmi', note: 'sbn-india-pmi' }},
+    'india_gdp':       {{ val: 'sbv-india-gdp', note: 'sbn-india-gdp' }},
+    'india_fiscal':    {{ val: 'sbv-india-fiscal', note: 'sbn-india-fiscal' }},
+  }};
+
+  for (const [key, ids] of Object.entries(map)) {{
+    const d = ECON_DATA[key];
+    if (!d) continue;  // fetch failed server-side, leave for JS fallback
+    const el = document.getElementById(ids.val);
+    if (el) {{
+      el.textContent = d.value;
+      el.className = 'sb-econ-val ' + (d.css || 'neu');
+    }}
+    if (ids.note && d.note) {{
+      const noteEl = document.getElementById(ids.note);
+      if (noteEl) noteEl.innerHTML = d.note + ' <span class="stale-badge">server</span>';
+    }}
+  }}
+}}
 
 // ── Current active category ──
 let currentCat = 'markets';
@@ -2814,6 +3059,9 @@ window.addEventListener('DOMContentLoaded', () => {{
   const ecalCount = document.getElementById('ecal-sidebar-count');
   if (ecalCount) ecalCount.textContent = EVENT_CALENDAR.length;
 
+  // Hydrate sidebar with server-fetched data (instant, no CORS)
+  hydrateEconData();
+
   // Set initial max-height for smooth collapse animation
   ['usa', 'india'].forEach(id => {{
     const body = document.getElementById('body-' + id);
@@ -2887,8 +3135,13 @@ def main():
     event_news = fetch_event_news()
     logging.info(f"  {len(event_news)} event news articles")
 
+    logging.info("Fetching economic indicators (server-side) …")
+    econ_data = fetch_all_economic_data()
+    fetched = sum(1 for v in econ_data.values() if v is not None)
+    logging.info(f"  {fetched}/{len(econ_data)} indicators fetched successfully")
+
     logging.info("Generating index.html …")
-    html = generate_complete_html(all_news, event_calendar, event_news)
+    html = generate_complete_html(all_news, event_calendar, event_news, econ_data)
 
     output = "index.html"
     with open(output, "w", encoding="utf-8") as f:
