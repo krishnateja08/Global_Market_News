@@ -1204,11 +1204,11 @@ body {{
 /* Label — top-left */
 .sb-econ-key {{
   grid-column: 1; grid-row: 1;
-  color: #888888;
+  color: #b0b8c8;
   font-size: 11px;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.8px;
   text-transform: uppercase;
-  font-weight: 500;
+  font-weight: 600;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
