@@ -1228,16 +1228,17 @@ body {{
 .sb-econ-val.neg {{ color: #ff4466; }}
 .sb-econ-val.neu {{ color: #d0d0d0; }}
 
-/* Note — bottom-right, muted */
+/* Note — bottom-right, muted but readable */
 .sb-econ-note {{
   grid-column: 2; grid-row: 2;
-  color: #555555;
+  color: #7a8a9a;
   font-size: 10px;
   white-space: nowrap;
   text-align: right;
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 120px;
+  font-style: italic;
 }}
 
 /* ── MAIN CONTENT ── */
