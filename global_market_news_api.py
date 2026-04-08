@@ -630,16 +630,39 @@ def _fetch_text(url: str) -> str:
         return resp.read().decode("utf-8", errors="replace")
 
 
+FRED_API_KEY = "945a102ffb72e3b04414990e35bd8aa7"
+
+
+def _fred_series(series_id: str, n: int = 14) -> list[list[str]]:
+    """
+    Fetch FRED series via authenticated JSON API.
+    Returns last n observations as [date, value] pairs.
+    Falls back to public CSV if the API call fails.
+    """
+    try:
+        url = (
+            "https://api.stlouisfed.org/fred/series/observations"
+            f"?series_id={series_id}&api_key={FRED_API_KEY}&file_type=json"
+            f"&sort_order=desc&limit={n}"
+        )
+        data = _fetch_json(url)
+        obs = [o for o in data.get("observations", []) if o.get("value") not in (".", "")]
+        return [[o["date"], o["value"]] for o in reversed(obs)]
+    except Exception as e:
+        logging.warning(f"FRED API fallback to CSV for {series_id}: {e}")
+        text = _fetch_text(f"https://fred.stlouisfed.org/graph/fredgraph.csv?id={series_id}")
+        lines = [l for l in text.strip().split("\n") if l and not l.startswith("DATE")]
+        return [l.split(",") for l in lines[-n:]]
+
+
 def _fred_csv_last_rows(series_id: str, n: int = 14) -> list[list[str]]:
-    """Fetch FRED CSV and return last n rows as [date, value] pairs."""
-    text = _fetch_text(f"https://fred.stlouisfed.org/graph/fredgraph.csv?id={series_id}")
-    lines = [l for l in text.strip().split("\n") if l and not l.startswith("DATE")]
-    return [l.split(",") for l in lines[-n:]]
+    """Alias kept for backward compatibility."""
+    return _fred_series(series_id, n)
 
 
 def _fred_yoy(series_id: str) -> tuple[str, str, str]:
     """Compute YoY % from FRED monthly series. Returns (yoy_str, date_label, raw_date)."""
-    rows = _fred_csv_last_rows(series_id, 14)
+    rows = _fred_series(series_id, 14)
     if len(rows) < 13:
         raise ValueError("Not enough data")
     last_val = float(rows[-1][1])
@@ -684,8 +707,8 @@ def fetch_all_economic_data() -> dict:
     # ════════════════════════════════════════════
 
     def fetch_us_fedfunds():
-        lower_rows = _fred_csv_last_rows("DFEDTARL", 2)
-        upper_rows = _fred_csv_last_rows("DFEDTARU", 2)
+        lower_rows = _fred_series("DFEDTARL", 2)
+        upper_rows = _fred_series("DFEDTARU", 2)
         lower = float(lower_rows[-1][1])
         upper = float(upper_rows[-1][1])
         return {"value": f"{lower:.2f}–{upper:.2f}%", "note": "Fed target range", "css": "neu"}
@@ -706,7 +729,7 @@ def fetch_all_economic_data() -> dict:
     safe("us_core_cpi", fetch_us_core_cpi)
 
     def fetch_us_gdp():
-        rows = _fred_csv_last_rows("A191RL1Q225SBEA", 4)
+        rows = _fred_series("A191RL1Q225SBEA", 4)
         val = float(rows[-1][1])
         d = datetime.strptime(rows[-1][0], "%Y-%m-%d")
         qtr = (d.month - 1) // 3 + 1
@@ -715,7 +738,7 @@ def fetch_all_economic_data() -> dict:
     safe("us_gdp", fetch_us_gdp)
 
     def fetch_us_unemployment():
-        rows = _fred_csv_last_rows("UNRATE", 2)
+        rows = _fred_series("UNRATE", 2)
         val = float(rows[-1][1])
         d = datetime.strptime(rows[-1][0], "%Y-%m-%d")
         return {"value": f"{val:.1f}%", "note": d.strftime("%b %Y"),
@@ -723,7 +746,7 @@ def fetch_all_economic_data() -> dict:
     safe("us_unemployment", fetch_us_unemployment)
 
     def fetch_us_nfp():
-        rows = _fred_csv_last_rows("PAYEMS", 3)
+        rows = _fred_series("PAYEMS", 3)
         change = round(float(rows[-1][1]) - float(rows[-2][1]))
         sign = "+" if change >= 0 else ""
         d = datetime.strptime(rows[-1][0], "%Y-%m-%d")
