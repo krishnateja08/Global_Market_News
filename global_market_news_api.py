@@ -1190,17 +1190,55 @@ body {{
 .sb-econ-body.collapsed {{ max-height: 0 !important; }}
 
 .sb-econ-row {{
-  padding: 5px 14px;
-  display: flex; justify-content: space-between; align-items: center;
-  font-size: 13px; border-bottom: 1px solid var(--border2);
+  padding: 6px 14px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-rows: auto auto;
+  column-gap: 8px;
+  row-gap: 1px;
+  border-bottom: 1px solid var(--border2);
+  align-items: center;
 }}
-.sb-econ-row:last-child {{ border-bottom: none; padding-bottom: 8px; }}
-.sb-econ-key {{ color: #bbbbbb; font-size: 12px; letter-spacing: 0.3px; flex: 1; }}
-.sb-econ-val {{ font-weight: 700; font-size: 13px; white-space: nowrap; margin-left: 6px; }}
-.sb-econ-val.pos {{ color: var(--green); }}
-.sb-econ-val.neg {{ color: var(--red); }}
-.sb-econ-val.neu {{ color: #aaaaaa; }}
-.sb-econ-note {{ color: #666; font-size: 11px; margin-left: 4px; white-space: nowrap; }}
+.sb-econ-row:last-child {{ border-bottom: none; padding-bottom: 10px; }}
+
+/* Label — top-left */
+.sb-econ-key {{
+  grid-column: 1; grid-row: 1;
+  color: #888888;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}}
+
+/* Value — top-right, bold & coloured */
+.sb-econ-val {{
+  grid-column: 2; grid-row: 1;
+  font-weight: 700;
+  font-size: 14px;
+  white-space: nowrap;
+  text-align: right;
+  font-family: 'IBM Plex Mono', monospace;
+  letter-spacing: 0.3px;
+}}
+.sb-econ-val.pos {{ color: #00e868; }}
+.sb-econ-val.neg {{ color: #ff4466; }}
+.sb-econ-val.neu {{ color: #d0d0d0; }}
+
+/* Note — bottom-right, muted */
+.sb-econ-note {{
+  grid-column: 2; grid-row: 2;
+  color: #555555;
+  font-size: 10px;
+  white-space: nowrap;
+  text-align: right;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 120px;
+}}
 
 /* ── MAIN CONTENT ── */
 .main {{ overflow-y: auto; display: flex; flex-direction: column; scrollbar-width: thin; scrollbar-color: var(--border) transparent; }}
@@ -1622,13 +1660,14 @@ body.light .cat-tabs-wrap::after {{
 /* ── STALE DATA BADGE ── */
 .stale-badge {{
   display: inline-block;
-  background: rgba(255,51,85,0.15);
-  color: var(--red);
+  background: rgba(0,200,80,0.12);
+  color: #00c850;
   font-size: 9px; font-weight: 700;
-  padding: 1px 5px; border-radius: 2px;
+  padding: 1px 4px; border-radius: 2px;
   letter-spacing: 0.5px;
-  margin-left: 4px;
+  margin-left: 3px;
   text-transform: uppercase;
+  vertical-align: middle;
 }}
 
 /* ── KEYBOARD FOCUS ── */
@@ -1853,14 +1892,46 @@ body.light .ecal-month-label {{ background: var(--bg); }}
         <span class="sb-econ-arrow" id="arrow-usa">▼</span>
       </div>
       <div class="sb-econ-body" id="body-usa">
-        <div class="sb-econ-row"><span class="sb-econ-key">Fed Funds Rate</span><span class="sb-econ-val neu" id="sbv-fedfunds">3.50–3.75%</span></div>
-        <div class="sb-econ-row"><span class="sb-econ-key">FOMC Next</span><span class="sb-econ-val neu" id="sbv-fomc">Hold</span><span class="sb-econ-note" id="sbn-fomc">Jun 17–18 2025</span></div>
-        <div class="sb-econ-row"><span class="sb-econ-key">CPI YoY</span><span class="sb-econ-val neu" id="sbv-cpi">--</span></div>
-        <div class="sb-econ-row"><span class="sb-econ-key">Core CPI</span><span class="sb-econ-val neu" id="sbv-corecpi">--</span><span class="sb-econ-note" id="sbn-corecpi">loading…</span></div>
-        <div class="sb-econ-row"><span class="sb-econ-key">GDP Growth</span><span class="sb-econ-val neu" id="sbv-gdp">--</span><span class="sb-econ-note" id="sbn-gdp">loading…</span></div>
-        <div class="sb-econ-row"><span class="sb-econ-key">Unemployment</span><span class="sb-econ-val neu" id="sbv-unemployment">--</span><span class="sb-econ-note" id="sbn-unemployment">loading…</span></div>
-        <div class="sb-econ-row"><span class="sb-econ-key">NFP</span><span class="sb-econ-val neu" id="sbv-nfp">--</span><span class="sb-econ-note" id="sbn-nfp">loading…</span></div>
-        <div class="sb-econ-row"><span class="sb-econ-key">PPI YoY</span><span class="sb-econ-val neu" id="sbv-ppi">--</span><span class="sb-econ-note" id="sbn-ppi">loading…</span></div>
+        <div class="sb-econ-row">
+          <span class="sb-econ-key">Fed Funds Rate</span>
+          <span class="sb-econ-val neu" id="sbv-fedfunds">4.25–4.50%</span>
+          <span class="sb-econ-note" id="sbn-fedfunds">Target range</span>
+        </div>
+        <div class="sb-econ-row">
+          <span class="sb-econ-key">FOMC Next</span>
+          <span class="sb-econ-val neu" id="sbv-fomc">Apr 28–29</span>
+          <span class="sb-econ-note" id="sbn-fomc">2026</span>
+        </div>
+        <div class="sb-econ-row">
+          <span class="sb-econ-key">CPI YoY</span>
+          <span class="sb-econ-val neu" id="sbv-cpi">--</span>
+          <span class="sb-econ-note" id="sbn-cpi">loading…</span>
+        </div>
+        <div class="sb-econ-row">
+          <span class="sb-econ-key">Core CPI</span>
+          <span class="sb-econ-val neu" id="sbv-corecpi">--</span>
+          <span class="sb-econ-note" id="sbn-corecpi">loading…</span>
+        </div>
+        <div class="sb-econ-row">
+          <span class="sb-econ-key">GDP Growth</span>
+          <span class="sb-econ-val neu" id="sbv-gdp">--</span>
+          <span class="sb-econ-note" id="sbn-gdp">loading…</span>
+        </div>
+        <div class="sb-econ-row">
+          <span class="sb-econ-key">Unemployment</span>
+          <span class="sb-econ-val neu" id="sbv-unemployment">--</span>
+          <span class="sb-econ-note" id="sbn-unemployment">loading…</span>
+        </div>
+        <div class="sb-econ-row">
+          <span class="sb-econ-key">NFP</span>
+          <span class="sb-econ-val neu" id="sbv-nfp">--</span>
+          <span class="sb-econ-note" id="sbn-nfp">loading…</span>
+        </div>
+        <div class="sb-econ-row">
+          <span class="sb-econ-key">PPI YoY</span>
+          <span class="sb-econ-val neu" id="sbv-ppi">--</span>
+          <span class="sb-econ-note" id="sbn-ppi">loading…</span>
+        </div>
       </div>
     </div>
 
@@ -1871,14 +1942,46 @@ body.light .ecal-month-label {{ background: var(--bg); }}
         <span class="sb-econ-arrow" id="arrow-india">▼</span>
       </div>
       <div class="sb-econ-body" id="body-india">
-        <div class="sb-econ-row"><span class="sb-econ-key">Repo Rate</span><span class="sb-econ-val neu" id="sbv-reporate">--</span><span class="sb-econ-note" id="sbn-reporate">loading…</span></div>
-        <div class="sb-econ-row"><span class="sb-econ-key">CPI</span><span class="sb-econ-val neu" id="sbv-india-cpi">--</span><span class="sb-econ-note" id="sbn-india-cpi">loading…</span></div>
-        <div class="sb-econ-row"><span class="sb-econ-key">WPI</span><span class="sb-econ-val neu" id="sbv-india-wpi">--</span><span class="sb-econ-note" id="sbn-india-wpi">loading…</span></div>
-        <div class="sb-econ-row"><span class="sb-econ-key">Unemployment</span><span class="sb-econ-val neu" id="sbv-india-unemp">--</span><span class="sb-econ-note" id="sbn-india-unemp">loading…</span></div>
-        <div class="sb-econ-row"><span class="sb-econ-key">Mfg PMI</span><span class="sb-econ-val pos" id="sbv-india-pmi">--</span><span class="sb-econ-note" id="sbn-india-pmi">loading…</span></div>
-        <div class="sb-econ-row"><span class="sb-econ-key">GDP Growth</span><span class="sb-econ-val pos" id="sbv-india-gdp">--</span><span class="sb-econ-note" id="sbn-india-gdp">loading…</span></div>
-        <div class="sb-econ-row"><span class="sb-econ-key">Fiscal Deficit</span><span class="sb-econ-val neu" id="sbv-india-fiscal">--</span><span class="sb-econ-note" id="sbn-india-fiscal">loading…</span></div>
-        <div class="sb-econ-row"><span class="sb-econ-key">USD/INR</span><span class="sb-econ-val neu" id="sbv-usdinr2">₹--</span></div>
+        <div class="sb-econ-row">
+          <span class="sb-econ-key">Repo Rate</span>
+          <span class="sb-econ-val neu" id="sbv-reporate">--</span>
+          <span class="sb-econ-note" id="sbn-reporate">loading…</span>
+        </div>
+        <div class="sb-econ-row">
+          <span class="sb-econ-key">CPI</span>
+          <span class="sb-econ-val neu" id="sbv-india-cpi">--</span>
+          <span class="sb-econ-note" id="sbn-india-cpi">loading…</span>
+        </div>
+        <div class="sb-econ-row">
+          <span class="sb-econ-key">WPI</span>
+          <span class="sb-econ-val neu" id="sbv-india-wpi">--</span>
+          <span class="sb-econ-note" id="sbn-india-wpi">loading…</span>
+        </div>
+        <div class="sb-econ-row">
+          <span class="sb-econ-key">Unemployment</span>
+          <span class="sb-econ-val neu" id="sbv-india-unemp">--</span>
+          <span class="sb-econ-note" id="sbn-india-unemp">loading…</span>
+        </div>
+        <div class="sb-econ-row">
+          <span class="sb-econ-key">Mfg PMI</span>
+          <span class="sb-econ-val pos" id="sbv-india-pmi">--</span>
+          <span class="sb-econ-note" id="sbn-india-pmi">loading…</span>
+        </div>
+        <div class="sb-econ-row">
+          <span class="sb-econ-key">GDP Growth</span>
+          <span class="sb-econ-val pos" id="sbv-india-gdp">--</span>
+          <span class="sb-econ-note" id="sbn-india-gdp">loading…</span>
+        </div>
+        <div class="sb-econ-row">
+          <span class="sb-econ-key">Fiscal Deficit</span>
+          <span class="sb-econ-val neu" id="sbv-india-fiscal">--</span>
+          <span class="sb-econ-note" id="sbn-india-fiscal">loading…</span>
+        </div>
+        <div class="sb-econ-row">
+          <span class="sb-econ-key">USD/INR</span>
+          <span class="sb-econ-val neu" id="sbv-usdinr2">₹--</span>
+          <span class="sb-econ-note" id="sbn-usdinr2">live</span>
+        </div>
       </div>
     </div>
 
@@ -2091,8 +2194,8 @@ const ECON_DATA = {econ_json};
 // ════════════════════════════
 function hydrateEconData() {{
   const map = {{
-    'us_fedfunds':     {{ val: 'sbv-fedfunds', note: null }},
-    'us_cpi':          {{ val: 'sbv-cpi', note: null }},
+    'us_fedfunds':     {{ val: 'sbv-fedfunds', note: 'sbn-fedfunds' }},
+    'us_cpi':          {{ val: 'sbv-cpi', note: 'sbn-cpi' }},
     'us_core_cpi':     {{ val: 'sbv-corecpi', note: 'sbn-corecpi' }},
     'us_gdp':          {{ val: 'sbv-gdp', note: 'sbn-gdp' }},
     'us_unemployment': {{ val: 'sbv-unemployment', note: 'sbn-unemployment' }},
