@@ -802,8 +802,77 @@ def fetch_all_economic_data() -> dict:
 
     # ── INDIA INDICATORS ──
     def fetch_india_repo():
-        val, formatted, label = _te_extract(te_india, "Interest Rate", "{:.2f}%")
-        return {"value": formatted, "note": f"RBI · {label}", "css": "neu"}
+        # Source 1: Trading Economics guest API — try several category names
+        for cat in ("Interest Rate", "Repo Rate", "RBI Rate", "Policy Rate",
+                    "Repurchase Rate", "Overnight Rate"):
+            try:
+                val, formatted, label = _te_extract(te_india, cat, "{:.2f}%")
+                return {"value": formatted, "note": f"RBI · {label}", "css": "neu"}
+            except (ValueError, KeyError):
+                continue
+
+        # Source 2: Trading Economics individual indicator endpoint
+        try:
+            url = ("https://api.tradingeconomics.com/historical/country/india"
+                   "/indicator/interest-rate?c=guest:guest&d1=2023-01-01")
+            req = urllib.request.Request(url, headers={
+                "User-Agent": "Mozilla/5.0", "Accept": "application/json"})
+            with urllib.request.urlopen(req, timeout=10) as resp:
+                rows = json.loads(resp.read().decode("utf-8", errors="replace"))
+            if rows:
+                last = max(rows, key=lambda r: r.get("DateTime", ""))
+                val = float(last["Value"])
+                d = datetime.strptime(last["DateTime"][:10], "%Y-%m-%d")
+                return {"value": f"{val:.2f}%",
+                        "note": f"RBI · {d.strftime('%b %Y')}",
+                        "css": "neu"}
+        except Exception:
+            pass
+
+        # Source 3: RBI main policy rates page (robust multi-pattern scrape)
+        try:
+            rbi_urls = [
+                "https://rbi.org.in/Scripts/bs_viewcontent.aspx?Id=2118",
+                "https://rbi.org.in/en/web/rbi/monetary-policy",
+            ]
+            patterns = [
+                r'Policy Repo Rate\s*[:\-]?\s*([0-9]+(?:\.[0-9]+)?)\s*%',
+                r'Repo Rate\s*[:\-]?\s*([0-9]+(?:\.[0-9]+)?)\s*%',
+                r'repo rate[^0-9]*([0-9]+(?:\.[0-9]+)?)\s*(?:per cent|percent|%)',
+                r'([0-9]+\.[0-9]+)\s*%.*?[Rr]epo',
+                r'[Rr]epo[^0-9]*([0-9]+\.[0-9]+)',
+            ]
+            for rbi_url in rbi_urls:
+                try:
+                    html_text = _fetch_text(rbi_url)
+                    for pat in patterns:
+                        m = re.search(pat, html_text, re.IGNORECASE)
+                        if m:
+                            val = float(m.group(1))
+                            if 1.0 <= val <= 20.0:   # sanity check
+                                return {"value": f"{val:.2f}%",
+                                        "note": "RBI", "css": "neu"}
+                except Exception:
+                    continue
+        except Exception:
+            pass
+
+        # Source 4: World Bank lending rate as proxy (closest free annual proxy)
+        try:
+            url = ("https://api.worldbank.org/v2/country/IN/indicator/"
+                   "FR.INR.LEND?format=json&mrv=2")
+            text = _fetch_text(url)
+            data = json.loads(text)
+            rows = [r for r in (data[1] or []) if r.get("value") is not None]
+            if rows:
+                val = float(rows[0]["value"])
+                d = rows[0].get("date", "")
+                return {"value": f"{val:.2f}%",
+                        "note": f"WB lending · {d}", "css": "neu"}
+        except Exception:
+            pass
+
+        raise ValueError("All sources failed for India Repo Rate")
     safe("india_repo", fetch_india_repo)
 
     def fetch_india_cpi():
@@ -919,13 +988,25 @@ def fetch_all_economic_data() -> dict:
 
     # ── FALLBACK: World Bank + RBI for India indicators ──
     if not result.get("india_repo"):
-        def fallback_repo():
-            html_text = _fetch_text("https://rbi.org.in/Scripts/bs_viewcontent.aspx?Id=2118")
-            match = re.search(r'Policy Repo Rate[^%]*?([0-9.]+)%', html_text, re.IGNORECASE)
-            if match:
-                return {"value": f"{float(match.group(1)):.2f}%", "note": "RBI", "css": "neu"}
-            raise ValueError("Pattern not found on RBI page")
-        safe("india_repo", fallback_repo)
+        def fallback_repo_news():
+            """Parse repo rate from Google News RSS — live, no API key."""
+            rss_url = ("https://news.google.com/rss/search?"
+                       "q=RBI+repo+rate+percent&hl=en-IN&gl=IN&ceid=IN:en")
+            text = _fetch_text(rss_url)
+            pats = [
+                r'repo rate[^0-9%]{0,30}(\d+(?:\.\d+)?)\s*%',
+                r'(\d+(?:\.\d+)?)\s*%\s*repo rate',
+                r'repo rate[^0-9]{0,20}(\d+\.\d+)',
+            ]
+            for pat in pats:
+                m = re.search(pat, text, re.IGNORECASE)
+                if m:
+                    val = float(m.group(1))
+                    if 1.0 <= val <= 20.0:
+                        return {"value": f"{val:.2f}%",
+                                "note": "RBI · via news", "css": "neu"}
+            raise ValueError("Repo rate not found in Google News RSS")
+        safe("india_repo", fallback_repo_news)
 
     if not result.get("india_cpi"):
         def fallback_india_cpi():
@@ -3038,32 +3119,80 @@ async function fetchIndiaUnemployment() {{
 }}
 
 // ════════════════════════════
-// INDIA: Repo Rate via RBI DBIE (corsproxy)
+// INDIA: Repo Rate — 3 live free sources, no hardcoding
 // ════════════════════════════
 async function fetchIndiaRepoRate() {{
+  const elV = document.getElementById('sbv-reporate');
+  const elN = document.getElementById('sbn-reporate');
+
+  function _setRepo(val, note) {{
+    if (elV) {{ elV.textContent = val; elV.className = 'sb-econ-val neu'; }}
+    if (elN) elN.textContent = note;
+  }}
+
+  // ── Source 1: Trading Economics guest API (CORS-enabled, JSON) ──
   try {{
-    const rbiUrl = 'https://rbi.org.in/Scripts/bs_viewcontent.aspx?Id=2118';
-    const r = await fetchWithProxies(rbiUrl);
+    const r = await fetch(
+      'https://api.tradingeconomics.com/country/india?c=guest:guest',
+      {{signal: AbortSignal.timeout(8000)}}
+    );
     if (r.ok) {{
-      let html = await r.text();
-      try {{ const j = JSON.parse(html); if (j.contents) html = j.contents; }} catch(e) {{}}
-      // RBI page lists "Policy Repo Rate" in a table – parse it
-      const match = html.match(/Policy Repo Rate[^%]*?([0-9.]+)%/i);
-      if (match) {{
-        const val = parseFloat(match[1]).toFixed(2);
-        const el = document.getElementById('sbv-reporate');
-        const note = document.getElementById('sbn-reporate');
-        if (el) {{ el.textContent = val + '%'; el.className = 'sb-econ-val neu'; }}
-        if (note) note.textContent = 'RBI live';
+      const data = await r.json();
+      const NAMES = ['Interest Rate','Repo Rate','RBI Rate','Policy Rate',
+                     'Repurchase Rate','Overnight Rate'];
+      const entry = data.find(d => NAMES.includes(d.Category));
+      if (entry && entry.LatestValue != null) {{
+        const val = parseFloat(entry.LatestValue).toFixed(2) + '%';
+        const dt  = (entry.LatestValueDate || '').slice(0, 7);
+        _setRepo(val, 'RBI · ' + dt);
+        return;
+      }}
+    }}
+  }} catch(e) {{ /* try next */ }}
+
+  // ── Source 2: Google News RSS — parse rate from headlines ──
+  try {{
+    const rss = 'https://news.google.com/rss/search?q=RBI+repo+rate+percent&hl=en-IN&gl=IN&ceid=IN:en';
+    const r = await fetch(rss, {{signal: AbortSignal.timeout(8000)}});
+    if (r.ok) {{
+      const text = await r.text();
+      const pats = [
+        /repo rate[^0-9%]{{0,30}}(\d+(?:\.\d+)?)\s*%/i,
+        /(\d+(?:\.\d+)?)\s*%\s*repo rate/i,
+        /repo rate[^0-9]{{0,20}}(\d+\.\d+)/i,
+      ];
+      for (const pat of pats) {{
+        const m = text.match(pat);
+        if (m) {{
+          const val = parseFloat(m[1]);
+          if (val >= 1 && val <= 20) {{
+            _setRepo(val.toFixed(2) + '%', 'RBI · news');
+            return;
+          }}
+        }}
+      }}
+    }}
+  }} catch(e) {{ /* try next */ }}
+
+  // ── Source 3: Trading Economics historical endpoint ──
+  try {{
+    const url = 'https://api.tradingeconomics.com/historical/country/india/indicator/interest-rate?c=guest:guest&d1=2023-01-01';
+    const r = await fetch(url, {{signal: AbortSignal.timeout(8000)}});
+    if (r.ok) {{
+      const rows = await r.json();
+      if (rows && rows.length) {{
+        rows.sort((a,b) => (b.DateTime||'').localeCompare(a.DateTime||''));
+        const val = parseFloat(rows[0].Value).toFixed(2);
+        const dt  = (rows[0].DateTime || '').slice(0,7);
+        _setRepo(val + '%', 'RBI · ' + dt);
         return;
       }}
     }}
   }} catch(e) {{ /* fall through */ }}
-  // Fallback to last known value
-  const el = document.getElementById('sbv-reporate');
-  const note = document.getElementById('sbn-reporate');
-  if (el) el.textContent = '—';
-  if (note) note.textContent = '—';
+
+  // All sources failed
+  if (elV) elV.textContent = '—';
+  if (elN) elN.textContent = '—';
 }}
 
 // ════════════════════════════
