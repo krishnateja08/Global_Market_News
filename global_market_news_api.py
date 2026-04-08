@@ -218,34 +218,10 @@ def fetch_live_economic_calendar() -> list[dict]:
     # Countries that affect Indian stock market + major global
     countries = "united%20states,india,euro%20area,japan,united%20kingdom,china"
 
-    # Try multiple API endpoints for resilience
-    api_urls = [
-        # Primary: all events for selected countries, high+medium importance
-        f"https://api.tradingeconomics.com/calendar/country/{countries}/{start}/{end}?c=guest:guest&importance=2",
-        # Backup: high importance only (smaller payload)
-        f"https://api.tradingeconomics.com/calendar/country/{countries}/{start}/{end}?c=guest:guest&importance=3",
-    ]
-
+    # Trading Economics guest API returns HTTP 403 — skip directly to fallback
     raw_events = []
-    for url in api_urls:
-        try:
-            req = urllib.request.Request(url, headers={
-                "User-Agent": "Mozilla/5.0 (compatible; MarketDashboard/2.0)",
-                "Accept": "application/json",
-            })
-            with urllib.request.urlopen(req, timeout=15) as resp:
-                data = json.loads(resp.read().decode("utf-8", errors="replace"))
-                if isinstance(data, list) and len(data) > 0:
-                    raw_events = data
-                    logging.info(f"  Trading Economics API: {len(data)} events fetched")
-                    break
-        except Exception as e:
-            logging.warning(f"  Trading Economics API failed ({url[:60]}…): {e}")
-            continue
-
-    if not raw_events:
-        logging.warning("  Trading Economics API unavailable — using computed fallback dates")
-        return _compute_fallback_events()
+    logging.info("  Trading Economics API unavailable — using computed fallback dates")
+    return _compute_fallback_events()
 
     # Parse into our event format
     events = []
@@ -687,9 +663,9 @@ def _world_bank(indicator: str, country: str = "IN", mrv: int = 2):
 def fetch_all_economic_data() -> dict:
     """
     Fetch all economic indicators server-side.
-    PRIMARY: Trading Economics API (free guest access, current monthly data)
-    FALLBACK: FRED CSV for US data
-    Returns dict ready to inject into HTML.
+    USA  : FRED (Federal Reserve) — free, no key, reliable CSV/JSON API
+    India: World Bank API (annual) + Google News RSS for repo rate
+    No Trading Economics dependency — guest access returns HTTP 403.
     """
     result = {}
 
@@ -701,364 +677,163 @@ def fetch_all_economic_data() -> dict:
             logging.warning(f"    ✗ {key}: {e}")
             result[key] = None
 
-    # ────────────────────────────────────────
-    #  TRADING ECONOMICS: Fetch ALL indicators in 2 calls
-    # ────────────────────────────────────────
-    te_india = {}
-    te_usa = {}
+    # ════════════════════════════════════════════
+    #  USA — FRED (api.stlouisfed.org, free, no key)
+    # ════════════════════════════════════════════
 
-    def _fetch_te_country(country: str) -> dict:
-        """Fetch all indicators for a country from Trading Economics. Returns {category: record}."""
-        url = f"https://api.tradingeconomics.com/country/{urllib.parse.quote(country)}?c=guest:guest"
-        req = urllib.request.Request(url, headers={
-            "User-Agent": "Mozilla/5.0 (compatible; MarketDashboard/2.0)",
-            "Accept": "application/json",
-        })
-        with urllib.request.urlopen(req, timeout=15) as resp:
-            data = json.loads(resp.read().decode("utf-8", errors="replace"))
-        out = {}
-        for rec in data:
-            cat = rec.get("Category", "").strip()
-            if cat:
-                out[cat] = rec
-        return out
-
-    try:
-        te_india = _fetch_te_country("india")
-        logging.info(f"    Trading Economics India: {len(te_india)} indicators")
-    except Exception as e:
-        logging.warning(f"    Trading Economics India failed: {e}")
-
-    try:
-        te_usa = _fetch_te_country("united states")
-        logging.info(f"    Trading Economics USA: {len(te_usa)} indicators")
-    except Exception as e:
-        logging.warning(f"    Trading Economics USA failed: {e}")
-
-    # ── Helper to extract from Trading Economics record ──
-    def _te_extract(te_dict, category, fmt="{:.1f}%", suffix=""):
-        rec = te_dict.get(category)
-        if not rec or rec.get("LatestValue") is None:
-            raise ValueError(f"No data for {category}")
-        val = float(rec["LatestValue"])
-        date_str = rec.get("LatestValueDate", "")[:10]
-        try:
-            d = datetime.strptime(date_str, "%Y-%m-%d")
-            label = d.strftime("%b %Y")
-        except ValueError:
-            label = date_str
-        formatted = fmt.format(val) + suffix
-        return val, formatted, label
-
-    # ── USA INDICATORS ──
     def fetch_us_fedfunds():
-        val, formatted, label = _te_extract(te_usa, "Interest Rate", "{:.2f}%")
-        # TE gives single rate; show as range approx
-        lower = val - 0.25
-        return {"value": f"{lower:.2f}–{val:.2f}%", "note": label, "css": "neu"}
+        lower_rows = _fred_csv_last_rows("DFEDTARL", 2)
+        upper_rows = _fred_csv_last_rows("DFEDTARU", 2)
+        lower = float(lower_rows[-1][1])
+        upper = float(upper_rows[-1][1])
+        return {"value": f"{lower:.2f}–{upper:.2f}%", "note": "Fed target range", "css": "neu"}
     safe("us_fedfunds", fetch_us_fedfunds)
 
     def fetch_us_cpi():
-        val, formatted, label = _te_extract(te_usa, "Inflation Rate")
-        return {"value": formatted, "note": f"YoY · {label}",
-                "css": "neg" if val > 3 else ("pos" if val <= 2 else "neu")}
+        yoy, label, _ = _fred_yoy("CPIAUCSL")
+        v = float(yoy)
+        return {"value": f"{yoy}%", "note": f"YoY · {label}",
+                "css": "neg" if v > 3 else ("pos" if v <= 2 else "neu")}
     safe("us_cpi", fetch_us_cpi)
 
     def fetch_us_core_cpi():
-        val, formatted, label = _te_extract(te_usa, "Core Inflation Rate")
-        return {"value": formatted, "note": label,
-                "css": "neg" if val > 3 else ("pos" if val <= 2 else "neu")}
+        yoy, label, _ = _fred_yoy("CPILFESL")
+        v = float(yoy)
+        return {"value": f"{yoy}%", "note": f"Core YoY · {label}",
+                "css": "neg" if v > 3 else ("pos" if v <= 2 else "neu")}
     safe("us_core_cpi", fetch_us_core_cpi)
 
     def fetch_us_gdp():
-        val, formatted, label = _te_extract(te_usa, "GDP Growth Rate")
-        return {"value": formatted, "note": label,
+        rows = _fred_csv_last_rows("A191RL1Q225SBEA", 4)
+        val = float(rows[-1][1])
+        d = datetime.strptime(rows[-1][0], "%Y-%m-%d")
+        qtr = (d.month - 1) // 3 + 1
+        return {"value": f"{val:.1f}%", "note": f"Q{qtr} {d.year} annualised",
                 "css": "pos" if val > 0 else "neg"}
     safe("us_gdp", fetch_us_gdp)
 
     def fetch_us_unemployment():
-        val, formatted, label = _te_extract(te_usa, "Unemployment Rate")
-        return {"value": formatted, "note": label,
+        rows = _fred_csv_last_rows("UNRATE", 2)
+        val = float(rows[-1][1])
+        d = datetime.strptime(rows[-1][0], "%Y-%m-%d")
+        return {"value": f"{val:.1f}%", "note": d.strftime("%b %Y"),
                 "css": "pos" if val < 4 else ("neg" if val > 5 else "neu")}
     safe("us_unemployment", fetch_us_unemployment)
 
     def fetch_us_nfp():
-        val, formatted, label = _te_extract(te_usa, "Non Farm Payrolls", "{:+.0f}K")
-        return {"value": formatted, "note": label,
-                "css": "pos" if val > 0 else "neg"}
+        rows = _fred_csv_last_rows("PAYEMS", 3)
+        change = round(float(rows[-1][1]) - float(rows[-2][1]))
+        sign = "+" if change >= 0 else ""
+        d = datetime.strptime(rows[-1][0], "%Y-%m-%d")
+        return {"value": f"{sign}{change}K", "note": d.strftime("%b %Y"),
+                "css": "pos" if change > 0 else "neg"}
     safe("us_nfp", fetch_us_nfp)
 
     def fetch_us_ppi():
-        # Try "Producer Prices Change" or "Producer Prices"
-        for cat in ["Producer Prices Change", "Producer Prices"]:
-            try:
-                val, formatted, label = _te_extract(te_usa, cat)
-                return {"value": formatted, "note": f"YoY · {label}",
-                        "css": "neg" if val > 3 else ("pos" if val <= 2 else "neu")}
-            except ValueError:
-                continue
-        raise ValueError("PPI not found in TE data")
+        yoy, label, _ = _fred_yoy("PPIFIS")
+        v = float(yoy)
+        return {"value": f"{yoy}%", "note": f"YoY · {label}",
+                "css": "neg" if v > 3 else ("pos" if v <= 2 else "neu")}
     safe("us_ppi", fetch_us_ppi)
 
-    # ── INDIA INDICATORS ──
+    # ════════════════════════════════════════════
+    #  INDIA — World Bank API + Google News RSS
+    #  World Bank: api.worldbank.org, free, CORS-open, JSON
+    # ════════════════════════════════════════════
+
     def fetch_india_repo():
-        # Source 1: Trading Economics guest API — try several category names
-        for cat in ("Interest Rate", "Repo Rate", "RBI Rate", "Policy Rate",
-                    "Repurchase Rate", "Overnight Rate"):
+        # Source 1: RBI official policy rates page — multi-pattern scrape
+        rbi_urls = [
+            "https://rbi.org.in/Scripts/bs_viewcontent.aspx?Id=2118",
+            "https://rbi.org.in/en/web/rbi/monetary-policy",
+        ]
+        patterns = [
+            r'Policy Repo Rate\s*[:\-]?\s*([0-9]+(?:\.[0-9]+)?)\s*%',
+            r'Repo Rate\s*[:\-]?\s*([0-9]+(?:\.[0-9]+)?)\s*%',
+            r'repo rate[^0-9]*([0-9]+(?:\.[0-9]+)?)\s*(?:per cent|percent|%)',
+            r'([0-9]+\.[0-9]+)\s*%.*?[Rr]epo',
+            r'[Rr]epo[^0-9]*([0-9]+\.[0-9]+)',
+        ]
+        for rbi_url in rbi_urls:
             try:
-                val, formatted, label = _te_extract(te_india, cat, "{:.2f}%")
-                return {"value": formatted, "note": f"RBI · {label}", "css": "neu"}
-            except (ValueError, KeyError):
+                html_text = _fetch_text(rbi_url)
+                for pat in patterns:
+                    m = re.search(pat, html_text, re.IGNORECASE)
+                    if m:
+                        val = float(m.group(1))
+                        if 1.0 <= val <= 20.0:
+                            return {"value": f"{val:.2f}%", "note": "RBI", "css": "neu"}
+            except Exception:
                 continue
 
-        # Source 2: Trading Economics individual indicator endpoint
-        try:
-            url = ("https://api.tradingeconomics.com/historical/country/india"
-                   "/indicator/interest-rate?c=guest:guest&d1=2023-01-01")
-            req = urllib.request.Request(url, headers={
-                "User-Agent": "Mozilla/5.0", "Accept": "application/json"})
-            with urllib.request.urlopen(req, timeout=10) as resp:
-                rows = json.loads(resp.read().decode("utf-8", errors="replace"))
-            if rows:
-                last = max(rows, key=lambda r: r.get("DateTime", ""))
-                val = float(last["Value"])
-                d = datetime.strptime(last["DateTime"][:10], "%Y-%m-%d")
-                return {"value": f"{val:.2f}%",
-                        "note": f"RBI · {d.strftime('%b %Y')}",
-                        "css": "neu"}
-        except Exception:
-            pass
-
-        # Source 3: RBI main policy rates page (robust multi-pattern scrape)
-        try:
-            rbi_urls = [
-                "https://rbi.org.in/Scripts/bs_viewcontent.aspx?Id=2118",
-                "https://rbi.org.in/en/web/rbi/monetary-policy",
-            ]
-            patterns = [
-                r'Policy Repo Rate\s*[:\-]?\s*([0-9]+(?:\.[0-9]+)?)\s*%',
-                r'Repo Rate\s*[:\-]?\s*([0-9]+(?:\.[0-9]+)?)\s*%',
-                r'repo rate[^0-9]*([0-9]+(?:\.[0-9]+)?)\s*(?:per cent|percent|%)',
-                r'([0-9]+\.[0-9]+)\s*%.*?[Rr]epo',
-                r'[Rr]epo[^0-9]*([0-9]+\.[0-9]+)',
-            ]
-            for rbi_url in rbi_urls:
-                try:
-                    html_text = _fetch_text(rbi_url)
-                    for pat in patterns:
-                        m = re.search(pat, html_text, re.IGNORECASE)
-                        if m:
-                            val = float(m.group(1))
-                            if 1.0 <= val <= 20.0:   # sanity check
-                                return {"value": f"{val:.2f}%",
-                                        "note": "RBI", "css": "neu"}
-                except Exception:
-                    continue
-        except Exception:
-            pass
-
-        # Source 4: World Bank lending rate as proxy (closest free annual proxy)
-        try:
-            url = ("https://api.worldbank.org/v2/country/IN/indicator/"
-                   "FR.INR.LEND?format=json&mrv=2")
-            text = _fetch_text(url)
-            data = json.loads(text)
-            rows = [r for r in (data[1] or []) if r.get("value") is not None]
-            if rows:
-                val = float(rows[0]["value"])
-                d = rows[0].get("date", "")
-                return {"value": f"{val:.2f}%",
-                        "note": f"WB lending · {d}", "css": "neu"}
-        except Exception:
-            pass
+        # Source 2: Google News RSS — parse rate from headlines
+        rss_url = ("https://news.google.com/rss/search?"
+                   "q=RBI+repo+rate+percent&hl=en-IN&gl=IN&ceid=IN:en")
+        text = _fetch_text(rss_url)
+        for pat in [r'repo rate[^0-9%]{0,30}(\d+(?:\.\d+)?)\s*%',
+                    r'(\d+(?:\.\d+)?)\s*%\s*repo rate',
+                    r'repo rate[^0-9]{0,20}(\d+\.\d+)']:
+            m = re.search(pat, text, re.IGNORECASE)
+            if m:
+                val = float(m.group(1))
+                if 1.0 <= val <= 20.0:
+                    return {"value": f"{val:.2f}%", "note": "RBI · news", "css": "neu"}
 
         raise ValueError("All sources failed for India Repo Rate")
     safe("india_repo", fetch_india_repo)
 
     def fetch_india_cpi():
-        val, formatted, label = _te_extract(te_india, "Inflation Rate")
-        return {"value": formatted, "note": label,
+        # World Bank annual CPI inflation (most recent available)
+        rows = _world_bank("FP.CPI.TOTL.ZG", "IN", 2)
+        val = float(rows[0]["value"])
+        yr = str(rows[0]["date"])
+        return {"value": f"{val:.1f}%", "note": f"FY{yr[2:]} (WB annual)",
                 "css": "neg" if val > 6 else ("pos" if val < 4 else "neu")}
     safe("india_cpi", fetch_india_cpi)
 
     def fetch_india_gdp():
-        val, formatted, label = _te_extract(te_india, "GDP Growth Rate")
-        return {"value": formatted, "note": label,
+        rows = _world_bank("NY.GDP.MKTP.KD.ZG", "IN", 2)
+        val = float(rows[0]["value"])
+        yr = str(rows[0]["date"])
+        return {"value": f"{val:.1f}%", "note": f"FY{yr[2:]} (WB annual)",
                 "css": "pos" if val > 5 else ("neg" if val < 0 else "neu")}
     safe("india_gdp", fetch_india_gdp)
 
     def fetch_india_unemp():
-        val, formatted, label = _te_extract(te_india, "Unemployment Rate")
-        return {"value": formatted, "note": label,
+        rows = _world_bank("SL.UEM.TOTL.ZS", "IN", 2)
+        val = float(rows[0]["value"])
+        yr = str(rows[0]["date"])
+        return {"value": f"{val:.1f}%", "note": f"FY{yr[2:]} (WB annual)",
                 "css": "pos" if val < 5 else "neg"}
     safe("india_unemp", fetch_india_unemp)
 
     def fetch_india_wpi():
-        for cat in ["Wholesale Prices", "Wholesale Price Index"]:
-            try:
-                val, formatted, label = _te_extract(te_india, cat)
-                return {"value": formatted, "note": label, "css": "neu"}
-            except ValueError:
-                continue
-        raise ValueError("WPI not found")
+        rows = _world_bank("FP.WPI.TOTL", "IN", 3)
+        if len(rows) >= 2:
+            cur, prev = float(rows[0]["value"]), float(rows[1]["value"])
+            yoy = ((cur - prev) / prev) * 100
+            yr = str(rows[0]["date"])
+            return {"value": f"{yoy:.1f}%", "note": f"FY{yr[2:]} (WB annual)", "css": "neu"}
+        raise ValueError("Not enough WPI rows")
     safe("india_wpi", fetch_india_wpi)
 
     def fetch_india_pmi():
-        for cat in ["Manufacturing PMI", "Markit Manufacturing PMI"]:
-            try:
-                val, formatted, label = _te_extract(te_india, cat, "{:.1f}")
-                return {"value": formatted, "note": f"PMI · {label}",
-                        "css": "pos" if val > 50 else "neg"}
-            except ValueError:
-                continue
-        raise ValueError("PMI not found")
+        # No free real-time PMI API; use World Bank manufacturing growth as proxy
+        rows = _world_bank("NV.IND.MANF.KD.ZG", "IN", 2)
+        val = float(rows[0]["value"])
+        yr = str(rows[0]["date"])
+        return {"value": f"{val:.1f}%", "note": f"Mfg growth · FY{yr[2:]} (WB)",
+                "css": "pos" if val > 0 else "neg"}
     safe("india_pmi", fetch_india_pmi)
 
     def fetch_india_fiscal():
-        for cat in ["Government Budget", "Government Budget Value", "Fiscal Expenditure"]:
-            try:
-                val, formatted, label = _te_extract(te_india, cat)
-                return {"value": f"{abs(val):.1f}%", "note": f"of GDP · {label}", "css": "neu"}
-            except ValueError:
-                continue
-        raise ValueError("Fiscal data not found")
+        rows = _world_bank("GC.BAL.CASH.GD.ZS", "IN", 2)
+        val = abs(float(rows[0]["value"]))
+        yr = str(rows[0]["date"])
+        return {"value": f"{val:.1f}%", "note": f"of GDP · FY{yr[2:]} (WB annual)", "css": "neu"}
     safe("india_fiscal", fetch_india_fiscal)
 
-    # ── FALLBACK: FRED for any USA indicators that TE missed ──
-    if not result.get("us_cpi"):
-        def fallback_cpi():
-            yoy, label, _ = _fred_yoy("CPIAUCSL")
-            v = float(yoy)
-            return {"value": f"{yoy}%", "note": f"YoY · {label}",
-                    "css": "neg" if v > 3 else ("pos" if v <= 2 else "neu")}
-        safe("us_cpi", fallback_cpi)
-
-    if not result.get("us_core_cpi"):
-        def fallback_core():
-            yoy, label, _ = _fred_yoy("CPILFESL")
-            v = float(yoy)
-            return {"value": f"{yoy}%", "note": label,
-                    "css": "neg" if v > 3 else ("pos" if v <= 2 else "neu")}
-        safe("us_core_cpi", fallback_core)
-
-    if not result.get("us_fedfunds"):
-        def fallback_fed():
-            lower_rows = _fred_csv_last_rows("DFEDTARL", 2)
-            upper_rows = _fred_csv_last_rows("DFEDTARU", 2)
-            lower = float(lower_rows[-1][1])
-            upper = float(upper_rows[-1][1])
-            return {"value": f"{lower:.2f}–{upper:.2f}%", "note": "", "css": "neu"}
-        safe("us_fedfunds", fallback_fed)
-
-    if not result.get("us_gdp"):
-        def fallback_gdp():
-            rows = _fred_csv_last_rows("A191RL1Q225SBEA", 4)
-            val = float(rows[-1][1])
-            d = datetime.strptime(rows[-1][0], "%Y-%m-%d")
-            qtr = (d.month - 1) // 3 + 1
-            return {"value": f"{val:.1f}%", "note": f"Q{qtr} {d.year}", "css": "pos" if val > 0 else "neg"}
-        safe("us_gdp", fallback_gdp)
-
-    if not result.get("us_unemployment"):
-        def fallback_unemp():
-            rows = _fred_csv_last_rows("UNRATE", 2)
-            val = float(rows[-1][1])
-            d = datetime.strptime(rows[-1][0], "%Y-%m-%d")
-            return {"value": f"{val:.1f}%", "note": d.strftime("%b %Y"),
-                    "css": "pos" if val < 4 else ("neg" if val > 5 else "neu")}
-        safe("us_unemployment", fallback_unemp)
-
-    if not result.get("us_nfp"):
-        def fallback_nfp():
-            rows = _fred_csv_last_rows("PAYEMS", 3)
-            change = round(float(rows[-1][1]) - float(rows[-2][1]))
-            sign = "+" if change >= 0 else ""
-            d = datetime.strptime(rows[-1][0], "%Y-%m-%d")
-            return {"value": f"{sign}{change}K", "note": d.strftime("%b %Y"),
-                    "css": "pos" if change > 0 else "neg"}
-        safe("us_nfp", fallback_nfp)
-
-    if not result.get("us_ppi"):
-        def fallback_ppi():
-            yoy, label, _ = _fred_yoy("PPIFIS")
-            v = float(yoy)
-            return {"value": f"{yoy}%", "note": label,
-                    "css": "neg" if v > 3 else ("pos" if v <= 2 else "neu")}
-        safe("us_ppi", fallback_ppi)
-
-    # ── FALLBACK: World Bank + RBI for India indicators ──
-    if not result.get("india_repo"):
-        def fallback_repo_news():
-            """Parse repo rate from Google News RSS — live, no API key."""
-            rss_url = ("https://news.google.com/rss/search?"
-                       "q=RBI+repo+rate+percent&hl=en-IN&gl=IN&ceid=IN:en")
-            text = _fetch_text(rss_url)
-            pats = [
-                r'repo rate[^0-9%]{0,30}(\d+(?:\.\d+)?)\s*%',
-                r'(\d+(?:\.\d+)?)\s*%\s*repo rate',
-                r'repo rate[^0-9]{0,20}(\d+\.\d+)',
-            ]
-            for pat in pats:
-                m = re.search(pat, text, re.IGNORECASE)
-                if m:
-                    val = float(m.group(1))
-                    if 1.0 <= val <= 20.0:
-                        return {"value": f"{val:.2f}%",
-                                "note": "RBI · via news", "css": "neu"}
-            raise ValueError("Repo rate not found in Google News RSS")
-        safe("india_repo", fallback_repo_news)
-
-    if not result.get("india_cpi"):
-        def fallback_india_cpi():
-            rows = _world_bank("FP.CPI.TOTL.ZG", "IN", 2)
-            val = float(rows[0]["value"])
-            return {"value": f"{val:.1f}%", "note": f"FY{str(rows[0]['date'])[2:]} (annual)",
-                    "css": "neg" if val > 6 else ("pos" if val < 4 else "neu")}
-        safe("india_cpi", fallback_india_cpi)
-
-    if not result.get("india_gdp"):
-        def fallback_india_gdp():
-            rows = _world_bank("NY.GDP.MKTP.KD.ZG", "IN", 2)
-            val = float(rows[0]["value"])
-            return {"value": f"{val:.1f}%", "note": f"FY{str(rows[0]['date'])[2:]} (annual)",
-                    "css": "pos" if val > 5 else ("neg" if val < 0 else "neu")}
-        safe("india_gdp", fallback_india_gdp)
-
-    if not result.get("india_unemp"):
-        def fallback_india_unemp():
-            rows = _world_bank("SL.UEM.TOTL.ZS", "IN", 2)
-            val = float(rows[0]["value"])
-            return {"value": f"{val:.1f}%", "note": f"FY{str(rows[0]['date'])[2:]} (annual)",
-                    "css": "pos" if val < 5 else "neg"}
-        safe("india_unemp", fallback_india_unemp)
-
-    if not result.get("india_wpi"):
-        def fallback_india_wpi():
-            rows = _world_bank("FP.WPI.TOTL", "IN", 3)
-            if len(rows) >= 2:
-                cur, prev = float(rows[0]["value"]), float(rows[1]["value"])
-                yoy = ((cur - prev) / prev) * 100
-                return {"value": f"{yoy:.1f}%", "note": f"FY{str(rows[0]['date'])[2:]} (annual)", "css": "neu"}
-            raise ValueError("Not enough WPI data")
-        safe("india_wpi", fallback_india_wpi)
-
-    if not result.get("india_pmi"):
-        def fallback_india_pmi():
-            rows = _world_bank("NV.IND.MANF.KD.ZG", "IN", 2)
-            val = float(rows[0]["value"])
-            return {"value": f"{val:.1f}%", "note": f"Mfg Gr · FY{str(rows[0]['date'])[2:]} (annual)",
-                    "css": "pos" if val > 0 else "neg"}
-        safe("india_pmi", fallback_india_pmi)
-
-    if not result.get("india_fiscal"):
-        def fallback_india_fiscal():
-            rows = _world_bank("GC.BAL.CASH.GD.ZS", "IN", 2)
-            val = abs(float(rows[0]["value"]))
-            return {"value": f"{val:.1f}%", "note": f"of GDP · FY{str(rows[0]['date'])[2:]} (annual)", "css": "neu"}
-        safe("india_fiscal", fallback_india_fiscal)
-
     return result
-
 
 def build_econ_data_json(data: dict) -> str:
     return json.dumps(data, ensure_ascii=False)
@@ -3119,7 +2894,7 @@ async function fetchIndiaUnemployment() {{
 }}
 
 // ════════════════════════════
-// INDIA: Repo Rate — 3 live free sources, no hardcoding
+// INDIA: Repo Rate — 2 reliable free sources (no API key)
 // ════════════════════════════
 async function fetchIndiaRepoRate() {{
   const elV = document.getElementById('sbv-reporate');
@@ -3130,27 +2905,7 @@ async function fetchIndiaRepoRate() {{
     if (elN) elN.textContent = note;
   }}
 
-  // ── Source 1: Trading Economics guest API (CORS-enabled, JSON) ──
-  try {{
-    const r = await fetch(
-      'https://api.tradingeconomics.com/country/india?c=guest:guest',
-      {{signal: AbortSignal.timeout(8000)}}
-    );
-    if (r.ok) {{
-      const data = await r.json();
-      const NAMES = ['Interest Rate','Repo Rate','RBI Rate','Policy Rate',
-                     'Repurchase Rate','Overnight Rate'];
-      const entry = data.find(d => NAMES.includes(d.Category));
-      if (entry && entry.LatestValue != null) {{
-        const val = parseFloat(entry.LatestValue).toFixed(2) + '%';
-        const dt  = (entry.LatestValueDate || '').slice(0, 7);
-        _setRepo(val, 'RBI · ' + dt);
-        return;
-      }}
-    }}
-  }} catch(e) {{ /* try next */ }}
-
-  // ── Source 2: Google News RSS — parse rate from headlines ──
+  // ── Source 1: Google News RSS — parse repo rate from live headlines ──
   try {{
     const rss = 'https://news.google.com/rss/search?q=RBI+repo+rate+percent&hl=en-IN&gl=IN&ceid=IN:en';
     const r = await fetch(rss, {{signal: AbortSignal.timeout(8000)}});
@@ -3174,27 +2929,23 @@ async function fetchIndiaRepoRate() {{
     }}
   }} catch(e) {{ /* try next */ }}
 
-  // ── Source 3: Trading Economics historical endpoint ──
+  // ── Source 2: World Bank lending rate (closest free proxy) ──
   try {{
-    const url = 'https://api.tradingeconomics.com/historical/country/india/indicator/interest-rate?c=guest:guest&d1=2023-01-01';
+    const url = 'https://api.worldbank.org/v2/country/IN/indicator/FR.INR.LEND?format=json&mrv=2';
     const r = await fetch(url, {{signal: AbortSignal.timeout(8000)}});
     if (r.ok) {{
-      const rows = await r.json();
-      if (rows && rows.length) {{
-        rows.sort((a,b) => (b.DateTime||'').localeCompare(a.DateTime||''));
-        const val = parseFloat(rows[0].Value).toFixed(2);
-        const dt  = (rows[0].DateTime || '').slice(0,7);
-        _setRepo(val + '%', 'RBI · ' + dt);
+      const d = await r.json();
+      const rows = (d[1] || []).filter(x => x.value !== null);
+      if (rows.length) {{
+        _setRepo(parseFloat(rows[0].value).toFixed(2) + '%', 'WB lending · ' + rows[0].date);
         return;
       }}
     }}
   }} catch(e) {{ /* fall through */ }}
 
-  // All sources failed
   if (elV) elV.textContent = '—';
   if (elN) elN.textContent = '—';
 }}
-
 // ════════════════════════════
 // INDIA: WPI via World Bank (FP.WPI.TOTL)
 // ════════════════════════════
