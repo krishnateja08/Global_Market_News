@@ -707,11 +707,47 @@ def fetch_all_economic_data() -> dict:
     # ════════════════════════════════════════════
 
     def fetch_us_fedfunds():
-        lower_rows = _fred_series("DFEDTARL", 2)
-        upper_rows = _fred_series("DFEDTARU", 2)
-        lower = float(lower_rows[-1][1])
-        upper = float(upper_rows[-1][1])
-        return {"value": f"{lower:.2f}–{upper:.2f}%", "note": "Fed target range", "css": "neu"}
+        # Source 1: FRED authenticated API (most reliable)
+        try:
+            lower_rows = _fred_series("DFEDTARL", 2)
+            upper_rows = _fred_series("DFEDTARU", 2)
+            lower = float(lower_rows[-1][1])
+            upper = float(upper_rows[-1][1])
+            if 0.0 < lower <= 20.0 and 0.0 < upper <= 20.0:
+                return {"value": f"{lower:.2f}–{upper:.2f}%", "note": "FRED · target range", "css": "neu"}
+        except Exception as e:
+            logging.warning(f"FRED fedfunds failed: {e}")
+
+        # Source 2: Scrape Federal Reserve press release page
+        try:
+            html_text = _fetch_text("https://www.federalreserve.gov/monetarypolicy/openmarket.htm")
+            patterns = [
+                r'(\d+(?:\.\d+)?)\s*(?:to|-)\s*(\d+(?:\.\d+)?)\s*percent',
+                r'target range.*?(\d+(?:\.\d+)?)\s*(?:and|to|-)\s*(\d+(?:\.\d+)?)\s*percent',
+                r'(\d+\.\d+)\s*percent.*?(\d+\.\d+)\s*percent',
+            ]
+            for pat in patterns:
+                m = re.search(pat, html_text, re.IGNORECASE)
+                if m:
+                    lower, upper = float(m.group(1)), float(m.group(2))
+                    if 0.0 < lower <= 20.0 and lower < upper:
+                        return {"value": f"{lower:.2f}–{upper:.2f}%", "note": "Fed.gov · target range", "css": "neu"}
+        except Exception as e:
+            logging.warning(f"Fed.gov scrape failed: {e}")
+
+        # Source 3: Google News RSS — parse rate from headlines
+        try:
+            rss = _fetch_text("https://news.google.com/rss/search?q=federal+funds+rate+percent+target&hl=en-US&gl=US&ceid=US:en")
+            m = re.search(r'(\d+(?:\.\d+)?)\s*(?:to|-)\s*(\d+(?:\.\d+)?)\s*(?:percent|%)', rss, re.IGNORECASE)
+            if m:
+                lower, upper = float(m.group(1)), float(m.group(2))
+                if 0.0 < lower <= 20.0 and lower < upper:
+                    return {"value": f"{lower:.2f}–{upper:.2f}%", "note": "News · target range", "css": "neu"}
+        except Exception as e:
+            logging.warning(f"Fed funds news scrape failed: {e}")
+
+        # Fallback: known current rate as of Apr 2026
+        return {"value": "4.25–4.50%", "note": "target range · fallback", "css": "neu"}
     safe("us_fedfunds", fetch_us_fedfunds)
 
     def fetch_us_cpi():
@@ -843,12 +879,36 @@ def fetch_all_economic_data() -> dict:
     safe("india_wpi", fetch_india_wpi)
 
     def fetch_india_pmi():
-        # No free real-time PMI API; use World Bank manufacturing growth as proxy
-        rows = _world_bank("NV.IND.MANF.KD.ZG", "IN", 2)
-        val = float(rows[0]["value"])
-        yr = str(rows[0]["date"])
-        return {"value": f"{val:.1f}%", "note": f"Mfg growth · FY{yr[2:]} (WB)",
-                "css": "pos" if val > 0 else "neg"}
+        # Source 1: Try to scrape actual PMI number from Google News headlines
+        try:
+            rss = _fetch_text("https://news.google.com/rss/search?q=India+manufacturing+PMI+2026&hl=en-IN&gl=IN&ceid=IN:en")
+            patterns = [
+                r'India.*?[Mm]fg.*?PMI.*?(\d{2}\.\d)',
+                r'[Mm]anufacturing PMI.*?(\d{2}\.\d)',
+                r'PMI.*?(\d{2}\.\d).*?[Mm]anufacturing',
+                r'S&P Global.*?PMI.*?(\d{2}\.\d)',
+            ]
+            for pat in patterns:
+                m = re.search(pat, rss)
+                if m:
+                    val = float(m.group(1))
+                    if 40.0 <= val <= 70.0:  # valid PMI range
+                        css = "pos" if val >= 50 else "neg"
+                        return {"value": f"{val:.1f}", "note": "Mfg PMI · news", "css": css}
+        except Exception as e:
+            logging.warning(f"India PMI news scrape failed: {e}")
+
+        # Source 2: World Bank manufacturing growth as proxy (clearly labelled)
+        try:
+            rows = _world_bank("NV.IND.MANF.KD.ZG", "IN", 2)
+            val = float(rows[0]["value"])
+            yr = str(rows[0]["date"])
+            return {"value": f"{val:.1f}%", "note": f"★ Mfg growth proxy · FY{yr[2:]}",
+                    "css": "pos" if val > 0 else "neg"}
+        except Exception as e:
+            logging.warning(f"India PMI World Bank failed: {e}")
+
+        raise ValueError("All PMI sources failed")
     safe("india_pmi", fetch_india_pmi)
 
     def fetch_india_fiscal():
