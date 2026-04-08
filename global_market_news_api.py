@@ -127,6 +127,239 @@ RSS_SOURCES = {
 MAX_NEWS_PER_CATEGORY = 10
 REQUEST_TIMEOUT = 8
 
+# ─────────────────────────────────────────────
+#  KEY EVENT CALENDAR — Dynamic date computation
+# ─────────────────────────────────────────────
+EVENT_RSS_FEEDS = [
+    "https://news.google.com/rss/search?q=RBI+MPC+meeting+date+repo+rate+2025+2026&hl=en-IN&gl=IN&ceid=IN:en",
+    "https://news.google.com/rss/search?q=FOMC+meeting+date+Fed+interest+rate+decision+2025+2026&hl=en-US&gl=US&ceid=US:en",
+    "https://news.google.com/rss/search?q=US+nonfarm+payrolls+jobs+report+date&hl=en-US&gl=US&ceid=US:en",
+    "https://news.google.com/rss/search?q=India+GDP+data+release+date+CSO&hl=en-IN&gl=IN&ceid=IN:en",
+    "https://news.google.com/rss/search?q=US+CPI+inflation+data+release+date&hl=en-US&gl=US&ceid=US:en",
+    "https://news.google.com/rss/search?q=India+CPI+WPI+inflation+data+release&hl=en-IN&gl=IN&ceid=IN:en",
+    "https://news.google.com/rss/search?q=ECB+interest+rate+decision+meeting+date&hl=en-US&gl=US&ceid=US:en",
+    "https://news.google.com/rss/search?q=Bank+of+Japan+BOJ+meeting+date+decision&hl=en-US&gl=US&ceid=US:en",
+    "https://news.google.com/rss/search?q=OPEC+meeting+date+oil+output+decision&hl=en-US&gl=US&ceid=US:en",
+    "https://news.google.com/rss/search?q=India+quarterly+results+earnings+season+date&hl=en-IN&gl=IN&ceid=IN:en",
+    "https://news.google.com/rss/search?q=US+Federal+budget+debt+ceiling+date&hl=en-US&gl=US&ceid=US:en",
+    "https://news.google.com/rss/search?q=India+Union+Budget+GST+council+date&hl=en-IN&gl=IN&ceid=IN:en",
+]
+
+
+def _nth_weekday(year, month, weekday, n):
+    """Return the nth occurrence of a weekday in a month (1-indexed). weekday: 0=Mon..6=Sun."""
+    import calendar as _cal
+    c = _cal.monthcalendar(year, month)
+    days = [week[weekday] for week in c if week[weekday] != 0]
+    if n <= len(days):
+        return datetime(year, month, days[n - 1])
+    return None
+
+
+def compute_scheduled_events() -> list[dict]:
+    """
+    Return a list of known/scheduled financial events with dates.
+    Dates are computed dynamically relative to the current date.
+    These are approximate — official confirmations may shift by 1-2 days.
+    """
+    now = datetime.now(timezone.utc).replace(tzinfo=None)
+    year = now.year
+    events = []
+
+    def add(date_obj, title, category, impact, region):
+        if date_obj and date_obj >= now - timedelta(days=1):
+            days_away = (date_obj - now).days
+            if days_away < 0:
+                status = "TODAY" if days_away >= -1 else "PASSED"
+            elif days_away == 0:
+                status = "TODAY"
+            elif days_away <= 7:
+                status = "THIS WEEK"
+            elif days_away <= 30:
+                status = "UPCOMING"
+            else:
+                status = "SCHEDULED"
+            events.append({
+                "date": date_obj.strftime("%Y-%m-%d"),
+                "date_display": date_obj.strftime("%b %d, %Y (%a)"),
+                "title": title,
+                "category": category,
+                "impact": impact,
+                "region": region,
+                "days_away": max(days_away, 0),
+                "status": status,
+            })
+
+    # ── FOMC MEETINGS (8 per year, approximate) ──
+    fomc_months_2025 = [
+        (1, 28, 29), (3, 18, 19), (5, 6, 7), (6, 17, 18),
+        (7, 29, 30), (9, 16, 17), (10, 28, 29), (12, 9, 10),
+    ]
+    fomc_months_2026 = [
+        (1, 27, 28), (3, 17, 18), (4, 28, 29), (6, 16, 17),
+        (7, 28, 29), (9, 15, 16), (10, 27, 28), (12, 8, 9),
+    ]
+    for m, d1, d2 in (fomc_months_2025 if year == 2025 else fomc_months_2026):
+        add(datetime(year, m, d2), f"🇺🇸 FOMC Rate Decision ({calendar.month_abbr[m]} {d1}-{d2})",
+            "Central Bank", "🔴 HIGH", "USA")
+
+    # ── RBI MPC MEETINGS (6 per year, approximate) ──
+    rbi_2025 = [(2, 7), (4, 9), (6, 6), (8, 8), (10, 8), (12, 5)]
+    rbi_2026 = [(2, 6), (4, 8), (6, 5), (8, 7), (10, 7), (12, 4)]
+    for m, d in (rbi_2025 if year == 2025 else rbi_2026):
+        try:
+            add(datetime(year, m, d), f"🇮🇳 RBI MPC Repo Rate Decision ({calendar.month_abbr[m]})",
+                "Central Bank", "🔴 HIGH", "India")
+        except ValueError:
+            pass
+
+    # ── US Non-Farm Payrolls (1st Friday of each month) ──
+    for m in range(1, 13):
+        nfp = _nth_weekday(year, m, 4, 1)  # 4=Friday
+        if nfp:
+            add(nfp, f"🇺🇸 US Non-Farm Payrolls ({calendar.month_abbr[m]})",
+                "Jobs Data", "🔴 HIGH", "USA")
+
+    # ── US CPI Release (~10th-14th of each month) ──
+    for m in range(1, 13):
+        # CPI is typically released on the 2nd or 3rd week Tuesday/Wednesday
+        d = 13 if m % 2 == 0 else 12
+        try:
+            add(datetime(year, m, d), f"🇺🇸 US CPI Inflation Data ({calendar.month_abbr[m]})",
+                "Inflation", "🔴 HIGH", "USA")
+        except ValueError:
+            pass
+
+    # ── India CPI Release (~12th of following month) ──
+    for m in range(1, 13):
+        try:
+            add(datetime(year, m, 12), f"🇮🇳 India CPI Data Release ({calendar.month_abbr[m]})",
+                "Inflation", "🟡 MEDIUM", "India")
+        except ValueError:
+            pass
+
+    # ── ECB Rate Decisions (roughly every 6 weeks) ──
+    ecb_2025 = [(1, 30), (3, 6), (4, 17), (6, 5), (7, 24), (9, 11), (10, 30), (12, 18)]
+    ecb_2026 = [(1, 22), (3, 5), (4, 16), (6, 4), (7, 16), (9, 10), (10, 29), (12, 17)]
+    for m, d in (ecb_2025 if year == 2025 else ecb_2026):
+        try:
+            add(datetime(year, m, d), f"🇪🇺 ECB Rate Decision ({calendar.month_abbr[m]} {d})",
+                "Central Bank", "🟡 MEDIUM", "Europe")
+        except ValueError:
+            pass
+
+    # ── BOJ Meetings ──
+    boj_2025 = [(1, 24), (3, 14), (4, 30), (6, 13), (7, 31), (9, 19), (10, 31), (12, 19)]
+    boj_2026 = [(1, 23), (3, 13), (4, 29), (6, 12), (7, 17), (9, 18), (10, 30), (12, 18)]
+    for m, d in (boj_2025 if year == 2025 else boj_2026):
+        try:
+            add(datetime(year, m, d), f"🇯🇵 BOJ Rate Decision ({calendar.month_abbr[m]} {d})",
+                "Central Bank", "🟡 MEDIUM", "Asia")
+        except ValueError:
+            pass
+
+    # ── India GDP (quarterly, released ~end of following quarter) ──
+    gdp_india = [(2, 28), (5, 30), (8, 29), (11, 28)]
+    for m, d in gdp_india:
+        try:
+            add(datetime(year, m, d), f"🇮🇳 India GDP Data ({calendar.month_abbr[m]})",
+                "GDP", "🟡 MEDIUM", "India")
+        except ValueError:
+            pass
+
+    # ── US GDP (advance estimate ~last week of Jan, Apr, Jul, Oct) ──
+    us_gdp = [(1, 30), (4, 30), (7, 30), (10, 30)]
+    for m, d in us_gdp:
+        try:
+            add(datetime(year, m, d), f"🇺🇸 US GDP (Advance Estimate, Q{(m-1)//3 + 1 - 1 or 4})",
+                "GDP", "🟡 MEDIUM", "USA")
+        except ValueError:
+            pass
+
+    # ── India Union Budget ──
+    add(datetime(year, 2, 1), "🇮🇳 India Union Budget", "Fiscal Policy", "🔴 HIGH", "India")
+
+    # ── OPEC+ Meetings (roughly quarterly) ──
+    opec = [(3, 1), (6, 1), (9, 1), (12, 1)]
+    for m, d in opec:
+        add(datetime(year, m, d), f"🛢️ OPEC+ Meeting ({calendar.month_abbr[m]})",
+            "Energy", "🟡 MEDIUM", "Global")
+
+    # ── India F&O Expiry (last Thursday of each month) ──
+    for m in range(1, 13):
+        # Find last Thursday
+        import calendar as _cal
+        c = _cal.monthcalendar(year, m)
+        thursdays = [week[3] for week in c if week[3] != 0]
+        if thursdays:
+            last_thu = thursdays[-1]
+            add(datetime(year, m, last_thu), f"🇮🇳 F&O Monthly Expiry ({calendar.month_abbr[m]})",
+                "Derivatives", "🟡 MEDIUM", "India")
+
+    # ── US Fed Beige Book (8 per year, ~2 weeks before FOMC) ──
+    beige_2025 = [(1, 15), (3, 5), (4, 23), (6, 4), (7, 16), (9, 3), (10, 15), (11, 26)]
+    beige_2026 = [(1, 14), (3, 4), (4, 15), (6, 3), (7, 15), (9, 2), (10, 14), (11, 25)]
+    for m, d in (beige_2025 if year == 2025 else beige_2026):
+        try:
+            add(datetime(year, m, d), f"🇺🇸 Fed Beige Book ({calendar.month_abbr[m]})",
+                "Central Bank", "🟢 LOW", "USA")
+        except ValueError:
+            pass
+
+    # Also include next year for events in Jan-Mar if we're in Oct+
+    if now.month >= 10:
+        ny = year + 1
+        fomc_next = fomc_months_2026 if ny == 2026 else fomc_months_2025
+        for m, d1, d2 in fomc_next[:3]:
+            add(datetime(ny, m, d2), f"🇺🇸 FOMC Rate Decision ({calendar.month_abbr[m]} {d1}-{d2}, {ny})",
+                "Central Bank", "🔴 HIGH", "USA")
+        rbi_next = rbi_2026 if ny == 2026 else rbi_2025
+        for m, d in rbi_next[:2]:
+            try:
+                add(datetime(ny, m, d), f"🇮🇳 RBI MPC Repo Rate Decision ({calendar.month_abbr[m]} {ny})",
+                    "Central Bank", "🔴 HIGH", "India")
+            except ValueError:
+                pass
+
+    events.sort(key=lambda e: e["date"])
+    return events
+
+
+def fetch_event_news() -> list[dict]:
+    """Fetch latest news about upcoming economic events from RSS."""
+    seen = set()
+    results = []
+    cutoff = datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(days=3)
+    for url in EVENT_RSS_FEEDS:
+        for item in fetch_rss(url):
+            key = item["title"].lower()[:60]
+            if key in seen:
+                continue
+            seen.add(key)
+            results.append(item)
+            if len(results) >= 20:
+                break
+        if len(results) >= 20:
+            break
+    return results[:20]
+
+
+def build_event_calendar_json(events: list[dict]) -> str:
+    return json.dumps(events, ensure_ascii=False)
+
+
+def build_event_news_json(news_items: list[dict]) -> str:
+    out = []
+    for item in news_items:
+        out.append({
+            "title": escape(item.get("title", "")),
+            "source": escape(item.get("source", "")),
+            "time": format_pub_date(item.get("pubDate", "")),
+            "summary": escape(item.get("summary", "")),
+            "link": escape(item.get("link", "#")),
+        })
+    return json.dumps(out, ensure_ascii=False)
+
 
 # ─────────────────────────────────────────────
 #  RSS FETCHER
@@ -329,10 +562,14 @@ def build_news_json(all_news: dict) -> str:
     return json.dumps(out, ensure_ascii=False)
 
 
-def generate_complete_html(all_news: dict) -> str:
+def generate_complete_html(all_news: dict, event_calendar=None, event_news=None) -> str:
     current_time = get_ist_time()
     total_articles = sum(len(v) for v in all_news.values())
     news_json = build_news_json(all_news)
+    event_calendar = event_calendar or []
+    event_news = event_news or []
+    event_cal_json = build_event_calendar_json(event_calendar)
+    event_news_json = build_event_news_json(event_news)
 
     # Count per category for sidebar
     cat_counts = {
@@ -1044,6 +1281,150 @@ body.light .cat-tabs-wrap::after {{
   outline: 2px solid var(--orange);
   outline-offset: -2px;
 }}
+
+/* ══════════════════════════════════════
+   KEY EVENT CALENDAR STYLES
+   ══════════════════════════════════════ */
+.event-calendar-panel {{
+  display: none;
+  padding: 0;
+  flex-direction: column;
+  height: 100%;
+}}
+.event-calendar-panel.active {{ display: flex; }}
+
+.ecal-header {{
+  padding: 16px 20px 10px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  flex-shrink: 0;
+}}
+.ecal-title {{ color: var(--orange); font-size: 13px; font-weight: 700; letter-spacing: 2px; }}
+.ecal-subtitle {{ color: var(--muted); font-size: 11px; }}
+
+.ecal-filters {{
+  display: flex; gap: 6px; padding: 10px 20px;
+  flex-wrap: wrap; flex-shrink: 0;
+  border-bottom: 1px solid var(--border2);
+}}
+.ecal-filter-btn {{
+  background: var(--panel2); border: 1px solid var(--border);
+  color: var(--muted); font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px; padding: 5px 12px; border-radius: 3px;
+  cursor: pointer; transition: all 0.15s; letter-spacing: 0.5px;
+}}
+.ecal-filter-btn:hover {{ border-color: var(--orange); color: var(--text); }}
+.ecal-filter-btn.active {{ background: var(--orange-dim); border-color: var(--orange); color: var(--orange); font-weight: 600; }}
+
+.ecal-body {{
+  flex: 1; overflow-y: auto; padding: 12px 20px 20px;
+}}
+.ecal-month-group {{
+  margin-bottom: 18px;
+}}
+.ecal-month-label {{
+  color: var(--orange); font-size: 12px; font-weight: 700;
+  letter-spacing: 2px; padding: 6px 0 8px;
+  border-bottom: 1px solid var(--border2);
+  margin-bottom: 6px;
+  position: sticky; top: 0;
+  background: var(--bg); z-index: 1;
+}}
+body.light .ecal-month-label {{ background: var(--bg); }}
+
+.ecal-event {{
+  display: grid;
+  grid-template-columns: 90px 1fr auto;
+  gap: 10px; align-items: center;
+  padding: 9px 8px;
+  border-bottom: 1px solid var(--border2);
+  transition: background 0.12s;
+  border-radius: 3px;
+}}
+.ecal-event:hover {{ background: rgba(255,106,0,0.05); }}
+
+.ecal-date {{
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px; color: var(--muted); font-weight: 600;
+  white-space: nowrap;
+}}
+.ecal-event-title {{
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px; color: var(--text); line-height: 1.4;
+}}
+.ecal-event-meta {{
+  display: flex; align-items: center; gap: 8px; flex-shrink: 0;
+}}
+.ecal-impact {{
+  font-size: 10px; font-weight: 700; letter-spacing: 0.5px;
+  padding: 2px 7px; border-radius: 2px;
+  white-space: nowrap;
+}}
+.ecal-impact.high {{ background: rgba(255,51,85,0.15); color: var(--red); }}
+.ecal-impact.medium {{ background: rgba(255,215,0,0.15); color: var(--yellow); }}
+.ecal-impact.low {{ background: rgba(0,255,85,0.1); color: var(--green); }}
+
+.ecal-status {{
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px; font-weight: 700; letter-spacing: 0.5px;
+  padding: 2px 7px; border-radius: 2px;
+}}
+.ecal-status.today {{ background: rgba(255,51,85,0.2); color: var(--red); animation: blink 1.5s step-end infinite; }}
+.ecal-status.thisweek {{ background: rgba(255,106,0,0.2); color: var(--orange); }}
+.ecal-status.upcoming {{ background: rgba(41,182,255,0.15); color: var(--blue); }}
+.ecal-status.scheduled {{ background: rgba(255,255,255,0.05); color: var(--muted); }}
+
+.ecal-region-badge {{
+  font-size: 10px; font-weight: 600; padding: 2px 6px;
+  border-radius: 2px; letter-spacing: 0.5px;
+  background: rgba(255,255,255,0.06); color: var(--muted);
+}}
+
+.ecal-news-section {{
+  margin-top: 24px; padding-top: 16px;
+  border-top: 2px solid var(--orange-dim);
+}}
+.ecal-news-title {{
+  color: var(--orange); font-size: 12px; font-weight: 700;
+  letter-spacing: 2px; margin-bottom: 12px;
+}}
+.ecal-news-item {{
+  padding: 8px 0; border-bottom: 1px solid var(--border2);
+  cursor: pointer; transition: background 0.12s;
+}}
+.ecal-news-item:hover {{ background: rgba(255,106,0,0.04); }}
+.ecal-news-headline {{
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px; color: var(--text); line-height: 1.4;
+}}
+.ecal-news-meta {{
+  font-size: 11px; color: var(--muted); margin-top: 3px;
+}}
+.ecal-news-expand {{
+  display: none; padding: 8px 0 4px 0;
+}}
+.ecal-news-item.open .ecal-news-expand {{ display: block; }}
+.ecal-news-summary {{
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px; color: #aaa; line-height: 1.6;
+  margin-bottom: 6px;
+}}
+.ecal-news-link {{
+  color: var(--orange); font-size: 12px; font-weight: 600;
+  text-decoration: none; border-bottom: 1px solid rgba(255,106,0,0.3);
+}}
+
+.ecal-count-badge {{
+  display: inline-block; background: var(--orange);
+  color: #000; font-size: 10px; font-weight: 700;
+  padding: 1px 6px; border-radius: 8px; margin-left: 6px;
+}}
+
+@media (max-width: 600px) {{
+  .ecal-event {{ grid-template-columns: 70px 1fr; gap: 6px; }}
+  .ecal-event-meta {{ grid-column: 1 / -1; }}
+  .ecal-filters {{ padding: 8px 10px; }}
+}}
 </style>
 </head>
 <body>
@@ -1222,6 +1603,10 @@ body.light .cat-tabs-wrap::after {{
         <span class="sb-name">🌎 LATAM</span>
         <span class="sb-count">{cat_counts["latam"]}</span>
       </div>
+      <div class="sb-item" id="sb-event_calendar"    onclick="switchCat('event_calendar',this)" tabindex="0" role="button">
+        <span class="sb-name">📅 Event Calendar</span>
+        <span class="sb-count" id="ecal-sidebar-count">--</span>
+      </div>
     </div>
 
     <!-- Sources ── -->
@@ -1278,6 +1663,7 @@ body.light .cat-tabs-wrap::after {{
       <div class="cat-tab"        id="tab-europe_uk"         onclick="switchCat('europe_uk',null)" tabindex="0" role="tab">🇪🇺 EUROPE & UK</div>
       <div class="cat-tab"        id="tab-esg_climate"       onclick="switchCat('esg_climate',null)" tabindex="0" role="tab">🌱 ESG & CLIMATE</div>
       <div class="cat-tab"        id="tab-latam"             onclick="switchCat('latam',null)" tabindex="0" role="tab">🌎 LATAM</div>
+      <div class="cat-tab"        id="tab-event_calendar"    onclick="switchCat('event_calendar',null)" tabindex="0" role="tab">📅 EVENT CALENDAR</div>
     </div>
     </div>
 
@@ -1290,12 +1676,34 @@ body.light .cat-tabs-wrap::after {{
     </div>
 
     <!-- ── NEWS AREA ── -->
-    <div class="news-area">
+    <div class="news-area" id="newsPanel">
       <div class="news-hdr">
         <span class="news-hdr-title" id="newsTitle">▶ MARKET UPDATES</span>
         <span class="news-hdr-meta" id="newsSubtitle">Click headline to expand · {current_time}</span>
       </div>
       <div class="news-col" id="newsCol"></div>
+    </div>
+
+    <!-- ── EVENT CALENDAR PANEL ── -->
+    <div class="event-calendar-panel" id="eventCalendarPanel">
+      <div class="ecal-header">
+        <div>
+          <div class="ecal-title">📅 KEY EVENT CALENDAR</div>
+          <div class="ecal-subtitle">Market-moving dates · Auto-generated {current_time}</div>
+        </div>
+      </div>
+      <div class="ecal-filters" id="ecalFilters">
+        <button class="ecal-filter-btn active" onclick="filterEvents('all')">ALL</button>
+        <button class="ecal-filter-btn" onclick="filterEvents('India')">🇮🇳 INDIA</button>
+        <button class="ecal-filter-btn" onclick="filterEvents('USA')">🇺🇸 USA</button>
+        <button class="ecal-filter-btn" onclick="filterEvents('Europe')">🇪🇺 EUROPE</button>
+        <button class="ecal-filter-btn" onclick="filterEvents('Asia')">🌏 ASIA</button>
+        <button class="ecal-filter-btn" onclick="filterEvents('Global')">🌍 GLOBAL</button>
+        <button class="ecal-filter-btn" onclick="filterEvents('HIGH')">🔴 HIGH IMPACT</button>
+      </div>
+      <div class="ecal-body" id="ecalBody">
+        <!-- Populated by JS -->
+      </div>
     </div>
 
   </div><!-- /main -->
@@ -1316,9 +1724,95 @@ body.light .cat-tabs-wrap::after {{
 <script>
 // ── All news injected by Python ──
 const NEWS_DATA = {news_json};
+const EVENT_CALENDAR = {event_cal_json};
+const EVENT_NEWS = {event_news_json};
 
 // ── Current active category ──
 let currentCat = 'markets';
+let eventFilter = 'all';
+
+// ════════════════════════════
+// EVENT CALENDAR RENDERING
+// ════════════════════════════
+function filterEvents(filter) {{
+  eventFilter = filter;
+  document.querySelectorAll('.ecal-filter-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  renderEventCalendar();
+}}
+
+function renderEventCalendar() {{
+  const body = document.getElementById('ecalBody');
+  let events = EVENT_CALENDAR;
+
+  if (eventFilter === 'HIGH') {{
+    events = events.filter(e => e.impact.includes('HIGH'));
+  }} else if (eventFilter !== 'all') {{
+    events = events.filter(e => e.region === eventFilter);
+  }}
+
+  // Group by month
+  const months = {{}};
+  events.forEach(e => {{
+    const key = e.date.slice(0, 7); // YYYY-MM
+    if (!months[key]) months[key] = [];
+    months[key].push(e);
+  }});
+
+  let html = '';
+  for (const [monthKey, items] of Object.entries(months)) {{
+    const d = new Date(monthKey + '-01');
+    const label = d.toLocaleDateString('en-US', {{ month: 'long', year: 'numeric' }});
+    html += `<div class="ecal-month-group">
+      <div class="ecal-month-label">${{label.toUpperCase()}} <span style="color:var(--muted);font-size:10px">(${{items.length}} events)</span></div>`;
+
+    items.forEach(e => {{
+      const dateParts = e.date.split('-');
+      const dayDate = new Date(dateParts[0], dateParts[1]-1, dateParts[2]);
+      const dayStr = dayDate.toLocaleDateString('en-US', {{ month: 'short', day: 'numeric', weekday: 'short' }});
+
+      const impactCls = e.impact.includes('HIGH') ? 'high' : e.impact.includes('MEDIUM') ? 'medium' : 'low';
+      const statusCls = e.status === 'TODAY' ? 'today' : e.status === 'THIS WEEK' ? 'thisweek' : e.status === 'UPCOMING' ? 'upcoming' : 'scheduled';
+
+      html += `<div class="ecal-event">
+        <div class="ecal-date">${{dayStr}}</div>
+        <div class="ecal-event-title">${{e.title}}
+          <span class="ecal-region-badge">${{e.category}}</span>
+        </div>
+        <div class="ecal-event-meta">
+          <span class="ecal-impact ${{impactCls}}">${{e.impact}}</span>
+          <span class="ecal-status ${{statusCls}}">${{e.status}}${{e.days_away > 0 ? ' · ' + e.days_away + 'd' : ''}}</span>
+        </div>
+      </div>`;
+    }});
+    html += '</div>';
+  }}
+
+  // Add related news
+  if (EVENT_NEWS.length > 0) {{
+    html += `<div class="ecal-news-section">
+      <div class="ecal-news-title">▶ RELATED EVENT NEWS (${{EVENT_NEWS.length}} ARTICLES)</div>`;
+    EVENT_NEWS.forEach((n, i) => {{
+      const link = n.link && n.link !== '#' ? `<a class="ecal-news-link" href="${{n.link}}" target="_blank">Read ↗</a>` : '';
+      html += `<div class="ecal-news-item" onclick="this.classList.toggle('open')">
+        <div class="ecal-news-headline">${{n.title}}</div>
+        <div class="ecal-news-meta">${{n.source}} · ${{n.time}}</div>
+        <div class="ecal-news-expand">
+          <div class="ecal-news-summary">${{n.summary}}</div>
+          ${{link}}
+        </div>
+      </div>`;
+    }});
+    html += '</div>';
+  }}
+
+  if (!html) html = '<div class="no-news">No events match this filter.</div>';
+  body.innerHTML = html;
+
+  // Update sidebar count
+  const countEl = document.getElementById('ecal-sidebar-count');
+  if (countEl) countEl.textContent = EVENT_CALENDAR.length;
+}}
 
 // ════════════════════════════
 // RENDER NEWS — NEWSPAPER COLUMN (Option B)
@@ -1436,7 +1930,21 @@ function switchCat(cat, sidebarEl) {{
   const tabEl = document.getElementById('tab-' + cat);
   if (tabEl) tabEl.classList.add('active');
 
-  renderNews(cat);
+  // Toggle panels
+  const newsPanel = document.getElementById('newsPanel');
+  const ecalPanel = document.getElementById('eventCalendarPanel');
+  const searchBox = document.querySelector('.news-search');
+  if (cat === 'event_calendar') {{
+    if (newsPanel) newsPanel.style.display = 'none';
+    if (ecalPanel) ecalPanel.classList.add('active');
+    if (searchBox) searchBox.style.display = 'none';
+    renderEventCalendar();
+  }} else {{
+    if (newsPanel) newsPanel.style.display = '';
+    if (ecalPanel) ecalPanel.classList.remove('active');
+    if (searchBox) searchBox.style.display = '';
+    renderNews(cat);
+  }}
 }}
 
 // ════════════════════════════
@@ -2173,6 +2681,9 @@ document.addEventListener('keydown', (e) => {{
 window.addEventListener('DOMContentLoaded', () => {{
   buildTicker();
   renderNews('markets');
+  // Set event calendar sidebar count
+  const ecalCount = document.getElementById('ecal-sidebar-count');
+  if (ecalCount) ecalCount.textContent = EVENT_CALENDAR.length;
 
   // Set initial max-height for smooth collapse animation
   ['usa', 'india'].forEach(id => {{
@@ -2239,8 +2750,16 @@ def main():
     total = sum(len(v) for v in all_news.values())
     logging.info(f"Total articles fetched: {total}")
 
+    logging.info("Computing Key Event Calendar …")
+    event_calendar = compute_scheduled_events()
+    logging.info(f"  {len(event_calendar)} scheduled events computed")
+
+    logging.info("Fetching event-related news …")
+    event_news = fetch_event_news()
+    logging.info(f"  {len(event_news)} event news articles")
+
     logging.info("Generating index.html …")
-    html = generate_complete_html(all_news)
+    html = generate_complete_html(all_news, event_calendar, event_news)
 
     output = "index.html"
     with open(output, "w", encoding="utf-8") as f:
