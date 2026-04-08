@@ -629,10 +629,17 @@ def _fetch_text(url: str) -> str:
 
 
 def _fred_csv_last_rows(series_id: str, n: int = 14) -> list[list[str]]:
-    """Fetch FRED CSV and return last n rows as [date, value] pairs."""
+    """Fetch FRED CSV and return last n valid rows as [date, value] pairs.
+    FRED uses '.' for missing/unreleased values — those rows are skipped."""
     text = _fetch_text(f"https://fred.stlouisfed.org/graph/fredgraph.csv?id={series_id}")
-    lines = [l for l in text.strip().split("\n") if l and not l.startswith("DATE")]
-    return [l.split(",") for l in lines[-n:]]
+    rows = []
+    for l in text.strip().split("\n"):
+        if not l or l.startswith("DATE"):
+            continue
+        parts = l.split(",")
+        if len(parts) >= 2 and parts[1].strip() not in (".", "", "NA"):
+            rows.append(parts)
+    return rows[-n:]
 
 
 def _fred_yoy(series_id: str) -> tuple[str, str, str]:
@@ -650,13 +657,18 @@ def _fred_yoy(series_id: str) -> tuple[str, str, str]:
     return f"{yoy:.1f}", label, rows[-1][0]
 
 
-def _world_bank(indicator: str, country: str = "IN", mrv: int = 2):
-    """Fetch latest value from World Bank API."""
-    url = f"https://api.worldbank.org/v2/country/{country}/indicator/{indicator}?format=json&mrv={mrv}"
-    data = _fetch_json(url)
+def _world_bank(indicator: str, country: str = "IN", mrv: int = 10):
+    """Fetch latest value from World Bank API. mrv=4 gives more rows to find non-null."""
+    url = f"https://api.worldbank.org/v2/country/{country}/indicator/{indicator}?format=json&mrv={mrv}&per_page=10"
+    req = urllib.request.Request(url, headers={
+        "User-Agent": "Mozilla/5.0 (compatible; MarketDashboard/2.0)",
+        "Accept": "application/json",
+    })
+    with urllib.request.urlopen(req, timeout=20) as resp:
+        data = json.loads(resp.read().decode("utf-8", errors="replace"))
     rows = [r for r in (data[1] or []) if r.get("value") is not None]
     if not rows:
-        raise ValueError("No data")
+        raise ValueError("No data from World Bank")
     return rows
 
 
@@ -784,7 +796,7 @@ def fetch_all_economic_data() -> dict:
 
     def fetch_india_cpi():
         # World Bank annual CPI inflation (most recent available)
-        rows = _world_bank("FP.CPI.TOTL.ZG", "IN", 2)
+        rows = _world_bank("FP.CPI.TOTL.ZG", "IN")
         val = float(rows[0]["value"])
         yr = str(rows[0]["date"])
         return {"value": f"{val:.1f}%", "note": f"FY{yr[2:]} (WB annual)",
@@ -792,7 +804,7 @@ def fetch_all_economic_data() -> dict:
     safe("india_cpi", fetch_india_cpi)
 
     def fetch_india_gdp():
-        rows = _world_bank("NY.GDP.MKTP.KD.ZG", "IN", 2)
+        rows = _world_bank("NY.GDP.MKTP.KD.ZG", "IN")
         val = float(rows[0]["value"])
         yr = str(rows[0]["date"])
         return {"value": f"{val:.1f}%", "note": f"FY{yr[2:]} (WB annual)",
@@ -800,7 +812,7 @@ def fetch_all_economic_data() -> dict:
     safe("india_gdp", fetch_india_gdp)
 
     def fetch_india_unemp():
-        rows = _world_bank("SL.UEM.TOTL.ZS", "IN", 2)
+        rows = _world_bank("SL.UEM.TOTL.ZS", "IN")
         val = float(rows[0]["value"])
         yr = str(rows[0]["date"])
         return {"value": f"{val:.1f}%", "note": f"FY{yr[2:]} (WB annual)",
@@ -808,7 +820,7 @@ def fetch_all_economic_data() -> dict:
     safe("india_unemp", fetch_india_unemp)
 
     def fetch_india_wpi():
-        rows = _world_bank("FP.WPI.TOTL", "IN", 3)
+        rows = _world_bank("FP.WPI.TOTL", "IN")
         if len(rows) >= 2:
             cur, prev = float(rows[0]["value"]), float(rows[1]["value"])
             yoy = ((cur - prev) / prev) * 100
@@ -819,7 +831,7 @@ def fetch_all_economic_data() -> dict:
 
     def fetch_india_pmi():
         # No free real-time PMI API; use World Bank manufacturing growth as proxy
-        rows = _world_bank("NV.IND.MANF.KD.ZG", "IN", 2)
+        rows = _world_bank("NV.IND.MANF.KD.ZG", "IN")
         val = float(rows[0]["value"])
         yr = str(rows[0]["date"])
         return {"value": f"{val:.1f}%", "note": f"Mfg growth · FY{yr[2:]} (WB)",
@@ -827,7 +839,7 @@ def fetch_all_economic_data() -> dict:
     safe("india_pmi", fetch_india_pmi)
 
     def fetch_india_fiscal():
-        rows = _world_bank("GC.BAL.CASH.GD.ZS", "IN", 2)
+        rows = _world_bank("GC.BAL.CASH.GD.ZS", "IN")
         val = abs(float(rows[0]["value"]))
         yr = str(rows[0]["date"])
         return {"value": f"{val:.1f}%", "note": f"of GDP · FY{yr[2:]} (WB annual)", "css": "neu"}
@@ -2704,6 +2716,309 @@ async function fetchCPI() {{
 // INDIA: Fiscal Deficit (World Bank GC.BAL.CASH.GD.ZS)
 // ════════════════════════════
 // ════════════════════════════
+// ════════════════════════════════════════════════════════════
+// LIVE ECONOMIC INDICATOR FETCHERS
+// Primary: World Bank API (CORS-open, no key)
+// Backup:  Google News RSS (parse value from headlines)
+// These run after hydrateEconData() to fill any gaps or refresh
+// ════════════════════════════════════════════════════════════
+
+// ── Shared helpers ──
+
+async function _wb(indicator, country, mrv) {{
+  mrv = mrv || 4;
+  const url = `https://api.worldbank.org/v2/country/${{country}}/indicator/${{indicator}}?format=json&mrv=${{mrv}}&per_page=10`;
+  const r = await fetch(url, {{signal: AbortSignal.timeout(12000)}});
+  if (!r.ok) throw new Error('WB ' + r.status);
+  const d = await r.json();
+  const rows = (d[1] || []).filter(x => x.value !== null);
+  if (!rows.length) throw new Error('No WB data for ' + indicator);
+  return rows[0];
+}}
+
+async function _rss(query, pats, min, max, lang, geo, ceid) {{
+  lang = lang || 'en-US'; geo = geo || 'US'; ceid = ceid || 'US:en';
+  const url = 'https://news.google.com/rss/search?q=' + encodeURIComponent(query) + '&hl=' + lang + '&gl=' + geo + '&ceid=' + ceid;
+  const r = await fetch(url, {{signal: AbortSignal.timeout(8000)}});
+  if (!r.ok) throw new Error('RSS failed');
+  const txt = await r.text();
+  for (const p of pats) {{
+    const m = txt.match(p);
+    if (m) {{
+      const v = parseFloat(m[1]);
+      if (v >= min && v <= max) return v;
+    }}
+  }}
+  throw new Error('No match in RSS');
+}}
+
+function _sbSet(valId, noteId, value, note, css) {{
+  const el = document.getElementById(valId);
+  const ne = document.getElementById(noteId);
+  if (el) {{ el.textContent = value; el.className = 'sb-econ-val ' + (css || 'neu'); }}
+  if (ne && note) ne.textContent = note;
+}}
+
+// ── USA: Fed Funds Rate ──
+async function liveUSFedFunds() {{
+  try {{
+    // FRED via proxy (daily series, tiny payload)
+    const r = await fetchWithProxies('https://fred.stlouisfed.org/graph/fredgraph.csv?id=DFEDTARL');
+    let txt = await r.text();
+    try {{ const j = JSON.parse(txt); if (j.contents) txt = j.contents; }} catch(e) {{}}
+    const lines = txt.trim().split('\n').filter(l => l && !l.startsWith('DATE') && !l.endsWith(',.')).slice(-3);
+    const lower = parseFloat(lines[lines.length-1].split(',')[1]);
+    const upperR = await fetchWithProxies('https://fred.stlouisfed.org/graph/fredgraph.csv?id=DFEDTARU');
+    let ut = await upperR.text();
+    try {{ const j = JSON.parse(ut); if (j.contents) ut = j.contents; }} catch(e) {{}}
+    const uLines = ut.trim().split('\n').filter(l => l && !l.startsWith('DATE') && !l.endsWith(',.')).slice(-3);
+    const upper = parseFloat(uLines[uLines.length-1].split(',')[1]);
+    if (!isNaN(lower) && !isNaN(upper)) {{
+      _sbSet('sbv-fedfunds', null, lower.toFixed(2) + '–' + upper.toFixed(2) + '%', '', 'neu');
+      return;
+    }}
+  }} catch(e) {{}}
+  // RSS fallback
+  try {{
+    const v = await _rss('Federal Reserve federal funds rate target', [
+      /federal funds rate[^0-9%]{{0,30}}(\d+\.?\d*)\s*%/i,
+      /(\d+\.?\d*)[\s–-]+(\d+\.?\d*)\s*%.*?federal/i,
+      /fed rate[^0-9%]{{0,20}}(\d+\.\d+)/i
+    ], 0, 25);
+    _sbSet('sbv-fedfunds', null, v.toFixed(2) + '%', 'Fed · news', 'neu');
+  }} catch(e) {{}}
+}}
+
+// ── USA: CPI YoY ──
+async function liveUSCPI() {{
+  try {{
+    const row = await _wb('FP.CPI.TOTL.ZG', 'US');
+    const v = parseFloat(row.value);
+    _sbSet('sbv-cpi', null, v.toFixed(1) + '%',  '',
+           v > 3 ? 'neg' : v <= 2 ? 'pos' : 'neu');
+    // Also update ticker bar
+    const vEl = document.getElementById('val-cpi');
+    const cEl = document.getElementById('chg-cpi');
+    if (vEl) vEl.textContent = v.toFixed(1) + '%';
+    if (cEl) cEl.textContent = 'YoY · ' + row.date;
+    return;
+  }} catch(e) {{}}
+  try {{
+    const v = await _rss('US CPI inflation rate year over year', [
+      /cpi[^0-9%]{{0,20}}(\d+\.?\d*)\s*%/i,
+      /inflation rate[^0-9%]{{0,20}}(\d+\.?\d*)\s*%/i
+    ], 0, 20);
+    _sbSet('sbv-cpi', null, v.toFixed(1) + '%', 'news', v > 3 ? 'neg' : v <= 2 ? 'pos' : 'neu');
+  }} catch(e) {{}}
+}}
+
+// ── USA: Core CPI ──
+async function liveUSCoreCPI() {{
+  try {{
+    const v = await _rss('US core CPI inflation excluding food energy', [
+      /core cpi[^0-9%]{{0,20}}(\d+\.?\d*)\s*%/i,
+      /core inflation[^0-9%]{{0,20}}(\d+\.?\d*)\s*%/i
+    ], 0, 15);
+    _sbSet('sbv-corecpi', 'sbn-corecpi', v.toFixed(1) + '%', 'Core · news', v > 3 ? 'neg' : v <= 2 ? 'pos' : 'neu');
+  }} catch(e) {{}}
+}}
+
+// ── USA: GDP Growth ──
+async function liveUSGDP() {{
+  try {{
+    const row = await _wb('NY.GDP.MKTP.KD.ZG', 'US');
+    const v = parseFloat(row.value);
+    _sbSet('sbv-gdp', 'sbn-gdp', v.toFixed(1) + '%', row.date + ' (WB annual)', v > 0 ? 'pos' : 'neg');
+    return;
+  }} catch(e) {{}}
+  try {{
+    const v = await _rss('US GDP growth rate quarterly', [
+      /gdp[^0-9%-]{{0,20}}(\d+\.?\d*)\s*%/i,
+      /economy grew[^0-9%]{{0,20}}(\d+\.?\d*)\s*%/i
+    ], -10, 20);
+    _sbSet('sbv-gdp', 'sbn-gdp', v.toFixed(1) + '%', 'news', v > 0 ? 'pos' : 'neg');
+  }} catch(e) {{}}
+}}
+
+// ── USA: Unemployment ──
+async function liveUSUnemployment() {{
+  try {{
+    const row = await _wb('SL.UEM.TOTL.ZS', 'US');
+    const v = parseFloat(row.value);
+    _sbSet('sbv-unemployment', 'sbn-unemployment', v.toFixed(1) + '%', row.date + ' (WB)',
+           v < 4 ? 'pos' : v > 5 ? 'neg' : 'neu');
+    return;
+  }} catch(e) {{}}
+  try {{
+    const v = await _rss('US unemployment rate percent', [
+      /unemployment rate[^0-9%]{{0,20}}(\d+\.?\d*)\s*%/i,
+      /jobless rate[^0-9%]{{0,20}}(\d+\.?\d*)\s*%/i
+    ], 1, 20);
+    _sbSet('sbv-unemployment', 'sbn-unemployment', v.toFixed(1) + '%', 'news',
+           v < 4 ? 'pos' : v > 5 ? 'neg' : 'neu');
+  }} catch(e) {{}}
+}}
+
+// ── USA: NFP ──
+async function liveUSNFP() {{
+  try {{
+    const v = await _rss('US nonfarm payrolls jobs added thousands', [
+      /payrolls.{{0,20}}(\d+)K?\s*(?:thousand|jobs|new)/i,
+      /payrolls[^0-9]{{0,10}}(\d+)[\s,]{{0,3}}000/i,
+      /nonfarm[^0-9]{{0,20}}(\d+\.?\d*)[Kk]/i
+    ], 1, 2000);
+    const sign = v >= 0 ? '+' : '';
+    _sbSet('sbv-nfp', 'sbn-nfp', sign + Math.round(v) + 'K', 'news', v > 0 ? 'pos' : 'neg');
+  }} catch(e) {{}}
+}}
+
+// ── USA: PPI ──
+async function liveUSPPI() {{
+  try {{
+    const v = await _rss('US producer price index PPI year over year', [
+      /ppi[^0-9%]{{0,20}}(\d+\.?\d*)\s*%/i,
+      /producer price[^0-9%]{{0,20}}(\d+\.?\d*)\s*%/i
+    ], -5, 20);
+    _sbSet('sbv-ppi', 'sbn-ppi', v.toFixed(1) + '%', 'PPI · news', v > 3 ? 'neg' : v <= 2 ? 'pos' : 'neu');
+  }} catch(e) {{}}
+}}
+
+// ── India: Repo Rate ──
+async function liveIndiaRepo() {{
+  try {{
+    const v = await _rss('RBI repo rate percent', [
+      /repo rate[^0-9%]{{0,30}}(\d+\.?\d*)\s*%/i,
+      /(\d+\.?\d*)\s*%\s*repo rate/i,
+      /repo rate[^0-9]{{0,20}}(\d+\.\d+)/i
+    ], 1, 20, 'en-IN', 'IN', 'IN:en');
+    _sbSet('sbv-reporate', 'sbn-reporate', v.toFixed(2) + '%', 'RBI · news', 'neu');
+  }} catch(e) {{}}
+}}
+
+// ── India: CPI ──
+async function liveIndiaCPI() {{
+  try {{
+    const row = await _wb('FP.CPI.TOTL.ZG', 'IN');
+    const v = parseFloat(row.value);
+    _sbSet('sbv-india-cpi', 'sbn-india-cpi', v.toFixed(1) + '%', 'FY' + String(row.date).slice(2) + ' (WB)',
+           v > 6 ? 'neg' : v < 4 ? 'pos' : 'neu');
+    return;
+  }} catch(e) {{}}
+  try {{
+    const v = await _rss('India CPI inflation rate', [
+      /india.*?cpi[^0-9%]{{0,20}}(\d+\.?\d*)\s*%/i,
+      /cpi.*?india[^0-9%]{{0,20}}(\d+\.?\d*)\s*%/i
+    ], 0, 25, 'en-IN', 'IN', 'IN:en');
+    _sbSet('sbv-india-cpi', 'sbn-india-cpi', v.toFixed(1) + '%', 'news', v > 6 ? 'neg' : v < 4 ? 'pos' : 'neu');
+  }} catch(e) {{}}
+}}
+
+// ── India: WPI ──
+async function liveIndiaWPI() {{
+  try {{
+    const rows = await (async () => {{
+      const url = 'https://api.worldbank.org/v2/country/IN/indicator/FP.WPI.TOTL?format=json&mrv=6&per_page=10';
+      const r = await fetch(url, {{signal: AbortSignal.timeout(12000)}});
+      const d = await r.json();
+      return (d[1] || []).filter(x => x.value !== null);
+    }})();
+    if (rows.length >= 2) {{
+      const yoy = ((rows[0].value - rows[1].value) / rows[1].value * 100);
+      _sbSet('sbv-india-wpi', 'sbn-india-wpi', yoy.toFixed(1) + '%', 'FY' + String(rows[0].date).slice(2) + ' (WB)', 'neu');
+      return;
+    }}
+  }} catch(e) {{}}
+  try {{
+    const v = await _rss('India WPI wholesale price index inflation', [
+      /wpi[^0-9%]{{0,20}}(\d+\.?\d*)\s*%/i,
+      /wholesale price[^0-9%]{{0,20}}(\d+\.?\d*)\s*%/i
+    ], -10, 25, 'en-IN', 'IN', 'IN:en');
+    _sbSet('sbv-india-wpi', 'sbn-india-wpi', v.toFixed(1) + '%', 'news', 'neu');
+  }} catch(e) {{}}
+}}
+
+// ── India: Unemployment ──
+async function liveIndiaUnemp() {{
+  try {{
+    const row = await _wb('SL.UEM.TOTL.ZS', 'IN');
+    const v = parseFloat(row.value);
+    _sbSet('sbv-india-unemp', 'sbn-india-unemp', v.toFixed(1) + '%', 'FY' + String(row.date).slice(2) + ' (WB)',
+           v < 5 ? 'pos' : 'neg');
+    return;
+  }} catch(e) {{}}
+  try {{
+    const v = await _rss('India unemployment rate', [
+      /india.*?unemployment[^0-9%]{{0,20}}(\d+\.?\d*)\s*%/i,
+      /unemployment.*?india[^0-9%]{{0,20}}(\d+\.?\d*)\s*%/i
+    ], 0, 30, 'en-IN', 'IN', 'IN:en');
+    _sbSet('sbv-india-unemp', 'sbn-india-unemp', v.toFixed(1) + '%', 'news', v < 5 ? 'pos' : 'neg');
+  }} catch(e) {{}}
+}}
+
+// ── India: Mfg PMI ──
+async function liveIndiaPMI() {{
+  try {{
+    const v = await _rss('India Manufacturing PMI index', [
+      /manufacturing pmi[^0-9]{{0,10}}(\d+\.?\d*)/i,
+      /india pmi[^0-9]{{0,10}}(\d+\.?\d*)/i,
+      /pmi.*?(\d{{2}}\.\d)/i
+    ], 30, 80, 'en-IN', 'IN', 'IN:en');
+    _sbSet('sbv-india-pmi', 'sbn-india-pmi', v.toFixed(1), 'PMI · news', v > 50 ? 'pos' : 'neg');
+  }} catch(e) {{
+    // WB manufacturing growth as proxy
+    try {{
+      const row = await _wb('NV.IND.MANF.KD.ZG', 'IN');
+      const v = parseFloat(row.value);
+      _sbSet('sbv-india-pmi', 'sbn-india-pmi', v.toFixed(1) + '%', 'Mfg Gr (WB)', v > 0 ? 'pos' : 'neg');
+    }} catch(e2) {{}}
+  }}
+}}
+
+// ── India: GDP Growth ──
+async function liveIndiaGDP() {{
+  try {{
+    const row = await _wb('NY.GDP.MKTP.KD.ZG', 'IN');
+    const v = parseFloat(row.value);
+    _sbSet('sbv-india-gdp', 'sbn-india-gdp', v.toFixed(1) + '%', 'FY' + String(row.date).slice(2) + ' (WB)',
+           v > 5 ? 'pos' : v < 0 ? 'neg' : 'neu');
+    return;
+  }} catch(e) {{}}
+  try {{
+    const v = await _rss('India GDP growth rate', [
+      /india.*?gdp[^0-9%]{{0,20}}(\d+\.?\d*)\s*%/i,
+      /gdp.*?india[^0-9%]{{0,20}}(\d+\.?\d*)\s*%/i
+    ], 0, 20, 'en-IN', 'IN', 'IN:en');
+    _sbSet('sbv-india-gdp', 'sbn-india-gdp', v.toFixed(1) + '%', 'news', v > 5 ? 'pos' : v < 0 ? 'neg' : 'neu');
+  }} catch(e) {{}}
+}}
+
+// ── India: Fiscal Deficit ──
+async function liveIndiaFiscal() {{
+  try {{
+    const row = await _wb('GC.BAL.CASH.GD.ZS', 'IN');
+    const v = Math.abs(parseFloat(row.value));
+    _sbSet('sbv-india-fiscal', 'sbn-india-fiscal', v.toFixed(1) + '%', 'of GDP · FY' + String(row.date).slice(2) + ' (WB)', 'neu');
+    return;
+  }} catch(e) {{}}
+  try {{
+    const v = await _rss('India fiscal deficit percent GDP', [
+      /fiscal deficit[^0-9%]{{0,20}}(\d+\.?\d*)\s*%/i,
+      /(\d+\.?\d*)\s*%.*?fiscal deficit/i
+    ], 0, 15, 'en-IN', 'IN', 'IN:en');
+    _sbSet('sbv-india-fiscal', 'sbn-india-fiscal', v.toFixed(1) + '%', 'of GDP · news', 'neu');
+  }} catch(e) {{}}
+}}
+
+// Run all live fetchers — called at init after hydrateEconData()
+async function loadAllEconomicIndicators() {{
+  await Promise.allSettled([
+    liveUSFedFunds(), liveUSCPI(), liveUSCoreCPI(), liveUSGDP(),
+    liveUSUnemployment(), liveUSNFP(), liveUSPPI(),
+    liveIndiaRepo(), liveIndiaCPI(), liveIndiaWPI(), liveIndiaUnemp(),
+    liveIndiaPMI(), liveIndiaGDP(), liveIndiaFiscal(),
+  ]);
+}}
+
 // CLOCK & REFRESH
 // ════════════════════════════
 function updateClock() {{
@@ -2787,6 +3102,8 @@ window.addEventListener('DOMContentLoaded', () => {{
 
   // Hydrate sidebar with server-fetched data (instant, no CORS)
   hydrateEconData();
+  // Live JS fetch — fills gaps, uses WB + Google RSS
+  loadAllEconomicIndicators();
 
   // Set initial max-height for smooth collapse animation
   ['usa', 'india'].forEach(id => {{
