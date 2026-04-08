@@ -632,7 +632,7 @@ def format_pub_date(raw: str) -> str:
 #  Fetches all indicators from Python directly
 #  (no CORS proxy needed — always fresh)
 # ─────────────────────────────────────────────
-ECON_FETCH_TIMEOUT = 12
+ECON_FETCH_TIMEOUT = 30
 
 
 def _fetch_json(url: str):
@@ -916,6 +916,65 @@ def fetch_all_economic_data() -> dict:
             return {"value": f"{yoy}%", "note": label,
                     "css": "neg" if v > 3 else ("pos" if v <= 2 else "neu")}
         safe("us_ppi", fallback_ppi)
+
+    # ── FALLBACK: World Bank + RBI for India indicators ──
+    if not result.get("india_repo"):
+        def fallback_repo():
+            html_text = _fetch_text("https://rbi.org.in/Scripts/bs_viewcontent.aspx?Id=2118")
+            match = re.search(r'Policy Repo Rate[^%]*?([0-9.]+)%', html_text, re.IGNORECASE)
+            if match:
+                return {"value": f"{float(match.group(1)):.2f}%", "note": "RBI", "css": "neu"}
+            raise ValueError("Pattern not found on RBI page")
+        safe("india_repo", fallback_repo)
+
+    if not result.get("india_cpi"):
+        def fallback_india_cpi():
+            rows = _world_bank("FP.CPI.TOTL.ZG", "IN", 2)
+            val = float(rows[0]["value"])
+            return {"value": f"{val:.1f}%", "note": f"FY{str(rows[0]['date'])[2:]} (annual)",
+                    "css": "neg" if val > 6 else ("pos" if val < 4 else "neu")}
+        safe("india_cpi", fallback_india_cpi)
+
+    if not result.get("india_gdp"):
+        def fallback_india_gdp():
+            rows = _world_bank("NY.GDP.MKTP.KD.ZG", "IN", 2)
+            val = float(rows[0]["value"])
+            return {"value": f"{val:.1f}%", "note": f"FY{str(rows[0]['date'])[2:]} (annual)",
+                    "css": "pos" if val > 5 else ("neg" if val < 0 else "neu")}
+        safe("india_gdp", fallback_india_gdp)
+
+    if not result.get("india_unemp"):
+        def fallback_india_unemp():
+            rows = _world_bank("SL.UEM.TOTL.ZS", "IN", 2)
+            val = float(rows[0]["value"])
+            return {"value": f"{val:.1f}%", "note": f"FY{str(rows[0]['date'])[2:]} (annual)",
+                    "css": "pos" if val < 5 else "neg"}
+        safe("india_unemp", fallback_india_unemp)
+
+    if not result.get("india_wpi"):
+        def fallback_india_wpi():
+            rows = _world_bank("FP.WPI.TOTL", "IN", 3)
+            if len(rows) >= 2:
+                cur, prev = float(rows[0]["value"]), float(rows[1]["value"])
+                yoy = ((cur - prev) / prev) * 100
+                return {"value": f"{yoy:.1f}%", "note": f"FY{str(rows[0]['date'])[2:]} (annual)", "css": "neu"}
+            raise ValueError("Not enough WPI data")
+        safe("india_wpi", fallback_india_wpi)
+
+    if not result.get("india_pmi"):
+        def fallback_india_pmi():
+            rows = _world_bank("NV.IND.MANF.KD.ZG", "IN", 2)
+            val = float(rows[0]["value"])
+            return {"value": f"{val:.1f}%", "note": f"Mfg Gr · FY{str(rows[0]['date'])[2:]} (annual)",
+                    "css": "pos" if val > 0 else "neg"}
+        safe("india_pmi", fallback_india_pmi)
+
+    if not result.get("india_fiscal"):
+        def fallback_india_fiscal():
+            rows = _world_bank("GC.BAL.CASH.GD.ZS", "IN", 2)
+            val = abs(float(rows[0]["value"]))
+            return {"value": f"{val:.1f}%", "note": f"of GDP · FY{str(rows[0]['date'])[2:]} (annual)", "css": "neu"}
+        safe("india_fiscal", fallback_india_fiscal)
 
     return result
 
