@@ -193,8 +193,10 @@ def _classify_event(event_name: str) -> str:
 def _compute_status(date_obj):
     now = datetime.now(timezone.utc).replace(tzinfo=None)
     days_away = (date_obj - now).days
-    if days_away < 0:
-        status = "TODAY" if days_away >= -1 else "PASSED"
+    if days_away < -2:
+        status = "PASSED"
+    elif days_away < 0:
+        status = "JUST PASSED"
     elif days_away == 0:
         status = "TODAY"
     elif days_away <= 7:
@@ -203,7 +205,7 @@ def _compute_status(date_obj):
         status = "UPCOMING"
     else:
         status = "SCHEDULED"
-    return status, max(days_away, 0)
+    return status, days_away  # keep negative for "days ago" display
 
 
 def fetch_live_economic_calendar() -> list[dict]:
@@ -250,8 +252,8 @@ def fetch_live_economic_calendar() -> list[dict]:
             except ValueError:
                 continue
 
-        # Skip past events
-        if date_obj < now - timedelta(days=1):
+        # Skip past events (older than 2 days)
+        if date_obj < now - timedelta(days=2):
             continue
 
         region = _REGION_MAP.get(country, "Global")
@@ -301,7 +303,7 @@ def _compute_fallback_events() -> list[dict]:
     events = []
 
     def add(date_obj, title, category, impact, region):
-        if date_obj and date_obj >= now - timedelta(days=1):
+        if date_obj and date_obj >= now - timedelta(days=2):
             status, days_away = _compute_status(date_obj)
             events.append({
                 "date": date_obj.strftime("%Y-%m-%d"),
@@ -1700,6 +1702,7 @@ body.light .ecal-month-label {{ background: var(--bg); }}
   padding: 3px 9px; border-radius: 3px;
 }}
 .ecal-status.today {{ background: rgba(255,51,85,0.2); color: var(--red); animation: blink 1.5s step-end infinite; }}
+.ecal-status.justpassed {{ background: rgba(180,100,255,0.18); color: #c084fc; border: 1px solid rgba(180,100,255,0.3); }}
 .ecal-status.thisweek {{ background: rgba(255,106,0,0.2); color: var(--orange); }}
 .ecal-status.upcoming {{ background: rgba(41,182,255,0.15); color: var(--blue); }}
 .ecal-status.scheduled {{ background: rgba(255,255,255,0.05); color: var(--muted); }}
@@ -2141,20 +2144,37 @@ function renderEventCalendar() {{
       const dayStr = dayDate.toLocaleDateString('en-US', {{ month: 'short', day: 'numeric', weekday: 'short' }});
 
       const impactCls = e.impact.includes('HIGH') ? 'high' : e.impact.includes('MEDIUM') ? 'medium' : 'low';
-      const statusCls = e.status === 'TODAY' ? 'today' : e.status === 'THIS WEEK' ? 'thisweek' : e.status === 'UPCOMING' ? 'upcoming' : 'scheduled';
+      const statusCls = e.status === 'TODAY' ? 'today'
+        : e.status === 'JUST PASSED' ? 'justpassed'
+        : e.status === 'THIS WEEK' ? 'thisweek'
+        : e.status === 'UPCOMING' ? 'upcoming' : 'scheduled';
+
+      // Days ago label for JUST PASSED
+      const daysAgo = e.days_away < 0 ? Math.abs(e.days_away) : 0;
+      const statusLabel = e.status === 'JUST PASSED'
+        ? `JUST PASSED · ${{daysAgo}}d ago`
+        : e.status + (e.days_away > 0 ? ' · ' + e.days_away + 'd' : '');
+
+      // Outcome result pill (shown when actual data exists or for JUST PASSED events)
+      let outcomePill = '';
+      if (e.actual) {{
+        outcomePill = `<span style="background:rgba(0,200,100,0.15);color:#4ade80;border:1px solid rgba(0,200,100,0.3);font-size:11px;font-weight:700;padding:2px 8px;border-radius:3px;margin-left:8px;">✓ OUTCOME: ${{e.actual}}</span>`;
+      }} else if (e.status === 'JUST PASSED') {{
+        outcomePill = `<span style="background:rgba(180,100,255,0.12);color:#c084fc;border:1px solid rgba(180,100,255,0.25);font-size:11px;font-weight:600;padding:2px 8px;border-radius:3px;margin-left:8px;">⏳ Result pending</span>`;
+      }}
 
       html += `<div class="ecal-event">
         <div class="ecal-date">${{dayStr}}</div>
         <div class="ecal-event-title">${{e.title}}
           <span class="ecal-region-badge">${{e.category}}</span>
           ${{e.country ? '<span class="ecal-region-badge">' + e.country + '</span>' : ''}}
+          ${{outcomePill}}
           ${{e.forecast ? '<span style="color:var(--blue);font-size:11px;margin-left:6px">Fcst: ' + e.forecast + '</span>' : ''}}
           ${{e.previous ? '<span style="color:var(--muted);font-size:11px;margin-left:4px">Prev: ' + e.previous + '</span>' : ''}}
-          ${{e.actual ? '<span style="color:var(--green);font-size:11px;font-weight:700;margin-left:4px">Act: ' + e.actual + '</span>' : ''}}
         </div>
         <div class="ecal-event-meta">
           <span class="ecal-impact ${{impactCls}}">${{e.impact}}</span>
-          <span class="ecal-status ${{statusCls}}">${{e.status}}${{e.days_away > 0 ? ' · ' + e.days_away + 'd' : ''}}</span>
+          <span class="ecal-status ${{statusCls}}">${{statusLabel}}</span>
         </div>
       </div>`;
     }});
