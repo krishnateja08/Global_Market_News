@@ -2641,10 +2641,10 @@ async function fetchCPI() {{
   }} catch (e) {{
     const vEl = document.getElementById('val-cpi');
     const cEl = document.getElementById('chg-cpi');
-    if (vEl) vEl.textContent = '2.8%';
-    if (cEl) cEl.textContent = 'YoY · Mar 2025 (cached)';
+    if (vEl) vEl.textContent = '—';
+    if (cEl) cEl.textContent = '—';
     const sbCpi = document.getElementById('sbv-cpi');
-    if (sbCpi) {{ sbCpi.textContent = '2.8%'; sbCpi.className = 'sb-econ-val neu'; }}
+    if (sbCpi) sbCpi.textContent = '—';
   }}
 }}
 
@@ -2714,8 +2714,8 @@ async function fetchCoreCPI() {{
   }} catch(e) {{
     const el = document.getElementById('sbv-corecpi');
     const note = document.getElementById('sbn-corecpi');
-    if (el) el.textContent = '3.3%';
-    if (note) note.innerHTML = 'Mar 2025 <span class="stale-badge">cached</span>';
+    if (el) el.textContent = '—';
+    if (note) note.innerHTML = '—';
   }}
 }}
 
@@ -2738,8 +2738,8 @@ async function fetchGDPGrowth() {{
   }} catch(e) {{
     const el = document.getElementById('sbv-gdp');
     const note = document.getElementById('sbn-gdp');
-    if (el) {{ el.textContent = '2.4%'; el.className = 'sb-econ-val pos'; }}
-    if (note) note.innerHTML = 'Q4 2024 <span class="stale-badge">cached</span>';
+    if (el) el.textContent = '—';
+    if (note) note.innerHTML = '—';
   }}
 }}
 
@@ -2759,8 +2759,8 @@ async function fetchUnemployment() {{
   }} catch(e) {{
     const el = document.getElementById('sbv-unemployment');
     const note = document.getElementById('sbn-unemployment');
-    if (el) {{ el.textContent = '4.2%'; el.className = 'sb-econ-val neu'; }}
-    if (note) note.innerHTML = 'Mar 2025 <span class="stale-badge">cached</span>';
+    if (el) el.textContent = '—';
+    if (note) note.textContent = '—';
   }}
 }}
 
@@ -2783,8 +2783,8 @@ async function fetchNFP() {{
   }} catch(e) {{
     const el = document.getElementById('sbv-nfp');
     const note = document.getElementById('sbn-nfp');
-    if (el) {{ el.textContent = '+228K'; el.className = 'sb-econ-val pos'; }}
-    if (note) note.innerHTML = 'Mar 2025 <span class="stale-badge">cached</span>';
+    if (el) el.textContent = '—';
+    if (note) note.innerHTML = '—';
   }}
 }}
 
@@ -2807,8 +2807,8 @@ async function fetchPPI() {{
   }} catch(e) {{
     const el = document.getElementById('sbv-ppi');
     const note = document.getElementById('sbn-ppi');
-    if (el) {{ el.textContent = '2.7%'; el.className = 'sb-econ-val neu'; }}
-    if (note) note.innerHTML = 'Feb 2025 <span class="stale-badge">cached</span>';
+    if (el) el.textContent = '—';
+    if (note) note.innerHTML = '—';
   }}
 }}
 
@@ -2840,8 +2840,8 @@ async function fetchIndiaCPI() {{
   }} catch(e) {{
     const el = document.getElementById('sbv-india-cpi');
     const note = document.getElementById('sbn-india-cpi');
-    if (el) {{ el.textContent = '4.95%'; el.className = 'sb-econ-val neu'; }}
-    if (note) note.innerHTML = 'FY24 <span class="stale-badge">cached</span>';
+    if (el) el.textContent = '—';
+    if (note) note.textContent = '—';
   }}
 }}
 
@@ -2859,8 +2859,8 @@ async function fetchIndiaGDP() {{
   }} catch(e) {{
     const el = document.getElementById('sbv-india-gdp');
     const note = document.getElementById('sbn-india-gdp');
-    if (el) {{ el.textContent = '6.5%'; el.className = 'sb-econ-val pos'; }}
-    if (note) note.innerHTML = 'FY24 <span class="stale-badge">cached</span>';
+    if (el) el.textContent = '—';
+    if (note) note.textContent = '—';
   }}
 }}
 
@@ -2878,8 +2878,8 @@ async function fetchIndiaUnemployment() {{
   }} catch(e) {{
     const el = document.getElementById('sbv-india-unemp');
     const note = document.getElementById('sbn-india-unemp');
-    if (el) {{ el.textContent = '4.2%'; el.className = 'sb-econ-val neu'; }}
-    if (note) note.innerHTML = 'FY25 <span class="stale-badge">cached</span>';
+    if (el) el.textContent = '—';
+    if (note) note.textContent = '—';
   }}
 }}
 
@@ -2908,8 +2908,8 @@ async function fetchIndiaRepoRate() {{
   // Fallback to last known value
   const el = document.getElementById('sbv-reporate');
   const note = document.getElementById('sbn-reporate');
-  if (el) {{ el.textContent = '6.00%'; el.className = 'sb-econ-val neu'; }}
-  if (note) note.innerHTML = 'Apr 2025 <span class="stale-badge">cached</span>';
+  if (el) el.textContent = '—';
+  if (note) note.textContent = '—';
 }}
 
 // ════════════════════════════
@@ -2933,8 +2933,8 @@ async function fetchIndiaWPI() {{
   }} catch(e) {{
     const el = document.getElementById('sbv-india-wpi');
     const note = document.getElementById('sbn-india-wpi');
-    if (el) {{ el.textContent = '1.7%'; el.className = 'sb-econ-val neu'; }}
-    if (note) note.innerHTML = 'FY24 <span class="stale-badge">cached</span>';
+    if (el) el.textContent = '—';
+    if (note) note.textContent = '—';
   }}
 }}
 
@@ -2953,8 +2953,8 @@ async function fetchIndiaPMI() {{
     if (el) {{ el.textContent = val + '%'; el.className = 'sb-econ-val ' + (parseFloat(val) > 0 ? 'pos' : 'neg'); }}
     if (note) note.textContent = 'Mfg Gr · FY' + String(latest.date).slice(2);
   }} catch(e) {{
-    if (el) {{ el.textContent = '58.1'; el.className = 'sb-econ-val pos'; }}
-    if (note) note.innerHTML = 'Mar 2025 <span class="stale-badge">cached</span>';
+    if (el) el.textContent = '—';
+    if (note) note.textContent = '—';
   }}
 }}
 
@@ -2972,8 +2972,8 @@ async function fetchIndiaFiscal() {{
   }} catch(e) {{
     const el = document.getElementById('sbv-india-fiscal');
     const note = document.getElementById('sbn-india-fiscal');
-    if (el) {{ el.textContent = '5.6%'; el.className = 'sb-econ-val neu'; }}
-    if (note) note.innerHTML = 'of GDP · FY24 <span class="stale-badge">cached</span>';
+    if (el) el.textContent = '—';
+    if (note) note.textContent = '—';
   }}
 }}
 
