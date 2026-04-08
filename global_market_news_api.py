@@ -128,39 +128,197 @@ MAX_NEWS_PER_CATEGORY = 10
 REQUEST_TIMEOUT = 8
 
 # ─────────────────────────────────────────────
-#  KEY EVENT CALENDAR — Dynamic date computation
+#  KEY EVENT CALENDAR — FULLY DYNAMIC
+#  Primary:  Trading Economics API (guest access, no key needed)
+#  Fallback: Computed approximate schedule
 # ─────────────────────────────────────────────
 EVENT_RSS_FEEDS = [
-    "https://news.google.com/rss/search?q=RBI+MPC+meeting+date+repo+rate+2025+2026&hl=en-IN&gl=IN&ceid=IN:en",
-    "https://news.google.com/rss/search?q=FOMC+meeting+date+Fed+interest+rate+decision+2025+2026&hl=en-US&gl=US&ceid=US:en",
-    "https://news.google.com/rss/search?q=US+nonfarm+payrolls+jobs+report+date&hl=en-US&gl=US&ceid=US:en",
-    "https://news.google.com/rss/search?q=India+GDP+data+release+date+CSO&hl=en-IN&gl=IN&ceid=IN:en",
-    "https://news.google.com/rss/search?q=US+CPI+inflation+data+release+date&hl=en-US&gl=US&ceid=US:en",
-    "https://news.google.com/rss/search?q=India+CPI+WPI+inflation+data+release&hl=en-IN&gl=IN&ceid=IN:en",
-    "https://news.google.com/rss/search?q=ECB+interest+rate+decision+meeting+date&hl=en-US&gl=US&ceid=US:en",
-    "https://news.google.com/rss/search?q=Bank+of+Japan+BOJ+meeting+date+decision&hl=en-US&gl=US&ceid=US:en",
-    "https://news.google.com/rss/search?q=OPEC+meeting+date+oil+output+decision&hl=en-US&gl=US&ceid=US:en",
-    "https://news.google.com/rss/search?q=India+quarterly+results+earnings+season+date&hl=en-IN&gl=IN&ceid=IN:en",
-    "https://news.google.com/rss/search?q=US+Federal+budget+debt+ceiling+date&hl=en-US&gl=US&ceid=US:en",
-    "https://news.google.com/rss/search?q=India+Union+Budget+GST+council+date&hl=en-IN&gl=IN&ceid=IN:en",
+    "https://news.google.com/rss/search?q=RBI+MPC+repo+rate+decision+upcoming&hl=en-IN&gl=IN&ceid=IN:en",
+    "https://news.google.com/rss/search?q=FOMC+Fed+interest+rate+decision+upcoming&hl=en-US&gl=US&ceid=US:en",
+    "https://news.google.com/rss/search?q=US+nonfarm+payrolls+CPI+data+release&hl=en-US&gl=US&ceid=US:en",
+    "https://news.google.com/rss/search?q=India+GDP+CPI+inflation+data+release&hl=en-IN&gl=IN&ceid=IN:en",
+    "https://news.google.com/rss/search?q=ECB+BOJ+interest+rate+decision+meeting&hl=en-US&gl=US&ceid=US:en",
+    "https://news.google.com/rss/search?q=OPEC+meeting+oil+output+decision&hl=en-US&gl=US&ceid=US:en",
+    "https://news.google.com/rss/search?q=India+F%26O+expiry+quarterly+results+earnings&hl=en-IN&gl=IN&ceid=IN:en",
 ]
+
+# ── COUNTRY/REGION MAPPING ──
+_REGION_MAP = {
+    "United States": "USA", "India": "India", "Euro Area": "Europe",
+    "Germany": "Europe", "France": "Europe", "Italy": "Europe",
+    "United Kingdom": "Europe", "Japan": "Asia", "China": "Asia",
+    "South Korea": "Asia", "Australia": "Asia", "Canada": "USA",
+    "Brazil": "Global", "Mexico": "Global", "Russia": "Global",
+    "Switzerland": "Europe", "New Zealand": "Asia", "Indonesia": "Asia",
+    "Singapore": "Asia", "Hong Kong": "Asia", "Taiwan": "Asia",
+}
+
+# ── IMPACT MAPPING (Trading Economics uses 1/2/3) ──
+_IMPACT_MAP = {3: "🔴 HIGH", 2: "🟡 MEDIUM", 1: "🟢 LOW"}
+
+# ── CATEGORY KEYWORDS → CATEGORY ──
+_CATEGORY_KEYWORDS = {
+    "Interest Rate": "Central Bank", "Rate Decision": "Central Bank",
+    "Repo Rate": "Central Bank", "FOMC": "Central Bank",
+    "Fed ": "Central Bank", "MPC": "Central Bank",
+    "Monetary Policy": "Central Bank", "Cash Rate": "Central Bank",
+    "Refinancing Rate": "Central Bank",
+    "Non Farm": "Jobs Data", "Nonfarm": "Jobs Data",
+    "Employment": "Jobs Data", "Unemployment": "Jobs Data",
+    "Payrolls": "Jobs Data", "Jobless": "Jobs Data",
+    "CPI": "Inflation", "Inflation": "Inflation",
+    "PPI": "Inflation", "WPI": "Inflation",
+    "Consumer Price": "Inflation", "Core PCE": "Inflation",
+    "GDP": "GDP", "Gross Domestic": "GDP",
+    "PMI": "PMI", "Manufacturing": "PMI",
+    "Trade Balance": "Trade", "Exports": "Trade",
+    "Imports": "Trade", "Current Account": "Trade",
+    "Crude Oil": "Energy", "OPEC": "Energy",
+    "Budget": "Fiscal Policy", "Fiscal": "Fiscal Policy",
+    "Retail Sales": "Consumer", "Consumer Confidence": "Consumer",
+    "Industrial Production": "Industrial", "Factory Orders": "Industrial",
+    "Housing": "Real Estate", "Building Permits": "Real Estate",
+    "Bond": "Bonds & Rates", "Treasury": "Bonds & Rates",
+    "Auction": "Bonds & Rates",
+}
+
+
+def _classify_event(event_name: str) -> str:
+    for keyword, category in _CATEGORY_KEYWORDS.items():
+        if keyword.lower() in event_name.lower():
+            return category
+    return "Other"
+
+
+def _compute_status(date_obj):
+    now = datetime.now(timezone.utc).replace(tzinfo=None)
+    days_away = (date_obj - now).days
+    if days_away < 0:
+        status = "TODAY" if days_away >= -1 else "PASSED"
+    elif days_away == 0:
+        status = "TODAY"
+    elif days_away <= 7:
+        status = "THIS WEEK"
+    elif days_away <= 30:
+        status = "UPCOMING"
+    else:
+        status = "SCHEDULED"
+    return status, max(days_away, 0)
+
+
+def fetch_live_economic_calendar() -> list[dict]:
+    """
+    Fetch REAL upcoming economic events from Trading Economics free API.
+    Returns structured list of events sorted by date.
+    """
+    now = datetime.now(timezone.utc).replace(tzinfo=None)
+    start = now.strftime("%Y-%m-%d")
+    end = (now + timedelta(days=90)).strftime("%Y-%m-%d")
+
+    # Countries that affect Indian stock market + major global
+    countries = "united%20states,india,euro%20area,japan,united%20kingdom,china"
+
+    # Try multiple API endpoints for resilience
+    api_urls = [
+        # Primary: all events for selected countries, high+medium importance
+        f"https://api.tradingeconomics.com/calendar/country/{countries}/{start}/{end}?c=guest:guest&importance=2",
+        # Backup: high importance only (smaller payload)
+        f"https://api.tradingeconomics.com/calendar/country/{countries}/{start}/{end}?c=guest:guest&importance=3",
+    ]
+
+    raw_events = []
+    for url in api_urls:
+        try:
+            req = urllib.request.Request(url, headers={
+                "User-Agent": "Mozilla/5.0 (compatible; MarketDashboard/2.0)",
+                "Accept": "application/json",
+            })
+            with urllib.request.urlopen(req, timeout=15) as resp:
+                data = json.loads(resp.read().decode("utf-8", errors="replace"))
+                if isinstance(data, list) and len(data) > 0:
+                    raw_events = data
+                    logging.info(f"  Trading Economics API: {len(data)} events fetched")
+                    break
+        except Exception as e:
+            logging.warning(f"  Trading Economics API failed ({url[:60]}…): {e}")
+            continue
+
+    if not raw_events:
+        logging.warning("  Trading Economics API unavailable — using computed fallback dates")
+        return _compute_fallback_events()
+
+    # Parse into our event format
+    events = []
+    seen = set()
+    for ev in raw_events:
+        event_name = ev.get("Event", "").strip()
+        country = ev.get("Country", "").strip()
+        date_str = ev.get("Date", "")
+        importance = ev.get("Importance", 1)
+
+        if not event_name or not date_str:
+            continue
+
+        # Deduplicate
+        key = f"{date_str[:10]}_{event_name}"
+        if key in seen:
+            continue
+        seen.add(key)
+
+        # Parse date
+        try:
+            date_obj = datetime.strptime(date_str[:19], "%Y-%m-%dT%H:%M:%S")
+        except ValueError:
+            try:
+                date_obj = datetime.strptime(date_str[:10], "%Y-%m-%d")
+            except ValueError:
+                continue
+
+        # Skip past events
+        if date_obj < now - timedelta(days=1):
+            continue
+
+        region = _REGION_MAP.get(country, "Global")
+        impact = _IMPACT_MAP.get(importance, "🟢 LOW")
+        category = _classify_event(event_name)
+        status, days_away = _compute_status(date_obj)
+
+        # Add flag emoji based on region
+        flag = {"USA": "🇺🇸", "India": "🇮🇳", "Europe": "🇪🇺",
+                "Asia": "🌏", "Global": "🌍"}.get(region, "🌍")
+
+        events.append({
+            "date": date_obj.strftime("%Y-%m-%d"),
+            "date_display": date_obj.strftime("%b %d, %Y (%a)"),
+            "title": f"{flag} {event_name}",
+            "category": category,
+            "impact": impact,
+            "region": region,
+            "country": country,
+            "days_away": days_away,
+            "status": status,
+            "actual": ev.get("Actual", ""),
+            "forecast": ev.get("Forecast", ""),
+            "previous": ev.get("Previous", ""),
+        })
+
+    events.sort(key=lambda e: e["date"])
+    return events
 
 
 def _nth_weekday(year, month, weekday, n):
     """Return the nth occurrence of a weekday in a month (1-indexed). weekday: 0=Mon..6=Sun."""
-    import calendar as _cal
-    c = _cal.monthcalendar(year, month)
+    c = calendar.monthcalendar(year, month)
     days = [week[weekday] for week in c if week[weekday] != 0]
     if n <= len(days):
         return datetime(year, month, days[n - 1])
     return None
 
 
-def compute_scheduled_events() -> list[dict]:
+def _compute_fallback_events() -> list[dict]:
     """
-    Return a list of known/scheduled financial events with dates.
-    Dates are computed dynamically relative to the current date.
-    These are approximate — official confirmations may shift by 1-2 days.
+    FALLBACK: Return approximate scheduled financial events when API is unavailable.
+    These are computed dynamically relative to the current date.
     """
     now = datetime.now(timezone.utc).replace(tzinfo=None)
     year = now.year
@@ -168,17 +326,7 @@ def compute_scheduled_events() -> list[dict]:
 
     def add(date_obj, title, category, impact, region):
         if date_obj and date_obj >= now - timedelta(days=1):
-            days_away = (date_obj - now).days
-            if days_away < 0:
-                status = "TODAY" if days_away >= -1 else "PASSED"
-            elif days_away == 0:
-                status = "TODAY"
-            elif days_away <= 7:
-                status = "THIS WEEK"
-            elif days_away <= 30:
-                status = "UPCOMING"
-            else:
-                status = "SCHEDULED"
+            status, days_away = _compute_status(date_obj)
             events.append({
                 "date": date_obj.strftime("%Y-%m-%d"),
                 "date_display": date_obj.strftime("%b %d, %Y (%a)"),
@@ -186,26 +334,24 @@ def compute_scheduled_events() -> list[dict]:
                 "category": category,
                 "impact": impact,
                 "region": region,
-                "days_away": max(days_away, 0),
+                "country": "",
+                "days_away": days_away,
                 "status": status,
+                "actual": "",
+                "forecast": "",
+                "previous": "",
             })
 
-    # ── FOMC MEETINGS (8 per year, approximate) ──
-    fomc_months_2025 = [
-        (1, 28, 29), (3, 18, 19), (5, 6, 7), (6, 17, 18),
-        (7, 29, 30), (9, 16, 17), (10, 28, 29), (12, 9, 10),
-    ]
-    fomc_months_2026 = [
-        (1, 27, 28), (3, 17, 18), (4, 28, 29), (6, 16, 17),
-        (7, 28, 29), (9, 15, 16), (10, 27, 28), (12, 8, 9),
-    ]
+    # ── FOMC MEETINGS ──
+    fomc_months_2025 = [(1,28,29),(3,18,19),(5,6,7),(6,17,18),(7,29,30),(9,16,17),(10,28,29),(12,9,10)]
+    fomc_months_2026 = [(1,27,28),(3,17,18),(4,28,29),(6,16,17),(7,28,29),(9,15,16),(10,27,28),(12,8,9)]
     for m, d1, d2 in (fomc_months_2025 if year == 2025 else fomc_months_2026):
         add(datetime(year, m, d2), f"🇺🇸 FOMC Rate Decision ({calendar.month_abbr[m]} {d1}-{d2})",
             "Central Bank", "🔴 HIGH", "USA")
 
-    # ── RBI MPC MEETINGS (6 per year, approximate) ──
-    rbi_2025 = [(2, 7), (4, 9), (6, 6), (8, 8), (10, 8), (12, 5)]
-    rbi_2026 = [(2, 6), (4, 8), (6, 5), (8, 7), (10, 7), (12, 4)]
+    # ── RBI MPC MEETINGS ──
+    rbi_2025 = [(2,7),(4,9),(6,6),(8,8),(10,8),(12,5)]
+    rbi_2026 = [(2,6),(4,8),(6,5),(8,7),(10,7),(12,4)]
     for m, d in (rbi_2025 if year == 2025 else rbi_2026):
         try:
             add(datetime(year, m, d), f"🇮🇳 RBI MPC Repo Rate Decision ({calendar.month_abbr[m]})",
@@ -215,14 +361,13 @@ def compute_scheduled_events() -> list[dict]:
 
     # ── US Non-Farm Payrolls (1st Friday of each month) ──
     for m in range(1, 13):
-        nfp = _nth_weekday(year, m, 4, 1)  # 4=Friday
+        nfp = _nth_weekday(year, m, 4, 1)
         if nfp:
             add(nfp, f"🇺🇸 US Non-Farm Payrolls ({calendar.month_abbr[m]})",
                 "Jobs Data", "🔴 HIGH", "USA")
 
-    # ── US CPI Release (~10th-14th of each month) ──
+    # ── US CPI (~12th-14th of each month) ──
     for m in range(1, 13):
-        # CPI is typically released on the 2nd or 3rd week Tuesday/Wednesday
         d = 13 if m % 2 == 0 else 12
         try:
             add(datetime(year, m, d), f"🇺🇸 US CPI Inflation Data ({calendar.month_abbr[m]})",
@@ -230,17 +375,17 @@ def compute_scheduled_events() -> list[dict]:
         except ValueError:
             pass
 
-    # ── India CPI Release (~12th of following month) ──
+    # ── India CPI (~12th of each month) ──
     for m in range(1, 13):
         try:
-            add(datetime(year, m, 12), f"🇮🇳 India CPI Data Release ({calendar.month_abbr[m]})",
+            add(datetime(year, m, 12), f"🇮🇳 India CPI Data ({calendar.month_abbr[m]})",
                 "Inflation", "🟡 MEDIUM", "India")
         except ValueError:
             pass
 
-    # ── ECB Rate Decisions (roughly every 6 weeks) ──
-    ecb_2025 = [(1, 30), (3, 6), (4, 17), (6, 5), (7, 24), (9, 11), (10, 30), (12, 18)]
-    ecb_2026 = [(1, 22), (3, 5), (4, 16), (6, 4), (7, 16), (9, 10), (10, 29), (12, 17)]
+    # ── ECB Rate Decisions ──
+    ecb_2025 = [(1,30),(3,6),(4,17),(6,5),(7,24),(9,11),(10,30),(12,18)]
+    ecb_2026 = [(1,22),(3,5),(4,16),(6,4),(7,16),(9,10),(10,29),(12,17)]
     for m, d in (ecb_2025 if year == 2025 else ecb_2026):
         try:
             add(datetime(year, m, d), f"🇪🇺 ECB Rate Decision ({calendar.month_abbr[m]} {d})",
@@ -249,8 +394,8 @@ def compute_scheduled_events() -> list[dict]:
             pass
 
     # ── BOJ Meetings ──
-    boj_2025 = [(1, 24), (3, 14), (4, 30), (6, 13), (7, 31), (9, 19), (10, 31), (12, 19)]
-    boj_2026 = [(1, 23), (3, 13), (4, 29), (6, 12), (7, 17), (9, 18), (10, 30), (12, 18)]
+    boj_2025 = [(1,24),(3,14),(4,30),(6,13),(7,31),(9,19),(10,31),(12,19)]
+    boj_2026 = [(1,23),(3,13),(4,29),(6,12),(7,17),(9,18),(10,30),(12,18)]
     for m, d in (boj_2025 if year == 2025 else boj_2026):
         try:
             add(datetime(year, m, d), f"🇯🇵 BOJ Rate Decision ({calendar.month_abbr[m]} {d})",
@@ -258,20 +403,18 @@ def compute_scheduled_events() -> list[dict]:
         except ValueError:
             pass
 
-    # ── India GDP (quarterly, released ~end of following quarter) ──
-    gdp_india = [(2, 28), (5, 30), (8, 29), (11, 28)]
-    for m, d in gdp_india:
+    # ── India GDP (quarterly) ──
+    for m, d in [(2,28),(5,30),(8,29),(11,28)]:
         try:
             add(datetime(year, m, d), f"🇮🇳 India GDP Data ({calendar.month_abbr[m]})",
                 "GDP", "🟡 MEDIUM", "India")
         except ValueError:
             pass
 
-    # ── US GDP (advance estimate ~last week of Jan, Apr, Jul, Oct) ──
-    us_gdp = [(1, 30), (4, 30), (7, 30), (10, 30)]
-    for m, d in us_gdp:
+    # ── US GDP (advance estimates) ──
+    for m, d in [(1,30),(4,30),(7,30),(10,30)]:
         try:
-            add(datetime(year, m, d), f"🇺🇸 US GDP (Advance Estimate, Q{(m-1)//3 + 1 - 1 or 4})",
+            add(datetime(year, m, d), f"🇺🇸 US GDP Advance Estimate",
                 "GDP", "🟡 MEDIUM", "USA")
         except ValueError:
             pass
@@ -279,47 +422,18 @@ def compute_scheduled_events() -> list[dict]:
     # ── India Union Budget ──
     add(datetime(year, 2, 1), "🇮🇳 India Union Budget", "Fiscal Policy", "🔴 HIGH", "India")
 
-    # ── OPEC+ Meetings (roughly quarterly) ──
-    opec = [(3, 1), (6, 1), (9, 1), (12, 1)]
-    for m, d in opec:
+    # ── OPEC+ Meetings ──
+    for m, d in [(3,1),(6,1),(9,1),(12,1)]:
         add(datetime(year, m, d), f"🛢️ OPEC+ Meeting ({calendar.month_abbr[m]})",
             "Energy", "🟡 MEDIUM", "Global")
 
     # ── India F&O Expiry (last Thursday of each month) ──
     for m in range(1, 13):
-        # Find last Thursday
-        import calendar as _cal
-        c = _cal.monthcalendar(year, m)
+        c = calendar.monthcalendar(year, m)
         thursdays = [week[3] for week in c if week[3] != 0]
         if thursdays:
-            last_thu = thursdays[-1]
-            add(datetime(year, m, last_thu), f"🇮🇳 F&O Monthly Expiry ({calendar.month_abbr[m]})",
+            add(datetime(year, m, thursdays[-1]), f"🇮🇳 F&O Monthly Expiry ({calendar.month_abbr[m]})",
                 "Derivatives", "🟡 MEDIUM", "India")
-
-    # ── US Fed Beige Book (8 per year, ~2 weeks before FOMC) ──
-    beige_2025 = [(1, 15), (3, 5), (4, 23), (6, 4), (7, 16), (9, 3), (10, 15), (11, 26)]
-    beige_2026 = [(1, 14), (3, 4), (4, 15), (6, 3), (7, 15), (9, 2), (10, 14), (11, 25)]
-    for m, d in (beige_2025 if year == 2025 else beige_2026):
-        try:
-            add(datetime(year, m, d), f"🇺🇸 Fed Beige Book ({calendar.month_abbr[m]})",
-                "Central Bank", "🟢 LOW", "USA")
-        except ValueError:
-            pass
-
-    # Also include next year for events in Jan-Mar if we're in Oct+
-    if now.month >= 10:
-        ny = year + 1
-        fomc_next = fomc_months_2026 if ny == 2026 else fomc_months_2025
-        for m, d1, d2 in fomc_next[:3]:
-            add(datetime(ny, m, d2), f"🇺🇸 FOMC Rate Decision ({calendar.month_abbr[m]} {d1}-{d2}, {ny})",
-                "Central Bank", "🔴 HIGH", "USA")
-        rbi_next = rbi_2026 if ny == 2026 else rbi_2025
-        for m, d in rbi_next[:2]:
-            try:
-                add(datetime(ny, m, d), f"🇮🇳 RBI MPC Repo Rate Decision ({calendar.month_abbr[m]} {ny})",
-                    "Central Bank", "🔴 HIGH", "India")
-            except ValueError:
-                pass
 
     events.sort(key=lambda e: e["date"])
     return events
@@ -329,7 +443,6 @@ def fetch_event_news() -> list[dict]:
     """Fetch latest news about upcoming economic events from RSS."""
     seen = set()
     results = []
-    cutoff = datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(days=3)
     for url in EVENT_RSS_FEEDS:
         for item in fetch_rss(url):
             key = item["title"].lower()[:60]
@@ -1690,6 +1803,7 @@ body.light .ecal-month-label {{ background: var(--bg); }}
         <div>
           <div class="ecal-title">📅 KEY EVENT CALENDAR</div>
           <div class="ecal-subtitle">Market-moving dates · Auto-generated {current_time}</div>
+          <div class="ecal-subtitle" id="ecalSource" style="margin-top:2px;font-size:10px"></div>
         </div>
       </div>
       <div class="ecal-filters" id="ecalFilters">
@@ -1778,6 +1892,10 @@ function renderEventCalendar() {{
         <div class="ecal-date">${{dayStr}}</div>
         <div class="ecal-event-title">${{e.title}}
           <span class="ecal-region-badge">${{e.category}}</span>
+          ${{e.country ? '<span class="ecal-region-badge">' + e.country + '</span>' : ''}}
+          ${{e.forecast ? '<span style="color:var(--blue);font-size:11px;margin-left:6px">Fcst: ' + e.forecast + '</span>' : ''}}
+          ${{e.previous ? '<span style="color:var(--muted);font-size:11px;margin-left:4px">Prev: ' + e.previous + '</span>' : ''}}
+          ${{e.actual ? '<span style="color:var(--green);font-size:11px;font-weight:700;margin-left:4px">Act: ' + e.actual + '</span>' : ''}}
         </div>
         <div class="ecal-event-meta">
           <span class="ecal-impact ${{impactCls}}">${{e.impact}}</span>
@@ -1812,6 +1930,15 @@ function renderEventCalendar() {{
   // Update sidebar count
   const countEl = document.getElementById('ecal-sidebar-count');
   if (countEl) countEl.textContent = EVENT_CALENDAR.length;
+
+  // Show data source
+  const srcEl = document.getElementById('ecalSource');
+  if (srcEl) {{
+    const isLive = EVENT_CALENDAR.length > 0 && EVENT_CALENDAR[0].country;
+    srcEl.innerHTML = isLive
+      ? '<span style="color:var(--green)">● LIVE</span> Trading Economics API'
+      : '<span style="color:var(--yellow)">● FALLBACK</span> Computed Dates';
+  }}
 }}
 
 // ════════════════════════════
@@ -2750,9 +2877,9 @@ def main():
     total = sum(len(v) for v in all_news.values())
     logging.info(f"Total articles fetched: {total}")
 
-    logging.info("Computing Key Event Calendar …")
-    event_calendar = compute_scheduled_events()
-    logging.info(f"  {len(event_calendar)} scheduled events computed")
+    logging.info("Fetching Key Event Calendar (Trading Economics API) …")
+    event_calendar = fetch_live_economic_calendar()
+    logging.info(f"  {len(event_calendar)} events loaded ({'LIVE' if event_calendar and event_calendar[0].get('country') else 'FALLBACK'})")
 
     logging.info("Fetching event-related news …")
     event_news = fetch_event_news()
