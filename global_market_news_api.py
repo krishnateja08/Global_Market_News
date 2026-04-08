@@ -1095,7 +1095,7 @@ body {{
 /* ── MAIN SHELL ── */
 .shell {{
   display: grid;
-  grid-template-columns: 240px 1fr;
+  grid-template-columns: 280px 1fr;
   height: calc(100vh - 90px);
 }}
 
@@ -1204,21 +1204,20 @@ body {{
 /* Label — top-left */
 .sb-econ-key {{
   grid-column: 1; grid-row: 1;
-  color: #b0b8c8;
-  font-size: 11px;
-  letter-spacing: 0.8px;
+  color: #c8d4e8;
+  font-size: 11.5px;
+  letter-spacing: 0.6px;
   text-transform: uppercase;
-  font-weight: 600;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  font-weight: 700;
+  white-space: normal;
+  line-height: 1.3;
 }}
 
 /* Value — top-right, bold & coloured */
 .sb-econ-val {{
   grid-column: 2; grid-row: 1;
   font-weight: 700;
-  font-size: 14px;
+  font-size: 14.5px;
   white-space: nowrap;
   text-align: right;
   font-family: 'IBM Plex Mono', monospace;
@@ -1231,14 +1230,13 @@ body {{
 /* Note — bottom-right, light yellow */
 .sb-econ-note {{
   grid-column: 2; grid-row: 2;
-  color: #e8d87a;
-  font-size: 10px;
-  white-space: nowrap;
+  color: #f0e070;
+  font-size: 10.5px;
+  white-space: normal;
   text-align: right;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 120px;
+  line-height: 1.3;
   font-style: italic;
+  font-weight: 500;
 }}
 
 /* ── MAIN CONTENT ── */
