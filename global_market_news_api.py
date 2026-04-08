@@ -2661,356 +2661,48 @@ async function fetchCPI() {{
 // ════════════════════════════
 // FED FUNDS RATE via FRED CSV
 // ════════════════════════════
-async function fetchFedRate() {{
-  const lowerUrl = 'https://fred.stlouisfed.org/graph/fredgraph.csv?id=DFEDTARL';
-  const upperUrl = 'https://fred.stlouisfed.org/graph/fredgraph.csv?id=DFEDTARU';
-  try {{
-    const [rL, rU] = await Promise.all([
-      fetchWithProxies(lowerUrl),
-      fetchWithProxies(upperUrl),
-    ]);
-    let [tL, tU] = await Promise.all([rL.text(), rU.text()]);
-    try {{ const j = JSON.parse(tL); if (j.contents) tL = j.contents; }} catch(e) {{}}
-    try {{ const j = JSON.parse(tU); if (j.contents) tU = j.contents; }} catch(e) {{}}
-    const lastVal = (txt) => {{
-      const lines = txt.trim().split('\\n').filter(l => l && !l.startsWith('DATE'));
-      return parseFloat(lines[lines.length - 1].split(',')[1]);
-    }};
-    const lower = lastVal(tL);
-    const upper = lastVal(tU);
-    if (isNaN(lower) || isNaN(upper)) throw new Error('Bad values');
-    const label = lower.toFixed(2) + '–' + upper.toFixed(2) + '%';
-    const el = document.getElementById('sbv-fedfunds');
-    if (el) el.textContent = label;
-  }} catch(e) {{
-    // keep the hardcoded fallback already in the DOM
-  }}
-}}
-
 // ════════════════════════════
 // SHARED FRED CSV HELPER
 // ════════════════════════════
-async function fetchFREDLines(seriesId) {{
-  const csvUrl = 'https://fred.stlouisfed.org/graph/fredgraph.csv?id=' + seriesId;
-  const r = await fetchWithProxies(csvUrl);
-  const text = await r.text();
-  // Handle allorigins wrapper
-  let raw = text;
-  try {{ const j = JSON.parse(text); if (j.contents) raw = j.contents; }} catch(e) {{}}
-  return raw.trim().split('\\n').filter(l => l && !l.startsWith('DATE'));
-}}
-
-function fredLabel(dateStr) {{
-  const d = new Date(dateStr + 'T12:00:00Z');
-  return d.toLocaleString('en-US', {{month: 'short', year: 'numeric', timeZone: 'UTC'}});
-}}
-
 // ════════════════════════════
 // USA: CORE CPI (CPILFESL)
 // ════════════════════════════
-async function fetchCoreCPI() {{
-  try {{
-    const lines = await fetchFREDLines('CPILFESL');
-    if (lines.length < 13) throw new Error('Not enough data');
-    const last = lines[lines.length - 1].split(',');
-    const prev = lines[lines.length - 13].split(',');
-    const lastVal = parseFloat(last[1]), prevVal = parseFloat(prev[1]);
-    if (isNaN(lastVal) || isNaN(prevVal) || prevVal === 0) throw new Error('Bad values');
-    const yoy = (((lastVal - prevVal) / prevVal) * 100).toFixed(1);
-    const el = document.getElementById('sbv-corecpi');
-    const note = document.getElementById('sbn-corecpi');
-    if (el) {{ el.textContent = yoy + '%'; el.className = 'sb-econ-val ' + (parseFloat(yoy) > 3 ? 'neg' : parseFloat(yoy) <= 2 ? 'pos' : 'neu'); }}
-    if (note) note.textContent = fredLabel(last[0]);
-  }} catch(e) {{
-    const el = document.getElementById('sbv-corecpi');
-    const note = document.getElementById('sbn-corecpi');
-    if (el) el.textContent = '—';
-    if (note) note.innerHTML = '—';
-  }}
-}}
-
 // ════════════════════════════
 // USA: GDP GROWTH (A191RL1Q225SBEA)
 // ════════════════════════════
-async function fetchGDPGrowth() {{
-  try {{
-    const lines = await fetchFREDLines('A191RL1Q225SBEA');
-    const last = lines[lines.length - 1].split(',');
-    const val = parseFloat(last[1]);
-    if (isNaN(val)) throw new Error('Bad value');
-    const d = new Date(last[0] + 'T12:00:00Z');
-    const qtr = Math.ceil((d.getUTCMonth() + 1) / 3);
-    const label = 'Q' + qtr + ' ' + d.getUTCFullYear();
-    const el = document.getElementById('sbv-gdp');
-    const note = document.getElementById('sbn-gdp');
-    if (el) {{ el.textContent = val.toFixed(1) + '%'; el.className = 'sb-econ-val ' + (val > 0 ? 'pos' : 'neg'); }}
-    if (note) note.textContent = label;
-  }} catch(e) {{
-    const el = document.getElementById('sbv-gdp');
-    const note = document.getElementById('sbn-gdp');
-    if (el) el.textContent = '—';
-    if (note) note.innerHTML = '—';
-  }}
-}}
-
 // ════════════════════════════
 // USA: UNEMPLOYMENT (UNRATE)
 // ════════════════════════════
-async function fetchUnemployment() {{
-  try {{
-    const lines = await fetchFREDLines('UNRATE');
-    const last = lines[lines.length - 1].split(',');
-    const val = parseFloat(last[1]);
-    if (isNaN(val)) throw new Error('Bad value');
-    const el = document.getElementById('sbv-unemployment');
-    const note = document.getElementById('sbn-unemployment');
-    if (el) {{ el.textContent = val.toFixed(1) + '%'; el.className = 'sb-econ-val ' + (val < 4 ? 'pos' : val > 5 ? 'neg' : 'neu'); }}
-    if (note) note.textContent = fredLabel(last[0]);
-  }} catch(e) {{
-    const el = document.getElementById('sbv-unemployment');
-    const note = document.getElementById('sbn-unemployment');
-    if (el) el.textContent = '—';
-    if (note) note.textContent = '—';
-  }}
-}}
-
 // ════════════════════════════
 // USA: NFP (PAYEMS – MoM change)
 // ════════════════════════════
-async function fetchNFP() {{
-  try {{
-    const lines = await fetchFREDLines('PAYEMS');
-    if (lines.length < 2) throw new Error('Not enough data');
-    const last = lines[lines.length - 1].split(',');
-    const prev = lines[lines.length - 2].split(',');
-    const change = Math.round(parseFloat(last[1]) - parseFloat(prev[1]));
-    if (isNaN(change)) throw new Error('Bad value');
-    const sign = change >= 0 ? '+' : '';
-    const el = document.getElementById('sbv-nfp');
-    const note = document.getElementById('sbn-nfp');
-    if (el) {{ el.textContent = sign + change + 'K'; el.className = 'sb-econ-val ' + (change > 0 ? 'pos' : 'neg'); }}
-    if (note) note.textContent = fredLabel(last[0]);
-  }} catch(e) {{
-    const el = document.getElementById('sbv-nfp');
-    const note = document.getElementById('sbn-nfp');
-    if (el) el.textContent = '—';
-    if (note) note.innerHTML = '—';
-  }}
-}}
-
 // ════════════════════════════
 // USA: PPI YoY (PPIFIS)
 // ════════════════════════════
-async function fetchPPI() {{
-  try {{
-    const lines = await fetchFREDLines('PPIFIS');
-    if (lines.length < 13) throw new Error('Not enough data');
-    const last = lines[lines.length - 1].split(',');
-    const prev = lines[lines.length - 13].split(',');
-    const lastVal = parseFloat(last[1]), prevVal = parseFloat(prev[1]);
-    if (isNaN(lastVal) || isNaN(prevVal) || prevVal === 0) throw new Error('Bad values');
-    const yoy = (((lastVal - prevVal) / prevVal) * 100).toFixed(1);
-    const el = document.getElementById('sbv-ppi');
-    const note = document.getElementById('sbn-ppi');
-    if (el) {{ el.textContent = yoy + '%'; el.className = 'sb-econ-val ' + (parseFloat(yoy) > 3 ? 'neg' : parseFloat(yoy) <= 2 ? 'pos' : 'neu'); }}
-    if (note) note.textContent = fredLabel(last[0]);
-  }} catch(e) {{
-    const el = document.getElementById('sbv-ppi');
-    const note = document.getElementById('sbn-ppi');
-    if (el) el.textContent = '—';
-    if (note) note.innerHTML = '—';
-  }}
-}}
-
 // ════════════════════════════
 // INDIA: World Bank API helper
 // ════════════════════════════
-async function fetchWorldBank(indicator, countryCode) {{
-  const url = 'https://api.worldbank.org/v2/country/' + countryCode + '/indicator/' + indicator + '?format=json&mrv=5';
-  const r = await fetch(url, {{signal: AbortSignal.timeout(10000)}});
-  if (!r.ok) throw new Error('HTTP ' + r.status);
-  const d = await r.json();
-  if (!d[1]) throw new Error('No data');
-  const latest = d[1].find(x => x.value !== null);
-  if (!latest) throw new Error('All null');
-  return latest;
-}}
-
 // ════════════════════════════
 // INDIA: CPI (World Bank FP.CPI.TOTL.ZG)
 // ════════════════════════════
-async function fetchIndiaCPI() {{
-  try {{
-    const latest = await fetchWorldBank('FP.CPI.TOTL.ZG', 'IN');
-    const val = parseFloat(latest.value).toFixed(2);
-    const el = document.getElementById('sbv-india-cpi');
-    const note = document.getElementById('sbn-india-cpi');
-    if (el) {{ el.textContent = val + '%'; el.className = 'sb-econ-val ' + (parseFloat(val) > 6 ? 'neg' : parseFloat(val) < 4 ? 'pos' : 'neu'); }}
-    if (note) note.innerHTML = 'FY' + String(latest.date).slice(2) + ' <span class="stale-badge">annual</span>';
-  }} catch(e) {{
-    const el = document.getElementById('sbv-india-cpi');
-    const note = document.getElementById('sbn-india-cpi');
-    if (el) el.textContent = '—';
-    if (note) note.textContent = '—';
-  }}
-}}
-
 // ════════════════════════════
 // INDIA: GDP Growth (World Bank NY.GDP.MKTP.KD.ZG)
 // ════════════════════════════
-async function fetchIndiaGDP() {{
-  try {{
-    const latest = await fetchWorldBank('NY.GDP.MKTP.KD.ZG', 'IN');
-    const val = parseFloat(latest.value).toFixed(1);
-    const el = document.getElementById('sbv-india-gdp');
-    const note = document.getElementById('sbn-india-gdp');
-    if (el) {{ el.textContent = val + '%'; el.className = 'sb-econ-val ' + (parseFloat(val) > 5 ? 'pos' : parseFloat(val) < 0 ? 'neg' : 'neu'); }}
-    if (note) note.innerHTML = 'FY' + String(latest.date).slice(2) + ' <span class="stale-badge">annual</span>';
-  }} catch(e) {{
-    const el = document.getElementById('sbv-india-gdp');
-    const note = document.getElementById('sbn-india-gdp');
-    if (el) el.textContent = '—';
-    if (note) note.textContent = '—';
-  }}
-}}
-
 // ════════════════════════════
 // INDIA: Unemployment (World Bank SL.UEM.TOTL.ZS)
 // ════════════════════════════
-async function fetchIndiaUnemployment() {{
-  try {{
-    const latest = await fetchWorldBank('SL.UEM.TOTL.ZS', 'IN');
-    const val = parseFloat(latest.value).toFixed(1);
-    const el = document.getElementById('sbv-india-unemp');
-    const note = document.getElementById('sbn-india-unemp');
-    if (el) {{ el.textContent = val + '%'; el.className = 'sb-econ-val ' + (parseFloat(val) < 5 ? 'pos' : 'neg'); }}
-    if (note) note.textContent = 'FY' + String(latest.date).slice(2) + ' <span class="stale-badge">annual</span>';
-  }} catch(e) {{
-    const el = document.getElementById('sbv-india-unemp');
-    const note = document.getElementById('sbn-india-unemp');
-    if (el) el.textContent = '—';
-    if (note) note.textContent = '—';
-  }}
-}}
-
 // ════════════════════════════
 // INDIA: Repo Rate — 2 reliable free sources (no API key)
-// ════════════════════════════
-async function fetchIndiaRepoRate() {{
-  const elV = document.getElementById('sbv-reporate');
-  const elN = document.getElementById('sbn-reporate');
-
-  function _setRepo(val, note) {{
-    if (elV) {{ elV.textContent = val; elV.className = 'sb-econ-val neu'; }}
-    if (elN) elN.textContent = note;
-  }}
-
-  // ── Source 1: Google News RSS — parse repo rate from live headlines ──
-  try {{
-    const rss = 'https://news.google.com/rss/search?q=RBI+repo+rate+percent&hl=en-IN&gl=IN&ceid=IN:en';
-    const r = await fetch(rss, {{signal: AbortSignal.timeout(8000)}});
-    if (r.ok) {{
-      const text = await r.text();
-      const pats = [
-        /repo rate[^0-9%]{{0,30}}(\d+(?:\.\d+)?)\s*%/i,
-        /(\d+(?:\.\d+)?)\s*%\s*repo rate/i,
-        /repo rate[^0-9]{{0,20}}(\d+\.\d+)/i,
-      ];
-      for (const pat of pats) {{
-        const m = text.match(pat);
-        if (m) {{
-          const val = parseFloat(m[1]);
-          if (val >= 1 && val <= 20) {{
-            _setRepo(val.toFixed(2) + '%', 'RBI · news');
-            return;
-          }}
-        }}
-      }}
-    }}
-  }} catch(e) {{ /* try next */ }}
-
-  // ── Source 2: World Bank lending rate (closest free proxy) ──
-  try {{
-    const url = 'https://api.worldbank.org/v2/country/IN/indicator/FR.INR.LEND?format=json&mrv=2';
-    const r = await fetch(url, {{signal: AbortSignal.timeout(8000)}});
-    if (r.ok) {{
-      const d = await r.json();
-      const rows = (d[1] || []).filter(x => x.value !== null);
-      if (rows.length) {{
-        _setRepo(parseFloat(rows[0].value).toFixed(2) + '%', 'WB lending · ' + rows[0].date);
-        return;
-      }}
-    }}
-  }} catch(e) {{ /* fall through */ }}
-
-  if (elV) elV.textContent = '—';
-  if (elN) elN.textContent = '—';
-}}
-// ════════════════════════════
+// ════════════════════════════// ════════════════════════════
 // INDIA: WPI via World Bank (FP.WPI.TOTL)
 // ════════════════════════════
-async function fetchIndiaWPI() {{
-  try {{
-    const latest = await fetchWorldBank('FP.WPI.TOTL', 'IN');
-    // WPI index value — compute YoY %
-    const url = 'https://api.worldbank.org/v2/country/IN/indicator/FP.WPI.TOTL?format=json&mrv=14';
-    const r = await fetch(url, {{signal: AbortSignal.timeout(10000)}});
-    const d = await r.json();
-    const rows = d[1] ? d[1].filter(x => x.value !== null) : [];
-    if (rows.length < 2) throw new Error('Not enough data');
-    const cur = rows[0].value, prev = rows[1].value;
-    const yoy = (((cur - prev) / prev) * 100).toFixed(1);
-    const el = document.getElementById('sbv-india-wpi');
-    const note = document.getElementById('sbn-india-wpi');
-    if (el) {{ el.textContent = yoy + '%'; el.className = 'sb-econ-val neu'; }}
-    if (note) note.textContent = 'FY' + String(rows[0].date).slice(2);
-  }} catch(e) {{
-    const el = document.getElementById('sbv-india-wpi');
-    const note = document.getElementById('sbn-india-wpi');
-    if (el) el.textContent = '—';
-    if (note) note.textContent = '—';
-  }}
-}}
-
 // ════════════════════════════
 // INDIA: Mfg PMI — no free official API;
 //   try a proxy to tradingeconomics data
 // ════════════════════════════
-async function fetchIndiaPMI() {{
-  // No reliable free API for India PMI — show last known
-  const el = document.getElementById('sbv-india-pmi');
-  const note = document.getElementById('sbn-india-pmi');
-  try {{
-    // Try World Bank Manufacturing Value Added as proxy
-    const latest = await fetchWorldBank('NV.IND.MANF.KD.ZG', 'IN');
-    const val = parseFloat(latest.value).toFixed(1);
-    if (el) {{ el.textContent = val + '%'; el.className = 'sb-econ-val ' + (parseFloat(val) > 0 ? 'pos' : 'neg'); }}
-    if (note) note.textContent = 'Mfg Gr · FY' + String(latest.date).slice(2);
-  }} catch(e) {{
-    if (el) el.textContent = '—';
-    if (note) note.textContent = '—';
-  }}
-}}
-
 // ════════════════════════════
 // INDIA: Fiscal Deficit (World Bank GC.BAL.CASH.GD.ZS)
 // ════════════════════════════
-async function fetchIndiaFiscal() {{
-  try {{
-    const latest = await fetchWorldBank('GC.BAL.CASH.GD.ZS', 'IN');
-    const val = Math.abs(parseFloat(latest.value)).toFixed(1);
-    const el = document.getElementById('sbv-india-fiscal');
-    const note = document.getElementById('sbn-india-fiscal');
-    if (el) {{ el.textContent = val + '%'; el.className = 'sb-econ-val neu'; }}
-    if (note) note.innerHTML = 'of GDP · FY' + String(latest.date).slice(2) + ' <span class="stale-badge">annual</span>';
-  }} catch(e) {{
-    const el = document.getElementById('sbv-india-fiscal');
-    const note = document.getElementById('sbn-india-fiscal');
-    if (el) el.textContent = '—';
-    if (note) note.textContent = '—';
-  }}
-}}
-
 // ════════════════════════════
 // CLOCK & REFRESH
 // ════════════════════════════
@@ -3109,21 +2801,8 @@ window.addEventListener('DOMContentLoaded', () => {{
 
   loadAll();
   fetchCPI();
-  fetchFedRate();
   // USA economic indicators (FRED)
-  fetchCoreCPI();
-  fetchGDPGrowth();
-  fetchUnemployment();
-  fetchNFP();
-  fetchPPI();
   // India economic indicators (World Bank + RBI)
-  fetchIndiaRepoRate();
-  fetchIndiaCPI();
-  fetchIndiaWPI();
-  fetchIndiaUnemployment();
-  fetchIndiaPMI();
-  fetchIndiaGDP();
-  fetchIndiaFiscal();
   setInterval(loadAll, 5 * 60 * 1000);
   setInterval(updateClock, 1000);
 
