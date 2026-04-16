@@ -128,6 +128,35 @@ MAX_NEWS_PER_CATEGORY = 10
 REQUEST_TIMEOUT = 8
 
 # ─────────────────────────────────────────────
+#  X (TWITTER) ACCOUNTS TO FOLLOW
+#  Uses free RSS bridges — no API key required.
+#  Priority order: RSSHub → Nitter instances
+#  Posts are filtered to last 2 days automatically.
+# ─────────────────────────────────────────────
+X_ACCOUNTS = [
+    {"handle": "elonmusk",       "name": "Elon Musk",         "tag": "Influencer",  "color": "#1d9bf0"},
+    {"handle": "BarackObama",    "name": "Barack Obama",       "tag": "US Politics", "color": "#e05060"},
+    {"handle": "realDonaldTrump","name": "Donald Trump",       "tag": "US Politics", "color": "#e05060"},
+    {"handle": "narendramodi",   "name": "Narendra Modi",      "tag": "India",       "color": "#ff9933"},
+    {"handle": "JoeBiden",       "name": "Joe Biden",          "tag": "US Politics", "color": "#e05060"},
+    {"handle": "ZelenskyyUa",    "name": "Volodymyr Zelensky", "tag": "Europe",      "color": "#60a5fa"},
+    {"handle": "nytimes",        "name": "The New York Times", "tag": "News",        "color": "#aaaaaa"},
+    {"handle": "CNN",            "name": "CNN",                "tag": "News",        "color": "#cc0000"},
+    {"handle": "BBCWorld",       "name": "BBC World News",     "tag": "News",        "color": "#bb1919"},
+]
+
+# RSS bridge URLs for X/Twitter (tried in order, first success wins per account)
+# RSSHub is the most reliable free bridge
+def _x_rss_urls(handle: str) -> list[str]:
+    return [
+        f"https://rsshub.app/twitter/user/{handle}",
+        f"https://nitter.privacyredirect.com/{handle}/rss",
+        f"https://nitter.net/{handle}/rss",
+        f"https://nitter.1d4.us/{handle}/rss",
+        f"https://xcancel.com/{handle}/rss",
+    ]
+
+# ─────────────────────────────────────────────
 #  KEY EVENT CALENDAR — FULLY DYNAMIC
 #  Primary:  Trading Economics API (guest access, no key needed)
 #  Fallback: Computed approximate schedule
@@ -450,6 +479,106 @@ def build_event_news_json(news_items: list[dict]) -> str:
             "link": escape(item.get("link", "#")),
         })
     return json.dumps(out, ensure_ascii=False)
+
+
+def fetch_x_posts() -> list[dict]:
+    """
+    Fetch recent X/Twitter posts from configured accounts via free RSS bridges.
+    Only returns posts from the last 2 days. Auto-refreshes every run.
+    """
+    cutoff = datetime.now(timezone.utc).replace(tzinfo=None) - timedelta(days=2)
+    DATE_FMTS = [
+        "%a, %d %b %Y %H:%M:%S %z",
+        "%a, %d %b %Y %H:%M:%S %Z",
+        "%Y-%m-%dT%H:%M:%S%z",
+        "%Y-%m-%dT%H:%M:%SZ",
+        "%Y-%m-%d",
+    ]
+
+    def parse_date(raw: str):
+        for fmt in DATE_FMTS:
+            try:
+                dt = datetime.strptime(raw.strip(), fmt)
+                if dt.tzinfo is not None:
+                    dt = datetime(*dt.utctimetuple()[:6])
+                return dt
+            except ValueError:
+                continue
+        return None
+
+    all_posts = []
+
+    for account in X_ACCOUNTS:
+        handle = account["handle"]
+        name = account["name"]
+        tag = account["tag"]
+        color = account["color"]
+        posts_fetched = []
+
+        for url in _x_rss_urls(handle):
+            if posts_fetched:
+                break
+            try:
+                req = urllib.request.Request(
+                    url,
+                    headers={
+                        "User-Agent": "Mozilla/5.0 (compatible; MarketDashboard/1.0)",
+                        "Accept": "application/rss+xml, application/xml, text/xml, */*",
+                    },
+                )
+                with urllib.request.urlopen(req, timeout=REQUEST_TIMEOUT) as resp:
+                    raw = resp.read().decode("utf-8", errors="replace")
+
+                raw = re.sub(r'\s+xmlns[^"]*"[^"]*"', "", raw)
+                raw = re.sub(r"<(/?)[\w]+:", r"<\1", raw)
+                root = ET.fromstring(raw)
+                channel = root.find("channel") or root
+
+                for item in channel.findall("item")[:20]:
+                    title = html_module.unescape((item.findtext("title") or "").strip())
+                    link = (item.findtext("link") or "").strip()
+                    summary = re.sub(r"<[^>]+>", "", (item.findtext("description") or "").strip())
+                    summary = html_module.unescape(summary)
+                    pub_date = (item.findtext("pubDate") or item.findtext("date") or "").strip()
+
+                    dt = parse_date(pub_date)
+                    if dt and dt >= cutoff and title and len(title) > 5:
+                        posts_fetched.append({
+                            "handle": handle,
+                            "name": name,
+                            "tag": tag,
+                            "color": color,
+                            "title": escape(title),
+                            "link": escape(link),
+                            "summary": escape(summary[:400]) if summary else "",
+                            "time": format_pub_date(pub_date),
+                            "pubDate": pub_date,
+                        })
+
+                if posts_fetched:
+                    logging.info(f"  @{handle}: {len(posts_fetched)} posts (via {url[:40]})")
+                    break
+
+            except Exception as e:
+                logging.warning(f"  @{handle} RSS failed ({url[:40]}): {e}")
+                continue
+
+        if not posts_fetched:
+            logging.warning(f"  @{handle}: No posts fetched from any RSS bridge (X may be blocking)")
+
+        all_posts.extend(posts_fetched[:5])  # max 5 per account
+
+    # Sort by recency
+    def sort_key(p):
+        dt = parse_date(p.get("pubDate", ""))
+        return dt if dt else datetime.min
+
+    all_posts.sort(key=sort_key, reverse=True)
+    return all_posts
+
+
+def build_x_posts_json(posts: list[dict]) -> str:
+    return json.dumps(posts, ensure_ascii=False)
 
 
 # ─────────────────────────────────────────────
@@ -975,16 +1104,19 @@ def build_news_json(all_news: dict) -> str:
     return json.dumps(out, ensure_ascii=False)
 
 
-def generate_complete_html(all_news: dict, event_calendar=None, event_news=None, econ_data=None) -> str:
+def generate_complete_html(all_news: dict, event_calendar=None, event_news=None, econ_data=None, x_posts=None) -> str:
     current_time = get_ist_time()
     total_articles = sum(len(v) for v in all_news.values())
     news_json = build_news_json(all_news)
     event_calendar = event_calendar or []
     event_news = event_news or []
     econ_data = econ_data or {}
+    x_posts = x_posts or []
     event_cal_json = build_event_calendar_json(event_calendar)
     event_news_json = build_event_news_json(event_news)
     econ_json = build_econ_data_json(econ_data)
+    x_posts_json = build_x_posts_json(x_posts)
+    x_accounts_json = json.dumps(X_ACCOUNTS, ensure_ascii=False)
 
     # Count per category for sidebar
     cat_counts = {
@@ -1879,6 +2011,127 @@ body.light .ecal-month-label {{ background: var(--bg); }}
   .ecal-event-meta {{ grid-column: 1 / -1; }}
   .ecal-filters {{ padding: 8px 10px; }}
 }}
+
+/* ══════════════════════════════════════
+   X POSTS PANEL STYLES
+   ══════════════════════════════════════ */
+.xposts-panel {{
+  display: none;
+  padding: 0;
+  flex-direction: column;
+  height: 100%;
+}}
+.xposts-panel.active {{ display: flex; }}
+
+.xposts-header {{
+  padding: 16px 20px 10px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: flex-start; justify-content: space-between;
+  flex-shrink: 0;
+  gap: 12px;
+}}
+.xposts-title {{
+  color: #1d9bf0;
+  font-size: 16px; font-weight: 700; letter-spacing: 2px;
+}}
+.xposts-subtitle {{ color: var(--muted); font-size: 12px; margin-top: 3px; }}
+.xposts-rss-note {{
+  color: #555; font-size: 11px; text-align: right;
+  background: rgba(255,255,255,0.03); border: 1px solid var(--border2);
+  padding: 4px 8px; border-radius: 3px; white-space: nowrap; flex-shrink: 0;
+}}
+
+.xposts-account-filters {{
+  display: flex; gap: 6px; padding: 10px 20px;
+  flex-wrap: wrap; flex-shrink: 0;
+  border-bottom: 1px solid var(--border2);
+  overflow-x: auto; scrollbar-width: none;
+}}
+.xposts-account-filters::-webkit-scrollbar {{ display: none; }}
+.xacc-filter {{
+  background: var(--panel2); border: 1px solid var(--border);
+  color: var(--muted); font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px; padding: 5px 12px; border-radius: 3px;
+  cursor: pointer; transition: all 0.15s; white-space: nowrap;
+}}
+.xacc-filter:hover {{ border-color: #1d9bf0; color: var(--text); }}
+.xacc-filter.active {{ background: rgba(29,155,240,0.15); border-color: #1d9bf0; color: #1d9bf0; font-weight: 600; }}
+
+.xposts-body {{
+  flex: 1; overflow-y: auto; padding: 12px 20px 20px;
+  scrollbar-width: thin; scrollbar-color: var(--border) transparent;
+}}
+
+.xpost-card {{
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  background: var(--panel2);
+  transition: border-color 0.15s, background 0.15s;
+  cursor: default;
+}}
+.xpost-card:hover {{ border-color: #1d9bf0; background: rgba(29,155,240,0.04); }}
+
+.xpost-account-row {{
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 10px;
+}}
+.xpost-avatar {{
+  width: 36px; height: 36px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 700; color: #fff;
+  flex-shrink: 0; letter-spacing: 0.5px;
+}}
+.xpost-name {{ font-weight: 700; font-size: 15px; color: var(--text); }}
+.xpost-handle {{ font-size: 13px; color: var(--muted); }}
+.xpost-tag {{
+  font-size: 11px; font-weight: 600; letter-spacing: 0.5px;
+  padding: 2px 8px; border-radius: 3px;
+  background: rgba(29,155,240,0.15); color: #1d9bf0;
+  margin-left: auto;
+}}
+.xpost-time {{
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px; color: #555; flex-shrink: 0;
+}}
+
+.xpost-text {{
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px; line-height: 1.6;
+  color: var(--text);
+  margin-bottom: 10px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}}
+
+.xpost-footer {{
+  display: flex; align-items: center; gap: 12px;
+}}
+.xpost-link {{
+  font-size: 13px; color: #1d9bf0; text-decoration: none;
+  font-weight: 600; border-bottom: 1px solid rgba(29,155,240,0.3);
+  transition: color 0.15s;
+}}
+.xpost-link:hover {{ color: #60c6ff; border-bottom-color: #60c6ff; }}
+
+.xposts-empty {{
+  text-align: center; padding: 60px 20px;
+  color: var(--muted); font-size: 14px; line-height: 1.8;
+}}
+.xposts-empty .x-big {{ font-size: 48px; display: block; margin-bottom: 12px; opacity: 0.3; }}
+
+.xposts-no-data-note {{
+  background: rgba(29,155,240,0.08); border: 1px solid rgba(29,155,240,0.2);
+  border-radius: 6px; padding: 12px 16px; margin-bottom: 16px;
+  font-size: 13px; color: #60a5fa; line-height: 1.7;
+}}
+
+.xpost-divider {{
+  text-align: center; color: #333; font-size: 12px;
+  padding: 6px 0; letter-spacing: 2px;
+  font-family: 'IBM Plex Mono', monospace;
+}}
 </style>
 </head>
 <body>
@@ -2125,6 +2378,10 @@ body.light .ecal-month-label {{ background: var(--bg); }}
         <span class="sb-name">📅 Event Calendar</span>
         <span class="sb-count" id="ecal-sidebar-count">--</span>
       </div>
+      <div class="sb-item" id="sb-x_posts"            onclick="switchCat('x_posts',this)" tabindex="0" role="button">
+        <span class="sb-name">𝕏 X Posts</span>
+        <span class="sb-count" id="xposts-sidebar-count">--</span>
+      </div>
     </div>
 
     <!-- Sources ── -->
@@ -2182,6 +2439,7 @@ body.light .ecal-month-label {{ background: var(--bg); }}
       <div class="cat-tab"        id="tab-esg_climate"       onclick="switchCat('esg_climate',null)" tabindex="0" role="tab">🌱 ESG & CLIMATE</div>
       <div class="cat-tab"        id="tab-latam"             onclick="switchCat('latam',null)" tabindex="0" role="tab">🌎 LATAM</div>
       <div class="cat-tab"        id="tab-event_calendar"    onclick="switchCat('event_calendar',null)" tabindex="0" role="tab">📅 EVENT CALENDAR</div>
+      <div class="cat-tab"        id="tab-x_posts"           onclick="switchCat('x_posts',null)" tabindex="0" role="tab">𝕏 X POSTS</div>
     </div>
     </div>
 
@@ -2225,7 +2483,25 @@ body.light .ecal-month-label {{ background: var(--bg); }}
       </div>
     </div>
 
-  </div><!-- /main -->
+    <!-- ── X POSTS PANEL ── -->
+    <div class="xposts-panel" id="xPostsPanel">
+      <div class="xposts-header">
+        <div>
+          <div class="xposts-title">𝕏 X POSTS</div>
+          <div class="xposts-subtitle">Last 2 days · <span id="xposts-count-label">--</span> posts · Auto-refreshes on each script run</div>
+        </div>
+        <div class="xposts-rss-note">⚡ Via free RSS bridge · No X account needed</div>
+      </div>
+      <div class="xposts-account-filters" id="xAccountFilters">
+        <button class="xacc-filter active" onclick="filterXPosts('all', this)">ALL</button>
+        <!-- Account buttons populated by JS -->
+      </div>
+      <div class="xposts-body" id="xPostsBody">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+
+    </div><!-- /main -->
 </div><!-- /shell -->
 
 <!-- STATUS BAR -->
@@ -2246,6 +2522,8 @@ const NEWS_DATA = {news_json};
 const EVENT_CALENDAR = {event_cal_json};
 const EVENT_NEWS = {event_news_json};
 const ECON_DATA = {econ_json};
+const X_POSTS_DATA = {x_posts_json};
+const X_ACCOUNTS_META = {x_accounts_json};
 
 // ════════════════════════════
 // HYDRATE SIDEBAR FROM SERVER-SIDE DATA
@@ -2518,20 +2796,135 @@ function switchCat(cat, sidebarEl) {{
   if (tabEl) tabEl.classList.add('active');
 
   // Toggle panels
-  const newsPanel = document.getElementById('newsPanel');
-  const ecalPanel = document.getElementById('eventCalendarPanel');
-  const searchBox = document.querySelector('.news-search');
+  const newsPanel  = document.getElementById('newsPanel');
+  const ecalPanel  = document.getElementById('eventCalendarPanel');
+  const xPanel     = document.getElementById('xPostsPanel');
+  const searchBox  = document.querySelector('.news-search');
+
+  // Hide all special panels first
+  if (newsPanel)  newsPanel.style.display = '';
+  if (ecalPanel)  ecalPanel.classList.remove('active');
+  if (xPanel)     xPanel.classList.remove('active');
+  if (searchBox)  searchBox.style.display = '';
+
   if (cat === 'event_calendar') {{
     if (newsPanel) newsPanel.style.display = 'none';
     if (ecalPanel) ecalPanel.classList.add('active');
     if (searchBox) searchBox.style.display = 'none';
     renderEventCalendar();
+  }} else if (cat === 'x_posts') {{
+    if (newsPanel) newsPanel.style.display = 'none';
+    if (xPanel)    xPanel.classList.add('active');
+    if (searchBox) searchBox.style.display = 'none';
+    renderXPosts('all');
   }} else {{
-    if (newsPanel) newsPanel.style.display = '';
-    if (ecalPanel) ecalPanel.classList.remove('active');
-    if (searchBox) searchBox.style.display = '';
     renderNews(cat);
   }}
+}}
+
+// ════════════════════════════
+// X POSTS — RENDER & FILTER
+// ════════════════════════════
+let xPostFilter = 'all';
+
+function initXAccountFilters() {{
+  const wrap = document.getElementById('xAccountFilters');
+  if (!wrap) return;
+  // Build per-account filter buttons from meta
+  X_ACCOUNTS_META.forEach(acc => {{
+    const btn = document.createElement('button');
+    btn.className = 'xacc-filter';
+    btn.textContent = '@' + acc.handle;
+    btn.style.borderColor = acc.color + '55';
+    btn.onclick = function() {{ filterXPosts(acc.handle, this); }};
+    wrap.appendChild(btn);
+  }});
+
+  // Update sidebar count
+  const countEl = document.getElementById('xposts-sidebar-count');
+  if (countEl) countEl.textContent = X_POSTS_DATA.length;
+
+  // Update header label
+  const lbl = document.getElementById('xposts-count-label');
+  if (lbl) lbl.textContent = X_POSTS_DATA.length;
+}}
+
+function filterXPosts(handle, btnEl) {{
+  xPostFilter = handle;
+  document.querySelectorAll('.xacc-filter').forEach(b => b.classList.remove('active'));
+  if (btnEl) btnEl.classList.add('active');
+  renderXPosts(handle);
+}}
+
+function renderXPosts(handle) {{
+  const body = document.getElementById('xPostsBody');
+  if (!body) return;
+
+  const posts = handle === 'all'
+    ? X_POSTS_DATA
+    : X_POSTS_DATA.filter(p => p.handle === handle);
+
+  if (!posts || posts.length === 0) {{
+    const hasAny = X_POSTS_DATA.length > 0;
+    body.innerHTML = `
+      <div class="xposts-no-data-note">
+        ℹ️ <strong>How X Posts work:</strong> Posts are fetched via free RSS bridges (RSSHub / Nitter).
+        These bridges may be temporarily blocked by X. Re-run the script to retry fetching.
+        If posts still don't appear, the bridge for this account may be down — try again later.
+      </div>
+      <div class="xposts-empty">
+        <span class="x-big">𝕏</span>
+        ${{handle === 'all'
+          ? 'No posts from the last 2 days were fetched.<br>Re-run the Python script to refresh.'
+          : 'No posts from <strong>@' + handle + '</strong> in the last 2 days.<br>The RSS bridge may be temporarily unavailable.'
+        }}
+      </div>`;
+    return;
+  }}
+
+  // Group by account for visual separation when showing ALL
+  let html = '';
+  if (handle !== 'all') {{
+    html = posts.map(p => xPostCardHTML(p)).join('');
+  }} else {{
+    // Group by account handle preserving recency order, show divider per account
+    let lastHandle = null;
+    posts.forEach(p => {{
+      if (p.handle !== lastHandle) {{
+        if (lastHandle !== null) html += '<div class="xpost-divider">· · ·</div>';
+        lastHandle = p.handle;
+      }}
+      html += xPostCardHTML(p);
+    }});
+  }}
+
+  body.innerHTML = html;
+}}
+
+function xPostCardHTML(p) {{
+  // Avatar: first 2 chars of name
+  const initials = p.name.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
+  const linkHtml = p.link && p.link !== '#'
+    ? `<a class="xpost-link" href="${{p.link}}" target="_blank" rel="noopener">View on X ↗</a>`
+    : '';
+  // Clean up summary — strip repeated title text
+  const text = p.summary && p.summary.length > 10 && p.summary !== p.title
+    ? p.summary
+    : p.title;
+
+  return `<div class="xpost-card">
+  <div class="xpost-account-row">
+    <div class="xpost-avatar" style="background:${{p.color}}">${{initials}}</div>
+    <div>
+      <div class="xpost-name">${{p.name}}</div>
+      <div class="xpost-handle">@${{p.handle}}</div>
+    </div>
+    <span class="xpost-tag">${{p.tag}}</span>
+    <span class="xpost-time">${{p.time}}</span>
+  </div>
+  <div class="xpost-text">${{text}}</div>
+  <div class="xpost-footer">${{linkHtml}}</div>
+</div>`;
 }}
 
 // ════════════════════════════
@@ -3011,6 +3404,9 @@ window.addEventListener('DOMContentLoaded', () => {{
   setInterval(loadAll, 5 * 60 * 1000);
   setInterval(updateClock, 1000);
 
+  // Init X Posts account filter buttons
+  initXAccountFilters();
+
   // Scroll-to-top observer
   const mainEl = document.querySelector('.main');
   const btn = document.getElementById('scrollTopBtn');
@@ -3032,7 +3428,7 @@ def main():
     logging.info("")
     logging.info("=" * 70)
     logging.info("GLOBAL MARKET DASHBOARD v2 – BLOOMBERG TERMINAL THEME")
-    logging.info("  14 CATEGORIES · 46+ RSS SOURCES")
+    logging.info("  14 CATEGORIES · 46+ RSS SOURCES · X POSTS")
     logging.info("=" * 70)
 
     all_news = {}
@@ -3058,8 +3454,12 @@ def main():
     fetched = sum(1 for v in econ_data.values() if v is not None)
     logging.info(f"  {fetched}/{len(econ_data)} indicators fetched successfully")
 
+    logging.info("Fetching X posts (last 2 days via RSS bridge) …")
+    x_posts = fetch_x_posts()
+    logging.info(f"  {len(x_posts)} X posts fetched across {len(X_ACCOUNTS)} accounts")
+
     logging.info("Generating index.html …")
-    html = generate_complete_html(all_news, event_calendar, event_news, econ_data)
+    html = generate_complete_html(all_news, event_calendar, event_news, econ_data, x_posts)
 
     output = "index.html"
     with open(output, "w", encoding="utf-8") as f:
