@@ -147,6 +147,14 @@ X_ACCOUNTS = [
 # RSS bridge URLs for X/Twitter (tried in order, first success wins per account)
 # RSSHub is the most reliable free bridge
 def _x_rss_urls(handle: str) -> list[str]:
+    # Special case: Trump's X account is blocked on all free RSS bridges.
+    # Fall back to Google News RSS for his statements / Truth Social posts.
+    if handle == "realDonaldTrump":
+        return [
+            "https://news.google.com/rss/search?q=Donald+Trump+statement+executive+order+when:2d&hl=en-US&gl=US&ceid=US:en",
+            "https://news.google.com/rss/search?q=Trump+Truth+Social+post+announcement+when:2d&hl=en-US&gl=US&ceid=US:en",
+            "https://feeds.reuters.com/reuters/politicsNews",
+        ]
     return [
         f"https://rsshub.app/twitter/user/{handle}",
         f"https://nitter.privacyredirect.com/{handle}/rss",
@@ -3432,6 +3440,41 @@ window.addEventListener('DOMContentLoaded', () => {{
 
   // Init X Posts account filter buttons
   initXAccountFilters();
+
+  // ── Drag-to-scroll for category tabs ──
+  const catTabs = document.getElementById('catTabs');
+  if (catTabs) {{
+    let isDown = false, startX = 0, scrollStart = 0;
+    catTabs.style.cursor = 'grab';
+    catTabs.addEventListener('mousedown', e => {{
+      isDown = true;
+      startX = e.pageX - catTabs.offsetLeft;
+      scrollStart = catTabs.scrollLeft;
+      catTabs.style.cursor = 'grabbing';
+      catTabs.style.userSelect = 'none';
+    }});
+    document.addEventListener('mouseup', () => {{
+      isDown = false;
+      catTabs.style.cursor = 'grab';
+      catTabs.style.userSelect = '';
+    }});
+    catTabs.addEventListener('mousemove', e => {{
+      if (!isDown) return;
+      e.preventDefault();
+      const x = e.pageX - catTabs.offsetLeft;
+      catTabs.scrollLeft = scrollStart - (x - startX);
+    }});
+    // Touch support
+    let touchStartX = 0, touchScrollStart = 0;
+    catTabs.addEventListener('touchstart', e => {{
+      touchStartX = e.touches[0].pageX;
+      touchScrollStart = catTabs.scrollLeft;
+    }}, {{ passive: true }});
+    catTabs.addEventListener('touchmove', e => {{
+      const dx = touchStartX - e.touches[0].pageX;
+      catTabs.scrollLeft = touchScrollStart + dx;
+    }}, {{ passive: true }});
+  }}
 
   // Scroll-to-top observer
   const mainEl = document.querySelector('.main');
