@@ -36,6 +36,7 @@ RSS_SOURCES = {
         "https://www.cnbc.com/id/100003114/device/rss/rss.html",
         "https://feeds.marketwatch.com/marketwatch/topstories/",
         "https://news.google.com/rss/search?q=earnings+results+IPO+stock+market+when:1d&hl=en-US&gl=US&ceid=US:en",
+        "https://www.investing.com/rss/news.rss",
     ],
     # 2 ── Macro & Policy + Trade & Tariffs
     "macro_policy": [
@@ -135,11 +136,9 @@ REQUEST_TIMEOUT = 8
 # ─────────────────────────────────────────────
 X_ACCOUNTS = [
     {"handle": "elonmusk",       "name": "Elon Musk",         "tag": "Influencer",  "color": "#1d9bf0"},
-    {"handle": "BarackObama",    "name": "Barack Obama",       "tag": "US Politics", "color": "#e05060"},
     {"handle": "realDonaldTrump","name": "Donald Trump",       "tag": "US Politics", "color": "#e05060"},
     {"handle": "narendramodi",   "name": "Narendra Modi",      "tag": "India",       "color": "#ff9933"},
-    {"handle": "JoeBiden",       "name": "Joe Biden",          "tag": "US Politics", "color": "#e05060"},
-    {"handle": "ZelenskyyUa",    "name": "Volodymyr Zelensky", "tag": "Europe",      "color": "#60a5fa"},
+    {"handle": "sama",           "name": "Sam Altman",         "tag": "Tech/AI",     "color": "#10a37f"},
     {"handle": "nytimes",        "name": "The New York Times", "tag": "News",        "color": "#aaaaaa"},
     {"handle": "CNN",            "name": "CNN",                "tag": "News",        "color": "#cc0000"},
     {"handle": "BBCWorld",       "name": "BBC World News",     "tag": "News",        "color": "#bb1919"},
@@ -506,6 +505,28 @@ def fetch_x_posts() -> list[dict]:
                 continue
         return None
 
+    # ── English-only filter ──
+    # Detects non-English posts using common non-Latin script ranges
+    # and high-frequency non-English Latin diacritics.
+    _NON_ENGLISH_RE = re.compile(
+        r"[\u0400-\u04FF"   # Cyrillic
+        r"\u0600-\u06FF"    # Arabic
+        r"\u0900-\u097F"    # Devanagari
+        r"\u4E00-\u9FFF"    # CJK Unified Ideographs (Chinese/Japanese)
+        r"\u3040-\u309F"    # Hiragana
+        r"\u30A0-\u30FF"    # Katakana
+        r"\uAC00-\uD7AF"    # Hangul (Korean)
+        r"\u0E00-\u0E7F"    # Thai
+        r"\u0370-\u03FF"    # Greek
+        r"]"
+    )
+
+    def _is_english(text: str) -> bool:
+        """Return True if text appears to be in English (no non-Latin/CJK scripts)."""
+        if not text:
+            return True
+        return not bool(_NON_ENGLISH_RE.search(text))
+
     all_posts = []
 
     for account in X_ACCOUNTS:
@@ -543,6 +564,10 @@ def fetch_x_posts() -> list[dict]:
 
                     dt = parse_date(pub_date)
                     if dt and dt >= cutoff and title and len(title) > 5:
+                        # Skip non-English posts
+                        if not _is_english(title) or not _is_english(summary):
+                            logging.info(f"  @{handle}: skipping non-English post: {title[:50]}")
+                            continue
                         posts_fetched.append({
                             "handle": handle,
                             "name": name,
@@ -620,6 +645,7 @@ def fetch_rss(url: str) -> list[dict]:
             "ft.com": "Financial Times",
             "bbc.co.uk": "BBC",
             "theguardian.com": "The Guardian",
+            "investing.com": "Investing.com",
         }
         source = next((v for k, v in source_map.items() if k in domain), domain)
 
