@@ -1651,19 +1651,19 @@ body {{
   display: grid;
   grid-template-columns: 36px 1fr 24px;
   align-items: center;
-  padding: 13px 12px 13px 0;
+  padding: 9px 12px 9px 0;
   gap: 4px;
 }}
 .nc-num {{
-  font-size: 14px; font-weight: 700;
+  font-size: 13px; font-weight: 700;
   color: var(--orange); opacity: 0.55;
   font-family: 'IBM Plex Mono', monospace;
   text-align: right; padding-right: 4px;
 }}
 .nc-headline {{
   font-family: 'DM Sans', sans-serif;
-  font-size: 20px; font-weight: 500;
-  color: #e8e8e8; line-height: 1.55;
+  font-size: 15px; font-weight: 500;
+  color: #e8e8e8; line-height: 1.45;
   letter-spacing: 0.1px;
 }}
 .nc-arrow {{
@@ -1687,22 +1687,22 @@ body {{
 }}
 .nc-src {{
   font-family: 'DM Sans', sans-serif;
-  font-size: 14px; font-weight: 600; letter-spacing: 0.5px;
+  font-size: 12px; font-weight: 600; letter-spacing: 0.5px;
   padding: 2px 7px; border-radius: 3px;
   background: rgba(255,106,0,0.14); color: var(--orange);
   text-transform: uppercase;
 }}
-.nc-sep {{ color: #444; font-size: 14px; }}
-.nc-time {{ font-family: 'IBM Plex Mono', monospace; font-size: 14px; color: #666; }}
+.nc-sep {{ color: #444; font-size: 13px; }}
+.nc-time {{ font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #666; }}
 .nc-summary {{
   font-family: 'DM Sans', sans-serif;
-  font-size: 17px; color: #aaaaaa;
-  line-height: 1.7; margin-bottom: 8px;
+  font-size: 14px; color: #aaaaaa;
+  line-height: 1.6; margin-bottom: 8px;
 }}
 .nc-link {{
   display: inline-block;
   font-family: 'DM Sans', sans-serif;
-  color: var(--orange); font-size: 15px; font-weight: 600;
+  color: var(--orange); font-size: 13px; font-weight: 600;
   text-decoration: none; letter-spacing: 0.5px;
   border-bottom: 1px solid rgba(255,106,0,0.3);
   padding-bottom: 1px; transition: opacity 0.15s;
@@ -1810,8 +1810,8 @@ body {{
   .news-hdr {{ margin-bottom: 10px; padding-bottom: 8px; }}
   .news-hdr-title {{ font-size: 10px; }}
   .news-hdr-meta {{ display: none; }}
-  .nc-row {{ padding: 8px 8px 8px 0; }}
-  .nc-headline {{ font-size: 15px; }}
+  .nc-row {{ padding: 7px 8px 7px 0; }}
+  .nc-headline {{ font-size: 13px; }}
   .nc-expand-body {{ padding: 0 8px 10px 30px; }}
   .statusbar {{ padding: 3px 8px; font-size: 9px; }}
   .statusbar span:first-child {{ display: none; }}
