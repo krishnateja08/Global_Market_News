@@ -2261,125 +2261,7 @@ body.light .ecal-month-label {{ background: var(--bg); }}
   <!-- ═══ SIDEBAR ═══ -->
   <div class="sidebar">
 
-    <!-- 1. USA ECONOMIC (collapsible) ── -->
-    <div class="sb-section">
-      <div class="sb-econ-hdr" onclick="toggleEcon('usa')">
-        <span class="sb-econ-title usa">🇺🇸 USA ECONOMIC</span>
-        <span class="sb-econ-arrow" id="arrow-usa">▼</span>
-      </div>
-      <div class="sb-econ-body" id="body-usa">
-        <div class="sb-econ-row">
-          <span class="sb-econ-key">Fed Funds Rate</span>
-          <span class="sb-econ-val neu" id="sbv-fedfunds">4.25–4.50%</span>
-          <span class="sb-econ-note" id="sbn-fedfunds">Target range</span>
-        </div>
-        <div class="sb-econ-row">
-          <span class="sb-econ-key">FOMC Next</span>
-          <span class="sb-econ-val neu" id="sbv-fomc">Apr 28–29</span>
-          <span class="sb-econ-note" id="sbn-fomc">2026</span>
-        </div>
-        <div class="sb-econ-row">
-          <span class="sb-econ-key">CPI YoY</span>
-          <span class="sb-econ-val neu" id="sbv-cpi">--</span>
-          <span class="sb-econ-note" id="sbn-cpi">loading…</span>
-        </div>
-        <div class="sb-econ-row">
-          <span class="sb-econ-key">Core CPI</span>
-          <span class="sb-econ-val neu" id="sbv-corecpi">--</span>
-          <span class="sb-econ-note" id="sbn-corecpi">loading…</span>
-        </div>
-        <div class="sb-econ-row">
-          <span class="sb-econ-key">GDP Growth</span>
-          <span class="sb-econ-val neu" id="sbv-gdp">--</span>
-          <span class="sb-econ-note" id="sbn-gdp">loading…</span>
-        </div>
-        <div class="sb-econ-row">
-          <span class="sb-econ-key">Unemployment</span>
-          <span class="sb-econ-val neu" id="sbv-unemployment">--</span>
-          <span class="sb-econ-note" id="sbn-unemployment">loading…</span>
-        </div>
-        <div class="sb-econ-row">
-          <span class="sb-econ-key">NFP</span>
-          <span class="sb-econ-val neu" id="sbv-nfp">--</span>
-          <span class="sb-econ-note" id="sbn-nfp">loading…</span>
-        </div>
-        <div class="sb-econ-row">
-          <span class="sb-econ-key">PPI YoY</span>
-          <span class="sb-econ-val neu" id="sbv-ppi">--</span>
-          <span class="sb-econ-note" id="sbn-ppi">loading…</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- 2. INDIA ECONOMIC (collapsible) ── -->
-    <div class="sb-section">
-      <div class="sb-econ-hdr" onclick="toggleEcon('india')">
-        <span class="sb-econ-title india">🇮🇳 INDIA ECONOMIC</span>
-        <span class="sb-econ-arrow" id="arrow-india">▼</span>
-      </div>
-      <div class="sb-econ-body" id="body-india">
-        <div class="sb-econ-row">
-          <span class="sb-econ-key">Repo Rate</span>
-          <span class="sb-econ-val neu" id="sbv-reporate">--</span>
-          <span class="sb-econ-note" id="sbn-reporate">loading…</span>
-        </div>
-        <div class="sb-econ-row">
-          <span class="sb-econ-key">CPI</span>
-          <span class="sb-econ-val neu" id="sbv-india-cpi">--</span>
-          <span class="sb-econ-note" id="sbn-india-cpi">loading…</span>
-        </div>
-        <div class="sb-econ-row">
-          <span class="sb-econ-key">WPI</span>
-          <span class="sb-econ-val neu" id="sbv-india-wpi">--</span>
-          <span class="sb-econ-note" id="sbn-india-wpi">loading…</span>
-        </div>
-        <div class="sb-econ-row">
-          <span class="sb-econ-key">Unemployment</span>
-          <span class="sb-econ-val neu" id="sbv-india-unemp">--</span>
-          <span class="sb-econ-note" id="sbn-india-unemp">loading…</span>
-        </div>
-        <div class="sb-econ-row">
-          <span class="sb-econ-key">Mfg PMI</span>
-          <span class="sb-econ-val pos" id="sbv-india-pmi">--</span>
-          <span class="sb-econ-note" id="sbn-india-pmi">loading…</span>
-        </div>
-        <div class="sb-econ-row">
-          <span class="sb-econ-key">GDP Growth</span>
-          <span class="sb-econ-val pos" id="sbv-india-gdp">--</span>
-          <span class="sb-econ-note" id="sbn-india-gdp">loading…</span>
-        </div>
-        <div class="sb-econ-row">
-          <span class="sb-econ-key">Fiscal Deficit</span>
-          <span class="sb-econ-val neu" id="sbv-india-fiscal">--</span>
-          <span class="sb-econ-note" id="sbn-india-fiscal">loading…</span>
-        </div>
-        <div class="sb-econ-row">
-          <span class="sb-econ-key">USD/INR</span>
-          <span class="sb-econ-val neu" id="sbv-usdinr2">₹--</span>
-          <span class="sb-econ-note" id="sbn-usdinr2">live</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- 3. LIVE PRICES ── -->
-    <div class="sb-section">
-      <div class="sb-label">▶ LIVE PRICES</div>
-      <div class="sb-ind-row"><span class="sb-ind-name">S&amp;P 500</span>    <span class="sb-ind-val neu" id="sbv-sp500">--</span></div>
-      <div class="sb-ind-row"><span class="sb-ind-name">Dow Jones</span>   <span class="sb-ind-val neu" id="sbv-dow">--</span></div>
-      <div class="sb-ind-row"><span class="sb-ind-name">Nasdaq</span>      <span class="sb-ind-val neu" id="sbv-nasdaq">--</span></div>
-      <div class="sb-ind-row"><span class="sb-ind-name">VIX</span>         <span class="sb-ind-val neu" id="sbv-vix">--</span></div>
-      <div class="sb-ind-row"><span class="sb-ind-name">10Y Yield</span>   <span class="sb-ind-val neu" id="sbv-us10y">--</span></div>
-      <div class="sb-ind-row"><span class="sb-ind-name">2Y Yield</span>    <span class="sb-ind-val neu" id="sbv-us2y">--</span></div>
-      <div class="sb-ind-row"><span class="sb-ind-name">Nifty 50</span>    <span class="sb-ind-val neu" id="sbv-nifty">--</span></div>
-      <div class="sb-ind-row"><span class="sb-ind-name">Sensex</span>      <span class="sb-ind-val neu" id="sbv-sensex">--</span></div>
-      <div class="sb-ind-row"><span class="sb-ind-name">USD/INR</span>     <span class="sb-ind-val neu" id="sbv-usdinr">--</span></div>
-      <div class="sb-ind-row"><span class="sb-ind-name">Crude Oil</span>   <span class="sb-ind-val neu" id="sbv-oil">--</span></div>
-      <div class="sb-ind-row"><span class="sb-ind-name">Gold</span>        <span class="sb-ind-val neu" id="sbv-gold">--</span></div>
-      <div class="sb-ind-row"><span class="sb-ind-name">Silver</span>      <span class="sb-ind-val neu" id="sbv-silver">--</span></div>
-      <div class="sb-ind-row"><span class="sb-ind-name">USD Index</span>   <span class="sb-ind-val neu" id="sbv-dollar">--</span></div>
-    </div>
-
-    <!-- 4. CATEGORIES ── -->
+    <!-- 1. CATEGORIES ── -->
     <div class="sb-section">
       <div class="sb-label">▶ CATEGORIES</div>
       <div class="sb-item active" id="sb-markets"            onclick="switchCat('markets',this)" tabindex="0" role="button">
@@ -2446,6 +2328,124 @@ body.light .ecal-month-label {{ background: var(--bg); }}
         <span class="sb-name">𝕏 X Posts</span>
         <span class="sb-count" id="xposts-sidebar-count">--</span>
       </div>
+    </div>
+
+    <!-- 2. INDIA ECONOMIC (collapsible) ── -->
+    <div class="sb-section">
+      <div class="sb-econ-hdr" onclick="toggleEcon('india')">
+        <span class="sb-econ-title india">🇮🇳 INDIA ECONOMIC</span>
+        <span class="sb-econ-arrow" id="arrow-india">▼</span>
+      </div>
+      <div class="sb-econ-body" id="body-india">
+        <div class="sb-econ-row">
+          <span class="sb-econ-key">Repo Rate</span>
+          <span class="sb-econ-val neu" id="sbv-reporate">--</span>
+          <span class="sb-econ-note" id="sbn-reporate">loading…</span>
+        </div>
+        <div class="sb-econ-row">
+          <span class="sb-econ-key">CPI</span>
+          <span class="sb-econ-val neu" id="sbv-india-cpi">--</span>
+          <span class="sb-econ-note" id="sbn-india-cpi">loading…</span>
+        </div>
+        <div class="sb-econ-row">
+          <span class="sb-econ-key">WPI</span>
+          <span class="sb-econ-val neu" id="sbv-india-wpi">--</span>
+          <span class="sb-econ-note" id="sbn-india-wpi">loading…</span>
+        </div>
+        <div class="sb-econ-row">
+          <span class="sb-econ-key">Unemployment</span>
+          <span class="sb-econ-val neu" id="sbv-india-unemp">--</span>
+          <span class="sb-econ-note" id="sbn-india-unemp">loading…</span>
+        </div>
+        <div class="sb-econ-row">
+          <span class="sb-econ-key">Mfg PMI</span>
+          <span class="sb-econ-val pos" id="sbv-india-pmi">--</span>
+          <span class="sb-econ-note" id="sbn-india-pmi">loading…</span>
+        </div>
+        <div class="sb-econ-row">
+          <span class="sb-econ-key">GDP Growth</span>
+          <span class="sb-econ-val pos" id="sbv-india-gdp">--</span>
+          <span class="sb-econ-note" id="sbn-india-gdp">loading…</span>
+        </div>
+        <div class="sb-econ-row">
+          <span class="sb-econ-key">Fiscal Deficit</span>
+          <span class="sb-econ-val neu" id="sbv-india-fiscal">--</span>
+          <span class="sb-econ-note" id="sbn-india-fiscal">loading…</span>
+        </div>
+        <div class="sb-econ-row">
+          <span class="sb-econ-key">USD/INR</span>
+          <span class="sb-econ-val neu" id="sbv-usdinr2">₹--</span>
+          <span class="sb-econ-note" id="sbn-usdinr2">live</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. USA ECONOMIC (collapsible) ── -->
+    <div class="sb-section">
+      <div class="sb-econ-hdr" onclick="toggleEcon('usa')">
+        <span class="sb-econ-title usa">🇺🇸 USA ECONOMIC</span>
+        <span class="sb-econ-arrow" id="arrow-usa">▼</span>
+      </div>
+      <div class="sb-econ-body" id="body-usa">
+        <div class="sb-econ-row">
+          <span class="sb-econ-key">Fed Funds Rate</span>
+          <span class="sb-econ-val neu" id="sbv-fedfunds">4.25–4.50%</span>
+          <span class="sb-econ-note" id="sbn-fedfunds">Target range</span>
+        </div>
+        <div class="sb-econ-row">
+          <span class="sb-econ-key">FOMC Next</span>
+          <span class="sb-econ-val neu" id="sbv-fomc">Apr 28–29</span>
+          <span class="sb-econ-note" id="sbn-fomc">2026</span>
+        </div>
+        <div class="sb-econ-row">
+          <span class="sb-econ-key">CPI YoY</span>
+          <span class="sb-econ-val neu" id="sbv-cpi">--</span>
+          <span class="sb-econ-note" id="sbn-cpi">loading…</span>
+        </div>
+        <div class="sb-econ-row">
+          <span class="sb-econ-key">Core CPI</span>
+          <span class="sb-econ-val neu" id="sbv-corecpi">--</span>
+          <span class="sb-econ-note" id="sbn-corecpi">loading…</span>
+        </div>
+        <div class="sb-econ-row">
+          <span class="sb-econ-key">GDP Growth</span>
+          <span class="sb-econ-val neu" id="sbv-gdp">--</span>
+          <span class="sb-econ-note" id="sbn-gdp">loading…</span>
+        </div>
+        <div class="sb-econ-row">
+          <span class="sb-econ-key">Unemployment</span>
+          <span class="sb-econ-val neu" id="sbv-unemployment">--</span>
+          <span class="sb-econ-note" id="sbn-unemployment">loading…</span>
+        </div>
+        <div class="sb-econ-row">
+          <span class="sb-econ-key">NFP</span>
+          <span class="sb-econ-val neu" id="sbv-nfp">--</span>
+          <span class="sb-econ-note" id="sbn-nfp">loading…</span>
+        </div>
+        <div class="sb-econ-row">
+          <span class="sb-econ-key">PPI YoY</span>
+          <span class="sb-econ-val neu" id="sbv-ppi">--</span>
+          <span class="sb-econ-note" id="sbn-ppi">loading…</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. LIVE PRICES ── -->
+    <div class="sb-section">
+      <div class="sb-label">▶ LIVE PRICES</div>
+      <div class="sb-ind-row"><span class="sb-ind-name">S&amp;P 500</span>    <span class="sb-ind-val neu" id="sbv-sp500">--</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">Dow Jones</span>   <span class="sb-ind-val neu" id="sbv-dow">--</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">Nasdaq</span>      <span class="sb-ind-val neu" id="sbv-nasdaq">--</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">VIX</span>         <span class="sb-ind-val neu" id="sbv-vix">--</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">10Y Yield</span>   <span class="sb-ind-val neu" id="sbv-us10y">--</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">2Y Yield</span>    <span class="sb-ind-val neu" id="sbv-us2y">--</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">Nifty 50</span>    <span class="sb-ind-val neu" id="sbv-nifty">--</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">Sensex</span>      <span class="sb-ind-val neu" id="sbv-sensex">--</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">USD/INR</span>     <span class="sb-ind-val neu" id="sbv-usdinr">--</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">Crude Oil</span>   <span class="sb-ind-val neu" id="sbv-oil">--</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">Gold</span>        <span class="sb-ind-val neu" id="sbv-gold">--</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">Silver</span>      <span class="sb-ind-val neu" id="sbv-silver">--</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">USD Index</span>   <span class="sb-ind-val neu" id="sbv-dollar">--</span></div>
     </div>
 
     <!-- Sources ── -->
@@ -3474,26 +3474,36 @@ window.addEventListener('DOMContentLoaded', () => {{
   // ── Drag-to-scroll for category tabs ──
   const catTabs = document.getElementById('catTabs');
   if (catTabs) {{
-    let isDown = false, startX = 0, scrollStart = 0;
+    let isDown = false, startX = 0, scrollStart = 0, hasDragged = false;
     catTabs.style.cursor = 'grab';
+
     catTabs.addEventListener('mousedown', e => {{
-      isDown = true;
-      startX = e.pageX - catTabs.offsetLeft;
+      isDown = true; hasDragged = false;
+      startX = e.pageX;
       scrollStart = catTabs.scrollLeft;
       catTabs.style.cursor = 'grabbing';
       catTabs.style.userSelect = 'none';
+      e.preventDefault();
     }});
+
     document.addEventListener('mouseup', () => {{
       isDown = false;
       catTabs.style.cursor = 'grab';
       catTabs.style.userSelect = '';
     }});
-    catTabs.addEventListener('mousemove', e => {{
+
+    document.addEventListener('mousemove', e => {{
       if (!isDown) return;
-      e.preventDefault();
-      const x = e.pageX - catTabs.offsetLeft;
-      catTabs.scrollLeft = scrollStart - (x - startX);
+      const dx = e.pageX - startX;
+      if (Math.abs(dx) > 4) hasDragged = true;
+      catTabs.scrollLeft = scrollStart - dx;
     }});
+
+    // Suppress click on tabs if we actually dragged
+    catTabs.addEventListener('click', e => {{
+      if (hasDragged) {{ e.stopPropagation(); e.preventDefault(); hasDragged = false; }}
+    }}, true);
+
     // Touch support
     let touchStartX = 0, touchScrollStart = 0;
     catTabs.addEventListener('touchstart', e => {{
@@ -3501,8 +3511,7 @@ window.addEventListener('DOMContentLoaded', () => {{
       touchScrollStart = catTabs.scrollLeft;
     }}, {{ passive: true }});
     catTabs.addEventListener('touchmove', e => {{
-      const dx = touchStartX - e.touches[0].pageX;
-      catTabs.scrollLeft = touchScrollStart + dx;
+      catTabs.scrollLeft = touchScrollStart - (e.touches[0].pageX - touchStartX);
     }}, {{ passive: true }});
   }}
 
