@@ -6,6 +6,7 @@ Generates HTML with Bloomberg Terminal UI (Template 1).
 """
 
 import json
+import subprocess
 import sys
 import urllib.request
 import urllib.parse
@@ -16,6 +17,12 @@ import html as html_module
 import re
 import calendar
 import logging
+
+# Auto-install langdetect if not present (needed for English-only X post filtering)
+try:
+    import langdetect  # noqa: F401
+except ImportError:
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "langdetect", "--quiet"])
 
 # ─────────────────────────────────────────────
 #  LOGGING SETUP
@@ -533,11 +540,30 @@ def fetch_x_posts() -> list[dict]:
         r"]"
     )
 
+    # Try to import langdetect for accurate Latin-script language detection
+    # (catches French, Spanish, Hindi-romanized, etc. that the regex misses)
+    try:
+        from langdetect import detect as _langdetect
+        from langdetect.lang_detect_exception import LangDetectException as _LangDetectException
+        _has_langdetect = True
+    except ImportError:
+        _has_langdetect = False
+
     def _is_english(text: str) -> bool:
-        """Return True if text appears to be in English (no non-Latin/CJK scripts)."""
+        """Return True if text is English. Uses langdetect when available,
+        falls back to script-range regex."""
         if not text:
             return True
-        return not bool(_NON_ENGLISH_RE.search(text))
+        # Fast reject: non-Latin scripts (always non-English)
+        if _NON_ENGLISH_RE.search(text):
+            return False
+        # Accurate check for Latin-script non-English (French, Spanish, etc.)
+        if _has_langdetect and len(text.split()) >= 4:
+            try:
+                return _langdetect(text) == "en"
+            except _LangDetectException:
+                pass  # fall through to True if detection fails
+        return True
 
     all_posts = []
 
