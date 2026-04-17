@@ -1368,38 +1368,38 @@ body {{
 .sidebar::-webkit-scrollbar-track {{ background:transparent; }}
 .sidebar::-webkit-scrollbar-thumb {{ background:var(--border); border-radius:2px; }}
 
-.sb-section {{ margin-bottom: 24px; }}
+.sb-section {{ margin-bottom: 14px; }}
 .sb-label {{
   color: var(--orange);
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 700;
   letter-spacing: 3px;
   text-transform: uppercase;
-  padding: 5px 14px 8px;
+  padding: 4px 12px 6px;
   border-bottom: 1px solid var(--border);
-  margin-bottom: 4px;
+  margin-bottom: 2px;
   display: flex;
   align-items: center;
   gap: 6px;
 }}
 .sb-item {{
-  padding: 8px 14px;
+  padding: 5px 12px;
   cursor: pointer;
   display: flex;
   justify-content: space-between;
   align-items: center;
   border-left: 3px solid transparent;
   transition: all 0.12s;
-  font-size: 15px;
+  font-size: 13px;
 }}
 .sb-item:hover {{ background: var(--orange-dim); border-left-color: rgba(255,106,0,0.4); }}
 .sb-item.active {{ background: var(--orange-dim); border-left-color: var(--orange); }}
 .sb-item .sb-name {{ color: var(--white); font-weight: 500; }}
 .sb-item .sb-count {{
   color: #cccccc;
-  font-size: 13px;
+  font-size: 11px;
   background: var(--border2);
-  padding: 1px 7px;
+  padding: 1px 6px;
   border-radius: 2px;
   font-weight: 600;
 }}
