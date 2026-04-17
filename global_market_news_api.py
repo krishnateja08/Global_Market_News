@@ -142,6 +142,10 @@ X_ACCOUNTS = [
     {"handle": "nytimes",        "name": "The New York Times", "tag": "News",        "color": "#aaaaaa"},
     {"handle": "CNN",            "name": "CNN",                "tag": "News",        "color": "#cc0000"},
     {"handle": "BBCWorld",       "name": "BBC World News",     "tag": "News",        "color": "#bb1919"},
+    {"handle": "WSJmarkets",     "name": "WSJ Markets",        "tag": "Markets",     "color": "#0080c6"},
+    {"handle": "Deltaone",       "name": "Walter Bloomberg",   "tag": "Markets",     "color": "#f5a623"},
+    {"handle": "Unusual_Whales", "name": "Unusual Whales",     "tag": "Options",     "color": "#7c3aed"},
+    {"handle": "FirstSquawk",    "name": "First Squawk",       "tag": "Breaking",    "color": "#16a34a"},
 ]
 
 # RSS bridge URLs for X/Twitter (tried in order, first success wins per account)
