@@ -1,0 +1,2327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NexusFeed – Global Market Intelligence v2</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;600;700&family=IBM+Plex+Sans:wght@300;400;600&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ══════════════════════════════════════════
+   BLOOMBERG TERMINAL THEME
+   ══════════════════════════════════════════ */
+:root {
+  --bg: #0d0d0d;
+  --panel: #131313;
+  --panel2: #181818;
+  --border: #333333;
+  --border2: #252525;
+  --orange: #ff6a00;
+  --orange-dim: rgba(255,106,0,0.10);
+  --orange-mid: rgba(255,106,0,0.22);
+  --green: #00ff55;
+  --green-dim: rgba(0,255,85,0.08);
+  --red: #ff3355;
+  --red-dim: rgba(255,51,85,0.08);
+  --yellow: #ffd700;
+  --blue: #29b6ff;
+  --muted: #999999;
+  --muted2: #666666;
+  --text: #d8d8d8;
+  --white: #f5f5f5;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 16px;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── TOP BAR ── */
+.topbar {
+  background: var(--orange);
+  color: #000;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 18px;
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 2px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.topbar-left { display:flex; align-items:center; gap:16px; }
+.topbar-right { display:flex; gap: 22px; font-weight: 600; font-size: 13px; }
+.topbar-dot { width:8px; height:8px; border-radius:50%; background:#000; animation: blink 1.5s step-end infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+
+/* ── CLOCK BAR ── */
+.clockbar {
+  background: #161616;
+  border-bottom: 1px solid #2e2e2e;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'IBM Plex Mono', monospace;
+  padding: 8px 18px;
+  position: sticky;
+  top: 34px;
+  z-index: 99;
+}
+.clockbar-clocks {
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+.clockbar-tz {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 32px;
+  border-right: 1px solid #2e2e2e;
+}
+.clockbar-tz:last-of-type { border-right: none; }
+.clockbar-tag {
+  color: var(--orange);
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 3px;
+}
+.clockbar-val {
+  color: #f0f0f0;
+  font-weight: 600;
+  font-size: 16px;
+  letter-spacing: 1px;
+}
+.clockbar-dot {
+  color: var(--orange);
+  font-size: 9px;
+  animation: blink 1.5s step-end infinite;
+}
+.clockbar-date {
+  position: absolute;
+  right: 18px;
+  color: #666;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+}
+
+/* ── TICKER STRIP ── */
+.ticker {
+  background: #1c1c1c;
+  border-bottom: 1px solid var(--border);
+  padding: 6px 0;
+  overflow: hidden;
+  white-space: nowrap;
+}
+.ticker-track {
+  display: inline-flex;
+  gap: 0;
+  animation: scroll-ticker 60s linear infinite;
+  will-change: transform;
+}
+.ticker-track:hover { animation-play-state: paused; }
+.ticker-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0 26px;
+  border-right: 1px solid var(--border);
+  font-size: 14px;
+  letter-spacing: 0.3px;
+}
+.t-sym { color: var(--orange); font-weight: 700; }
+.t-val { color: var(--white); font-weight: 500; }
+.t-pos { color: var(--green); font-weight: 600; }
+.t-neg { color: var(--red); font-weight: 600; }
+.t-neu { color: #aaaaaa; }
+@keyframes scroll-ticker {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* ── MAIN SHELL ── */
+.shell {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  height: calc(100vh - 90px);
+}
+
+/* ── SIDEBAR ── */
+.sidebar {
+  background: var(--panel);
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  padding: 16px 0 40px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+.sidebar::-webkit-scrollbar { width:4px; }
+.sidebar::-webkit-scrollbar-track { background:transparent; }
+.sidebar::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
+
+.sb-section { margin-bottom: 14px; }
+.sb-label {
+  color: var(--orange);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  padding: 4px 12px 6px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 2px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.sb-item {
+  padding: 5px 12px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-left: 3px solid transparent;
+  transition: all 0.12s;
+  font-size: 13px;
+}
+.sb-item:hover { background: var(--orange-dim); border-left-color: rgba(255,106,0,0.4); }
+.sb-item.active { background: var(--orange-dim); border-left-color: var(--orange); }
+.sb-item .sb-name { color: var(--white); font-weight: 500; }
+.sb-item .sb-count {
+  color: #cccccc;
+  font-size: 11px;
+  background: var(--border2);
+  padding: 1px 6px;
+  border-radius: 2px;
+  font-weight: 600;
+}
+.sb-item.active .sb-count { background: var(--orange-mid); color: var(--orange); }
+
+.sb-ind-row {
+  padding: 7px 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+  border-bottom: 1px solid var(--border2);
+}
+.sb-ind-row:last-child { border-bottom: none; }
+.sb-ind-name { color: #cccccc; font-weight: 400; }
+.sb-ind-val { font-weight: 700; font-size: 14px; }
+.sb-ind-val.pos { color: var(--green); }
+.sb-ind-val.neg { color: var(--red); }
+.sb-ind-val.neu { color: #aaaaaa; }
+
+/* ── COLLAPSIBLE ECON SECTIONS IN SIDEBAR ── */
+.sb-econ-hdr {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 6px 14px 8px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.12s;
+}
+.sb-econ-hdr:hover { background: rgba(255,106,0,0.06); }
+.sb-econ-title {
+  font-size: 13px; font-weight: 700; letter-spacing: 2px;
+  text-transform: uppercase; display: flex; align-items: center; gap: 6px;
+}
+.sb-econ-title.usa  { color: #e05060; }
+.sb-econ-title.india { color: #ffaa44; }
+.sb-econ-arrow {
+  color: var(--orange); font-size: 11px;
+  transition: transform 0.2s; flex-shrink: 0;
+}
+.sb-econ-arrow.collapsed { transform: rotate(-90deg); }
+
+.sb-econ-body { overflow: hidden; transition: max-height 0.25s ease; }
+.sb-econ-body.collapsed { max-height: 0 !important; }
+
+.sb-econ-row {
+  padding: 6px 14px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-rows: auto auto;
+  column-gap: 8px;
+  row-gap: 1px;
+  border-bottom: 1px solid var(--border2);
+  align-items: center;
+}
+.sb-econ-row:last-child { border-bottom: none; padding-bottom: 10px; }
+
+/* Label — top-left */
+.sb-econ-key {
+  grid-column: 1; grid-row: 1;
+  color: #c8d4e8;
+  font-size: 11.5px;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  font-weight: 700;
+  white-space: normal;
+  line-height: 1.3;
+}
+
+/* Value — top-right, bold & coloured */
+.sb-econ-val {
+  grid-column: 2; grid-row: 1;
+  font-weight: 700;
+  font-size: 14.5px;
+  white-space: nowrap;
+  text-align: right;
+  font-family: 'IBM Plex Mono', monospace;
+  letter-spacing: 0.3px;
+}
+.sb-econ-val.pos { color: #00e868; }
+.sb-econ-val.neg { color: #ff4466; }
+.sb-econ-val.neu { color: #d0d0d0; }
+
+/* Note — bottom-right, light yellow */
+.sb-econ-note {
+  grid-column: 2; grid-row: 2;
+  color: #f0e070;
+  font-size: 10.5px;
+  white-space: normal;
+  text-align: right;
+  line-height: 1.3;
+  font-style: italic;
+  font-weight: 500;
+}
+
+/* ── MAIN CONTENT ── */
+.main { overflow-y: auto; display: flex; flex-direction: column; scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
+.main::-webkit-scrollbar { width:4px; }
+.main::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
+
+/* ── INDICATORS / ECON PANELS ── */
+.ind-panel-hdr {
+  color: var(--orange);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ind-panel-hdr::after { content:''; flex:1; height:1px; background: linear-gradient(90deg, rgba(255,106,0,0.5), transparent); }
+
+.ind-row { display: flex; gap: 3px; flex-wrap: wrap; }
+
+.ind-cell {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  padding: 10px 14px;
+  min-width: 130px;
+  flex: 1;
+  position: relative;
+  transition: border-color 0.2s;
+}
+.ind-cell::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+}
+.ind-cell.pos::after { background: var(--green); }
+.ind-cell.neg::after { background: var(--red); }
+.ind-cell.neu::after { background: #666; }
+.ind-cell:hover { border-color: var(--orange); }
+
+.ind-name {
+  color: #aaaaaa;
+  font-size: 13px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-bottom: 5px;
+  font-weight: 500;
+}
+.ind-val {
+  color: var(--white);
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 4px;
+  white-space: nowrap;
+  letter-spacing: -0.5px;
+}
+.ind-chg {
+  font-size: 13px;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+  font-weight: 600;
+}
+.ind-chg.pos { color: var(--green); }
+.ind-chg.neg { color: var(--red); }
+.ind-chg.neu { color: #aaaaaa; }
+
+/* ── USA / INDIA ECON PANELS ── */
+.econ-section {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+  background: #101010;
+  flex-shrink: 0;
+}
+.econ-hdr {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.econ-hdr.usa { color: #e05060; }
+.econ-hdr.usa::after { content:''; flex:1; height:1px; background: linear-gradient(90deg, rgba(224,80,96,0.5), transparent); }
+.econ-hdr.india { color: #ffaa44; }
+.econ-hdr.india::after { content:''; flex:1; height:1px; background: linear-gradient(90deg, rgba(255,170,68,0.5), transparent); }
+
+/* ── CATEGORY TABS ── */
+.cat-tabs {
+  display: flex;
+  gap: 0;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--border);
+  background: #101010;
+  overflow-x: auto;
+  flex-shrink: 0;
+  scrollbar-width: none;
+}
+.cat-tabs::-webkit-scrollbar { display:none; }
+.cat-tab {
+  padding: 9px 18px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: #999999;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+.cat-tab:hover { color: var(--white); }
+.cat-tab.active {
+  color: var(--orange);
+  border-bottom-color: var(--orange);
+}
+
+/* ── NEWS AREA ── */
+.news-area { flex: 1; padding: 16px 18px; overflow-y: auto; }
+.news-hdr {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+.news-hdr-title {
+  color: var(--orange);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+.news-hdr-meta { color: #aaaaaa; font-size: 13px; }
+
+/* ── NEWSPAPER COLUMN — COMPACT STYLE ── */
+.news-col { border: 1px solid var(--border); border-radius: 3px; overflow: hidden; }
+
+.nc-item {
+  border-bottom: 1px solid #1e1e1e;
+  cursor: pointer;
+  transition: background 0.12s;
+  user-select: none;
+}
+.nc-item:last-of-type { border-bottom: none; }
+.nc-item:hover { background: rgba(255,106,0,0.04); }
+.nc-item.open { background: rgba(255,106,0,0.06); border-left: 2px solid var(--orange); }
+
+.nc-row {
+  display: grid;
+  grid-template-columns: 36px 1fr 24px;
+  align-items: center;
+  padding: 9px 12px 9px 0;
+  gap: 4px;
+}
+.nc-num {
+  font-size: 13px; font-weight: 700;
+  color: var(--orange); opacity: 0.55;
+  font-family: 'IBM Plex Mono', monospace;
+  text-align: right; padding-right: 4px;
+}
+.nc-headline {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px; font-weight: 500;
+  color: #e8e8e8; line-height: 1.45;
+  letter-spacing: 0.1px;
+}
+.nc-arrow {
+  color: #555; font-size: 12px;
+  text-align: center; transition: transform 0.2s, color 0.15s;
+}
+.nc-item:hover .nc-arrow { color: var(--orange); }
+.nc-item.open .nc-arrow { transform: rotate(180deg); color: var(--orange); }
+
+.nc-expand-body {
+  display: none;
+  padding: 0 14px 12px 36px;
+  border-top: 1px dashed #2a2a2a;
+}
+.nc-expand-body.open { display: block; animation: fadeIn 0.18s ease; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(-3px); } to { opacity:1; transform:translateY(0); } }
+
+.nc-meta {
+  display: flex; align-items: center; gap: 6px;
+  padding: 8px 0 6px;
+}
+.nc-src {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px; font-weight: 600; letter-spacing: 0.5px;
+  padding: 2px 7px; border-radius: 3px;
+  background: rgba(255,106,0,0.14); color: var(--orange);
+  text-transform: uppercase;
+}
+.nc-sep { color: #444; font-size: 13px; }
+.nc-time { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #666; }
+.nc-summary {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px; color: #aaaaaa;
+  line-height: 1.6; margin-bottom: 8px;
+}
+.nc-link {
+  display: inline-block;
+  font-family: 'DM Sans', sans-serif;
+  color: var(--orange); font-size: 13px; font-weight: 600;
+  text-decoration: none; letter-spacing: 0.5px;
+  border-bottom: 1px solid rgba(255,106,0,0.3);
+  padding-bottom: 1px; transition: opacity 0.15s;
+}
+.nc-link:hover { opacity: 0.7; }
+
+.no-news {
+  color: #777; font-size: 14px;
+  padding: 20px 14px; font-family: 'DM Sans', sans-serif;
+}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+/* ── LOADING OVERLAY ── */
+.loading-overlay {
+  position: fixed; inset: 0;
+  background: rgba(13,13,13,0.97);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  z-index: 500;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.3s;
+}
+.loading-overlay.visible { opacity: 1; pointer-events: all; }
+.spinner {
+  width: 36px; height: 36px;
+  border: 3px solid var(--border);
+  border-top-color: var(--orange);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-bottom: 14px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-text {
+  color: var(--orange); font-size: 13px;
+  letter-spacing: 2px; text-transform: uppercase;
+  font-weight: 600;
+}
+
+/* ── STATUS BAR ── */
+.statusbar {
+  background: #161616;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 18px;
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.5px;
+  position: sticky;
+  bottom: 0;
+  z-index: 98;
+}
+
+/* ── HAMBURGER BUTTON ── */
+.hamburger {
+  display: none;
+  flex-direction: column; justify-content: center; gap: 4px;
+  width: 32px; height: 32px; cursor: pointer;
+  padding: 4px; border-radius: 3px;
+  transition: background 0.15s; flex-shrink: 0;
+}
+.hamburger:hover { background: rgba(0,0,0,0.2); }
+.hamburger span { display: block; width: 20px; height: 2px; background: #000; border-radius: 2px; }
+
+/* ── SIDEBAR OVERLAY (mobile) ── */
+.sidebar-overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.7); z-index: 200;
+}
+.sidebar-overlay.open { display: block; }
+
+/* ── RESPONSIVE — Tablet ── */
+@media (max-width: 900px) {
+  .shell { grid-template-columns: 1fr; height: auto; }
+  .sidebar {
+    position: fixed; top: 0; left: -265px; bottom: 0;
+    width: 265px; z-index: 300;
+    transition: left 0.25s ease; padding-top: 50px;
+  }
+  .sidebar.open { left: 0; }
+  .hamburger { display: flex; }
+  .topbar-right span:nth-child(3) { display: none; }
+  .ind-row { flex-wrap: wrap; }
+  .ind-cell { min-width: 110px; }
+  .news-area { padding: 12px 10px; }
+  .statusbar span:first-child { font-size: 9px; letter-spacing: 0; }
+}
+
+/* ── RESPONSIVE — Mobile ── */
+@media (max-width: 600px) {
+  body { font-size: 13px; }
+  .topbar { padding: 5px 10px; }
+  .topbar-right { gap: 10px; font-size: 10px; }
+  .topbar-right span:nth-child(3), .topbar-right span:nth-child(4) { display: none; }
+  .ticker-item { padding: 0 14px; font-size: 11px; }
+  .cat-tabs { padding: 0 6px; }
+  .cat-tab { padding: 8px 10px; font-size: 12px; letter-spacing: 0.5px; }
+  .news-area { padding: 10px 8px; }
+  .news-hdr { margin-bottom: 10px; padding-bottom: 8px; }
+  .news-hdr-title { font-size: 10px; }
+  .news-hdr-meta { display: none; }
+  .nc-row { padding: 7px 8px 7px 0; }
+  .nc-headline { font-size: 13px; }
+  .nc-expand-body { padding: 0 8px 10px 30px; }
+  .statusbar { padding: 3px 8px; font-size: 9px; }
+  .statusbar span:first-child { display: none; }
+  .ind-cell { min-width: 90px; padding: 8px 10px; }
+  .ind-val { font-size: 17px; }
+}
+
+/* ── LIGHT MODE ── */
+body.light {
+  --bg: #f0f1f4;
+  --panel: #ffffff;
+  --panel2: #f7f7f8;
+  --border: #d0d4db;
+  --border2: #e2e5ea;
+  --muted: #666666;
+  --muted2: #999999;
+  --text: #1a1a1a;
+  --white: #111111;
+}
+body.light .topbar { background: #ff7a1a; }
+body.light .clockbar { background: #e8eaef; border-color: #d0d4db; }
+body.light .ticker { background: #e2e5ea; }
+body.light .statusbar { background: #e2e5ea; color: #444; }
+body.light .nc-headline { color: #111; }
+body.light .nc-summary { color: #555; }
+body.light .nc-expand-body { border-color: #d0d4db; }
+body.light .sb-econ-key { color: #555; }
+body.light .sb-ind-name { color: #555; }
+body.light .clockbar-val { color: #111; }
+body.light .cat-tab { color: #666; }
+body.light .cat-tab.active { color: var(--orange); }
+body.light .cat-tabs { background: #f0f1f4; }
+body.light .econ-section { background: #f5f5f7; }
+body.light .loading-overlay { background: rgba(240,241,244,0.97); }
+body.light .loading-text { color: #333; }
+
+/* ── THEME TOGGLE ── */
+.theme-toggle {
+  cursor: pointer; font-size: 16px; padding: 2px 6px;
+  border-radius: 4px; transition: background 0.15s;
+  user-select: none;
+}
+.theme-toggle:hover { background: rgba(0,0,0,0.15); }
+
+/* ── SEARCH BOX ── */
+.news-search {
+  padding: 0 18px 10px;
+  flex-shrink: 0;
+}
+.news-search input {
+  width: 100%;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  color: var(--white);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  padding: 9px 14px 9px 36px;
+  border-radius: 4px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.news-search input::placeholder { color: var(--muted2); }
+.news-search input:focus { border-color: var(--orange); }
+.news-search-wrap {
+  position: relative;
+}
+.news-search-icon {
+  position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+  color: var(--muted2); font-size: 14px; pointer-events: none;
+}
+
+/* ── SCROLL-TO-TOP BUTTON ── */
+.scroll-top {
+  position: fixed; bottom: 40px; right: 20px;
+  width: 40px; height: 40px;
+  background: var(--orange);
+  color: #000; font-weight: 700; font-size: 18px;
+  border: none; border-radius: 50%;
+  cursor: pointer; z-index: 90;
+  display: none; align-items: center; justify-content: center;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.4);
+  transition: opacity 0.2s, transform 0.2s;
+}
+.scroll-top.visible { display: flex; }
+.scroll-top:hover { transform: scale(1.1); }
+
+/* ── TAB SCROLL FADE ── */
+.cat-tabs-wrap {
+  position: relative; flex-shrink: 0;
+}
+.cat-tabs-wrap::after {
+  content: ''; position: absolute;
+  top: 0; right: 0; bottom: 0; width: 50px;
+  background: linear-gradient(90deg, transparent, #101010);
+  pointer-events: none; z-index: 1;
+}
+body.light .cat-tabs-wrap::after {
+  background: linear-gradient(90deg, transparent, #f0f1f4);
+}
+
+/* ── STALE DATA BADGE ── */
+.stale-badge {
+  display: inline-block;
+  background: rgba(0,200,80,0.12);
+  color: #00c850;
+  font-size: 9px; font-weight: 700;
+  padding: 1px 4px; border-radius: 2px;
+  letter-spacing: 0.5px;
+  margin-left: 3px;
+  text-transform: uppercase;
+  vertical-align: middle;
+}
+
+/* ── KEYBOARD FOCUS ── */
+.sb-item:focus-visible, .nc-item:focus-visible, .cat-tab:focus-visible {
+  outline: 2px solid var(--orange);
+  outline-offset: -2px;
+}
+
+/* ══════════════════════════════════════
+   KEY EVENT CALENDAR STYLES
+   ══════════════════════════════════════ */
+.event-calendar-panel {
+  display: none;
+  padding: 0;
+  flex-direction: column;
+  height: 100%;
+}
+.event-calendar-panel.active { display: flex; }
+
+.ecal-header {
+  padding: 16px 20px 10px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  flex-shrink: 0;
+}
+.ecal-title { color: var(--orange); font-size: 16px; font-weight: 700; letter-spacing: 2px; }
+.ecal-subtitle { color: var(--muted); font-size: 12px; }
+
+.ecal-filters {
+  display: flex; gap: 6px; padding: 10px 20px;
+  flex-wrap: wrap; flex-shrink: 0;
+  border-bottom: 1px solid var(--border2);
+}
+.ecal-filter-btn {
+  background: var(--panel2); border: 1px solid var(--border);
+  color: var(--muted); font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px; padding: 6px 14px; border-radius: 3px;
+  cursor: pointer; transition: all 0.15s; letter-spacing: 0.5px;
+}
+.ecal-filter-btn:hover { border-color: var(--orange); color: var(--text); }
+.ecal-filter-btn.active { background: var(--orange-dim); border-color: var(--orange); color: var(--orange); font-weight: 600; }
+
+.ecal-body {
+  flex: 1; overflow-y: auto; padding: 12px 20px 20px;
+}
+.ecal-month-group {
+  margin-bottom: 18px;
+}
+.ecal-month-label {
+  color: var(--orange); font-size: 15px; font-weight: 700;
+  letter-spacing: 2px; padding: 8px 0 10px;
+  border-bottom: 1px solid var(--border2);
+  margin-bottom: 6px;
+  position: sticky; top: 0;
+  background: var(--bg); z-index: 1;
+}
+body.light .ecal-month-label { background: var(--bg); }
+
+.ecal-event {
+  display: grid;
+  grid-template-columns: 105px 1fr auto;
+  gap: 12px; align-items: center;
+  padding: 11px 10px;
+  border-bottom: 1px solid var(--border2);
+  transition: background 0.12s;
+  border-radius: 3px;
+}
+.ecal-event:hover { background: rgba(255,106,0,0.05); }
+
+.ecal-date {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 14px; color: var(--muted); font-weight: 600;
+  white-space: nowrap;
+}
+.ecal-event-title {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 16px; color: var(--text); line-height: 1.4;
+}
+.ecal-event-meta {
+  display: flex; align-items: center; gap: 8px; flex-shrink: 0;
+}
+.ecal-impact {
+  font-size: 12px; font-weight: 700; letter-spacing: 0.5px;
+  padding: 3px 9px; border-radius: 3px;
+  white-space: nowrap;
+}
+.ecal-impact.high { background: rgba(255,51,85,0.15); color: var(--red); }
+.ecal-impact.medium { background: rgba(255,215,0,0.15); color: var(--yellow); }
+.ecal-impact.low { background: rgba(0,255,85,0.1); color: var(--green); }
+
+.ecal-status {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px; font-weight: 700; letter-spacing: 0.5px;
+  padding: 3px 9px; border-radius: 3px;
+}
+.ecal-status.today { background: rgba(255,51,85,0.2); color: var(--red); animation: blink 1.5s step-end infinite; }
+.ecal-status.justpassed { background: rgba(180,100,255,0.18); color: #c084fc; border: 1px solid rgba(180,100,255,0.3); }
+.ecal-status.thisweek { background: rgba(255,106,0,0.2); color: var(--orange); }
+.ecal-status.upcoming { background: rgba(41,182,255,0.15); color: var(--blue); }
+.ecal-status.scheduled { background: rgba(255,255,255,0.05); color: var(--muted); }
+
+.ecal-region-badge {
+  font-size: 12px; font-weight: 600; padding: 2px 8px;
+  border-radius: 2px; letter-spacing: 0.5px;
+  background: rgba(255,255,255,0.06); color: var(--muted);
+}
+
+.ecal-news-section {
+  margin-top: 24px; padding-top: 16px;
+  border-top: 2px solid var(--orange-dim);
+}
+.ecal-news-title {
+  color: var(--orange); font-size: 14px; font-weight: 700;
+  letter-spacing: 2px; margin-bottom: 12px;
+}
+.ecal-news-item {
+  padding: 8px 0; border-bottom: 1px solid var(--border2);
+  cursor: pointer; transition: background 0.12s;
+}
+.ecal-news-item:hover { background: rgba(255,106,0,0.04); }
+.ecal-news-headline {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px; color: var(--text); line-height: 1.4;
+}
+.ecal-news-meta {
+  font-size: 11px; color: var(--muted); margin-top: 3px;
+}
+.ecal-news-expand {
+  display: none; padding: 8px 0 4px 0;
+}
+.ecal-news-item.open .ecal-news-expand { display: block; }
+.ecal-news-summary {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px; color: #aaa; line-height: 1.6;
+  margin-bottom: 6px;
+}
+.ecal-news-link {
+  color: var(--orange); font-size: 12px; font-weight: 600;
+  text-decoration: none; border-bottom: 1px solid rgba(255,106,0,0.3);
+}
+
+.ecal-count-badge {
+  display: inline-block; background: var(--orange);
+  color: #000; font-size: 10px; font-weight: 700;
+  padding: 1px 6px; border-radius: 8px; margin-left: 6px;
+}
+
+@media (max-width: 600px) {
+  .ecal-event { grid-template-columns: 70px 1fr; gap: 6px; }
+  .ecal-event-meta { grid-column: 1 / -1; }
+  .ecal-filters { padding: 8px 10px; }
+}
+
+/* ══════════════════════════════════════
+   X POSTS PANEL STYLES
+   ══════════════════════════════════════ */
+.xposts-panel {
+  display: none;
+  padding: 0;
+  flex-direction: column;
+  height: 100%;
+}
+.xposts-panel.active { display: flex; }
+
+.xposts-header {
+  padding: 16px 20px 10px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: flex-start; justify-content: space-between;
+  flex-shrink: 0;
+  gap: 12px;
+}
+.xposts-title {
+  color: #1d9bf0;
+  font-size: 16px; font-weight: 700; letter-spacing: 2px;
+}
+.xposts-subtitle { color: var(--muted); font-size: 12px; margin-top: 3px; }
+.xposts-rss-note {
+  color: #555; font-size: 11px; text-align: right;
+  background: rgba(255,255,255,0.03); border: 1px solid var(--border2);
+  padding: 4px 8px; border-radius: 3px; white-space: nowrap; flex-shrink: 0;
+}
+
+.xposts-account-filters {
+  display: flex; gap: 6px; padding: 10px 20px;
+  flex-wrap: wrap; flex-shrink: 0;
+  border-bottom: 1px solid var(--border2);
+  overflow-x: auto; scrollbar-width: none;
+}
+.xposts-account-filters::-webkit-scrollbar { display: none; }
+.xacc-filter {
+  background: var(--panel2); border: 1px solid var(--border);
+  color: var(--muted); font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px; padding: 5px 12px; border-radius: 3px;
+  cursor: pointer; transition: all 0.15s; white-space: nowrap;
+}
+.xacc-filter:hover { border-color: #1d9bf0; color: var(--text); }
+.xacc-filter.active { background: rgba(29,155,240,0.15); border-color: #1d9bf0; color: #1d9bf0; font-weight: 600; }
+
+.xposts-body {
+  flex: 1; overflow-y: auto; padding: 12px 20px 20px;
+  scrollbar-width: thin; scrollbar-color: var(--border) transparent;
+}
+
+.xpost-card {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  background: var(--panel2);
+  transition: border-color 0.15s, background 0.15s;
+  cursor: default;
+}
+.xpost-card:hover { border-color: #1d9bf0; background: rgba(29,155,240,0.04); }
+
+.xpost-account-row {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 10px;
+}
+.xpost-avatar {
+  width: 36px; height: 36px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 700; color: #fff;
+  flex-shrink: 0; letter-spacing: 0.5px;
+}
+.xpost-name { font-weight: 700; font-size: 15px; color: var(--text); }
+.xpost-handle { font-size: 13px; color: var(--muted); }
+.xpost-tag {
+  font-size: 11px; font-weight: 600; letter-spacing: 0.5px;
+  padding: 2px 8px; border-radius: 3px;
+  background: rgba(29,155,240,0.15); color: #1d9bf0;
+  margin-left: auto;
+}
+.xpost-time {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px; color: #555; flex-shrink: 0;
+}
+
+.xpost-text {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px; line-height: 1.6;
+  color: var(--text);
+  margin-bottom: 10px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.xpost-footer {
+  display: flex; align-items: center; gap: 12px;
+}
+.xpost-link {
+  font-size: 13px; color: #1d9bf0; text-decoration: none;
+  font-weight: 600; border-bottom: 1px solid rgba(29,155,240,0.3);
+  transition: color 0.15s;
+}
+.xpost-link:hover { color: #60c6ff; border-bottom-color: #60c6ff; }
+
+.xposts-empty {
+  text-align: center; padding: 60px 20px;
+  color: var(--muted); font-size: 14px; line-height: 1.8;
+}
+.xposts-empty .x-big { font-size: 48px; display: block; margin-bottom: 12px; opacity: 0.3; }
+
+.xposts-no-data-note {
+  background: rgba(29,155,240,0.08); border: 1px solid rgba(29,155,240,0.2);
+  border-radius: 6px; padding: 12px 16px; margin-bottom: 16px;
+  font-size: 13px; color: #60a5fa; line-height: 1.7;
+}
+
+.xpost-divider {
+  text-align: center; color: #333; font-size: 12px;
+  padding: 6px 0; letter-spacing: 2px;
+  font-family: 'IBM Plex Mono', monospace;
+}
+</style>
+</head>
+<body>
+
+<!-- LOADING OVERLAY -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+  <div class="loading-text">Loading Market Data…</div>
+</div>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-left">
+    <div class="hamburger" onclick="toggleSidebar()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </div>
+    <div class="topbar-dot"></div>
+    <span>🌐 NEXUSFEED</span>
+  </div>
+  <div class="topbar-right">
+    <span>🔴 LIVE FEED</span>
+    <span>📅 November 14, 2026 at 05:32 PM IST</span>
+    <span>✅ 130 ARTICLES</span>
+    <span class="theme-toggle" onclick="toggleTheme()" title="Toggle light/dark mode">🌓</span>
+  </div>
+</div>
+
+<!-- CLOCK BAR -->
+<div class="clockbar">
+  <div class="clockbar-clocks">
+    <div class="clockbar-tz">
+      <span class="clockbar-tag">CST</span>
+      <span class="clockbar-val" id="clockCST">--:--:--</span>
+      <span class="clockbar-dot">●</span>
+    </div>
+    <div class="clockbar-tz">
+      <span class="clockbar-tag">IST</span>
+      <span class="clockbar-val" id="clockIST">--:--:--</span>
+      <span class="clockbar-dot">●</span>
+    </div>
+    <div class="clockbar-tz">
+      <span class="clockbar-tag">SGT</span>
+      <span class="clockbar-val" id="clockSGT">--:--:--</span>
+      <span class="clockbar-dot">●</span>
+    </div>
+  </div>
+  <div class="clockbar-date" id="clockbarDate">--</div>
+</div>
+
+<!-- TICKER STRIP -->
+<div class="ticker">
+  <div class="ticker-track" id="tickerTrack">
+    <!-- populated by JS -->
+  </div>
+</div>
+
+<!-- SIDEBAR OVERLAY (mobile) -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+<!-- MAIN SHELL -->
+<div class="shell">
+
+  <!-- ═══ SIDEBAR ═══ -->
+  <div class="sidebar">
+
+    <!-- 1. CATEGORIES ── -->
+    <div class="sb-section">
+      <div class="sb-label">▶ CATEGORIES</div>
+      <div class="sb-item active" id="sb-markets"            onclick="switchCat('markets',this)" tabindex="0" role="button">
+        <span class="sb-name">📊 Markets</span>
+        <span class="sb-count">10</span>
+      </div>
+      <div class="sb-item" id="sb-macro_policy"      onclick="switchCat('macro_policy',this)" tabindex="0" role="button">
+        <span class="sb-name">💰 Macro & Policy</span>
+        <span class="sb-count">9</span>
+      </div>
+      <div class="sb-item" id="sb-banking_fx"        onclick="switchCat('banking_fx',this)" tabindex="0" role="button">
+        <span class="sb-name">🏦 Banking & FX</span>
+        <span class="sb-count">10</span>
+      </div>
+      <div class="sb-item" id="sb-bonds_rates"       onclick="switchCat('bonds_rates',this)" tabindex="0" role="button">
+        <span class="sb-name">📈 Bonds & Rates</span>
+        <span class="sb-count">10</span>
+      </div>
+      <div class="sb-item" id="sb-commodities_energy" onclick="switchCat('commodities_energy',this)" tabindex="0" role="button">
+        <span class="sb-name">📦 Commodities & Energy</span>
+        <span class="sb-count">10</span>
+      </div>
+      <div class="sb-item" id="sb-india"             onclick="switchCat('india',this)" tabindex="0" role="button">
+        <span class="sb-name">🇮🇳 India</span>
+        <span class="sb-count">10</span>
+      </div>
+      <div class="sb-item" id="sb-corporate"         onclick="switchCat('corporate',this)" tabindex="0" role="button">
+        <span class="sb-name">🏢 Corporate</span>
+        <span class="sb-count">3</span>
+      </div>
+      <div class="sb-item" id="sb-geopolitical"      onclick="switchCat('geopolitical',this)" tabindex="0" role="button">
+        <span class="sb-name">🌍 Geopolitical</span>
+        <span class="sb-count">8</span>
+      </div>
+      <div class="sb-item" id="sb-crypto"            onclick="switchCat('crypto',this)" tabindex="0" role="button">
+        <span class="sb-name">📉 Crypto & Web3</span>
+        <span class="sb-count">10</span>
+      </div>
+      <div class="sb-item" id="sb-tech_ai"           onclick="switchCat('tech_ai',this)" tabindex="0" role="button">
+        <span class="sb-name">🤖 Tech & AI</span>
+        <span class="sb-count">10</span>
+      </div>
+      <div class="sb-item" id="sb-asia_china"        onclick="switchCat('asia_china',this)" tabindex="0" role="button">
+        <span class="sb-name">🌏 Asia & China</span>
+        <span class="sb-count">10</span>
+      </div>
+      <div class="sb-item" id="sb-europe_uk"         onclick="switchCat('europe_uk',this)" tabindex="0" role="button">
+        <span class="sb-name">🇪🇺 Europe & UK</span>
+        <span class="sb-count">10</span>
+      </div>
+      <div class="sb-item" id="sb-esg_climate"       onclick="switchCat('esg_climate',this)" tabindex="0" role="button">
+        <span class="sb-name">🌱 ESG & Climate</span>
+        <span class="sb-count">10</span>
+      </div>
+      <div class="sb-item" id="sb-latam"             onclick="switchCat('latam',this)" tabindex="0" role="button">
+        <span class="sb-name">🌎 LATAM</span>
+        <span class="sb-count">10</span>
+      </div>
+      <div class="sb-item" id="sb-event_calendar"    onclick="switchCat('event_calendar',this)" tabindex="0" role="button">
+        <span class="sb-name">📅 Event Calendar</span>
+        <span class="sb-count" id="ecal-sidebar-count">--</span>
+      </div>
+      <div class="sb-item" id="sb-x_posts"            onclick="switchCat('x_posts',this)" tabindex="0" role="button">
+        <span class="sb-name">𝕏 X Posts</span>
+        <span class="sb-count" id="xposts-sidebar-count">--</span>
+      </div>
+    </div>
+
+    <!-- 2. INDIA ECONOMIC (collapsible) ── -->
+    <div class="sb-section">
+      <div class="sb-econ-hdr" onclick="toggleEcon('india')">
+        <span class="sb-econ-title india">🇮🇳 INDIA ECONOMIC</span>
+        <span class="sb-econ-arrow" id="arrow-india">▼</span>
+      </div>
+      <div class="sb-econ-body" id="body-india">
+        <div class="sb-econ-row">
+          <span class="sb-econ-key">Repo Rate</span>
+          <span class="sb-econ-val neu" id="sbv-reporate">--</span>
+          <span class="sb-econ-note" id="sbn-reporate">loading…</span>
+        </div>
+        <div class="sb-econ-row">
+          <span class="sb-econ-key">CPI</span>
+          <span class="sb-econ-val neu" id="sbv-india-cpi">--</span>
+          <span class="sb-econ-note" id="sbn-india-cpi">loading…</span>
+        </div>
+        <div class="sb-econ-row">
+          <span class="sb-econ-key">WPI</span>
+          <span class="sb-econ-val neu" id="sbv-india-wpi">--</span>
+          <span class="sb-econ-note" id="sbn-india-wpi">loading…</span>
+        </div>
+        <div class="sb-econ-row">
+          <span class="sb-econ-key">Unemployment</span>
+          <span class="sb-econ-val neu" id="sbv-india-unemp">--</span>
+          <span class="sb-econ-note" id="sbn-india-unemp">loading…</span>
+        </div>
+        <div class="sb-econ-row">
+          <span class="sb-econ-key">Mfg PMI</span>
+          <span class="sb-econ-val pos" id="sbv-india-pmi">--</span>
+          <span class="sb-econ-note" id="sbn-india-pmi">loading…</span>
+        </div>
+        <div class="sb-econ-row">
+          <span class="sb-econ-key">GDP Growth</span>
+          <span class="sb-econ-val pos" id="sbv-india-gdp">--</span>
+          <span class="sb-econ-note" id="sbn-india-gdp">loading…</span>
+        </div>
+        <div class="sb-econ-row">
+          <span class="sb-econ-key">Fiscal Deficit</span>
+          <span class="sb-econ-val neu" id="sbv-india-fiscal">--</span>
+          <span class="sb-econ-note" id="sbn-india-fiscal">loading…</span>
+        </div>
+        <div class="sb-econ-row">
+          <span class="sb-econ-key">USD/INR</span>
+          <span class="sb-econ-val neu" id="sbv-usdinr2">₹--</span>
+          <span class="sb-econ-note" id="sbn-usdinr2">live</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. USA ECONOMIC (collapsible) ── -->
+    <div class="sb-section">
+      <div class="sb-econ-hdr" onclick="toggleEcon('usa')">
+        <span class="sb-econ-title usa">🇺🇸 USA ECONOMIC</span>
+        <span class="sb-econ-arrow" id="arrow-usa">▼</span>
+      </div>
+      <div class="sb-econ-body" id="body-usa">
+        <div class="sb-econ-row">
+          <span class="sb-econ-key">Fed Funds Rate</span>
+          <span class="sb-econ-val neu" id="sbv-fedfunds">4.25–4.50%</span>
+          <span class="sb-econ-note" id="sbn-fedfunds">Target range</span>
+        </div>
+        <div class="sb-econ-row">
+          <span class="sb-econ-key">FOMC Next</span>
+          <span class="sb-econ-val neu" id="sbv-fomc">Apr 28–29</span>
+          <span class="sb-econ-note" id="sbn-fomc">2026</span>
+        </div>
+        <div class="sb-econ-row">
+          <span class="sb-econ-key">CPI YoY</span>
+          <span class="sb-econ-val neu" id="sbv-cpi">--</span>
+          <span class="sb-econ-note" id="sbn-cpi">loading…</span>
+        </div>
+        <div class="sb-econ-row">
+          <span class="sb-econ-key">Core CPI</span>
+          <span class="sb-econ-val neu" id="sbv-corecpi">--</span>
+          <span class="sb-econ-note" id="sbn-corecpi">loading…</span>
+        </div>
+        <div class="sb-econ-row">
+          <span class="sb-econ-key">GDP Growth</span>
+          <span class="sb-econ-val neu" id="sbv-gdp">--</span>
+          <span class="sb-econ-note" id="sbn-gdp">loading…</span>
+        </div>
+        <div class="sb-econ-row">
+          <span class="sb-econ-key">Unemployment</span>
+          <span class="sb-econ-val neu" id="sbv-unemployment">--</span>
+          <span class="sb-econ-note" id="sbn-unemployment">loading…</span>
+        </div>
+        <div class="sb-econ-row">
+          <span class="sb-econ-key">NFP</span>
+          <span class="sb-econ-val neu" id="sbv-nfp">--</span>
+          <span class="sb-econ-note" id="sbn-nfp">loading…</span>
+        </div>
+        <div class="sb-econ-row">
+          <span class="sb-econ-key">PPI YoY</span>
+          <span class="sb-econ-val neu" id="sbv-ppi">--</span>
+          <span class="sb-econ-note" id="sbn-ppi">loading…</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. LIVE PRICES ── -->
+    <div class="sb-section">
+      <div class="sb-label">▶ LIVE PRICES</div>
+      <div class="sb-ind-row"><span class="sb-ind-name">S&amp;P 500</span>    <span class="sb-ind-val neu" id="sbv-sp500">--</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">Dow Jones</span>   <span class="sb-ind-val neu" id="sbv-dow">--</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">Nasdaq</span>      <span class="sb-ind-val neu" id="sbv-nasdaq">--</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">VIX</span>         <span class="sb-ind-val neu" id="sbv-vix">--</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">10Y Yield</span>   <span class="sb-ind-val neu" id="sbv-us10y">--</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">2Y Yield</span>    <span class="sb-ind-val neu" id="sbv-us2y">--</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">Nifty 50</span>    <span class="sb-ind-val neu" id="sbv-nifty">--</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">Sensex</span>      <span class="sb-ind-val neu" id="sbv-sensex">--</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">USD/INR</span>     <span class="sb-ind-val neu" id="sbv-usdinr">--</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">Crude Oil</span>   <span class="sb-ind-val neu" id="sbv-oil">--</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">Gold</span>        <span class="sb-ind-val neu" id="sbv-gold">--</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">Silver</span>      <span class="sb-ind-val neu" id="sbv-silver">--</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">USD Index</span>   <span class="sb-ind-val neu" id="sbv-dollar">--</span></div>
+    </div>
+
+    <!-- Sources ── -->
+    <div class="sb-section">
+      <div class="sb-label">▶ SOURCES</div>
+      <div class="sb-ind-row"><span class="sb-ind-name">CNBC</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">MarketWatch</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">Reuters</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">Economic Times</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">MoneyControl</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">Yahoo Finance</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">Google News</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">Federal Reserve</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">CoinTelegraph</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">CoinDesk</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">Reuters UK</span></div>
+      <div class="sb-ind-row"><span class="sb-ind-name">Reuters China</span></div>
+    </div>
+
+  </div><!-- /sidebar -->
+
+  <!-- ═══ MAIN ═══ -->
+  <div class="main">
+
+    <!-- Hidden elements kept for JS ticker/sidebar updates (panel removed – prices shown in sidebar + ticker) -->
+    <div style="display:none">
+      <span id="card-gift-nifty"></span><span id="val-gift-nifty"></span><span id="chg-gift-nifty"></span>
+      <span id="card-dow"></span><span id="val-dow"></span><span id="chg-dow"></span>
+      <span id="card-sp500"></span><span id="val-sp500"></span><span id="chg-sp500"></span>
+      <span id="card-nasdaq"></span><span id="val-nasdaq"></span><span id="chg-nasdaq"></span>
+      <span id="card-vix"></span><span id="val-vix"></span><span id="chg-vix"></span>
+      <span id="card-us10y"></span><span id="val-us10y"></span><span id="chg-us10y"></span>
+      <span id="card-us2y"></span><span id="val-us2y"></span><span id="chg-us2y"></span>
+      <span id="card-oil"></span><span id="val-oil"></span><span id="chg-oil"></span>
+      <span id="card-dollar"></span><span id="val-dollar"></span><span id="chg-dollar"></span>
+      <span id="card-gold"></span><span id="val-gold"></span><span id="chg-gold"></span>
+      <span id="card-silver"></span><span id="val-silver"></span><span id="chg-silver"></span>
+    </div>
+
+    <!-- ── CATEGORY TABS ── -->
+    <div class="cat-tabs-wrap">
+    <div class="cat-tabs" id="catTabs">
+      <div class="cat-tab active" id="tab-markets"           onclick="switchCat('markets',null)" tabindex="0" role="tab">📊 MARKETS</div>
+      <div class="cat-tab"        id="tab-macro_policy"      onclick="switchCat('macro_policy',null)" tabindex="0" role="tab">💰 MACRO</div>
+      <div class="cat-tab"        id="tab-banking_fx"        onclick="switchCat('banking_fx',null)" tabindex="0" role="tab">🏦 BANKING & FX</div>
+      <div class="cat-tab"        id="tab-bonds_rates"       onclick="switchCat('bonds_rates',null)" tabindex="0" role="tab">📈 BONDS</div>
+      <div class="cat-tab"        id="tab-commodities_energy" onclick="switchCat('commodities_energy',null)" tabindex="0" role="tab">📦 COMMODITIES</div>
+      <div class="cat-tab"        id="tab-india"             onclick="switchCat('india',null)" tabindex="0" role="tab">🇮🇳 INDIA</div>
+      <div class="cat-tab"        id="tab-corporate"         onclick="switchCat('corporate',null)" tabindex="0" role="tab">🏢 CORPORATE</div>
+      <div class="cat-tab"        id="tab-geopolitical"      onclick="switchCat('geopolitical',null)" tabindex="0" role="tab">🌍 GEOPOLITICAL</div>
+      <div class="cat-tab"        id="tab-crypto"            onclick="switchCat('crypto',null)" tabindex="0" role="tab">📉 CRYPTO</div>
+      <div class="cat-tab"        id="tab-tech_ai"           onclick="switchCat('tech_ai',null)" tabindex="0" role="tab">🤖 TECH & AI</div>
+      <div class="cat-tab"        id="tab-asia_china"        onclick="switchCat('asia_china',null)" tabindex="0" role="tab">🌏 ASIA & CHINA</div>
+      <div class="cat-tab"        id="tab-europe_uk"         onclick="switchCat('europe_uk',null)" tabindex="0" role="tab">🇪🇺 EUROPE & UK</div>
+      <div class="cat-tab"        id="tab-esg_climate"       onclick="switchCat('esg_climate',null)" tabindex="0" role="tab">🌱 ESG & CLIMATE</div>
+      <div class="cat-tab"        id="tab-latam"             onclick="switchCat('latam',null)" tabindex="0" role="tab">🌎 LATAM</div>
+      <div class="cat-tab"        id="tab-event_calendar"    onclick="switchCat('event_calendar',null)" tabindex="0" role="tab">📅 EVENT CALENDAR</div>
+      <div class="cat-tab"        id="tab-x_posts"           onclick="switchCat('x_posts',null)" tabindex="0" role="tab">𝕏 X POSTS</div>
+    </div>
+    </div>
+
+    <!-- ── SEARCH BOX ── -->
+    <div class="news-search">
+      <div class="news-search-wrap">
+        <span class="news-search-icon">🔍</span>
+        <input type="text" id="newsSearchInput" placeholder="Filter headlines…" oninput="filterNews()" />
+      </div>
+    </div>
+
+    <!-- ── NEWS AREA ── -->
+    <div class="news-area" id="newsPanel">
+      <div class="news-hdr">
+        <span class="news-hdr-title" id="newsTitle">▶ MARKET UPDATES</span>
+        <span class="news-hdr-meta" id="newsSubtitle">Click headline to expand · November 14, 2026 at 05:32 PM IST</span>
+      </div>
+      <div class="news-col" id="newsCol"></div>
+    </div>
+
+    <!-- ── EVENT CALENDAR PANEL ── -->
+    <div class="event-calendar-panel" id="eventCalendarPanel">
+      <div class="ecal-header">
+        <div>
+          <div class="ecal-title">📅 KEY EVENT CALENDAR</div>
+          <div class="ecal-subtitle">Market-moving dates · Auto-generated November 14, 2026 at 05:32 PM IST</div>
+          <div class="ecal-subtitle" id="ecalSource" style="margin-top:2px;font-size:10px"></div>
+        </div>
+      </div>
+      <div class="ecal-filters" id="ecalFilters">
+        <button class="ecal-filter-btn active" onclick="filterEvents('all')">ALL</button>
+        <button class="ecal-filter-btn" onclick="filterEvents('India')">🇮🇳 INDIA</button>
+        <button class="ecal-filter-btn" onclick="filterEvents('USA')">🇺🇸 USA</button>
+        <button class="ecal-filter-btn" onclick="filterEvents('Europe')">🇪🇺 EUROPE</button>
+        <button class="ecal-filter-btn" onclick="filterEvents('Asia')">🌏 ASIA</button>
+        <button class="ecal-filter-btn" onclick="filterEvents('Global')">🌍 GLOBAL</button>
+        <button class="ecal-filter-btn" onclick="filterEvents('HIGH')">🔴 HIGH IMPACT</button>
+      </div>
+      <div class="ecal-body" id="ecalBody">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+
+    <!-- ── X POSTS PANEL ── -->
+    <div class="xposts-panel" id="xPostsPanel">
+      <div class="xposts-header">
+        <div>
+          <div class="xposts-title">𝕏 X POSTS</div>
+          <div class="xposts-subtitle">Last 2 days · <span id="xposts-count-label">--</span> posts · Auto-refreshes on each script run</div>
+        </div>
+        <div class="xposts-rss-note">⚡ Via free RSS bridge · No X account needed</div>
+      </div>
+      <div class="xposts-account-filters" id="xAccountFilters">
+        <button class="xacc-filter active" onclick="filterXPosts('all', this)">ALL</button>
+        <!-- Account buttons populated by JS -->
+      </div>
+      <div class="xposts-body" id="xPostsBody">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+
+    </div><!-- /main -->
+</div><!-- /shell -->
+
+<!-- STATUS BAR -->
+<div class="statusbar">
+  <span>NEXUSFEED v2 · RSS FEEDS: 46 SOURCES · 14 CATEGORIES · AUTO-REFRESH: 5 MIN · NOT FINANCIAL ADVICE</span>
+  <span id="statusClock">--:-- IST</span>
+</div>
+
+<!-- SCROLL-TO-TOP -->
+<button class="scroll-top" id="scrollTopBtn" onclick="scrollToTop()" title="Back to top">↑</button>
+
+<!-- ══════════════════════════════════════════
+     SCRIPTS
+══════════════════════════════════════════ -->
+<script>
+// ── All news injected by Python ──
+const NEWS_DATA = {"markets": {"label": "📊 MARKETS & EARNINGS", "items": [{"title": "Prediction: Nov. 18 Will Be a Massive Day for the Stock Market", "source": "Yahoo Finance", "time": "2 hours ago", "summary": "Two major events are on the agenda.", "link": "https://www.fool.com/investing/2026/11/14/prediction-nov-18-will-be-a-massive-day-for-the-stock-market/?.tsrc=rss"}, {"title": "‘65% of the S&amp;P Is Basically AI’: Eisman’s Warning as Ramsey Tells Disabled Veteran His $500,000 Is ‘Safe’", "source": "Yahoo Finance", "time": "2 hours ago", "summary": "Dave Ramsey called a disabled veteran&#x27;s $500,000 index fund conservative, while Steve Eisman says the same index hides a giant bet on one theme. One question about when he might need the money decides who is right.", "link": "https://247wallst.com/personal-finance/2026/11/14/65-of-the-sp-is-basically-ai-eismans-warning-as-ramsey-tells-disabled-veteran-his-500000-is-safe/?.tsrc=rss"}, {"title": "Review &amp; Preview: Moving On", "source": "Yahoo Finance", "time": "11 hours ago", "summary": "Indexes ended the week higher despite Nvidia’s dramatic slide.", "link": "https://finance.yahoo.com/m/aaf2f5e5-33ee-38f6-879e-ff5ff7d5599d/review-%26-preview%3A-moving-on.html?.tsrc=rss"}, {"title": "Dow Jones Futures: Market Rally Shaky As Nvidia Earnings, Anthropic IPO Loom; SpaceX Starship Flight 15 Booster Diverts.", "source": "Yahoo Finance", "time": "11 hours ago", "summary": "The new market rally is isn&#x27;t giving clear directions. A SpaceX Starship launch is imminent. Nvidia earnings and Anthropic IPO loom.", "link": "https://finance.yahoo.com/m/53e50dc8-f137-3f6c-bfd6-912334fef9f1/dow-jones-futures%3A-market.html?.tsrc=rss"}, {"title": "The 60/40 Portfolio Is Having a Disappointing Year. Blame Bonds.", "source": "Yahoo Finance", "time": "12 hours ago", "summary": "The 60% stock/40% bond portfolio is up just 5% this year, the poorest showing since 2022’s double drubbing. Plus, investment newsletter commentary on business activity, the data-center backlash, and holiday sales.", "link": "https://finance.yahoo.com/m/e5dcf856-6a7b-3e77-94cd-b1000bbf154c/the-60%2F40-portfolio-is-having.html?.tsrc=rss"}, {"title": "Nvidia and Jensen Huang fallout: Here&#x27;s everything we know after a momentous week", "source": "Yahoo Finance", "time": "1 hour ago", "summary": "Here&#x27;s a giant rundown of everything that happened with Nvidia this week.", "link": "https://finance.yahoo.com/technology/article/nvidia-and-jensen-huang-fallout-heres-everything-we-know-after-a-momentous-week-110000323.html?.tsrc=rss"}, {"title": "New Inflation Data Offers Terrible News for President Donald Trump&#x27;s Economy and the AI-Driven Bull Market", "source": "Yahoo Finance", "time": "2 hours ago", "summary": "Trumpflation and Wall Street’s No. 1 catalyst have put the Federal Reserve in quite a bind.", "link": "https://www.fool.com/investing/2026/11/14/new-inflation-data-offers-terrible-news-donald-trump-economy-and-ai-driven-bull-market/?.tsrc=rss"}, {"title": "Is There Any Reason To Invest In Edwards Lifesciences Stock?", "source": "Yahoo Finance", "time": "10 hours ago", "summary": "For questions about this article or underlying research, email help@trefis.com.", "link": "https://www.trefis.com/stock/ew/articles/624863/is-there-any-reason-to-invest-in-edwards-lifesciences-stock/2026-11-13?.tsrc=rss"}, {"title": "Cathie Wood buys $15 million of popular AI stock", "source": "Yahoo Finance", "time": "10 hours ago", "summary": "Here are Cathie Wood’s latest moves.", "link": "https://www.thestreet.com/investing/stocks/cathie-wood-buys-15-million-of-popular-ai-stock?.tsrc=rss"}, {"title": "Could You Have Held Glaukos Stock Through Its Falls?", "source": "Yahoo Finance", "time": "10 hours ago", "summary": "For questions about this article or underlying research, email help@trefis.com.", "link": "https://www.trefis.com/stock/gkos/articles/624885/could-you-have-held-glaukos-stock-through-its-falls/2026-11-13?.tsrc=rss"}]}, "macro_policy": {"label": "💰 MACRO & POLICY", "items": [{"title": "AI risks are the biggest threat to the financial system, Fed survey finds", "source": "CNBC", "time": "14 hours ago", "summary": "The report comes with Wall Street on edge over high-flying AI hyperscalers, while communities are on alert for the rapid spread of data centers.", "link": "https://www.cnbc.com/2026/11/13/ai-risks-financial-system-federal-reserve.html"}, {"title": "Wholesale prices rose 0.3% in October, putting annual rate at 6.5%, the highest in nearly four years", "source": "CNBC", "time": "20 hours ago", "summary": "The producer price index was expected to increase 0.4% in October, according to the Dow Jones consensus.", "link": "https://www.cnbc.com/2026/11/13/ppi-inflation-report-october-2026.html"}, {"title": "Bessent blames Lutnick’s Commerce as he slams Nvidia chip ‘leakage’ to China", "source": "CNBC", "time": "18 hours ago", "summary": "Jensen Huang resigned as Nvidia CEO days after admitting to an affair following scrutiny of his relationship with a woman reportedly deemed a Chinese spy.", "link": "https://www.cnbc.com/2026/11/13/us-inflation-outlook-federal-reserve-rate-hike.html"}, {"title": "Agencies extend comment period for proposed third-party risk management guidance", "source": "Federal Reserve", "time": "14 hours ago", "summary": "Agencies extend comment period for proposed third-party risk management guidance", "link": "https://www.federalreserve.gov/newsevents/pressreleases/bcreg20261113a.htm"}, {"title": "Price: Blue wave may rock tariff boat, but some ships like Section 232 aren’t sinking - Steel Market Update", "source": "Google News", "time": "13 hours ago", "summary": "Price: Blue wave may rock tariff boat, but some ships like Section 232 aren’t sinking  Steel Market Update", "link": "https://news.google.com/rss/articles/CBMixwFBVV95cUxOWU1teW9iT3ZkamRKeXppbjBlUFhxS21SdXl2V1FsU0ExS25DVWNFcms3Uk1ZZmVSTmExb01FYmlCVHUxNHMwcEFFWllMZFF2WWtpMVJvUUxrRWhMQk1qLTJVMGsxWVkzV2wtUUxnZldhcF91NF9SZG9hbTBWOEZoYmJiQU4xNFZwYzNaRTAwNFFqemIzVl9fajIxS0l2NnRFeW95a0FHcFBfb19QN0NtY0hHR1NIQkdLSEkyNnItMk9Ra2JITjNr?oc=5"}, {"title": "Greer Confirms New Canada–US Trade Talks: What a Deal Means for CUSMA - Diplomacy and Law", "source": "Google News", "time": "20 hours ago", "summary": "Greer Confirms New Canada–US Trade Talks: What a Deal Means for CUSMA  Diplomacy and Law", "link": "https://news.google.com/rss/articles/CBMiakFVX3lxTE51RkZucGFzWmZwQlAzaXcxLVNxZmFRc1ZJNTk5OGRTbjA1bWRUeTY4UThkZXdxczJIZ2tSX0VHdHd4dUJWTzhoOHNITWs4X1o3NEJ2Y0JuMFBRYWg0SUtSb29jLUdEX2c5c3c?oc=5"}, {"title": "India&#x27;s global ambition should begin at home | Hindustan Times - newspaper - Magzter", "source": "Google News", "time": "3 hours ago", "summary": "India&#x27;s global ambition should begin at home | Hindustan Times - newspaper  Magzter", "link": "https://news.google.com/rss/articles/CBMiowFBVV95cUxQYi1PRE9Mc19jZUJRNjBrNm1LZUVuVmFTRXF3Yld0V1B6aklPWEVfemEybjFzemdMMGROWXJHTWp2WGQ3MlpqdlZsNDV0eUJGZ29hT0F4MmxTTlRvcmZMckJkc29Gb20wNFhoM0wzZUE1ZTNiS0ZBRXk4d0V6YWcxdmJHMG42SUQ1MkxrbVNSakJQOFJoR3gtSEJiNnRuUzlqOG9V?oc=5"}, {"title": "VEFTA: Expanding markets, increasing opportunities for Vietnamese businesses. - Vietnam.vn", "source": "Google News", "time": "9 hours ago", "summary": "VEFTA: Expanding markets, increasing opportunities for Vietnamese businesses.  Vietnam.vn", "link": "https://news.google.com/rss/articles/CBMikgFBVV95cUxPTmpMNWV4aXNnUkhlTTkzU0F2UkQ3MDlzQ3BocWpmWGFwRE9tUWtwY0k1MkhZRDlHTTRBeWh6UTVmamtHRTQwY1QySThMaVQwM083RmlkdVFpYy1CSVJCeHNYSTYzY3ktV3hsdThpY20yMm94cVZYQzRxUnA2N0F3WkV5cE12Rlk0VmtKbDRGUXRZdw?oc=5"}, {"title": "PIDE holds moot: Speakers for export-oriented approach to trade accords - Business Recorder", "source": "Google News", "time": "9 hours ago", "summary": "PIDE holds moot: Speakers for export-oriented approach to trade accords  Business Recorder", "link": "https://news.google.com/rss/articles/CBMiVkFVX3lxTFBnSHZ0dVNPUWh3SWlqNE1KNUtqSjZxOVU3TWVjaVlHRUpqZ3U2VEpUZ0hRWk96YjBGWmZYM1c5QmVmdjlXNWFDRVNRT0VoQzh4Zi1MXzR30gFWQVVfeXFMUGdIdnR1U09RaHdJaWo0TUo1S2pKNnE5VTdNZWNpWUdFSmpndTZUSlRnSFFaT3piMEZaZlgzVzlCZWZ2OVc1YUNFU1FPRWhDOHhmLUxfNHc?oc=5"}]}, "banking_fx": {"label": "🏦 BANKING & FX", "items": [{"title": "EUR/USD, EUR/JPY: Hawkish Fed Weighs on Euro as Yen Bulls Struggle - StoneX", "source": "Google News", "time": "18 hours ago", "summary": "EUR/USD, EUR/JPY: Hawkish Fed Weighs on Euro as Yen Bulls Struggle  StoneX", "link": "https://news.google.com/rss/articles/CBMisgFBVV95cUxOcVJmemJ0bVlxVHY1cjd4RHplUi01bE5XTC1LUW53MGZRcUQ0SjUwZ0kxR1VxNFRkRHhMTjdfRWc2Mmp6Q3VVc2xEakVtUnRBakY0S2hhd095X0NKZ3doN3I3SnQ1TTlfdVZEVmEzWnBUVlUtM2dNLUtzWEMyNDFVM1VOZ3NwM3BPUU1faWs4aHQ4dzVjMzR2c0Yzb1g1dG9jbmtFYVA5dzRxd0hMNlNYVjNB?oc=5"}, {"title": "EUR/USD (EURUSD=X) Live Rate, Chart &amp; News - Yahoo Finance - Yahoo! Finance Canada", "source": "Google News", "time": "3 hours ago", "summary": "EUR/USD (EURUSD=X) Live Rate, Chart &amp; News - Yahoo Finance  Yahoo! Finance Canada", "link": "https://news.google.com/rss/articles/CBMiWkFVX3lxTE8zSUFCZmxoakVmQW1kNlNLdzU5SzNSb01UdHBTdVJKMXlVVkl4cnV3eXUwcXpFWHF3STc0OXFnWXRWY2p1ZkJNVlpWSG5rRWx1aTBrNHhSbHduZw?oc=5"}, {"title": "Forex Technical Analysis — Live Buy &amp; Sell Summary - FXEmpire", "source": "Google News", "time": "8 hours ago", "summary": "Forex Technical Analysis — Live Buy &amp; Sell Summary  FXEmpire", "link": "https://news.google.com/rss/articles/CBMiZEFVX3lxTFAwLUx0c1ZjUl8tLVVwOW5DRlc2dDY2VzB3Wnh1YlhaclZyVnJHNFRobHpaNXFockJxdTgwbFB4d2xaU19NNlpVblhzVmxqOXY0Q2ZaY2E3RDlwNFpJYTRsZWFnQnM?oc=5"}, {"title": "Official exchange rates on selected date | Bank of Russia - Центральный Банк России", "source": "Google News", "time": "10 hours ago", "summary": "Official exchange rates on selected date | Bank of Russia  Центральный Банк России", "link": "https://news.google.com/rss/articles/CBMiVkFVX3lxTE5YcldQcEpOMEd0OGVlTzFTZnlKM2lYZ1JxQ2FvLUVUMDI2WnQ0bnk2SzlEV01pb2RKNW40WVJTTzNUTTdDeFJmSDFJN3pnZE5tS3QtakRR?oc=5"}, {"title": "USD exchange rate today, November 14th: USD price rises sharply, what is the difference in the &#x27;black market&#x27;? - Vietnam.vn", "source": "Google News", "time": "1 hour ago", "summary": "USD exchange rate today, November 14th: USD price rises sharply, what is the difference in the &#x27;black market&#x27;?  Vietnam.vn", "link": "https://news.google.com/rss/articles/CBMirAFBVV95cUxPbGdUZ1VzeVBkOU5mU09nTXY4aE9zZVM4djZRQV9PRHlqQ1otNWdnWHB5UUo0M0VXLVNkZ1RvQ2pNMXc0WVZoWjhZM2gxRl9IMTF2c2RRVGVtZXNBdVNCeHpxOVZJVF9HVF94U2p0TkZVcXowZXRaVlN1Qm1LSEV1TEUwOS1qVDVlam5uTi1Ba1BQZ2k2bHA5eGlMSjBWejBKSjFXc1RoMVkwRk5M?oc=5"}, {"title": "US Dollar Price Action Setups: EUR/USD, USD/JPY - FOREX.com", "source": "Google News", "time": "15 hours ago", "summary": "US Dollar Price Action Setups: EUR/USD, USD/JPY  FOREX.com", "link": "https://news.google.com/rss/articles/CBMipgFBVV95cUxQVDE1aERBSW5CZm1MSjBqRl9tRm9qekJJMXY5Y3Q1cTBKMk4yU3lNc3lSQ0hVM3QzeUVPUVZGM0pSMlBWdTJOVHpFbUF4V1JfWWl1LVJDSnFwc3RYUmhEMHk4R0VwY0wwUTFwOXg4RTh6VWd2R3pNc0o3SXplblNvS0k3MVo5YjRSeGRlT0lMcWZsWmhEU2VndkpSS2hzSmF0T1RHaTNR?oc=5"}, {"title": "EUR/USD, DXY, Silver Price Outlook: Bullish Rebounds on Hold? - StoneX", "source": "Google News", "time": "12 hours ago", "summary": "EUR/USD, DXY, Silver Price Outlook: Bullish Rebounds on Hold?  StoneX", "link": "https://news.google.com/rss/articles/CBMiqAFBVV95cUxPaGw0V1ZCalVEdENQYndOZVg0T1hBWGxZb3NHLXY5LTAxdU51SDdqeDVodzZsTmw2TmRTMW50dU54R2dsc2d3RFY1Xzlpa2EzTmd0VldSN3ZlaTJpMmIwdTVialBYd3BhTm1pQk9zOVpQUmFXQzRTY3REUEt3WUNHNzY0MU41NTVRdkpScWc2VHp4QjRITzJjM2Q2WE56UDBfVEV4QjdWa3Q?oc=5"}, {"title": "G10 FX Outlook 2027: It’s hard to look beyond the Fed - ING Think", "source": "Google News", "time": "22 hours ago", "summary": "G10 FX Outlook 2027: It’s hard to look beyond the Fed  ING Think", "link": "https://news.google.com/rss/articles/CBMiYEFVX3lxTE5JSlZ4U2htaXB2WkJXUnZoVTFZa19yQ2R6VE5SMTA2QmJ3YThHNTdFV0J6cTFIQmhRSDNLMDBBY2dUeGc3b1JrM2VLREp0LUFmVDJnTlFOODVSZFNvVTc0Vg?oc=5"}, {"title": "U.S. Dollar Tests Yearly Highs As Rally Continues: Analysis For EUR/USD, GBP/USD, USD/CAD, USD/JPY - FXEmpire", "source": "Google News", "time": "11 hours ago", "summary": "U.S. Dollar Tests Yearly Highs As Rally Continues: Analysis For EUR/USD, GBP/USD, USD/CAD, USD/JPY  FXEmpire", "link": "https://news.google.com/rss/articles/CBMi3wFBVV95cUxPcmgtM1JRdFdSVVRGQS01ODRLeVdrTV9WZWxQWl90ak1GbFlZbzZpYVRQZ1dHMWRFU3QydG9MUTJjSzRlZXR2OHdjc1ZFam1zd2dpRW45OXJUN2Y5b2RSZFRHX1dLaFkwekJabVpIWjA4UnVManpmSVIyU0draWdDdVUwWjZJdWZvX09zVlhxZ0s4R1M1Y0dNWjc4bmNlTGNTREVscEJFWERFMlh4RVotclA2R0dFRDVqbmVVTjF1UXY4LW1iRHZ4RnhJemozb3ZvNkNhUUV2a3NvR08tVFVr?oc=5"}, {"title": "EUR/USD (EURUSD=X) live rate, chart and news - Yahoo Finance Singapore", "source": "Google News", "time": "20 hours ago", "summary": "EUR/USD (EURUSD=X) live rate, chart and news  Yahoo Finance Singapore", "link": "https://news.google.com/rss/articles/CBMiWkFVX3lxTE9KWjJPTE90NjkzSllGWnB3UGFlWk5ENy1yRUhfYTNKYjdIY01fQWl2N2duaUhZbmxsZjlqMU1zbkgtZEpSa1FoRjloWFAtLUxLdkM1bnl6WldLdw?oc=5"}]}, "bonds_rates": {"label": "📈 BONDS & RATES", "items": [{"title": "Treasury, European Bond Yields Tumble as Markets Lifted by U.S. Democrats’ Victory - WSJ", "source": "Google News", "time": "5 hours ago", "summary": "Treasury, European Bond Yields Tumble as Markets Lifted by U.S. Democrats’ Victory  WSJ", "link": "https://news.google.com/rss/articles/CBMiwgFBVV95cUxOdld4SERJUnFrU2lIQ2NMNTJkZy1mVGZUbUFRaEtBQllGTHdQODM2WkhrV1lwd0tCaEd0UUJWclh4M2t6Y0RxMEZWTTBGRHRvNkpMaUV6YkZweVR5MlFwVThma29VWEI4dzdPMTNaSGR1Y28wRnBDWGZQWk02SnhXbnNQbWkycmo0QU50Wm9MNnFGa2lLR2czVU5Vd0thSTNkUEZyTGZDVHR6dWd2RkhoQ18zdnl3b1k0U3QxdWs1Qk5kQQ?oc=5"}, {"title": "Treasury Rates Today: November 13, 2026 - Forbes", "source": "Google News", "time": "14 hours ago", "summary": "Treasury Rates Today: November 13, 2026  Forbes", "link": "https://news.google.com/rss/articles/CBMiZ0FVX3lxTE9yck9yOUFWR0FpdE9oMU00NGZWMVVrb25MOWxBWmRuU3Ztc1FvdGJZZlBMXzZwUnpPQVp5Mlg4UzFwX2VZTG00SUFUa3p0VVoxRFZOY2M3V2N3R1ZlLXhCdVVpWHNKd2s?oc=5"}, {"title": "Investors Warn Bond Rout Isn’t Over After Week of Soaring Yields - Bloomberg.com", "source": "Google News", "time": "14 hours ago", "summary": "Investors Warn Bond Rout Isn’t Over After Week of Soaring Yields  Bloomberg.com", "link": "https://news.google.com/rss/articles/CBMiswFBVV95cUxQWjhkdkdUYk85b1djY25EQk9aY3VBUmdlZGVpS251di03VTMzaDRvVHIzbEZBcjZSSlNvMDNXdXFNX3A0QTB6TFBXRndSdFFyNXBwMXRtRmZIcVJySzVXaEZDQ25HN0ZDOGZtbkpibUZ3UDZPUWpiVWVLMU1hVzk3X3JwQ2NxVXo3WkVWMnhqandnNUg0UjlnUUNSTkUwYjFLd3ZBeEFBel9yT2h5WVRObU0zYw?oc=5"}, {"title": "Oil Jump Sends 30-Year Yields to Two-Decade High - EnergyNow.com", "source": "Google News", "time": "14 hours ago", "summary": "Oil Jump Sends 30-Year Yields to Two-Decade High  EnergyNow.com", "link": "https://news.google.com/rss/articles/CBMihgFBVV95cUxPUWk2WC1hN18wT1RfM3dHUFA4N1RoVkNJSVNtdVJYaTZWQzhJbXlLV2RHcTlNVTRRa3dFcWJWMXkwQWI5QS1FdnFsTGg3ZjVQVE8xbjE3QjBuYUQyZEpzMHZzZGd2UzFfNlZqUnRXc1ljRGVWV25OUERiQnRiU0ZRMThjS1hWdw?oc=5"}, {"title": "Market Movers blog: Microsoft shares shudder on global Outlook outage while tech rivals benefit - Investment Week", "source": "Google News", "time": "2 hours ago", "summary": "Market Movers blog: Microsoft shares shudder on global Outlook outage while tech rivals benefit  Investment Week", "link": "https://news.google.com/rss/articles/CBMickFVX3lxTE5mZHNUUnlOeExDV2hSRjhxWEs0blpwaGhqUzIzQ054d1JaTnNIcGZWbkhtTDVwZFdwUXM5ekRkX2Z5UFJEWW5uMGtRSzVnd2NwZDFRUWZnYm9JWHFlTUptZzJGSHdKOS1oTEJxOUk0bFRWdw?oc=5"}, {"title": "The Weekly Spread: What Shaped US Treasury Yields And The Dollar This Week - TradingView", "source": "Google News", "time": "10 hours ago", "summary": "The Weekly Spread: What Shaped US Treasury Yields And The Dollar This Week  TradingView", "link": "https://news.google.com/rss/articles/CBMizwFBVV95cUxOZjd2c3Z0MURvZFp1OG85MHF3VGUyTnViSnJqYUtQeGdsYml5bl8tR0kzU1VJcFhLaTdiamZDSkppUDRtdDF2aDlzdXEzMDMtaDVHUDBQOHFFT2ozdkJBNTd4SU13WUJ5UENNOERlaVROR3p2MDZndE5NMkh0aHZHTG90VV9fOG4xZkZ2RkhuWmdfTHF6WmRKekhfcUk3dE5MRFVMeFdQcDNrUFdWMG5TajBEb2ROSXBEZGpKeE5EV0dhV194RFhFUnZGQTVVVFk?oc=5"}, {"title": "Treasury Yields Jump as Inflation Data and Hawkish Fed Talk Kill Post-Election Rally - BigGo Finance", "source": "Google News", "time": "9 hours ago", "summary": "Treasury Yields Jump as Inflation Data and Hawkish Fed Talk Kill Post-Election Rally  BigGo Finance", "link": "https://news.google.com/rss/articles/CBMidkFVX3lxTE1MLUV1ZUU2cWEwbUl5VG9DNElJRXhOQ3B5OGx2RTAzMmlac1hBcFhHM2t1WmxmNWZvdy12Nzh1azZzWDdTVGRwSHoya0pKWWJydTluY29iX2V3LTJ1UDN6RFlYM0dYd2pqbGFDUEg1b2R5NzlUQ1E?oc=5"}, {"title": "U.S., Eurozone Bond Yields Rise - WSJ", "source": "Google News", "time": "16 hours ago", "summary": "U.S., Eurozone Bond Yields Rise  WSJ", "link": "https://news.google.com/rss/articles/CBMiyAFBVV95cUxOUm1uQmRvQ0wyVFV4VDljWGRaaWZVRDVONmUwc0dlNW9DeF9zMzRtME5KQmxjOHRkemVqeFA4TVBwUnQzLXhIekJ6ODVzOWpTVUZWemlCakw0UUF1RzY2TWJ0MXF2VkpDTHFsVnpSOU1Vd2wzTWN1dS16dGYwM3FDSC1GR0JuNTlXM3hqcjVoRnpaaW1JNkotYmYzalhoRWFYSmNIMFpYLXJSam1xbmhHZTdtTGRNd0hrZnplUDQ0MmMybERQUVd2ZA?oc=5"}, {"title": "Ten-Year Treasury Yields Again Spike Above 5% (NYSEARCA:SPY) - Seeking Alpha", "source": "Google News", "time": "22 hours ago", "summary": "Ten-Year Treasury Yields Again Spike Above 5% (NYSEARCA:SPY)  Seeking Alpha", "link": "https://news.google.com/rss/articles/CBMimAFBVV95cUxNZzdSREVCX0xhVVlvb0c5Zkd2ZkktS2o0bk5kWlAycW1hNVpMUXpMX1Y1bTc4cXMxSGJGLWF0Mktza0lMRzE5cmdwZDdYMnBtVDY5N18xWFBzNnRpZzhnbFVxazM5NW9IOWdrVmRtdF8zZ2Zxek52VjAzeVdVS2NnUFFmYzRMdkZjQkpqNW9PTXRrM2VsbHdqeg?oc=5"}, {"title": "Canada 10-year bond yield climbs as hot U.S. inflation revives rate concerns - Investing.com Canada", "source": "Google News", "time": "14 hours ago", "summary": "Canada 10-year bond yield climbs as hot U.S. inflation revives rate concerns  Investing.com Canada", "link": "https://news.google.com/rss/articles/CBMiwgFBVV95cUxPOG1aOU9YNkkxcjZvNEJwVDF0Qk5QU28wRy1ZcTFIZlJkOHpWSTY2MTJNY1o3eHBqNFFYVGc1ZkotNEl0QTIxVGcyTkkyZEt3bDJMdUpLRlZ6WGh2YklvSG1zYmpsQ3FyMGh6MW9hZXNYLWlVSE1UQVVKR3p3eGoyWjYyc21GOEE2V2VlVXhJZzEzRjV3WXM2Z1Z6VjhhV2VLVVdRZWh5XzNld2NIZy0taXB3Y2hMTURYUW8zSHlOalV6QQ?oc=5"}]}, "commodities_energy": {"label": "📦 COMMODITIES & ENERGY", "items": [{"title": "AMERICAN ENERGY SNAPSHOT: Who Sets the Price of Oil? How a Global Market Decides - EnergyNow.com", "source": "Google News", "time": "18 hours ago", "summary": "AMERICAN ENERGY SNAPSHOT: Who Sets the Price of Oil? How a Global Market Decides  EnergyNow.com", "link": "https://news.google.com/rss/articles/CBMirgFBVV95cUxQOHdZcEpRZDR4VWFZS09kU3ZseUEwb3NyMk1pbXFXa21OY1lyUjY0bVdSSjhlUzF0eGs2VWdQQjN0a3FnUHJZbTBHUzNEV2k3aWpPYjNUbnREYWFYanpBekI0SHAwdmh1YUtTZmRBcUh5V0M3cHZCbXFVWHRwMWdHS3IxX0pscm8tTmd6d1RXVG8ydVBnQzRTdDdYOEN0dFhTMUpMa1JxN3RjMXlNWVE?oc=5"}, {"title": "How to Trade Commodities in Australia (2026): 4 Ways Compared - Invezz", "source": "Google News", "time": "3 hours ago", "summary": "How to Trade Commodities in Australia (2026): 4 Ways Compared  Invezz", "link": "https://news.google.com/rss/articles/CBMid0FVX3lxTE9iUU95WVBoYmY0LWFLcXlWaWtMMHp4ajRmNUpldjhYdXFabF9mNGRnekVuMHlMTHBhQ0s4S21YUWdwcThPbVZ1OGIwRF9TQ2VZclM1UVpKdUo5TVVBcXd1bmRscVQwTEtIMlFsVE5IOEtQVWliZGM0?oc=5"}, {"title": "Trump doesn’t plan to raise Nvidia, spy issue during China trip: U.S. officials", "source": "CNBC", "time": "10 hours ago", "summary": "Nvidia CEO Jensen Huang resigned this week after reports of multiple affairs, including one with a suspected Chinese spy, Alice Huang.", "link": "https://www.cnbc.com/2026/11/13/trump-nvidia-huang-china.html"}, {"title": "Nvidia is done with Jensen Huang. The fallout in Washington is just beginning", "source": "CNBC", "time": "12 hours ago", "summary": "The Republican-led Congress wants to see Jensen Huang in Washington before Democrats take control in January.", "link": "https://www.cnbc.com/2026/11/13/nvidia-jensen-huang-washington-congress.html"}, {"title": "Hassett denies report he&#x27;s leaving White House: &#x27;Not true&#x27;", "source": "CNBC", "time": "15 hours ago", "summary": "National Economic Council Director Kevin Hassett poured cold water on a report that he&#x27;s expected to leave the White House in the coming weeks.", "link": "https://www.cnbc.com/2026/11/13/kevin-hassett-white-house-nec.html"}, {"title": "Supreme Court agrees to hear Robinhood challenge to IPO information omission lawsuit", "source": "CNBC", "time": "15 hours ago", "summary": "The Trump administration had urged the Supreme Court to hear an appeal by Robinhood of a lower-court&#x27;s decision to revive an investors&#x27; lawsuit over the IPO.", "link": "https://www.cnbc.com/2026/11/13/robinhood-supreme-court-ipo-lawsuit.html"}, {"title": "Lutnick faces questions over Nvidia spy scandal. His sons&#x27; firm has deep ties to the chipmaker", "source": "CNBC", "time": "12 hours ago", "summary": "Jensen Huang’s resignation as Nvidia CEO has brought renewed scrutiny to Commerce Secretary Howard Lutnick and his family&#x27;s financial ties to the chipmaker.", "link": "https://www.cnbc.com/2026/11/13/howard-lutnick-nvidia-jensen-huang-china-cantor-fitzgerald.html"}, {"title": "Bessent blames Lutnick’s Commerce as he slams Nvidia chip ‘leakage’ to China", "source": "CNBC", "time": "18 hours ago", "summary": "Jensen Huang resigned as Nvidia CEO days after admitting to an affair following scrutiny of his relationship with a woman reportedly deemed a Chinese spy.", "link": "https://www.cnbc.com/2026/11/13/us-inflation-outlook-federal-reserve-rate-hike.html"}, {"title": "Huang&#x27;s downfall may undo cozy ties between business and government: analysis", "source": "CNBC", "time": "23 hours ago", "summary": "The Nvidia founder&#x27;s downfall and the midterm election could mark a turning point in the recent close relationship between corporate leaders and the federal government.", "link": "https://www.cnbc.com/2026/11/13/jensen-huang-nvidia-fallout-business-politics.html"}, {"title": "Trump says he wants to ‘get Cuba done’ before leaving office, would consider military force", "source": "CNBC", "time": "22 hours ago", "summary": "It comes as the U.S. continues to enforce a comprehensive economic embargo against Cuba.", "link": "https://www.cnbc.com/2026/11/13/trump-cuba-us-military-force-iran.html"}]}, "india": {"label": "🇮🇳 INDIA MARKETS", "items": [{"title": "Yes Bank moves SC seeking review of order on writing off of Rs 8,415 cr AT-1 bonds", "source": "Economic Times", "time": "51 min ago", "summary": "Yes Bank has filed a petition with the Supreme Court to review an order from October 15. This order upheld a Bombay High Court ruling that quashed the bank&#x27;s decision to write off AT-1 bonds. These bonds, worth Rs 8,415 crore, were questioned during Yes Bank&#x27;s financial difficulties. The high court ruled that the bank&#x27;s administrator lacked authority for such a write-off.", "link": "https://economictimes.indiatimes.com/markets/bonds/yes-bank-moves-sc-seeking-review-of-order-on-writing-off-of-rs-8415-cr-at-1-bonds/articleshow/135830873.cms"}, {"title": "RHI Magnesita Q2 net profit jumps 62 pc to over Rs 62 cr", "source": "Economic Times", "time": "52 min ago", "summary": "RHI Magnesita has reported a remarkable surge in net profit, soaring to Rs 62.09 crore for the September quarter. The consolidated revenues experienced a modest increase, hitting Rs 1,038.26 crore this period. Additionally, overall expenses decreased to Rs 953.06 crore compared to the last year. EBITDA saw a 30 percent growth, reflecting operational enhancements despite challenging economic conditions.", "link": "https://economictimes.indiatimes.com/markets/stocks/earnings/rhi-magnesita-q2-net-profit-jumps-62-pc-to-over-rs-62-cr/articleshow/135830890.cms"}, {"title": "Mahanadi Coalfields files RHP for proposed IPO worth nearly Rs 9,500 crore", "source": "Economic Times", "time": "1 hour ago", "summary": "Mahanadi Coalfields Ltd has filed its Red Herring Prospectus for an initial public offering with regulatory bodies. This IPO features an offer for sale of roughly 66.18 crore equity shares from Coal India, amounting to a 10 percent stake in the subsidiary MCL. The intended capital raise is around Rs 9,500 crore, with the final execution reliant on regulatory approval and market conditions.", "link": "https://economictimes.indiatimes.com/markets/ipos/fpos/mahanadi-coalfields-files-rhp-for-proposed-ipo-worth-nearly-rs-9500-crore/articleshow/135829640.cms"}, {"title": "Dalal Street Week Ahead: Can Nifty bulls overcome key resistance levels?", "source": "Economic Times", "time": "1 hour ago", "summary": "The Nifty&#x27;s current technical structure remains positive. Although a sharp rebound from the vicinity of the 200-week moving average has significantly improved the near-term technical setup, the Index is near its overhead resistance area.", "link": "https://economictimes.indiatimes.com/markets/stocks/news/dalal-street-week-ahead-can-nifty-bulls-overcome-key-resistance-levels/articleshow/135829497.cms"}, {"title": "Concurrent Gainers: 8 stocks gain for 5 days in a row", "source": "Economic Times", "time": "2 hours ago", "summary": "Of these, we shortlisted 8 stocks that consistently gained throughout the period, delivering cumulative returns ranging from 7% to 11%.", "link": "https://economictimes.indiatimes.com/markets/stocks/news/concurrent-gainers-8-stocks-gain-for-5-days-in-a-row/slideshow/135828499.cms"}, {"title": "Binance targets full reopening of withdrawals by next week", "source": "Economic Times", "time": "2 hours ago", "summary": "Binance is set to restore withdrawals across all networks and assets by the end of next week. This decision comes after recovering 95% of the $6.3 billion lost in the October hack, which the FBI attributes to North Korean actors, though the nation denies any involvement. Binance pledges to fully reimburse affected clients as operations return to normal.", "link": "https://economictimes.indiatimes.com/markets/commodities/news/binance-targets-full-reopening-of-withdrawals-by-next-week/articleshow/135828102.cms"}, {"title": "Base metals lose momentum amid strong dollar and demand concerns", "source": "Economic Times", "time": "3 hours ago", "summary": "One of the key reasons behind the weakness in base metals is the strength of the US dollar. The Dollar Index (DXY) has climbed to the 103-104 range, supported by resilient US economic data, elevated Treasury yields, and expectations that the Federal Reserve may keep interest rates relatively restrictive for longer.", "link": "https://economictimes.indiatimes.com/markets/commodities/news/base-metals-lose-momentum-amid-strong-dollar-and-demand-concerns/articleshow/135827655.cms"}, {"title": "6 out of 10 top performing largecap stocks in November delivered multibagger returns in long run. Do you own any?", "source": "Economic Times", "time": "6 hours ago", "summary": "Here are the 10 largecap stocks that recorded the biggest jump in November so far, including six who have delivered multibagger returns in the longer run.", "link": "https://economictimes.indiatimes.com/markets/stocks/news/6-out-of-10-top-performing-largecap-stocks-in-november-delivered-multibagger-returns-in-long-run-do-you-own-any/slideshow/135824732.cms"}, {"title": "Anthropic IPO buyers have more influence on price than SpaceX", "source": "Economic Times", "time": "6 hours ago", "summary": "Anthropic PBC is gearing up for its initial public offering, setting ambitious price targets to capture investor interest. The firm aspires to achieve record fundraising that could eclipse SpaceX&#x27;s previous achievements. High-profile tech investors back Anthropic&#x27;s private financing, indicating strong market confidence. Its traditional IPO pricing strategy, distinct from SpaceX&#x27;s, positions Anthropic to navigate through the challenges of market fluctuations smoothly.", "link": "https://economictimes.indiatimes.com/markets/us-stocks/news/anthropic-ipo-buyers-have-more-influence-on-price-than-spacex/articleshow/135823355.cms"}, {"title": "Wall Street’s wild ride delivers big paydays and bigger bruises", "source": "Economic Times", "time": "7 hours ago", "summary": "Market volatility continues as investors navigate significant fluctuations in stock and bond prices this month. Despite challenging conditions, billions are flowing into both index funds and speculative assets. Retail investors are capitalizing on short-term opportunities while the overall market remains fragile. Many professional investors are taking a defensive stance, opting for high-quality assets amid economic uncertainty. This environment highlights the persistent appeal of diversified inv", "link": "https://economictimes.indiatimes.com/markets/us-stocks/news/wall-streets-wild-ride-delivers-big-paydays-and-bigger-bruises/articleshow/135822826.cms"}]}, "corporate": {"label": "🏢 CORPORATE NEWS", "items": [{"title": "Eric Trump-backed robot soldier startup can&#x27;t pay staff after founder borrowed $4.6 million from company to buy home", "source": "CNBC", "time": "2 min ago", "summary": "Eric Trump-backed robot startup Foundation Future Industries has run low on cash and missed payroll, as CEO Sankaet Pathak faces scrutiny over a $4.6 million company loan.", "link": "https://www.cnbc.com/2026/11/14/foundation-payroll-ceo-loan.html"}, {"title": "Disney&#x27;s &#x27;Star Wars&#x27; is coming to Cosm domes ahead of 50th anniversary as part of multiyear film deal", "source": "CNBC", "time": "1 day ago", "summary": "Cosm has secured a new studio partnership with Disney that will bring &quot;Star Wars: A New Hope&quot; to its domes as part of a multiyear, multifilm collaboration.", "link": "https://www.cnbc.com/2026/11/12/star-wars-cosm-dome-screenings.html"}, {"title": "Scout Motors has 212,000 vehicle reservations as $2 billion South Carolina plant nears completion", "source": "CNBC", "time": "1 day ago", "summary": "Scout Motors has roughly 212,000 reservations for its Terra pickup and Traveler SUV, CEO Scott Keogh told CNBC.", "link": "https://www.cnbc.com/2026/11/12/scout-motors-reservations-south-carolina-plant.html"}]}, "geopolitical": {"label": "🌍 GEOPOLITICAL", "items": [{"title": "Trump doesn’t plan to raise Nvidia, spy issue during China trip: U.S. officials", "source": "CNBC", "time": "10 hours ago", "summary": "Nvidia CEO Jensen Huang resigned this week after reports of multiple affairs, including one with a suspected Chinese spy, Alice Huang.", "link": "https://www.cnbc.com/2026/11/13/trump-nvidia-huang-china.html"}, {"title": "Flight disruptions continue after FAA lifts ground stop, some college football games delayed", "source": "CNBC", "time": "28 min ago", "summary": "U.S. flights are resuming after the FAA ground stop, but delays and cancellations are still piling up.", "link": "https://www.cnbc.com/2026/11/14/faa-ground-stop-flights-resume-delays.html"}, {"title": "Analysis: Companies love a ‘rockstar’ CEO. Until they depend on one", "source": "CNBC", "time": "4 hours ago", "summary": "Jensen Huang’s exit tests Nvidia’s succession planning and governance, and offers lessons for companies that elevate their CEOs to rockstar status.", "link": "https://www.cnbc.com/2026/11/14/nvidia-jensen-huang-ceo-succession-risk.html"}, {"title": "Ecuador wants to monetize its biodiversity — while still drilling for oil", "source": "CNBC", "time": "6 hours ago", "summary": "Ecuador is planning to channel funds into its biodiversity, but faces a key challenge: its reliance on oil.", "link": "https://www.cnbc.com/2026/11/14/ecuador-biodiversity-green-finance-oil.html"}, {"title": "FAA lifts ground stop after more than four hours, but flight cancellations will stretch into the weekend", "source": "CNBC", "time": "6 hours ago", "summary": "The Federal Aviation Administration issued a nationwide ground stop on Friday afternoon, disrupting thousands of departing of flights.", "link": "https://www.cnbc.com/2026/11/13/faa-ground-stop.html"}, {"title": "Microsoft apologizes for massive outage that took down Outlook and other 365 services", "source": "CNBC", "time": "3 hours ago", "summary": "A Microsoft outage on Thursday and Friday affected users of services like Outlook, Teams and 365.", "link": "https://www.cnbc.com/2026/11/12/microsoft-outage-outlook-aws-google.html"}, {"title": "SpaceX launches Starship in key test flight of massive rocket", "source": "CNBC", "time": "10 hours ago", "summary": "The test flight is SpaceX&#x27;s first attempt to ​catch both the Super Heavy booster and upper stage spacecraft of the rocket at its launch site in Starbase, Texas.", "link": "https://www.cnbc.com/2026/11/13/spacex-launches-starship-in-key-test-flight-of-massive-rocket.html"}, {"title": "Nvidia is done with Jensen Huang. The fallout in Washington is just beginning", "source": "CNBC", "time": "12 hours ago", "summary": "The Republican-led Congress wants to see Jensen Huang in Washington before Democrats take control in January.", "link": "https://www.cnbc.com/2026/11/13/nvidia-jensen-huang-washington-congress.html"}]}, "crypto": {"label": "📉 CRYPTO & WEB3", "items": [{"title": "Here’s what happened in crypto today", "source": "CoinTelegraph", "time": "34 min ago", "summary": "Need to know what happened in crypto today? Here is the latest news on daily trends and events impacting Bitcoin price, blockchain, DeFi, Web3 and crypto regulation.", "link": "https://cointelegraph.com/news/what-happened-in-crypto-today?utm_source=rss_feed&amp;utm_medium=rss&amp;utm_campaign=rss_partner_inbound"}, {"title": "Microsoft confirms global outage resolved, rules out cyberattack", "source": "CoinTelegraph", "time": "1 hour ago", "summary": "Microsoft attributed the outage to a network capacity upgrade issue, confirming that the disruption was unrelated to cyberattacks or AI agents.", "link": "https://cointelegraph.com/news/microsoft-365-outage-resolved-cyberattack-ruled-out?utm_source=rss_feed&amp;utm_medium=rss&amp;utm_campaign=rss_partner_inbound"}, {"title": "MegaETH parent cuts 20% of staff amid restructuring, AI push", "source": "CoinTelegraph", "time": "3 hours ago", "summary": "MegaETH co-founder Shuyao Kong said the restructuring affected employees who helped build the project’s blockchain, wallet and ecosystem.", "link": "https://cointelegraph.com/news/megaeth-parent-cuts-20-percent-staff-ai-push?utm_source=rss_feed&amp;utm_medium=rss&amp;utm_campaign=rss_partner_inbound"}, {"title": "Bitcoin ETFs shed $2.35B in 2 weeks, BlackRock’s losing streak hits 11", "source": "CoinTelegraph", "time": "5 hours ago", "summary": "US spot Bitcoin ETFs recorded $185.4 million in net outflows Friday, with BlackRock’s IBIT accounting for $143.5 million and Fidelity’s FBTC shedding $41.9 million.", "link": "https://cointelegraph.com/markets/bitcoin-etf-outflows-2-35-billion-blackrock-11-session-streak?utm_source=rss_feed&amp;utm_medium=rss&amp;utm_campaign=rss_partner_inbound"}, {"title": "OpenAI launches AI payments in ChatGPT with Visa, Mastercard and Amex", "source": "CoinTelegraph", "time": "14 hours ago", "summary": "OpenAI’s new payment wallet lets AI agents complete purchases using existing card networks, with plans to eventually allow preauthorized transactions.", "link": "https://cointelegraph.com/news/openai-ai-payments-chatgpt-wallet-visa-mastercard-amex?utm_source=rss_feed&amp;utm_medium=rss&amp;utm_campaign=rss_partner_inbound"}, {"title": "Adam Back makes case for simpler security as Blockstream launches Bitcoin custody system", "source": "CoinTelegraph", "time": "14 hours ago", "summary": "Blockstream’s new custody system, developed with Thales, uses dedicated hardware for transaction signing as Adam Back advocates for offline security to reduce cyber risks.", "link": "https://cointelegraph.com/news/adam-back-simpler-security-blockstream-bitcoin-custody-system?utm_source=rss_feed&amp;utm_medium=rss&amp;utm_campaign=rss_partner_inbound"}, {"title": "Kraken parent Payward gains market share as slower trading weighs on earnings", "source": "CoinTelegraph", "time": "15 hours ago", "summary": "Payward’s adjusted EBITDA fell 66% year over year to $60 million, even as its share of global spot trading nearly doubled and fee-based services expanded.", "link": "https://cointelegraph.com/news/kraken-parent-payward-gains-market-share-slower-trading-earnings?utm_source=rss_feed&amp;utm_medium=rss&amp;utm_campaign=rss_partner_inbound"}, {"title": "US regulators move ahead on crypto trust charters as Senate scrutiny grows", "source": "CoinTelegraph", "time": "15 hours ago", "summary": "Coinbase’s trust company received final clearance as lawmakers seek records on crypto firms’ compliance and potential conflicts of interest.", "link": "https://cointelegraph.com/news/us-regulators-crypto-trust-charters-senate-scrutiny-grows?utm_source=rss_feed&amp;utm_medium=rss&amp;utm_campaign=rss_partner_inbound"}, {"title": "Metaplanet swings to $170M loss as Bitcoin sale hits earnings", "source": "CoinTelegraph", "time": "17 hours ago", "summary": "Bitcoin sales, valuation losses and rising borrowing costs weighed on the Japanese company’s earnings despite higher revenue and operating profit.", "link": "https://cointelegraph.com/news/metaplanet-swings-170m-loss-bitcoin-sale-earnings?utm_source=rss_feed&amp;utm_medium=rss&amp;utm_campaign=rss_partner_inbound"}, {"title": "Bitcoin holds below $70K as stocks slip despite a cooler US PPI print", "source": "CoinTelegraph", "time": "19 hours ago", "summary": "Bitcoin was down about 4% on the day amid a tepid market reaction to October’s US PPI reading, which came in below expected levels.", "link": "https://cointelegraph.com/markets/bitcoin-below-70k-stocks-slip-cooler-us-ppi-print?utm_source=rss_feed&amp;utm_medium=rss&amp;utm_campaign=rss_partner_inbound"}]}, "tech_ai": {"label": "🤖 TECH & AI", "items": [{"title": "Protests in Chicago After Google Warns Schools About Disabling AI Feature - The 74", "source": "Google News", "time": "32 min ago", "summary": "Protests in Chicago After Google Warns Schools About Disabling AI Feature  The 74", "link": "https://news.google.com/rss/articles/CBMisAFBVV95cUxONk9kRU5lX2I4WlJjMi1pbHpZWFZBT3RsNWdYdkZUVHJDZ21BRTdqUXNjNWUyQVFhZHM4T0gxR1ZfZDVNU0xVXy0zSWxCakxKcWR4OEMzR01ieVhUNjI2OTZfMm1QdWRCa1Vqd1V6ZkVWclQ3czNoQk8tMXhkMV8zUnpNYXJzVkg3ZlVmTUhnaFhOeHpSQkZ3NzYyWEFKdHJiTzQ0dWN1dEtvRFU3YUhnSg?oc=5"}, {"title": "Key Considerations for Evaluating an AI Vendor - Morgan Lewis", "source": "Google News", "time": "14 hours ago", "summary": "Key Considerations for Evaluating an AI Vendor  Morgan Lewis", "link": "https://news.google.com/rss/articles/CBMirwFBVV95cUxPVS1xdktscThwc0p0RDlDTTJISzl3dE9tRzc0blJxQllDTjFyLWs2dlVMVngxNnNrbjgxVGpDc2ZtMzVsVk5aZWFRaV94a1lNSElzSWZBd0VtQVpxWEI1akoyUkZpMVJ0OUZYMklFY0syQU9DVUI2STd6OTFTbGlPcGNlUEZ4YThBY0FxSzNBTlk0dmpNLWMyYjNJY3IxbFJNLWd6SjJ1T0VrVGZ4SlRZ?oc=5"}, {"title": "Artificial intelligence is scary. But history reminds us that tech makes lives better, not worse. - New York Post", "source": "Google News", "time": "15 hours ago", "summary": "Artificial intelligence is scary. But history reminds us that tech makes lives better, not worse.  New York Post", "link": "https://news.google.com/rss/articles/CBMizgFBVV95cUxNang1SV9DYXYxazFLSThrNy11WDRLVDRPcndXMERvWWJMN2cyMmlVRm1CS2dpMU81cmcxd0o3TTdGcHZDNXU4RnpNS1JibHNkamVUU252UmxnVnAxbmt4OVFqTTl2V0JTZkpoZ01yT2pKOUlBUGRIdkpJQl9OLVc4S3ZNbVFMSHYtSVd5NUNRSlRlbVlubVU0NjY3WFl5bThjRDgzb3FlZTFJYlQ1dEdUaHhBcE83RWZxVk1qV2loWHk1c0d6aVJaLUtod3dtdw?oc=5"}, {"title": "What’s Working: What happens when AI bots take over landscaping? An Aspen company finds out - The Colorado Sun", "source": "Google News", "time": "1 hour ago", "summary": "What’s Working: What happens when AI bots take over landscaping? An Aspen company finds out  The Colorado Sun", "link": "https://news.google.com/rss/articles/CBMiqAFBVV95cUxOMndkNzFrTUNFTExCUXJpdU1zZVp1d0hRazFHRGd3OFJWRHAycEpFdmkySC0zYUlCRU1KTjdBZjFvS0VfdHplUUw5ajlBQ0N5M2M4YnJVTmVJakNOSERYeHlLcUJ2UWcwWXdiOVhJQjBib1A3MW5nYVE3Nkk5ZHVXaDI3XzNNUWcxZDVuVjlORlE4NWZUN0l0NFpLVHM3eGpQRzI1U1BaY24?oc=5"}, {"title": "FAA investigating whether new AI technology contributed to nationwide ground stop - Click2Houston", "source": "Google News", "time": "13 hours ago", "summary": "FAA investigating whether new AI technology contributed to nationwide ground stop  Click2Houston", "link": "https://news.google.com/rss/articles/CBMizwFBVV95cUxPLWtSN25JZ3FqRk1BTEdGZDR2SHc2RkdsTEhBMmdQUThHcVYwTUhseVFxSG44TVlCZ2xVLUtyejFFbkJWTlZCMm92QzZIb2p1aU5hQVVmakIxZjZNZy1jaDNUbWxVQ2kwZ2NiR2tjeW4ydmYxazZlM3dBRFcyQ1pDSnliSmRFVGk1WUt3czBuTWFlRlZiTG5NSXBRSldyQVFJazFUVXdlOXdsV3ZqSk9ZVUI0V2NxRVc0TkEtRjFDLXU4Vm9WUEVFZDVBUktEREk?oc=5"}, {"title": "AI agents with friendly faces and adorable bodies can distract you from serious risks - Digital Information World", "source": "Google News", "time": "7 min ago", "summary": "AI agents with friendly faces and adorable bodies can distract you from serious risks  Digital Information World", "link": "https://news.google.com/rss/articles/CBMijwFBVV95cUxONHpLRk5aVHp3aHM3NkllZENmUXEtLW1hSEZtb3N5akhLd1NKcjVERlEwQUdhbjNvSXVja0paRDRlNE03cWdTWDFna0hmSDJPU2V4dUlaWU1XUnhnZVk0WjdIQ0pPYmg1TEtaV0t6Tlkyb19NcU5LMm1BZEEyaDlRb0hEVDE3VkdacEJVOEhxWQ?oc=5"}, {"title": "HUD OCIO Plans Data and Artificial Intelligence Division - ExecutiveGov", "source": "Google News", "time": "13 hours ago", "summary": "HUD OCIO Plans Data and Artificial Intelligence Division  ExecutiveGov", "link": "https://news.google.com/rss/articles/CBMihAFBVV95cUxPVDR1a002Y0NEYlEtZG1TTmV1bV9HcmtEWWM5MXhVVkVUbWR2UEk5OEJjTnBwR3VGVmlYbGRsMk9KWkhqLVJBNFhHY3JfSi1FMmlEdC1nT2VYdHZxcnp0NjVtcS12RjdqZjgxQ2lNYzhxS3ZEbjhYN0hzc2lKQ3VaX1FMR3E?oc=5"}, {"title": "Pentagon rebrands principal AI shop as ‘Super Intelligence Office’ - Breaking Defense", "source": "Google News", "time": "18 hours ago", "summary": "Pentagon rebrands principal AI shop as ‘Super Intelligence Office’  Breaking Defense", "link": "https://news.google.com/rss/articles/CBMiowFBVV95cUxNT05UWGJTSFduUXhDT3l3QkdWNVBzcFBOb3p3blUzVFcwR3NQdFNGRUI4MV91cl9maVZTcmlfSW13VUd1X3k1REY3NE1jeFVlOC0wWkxLQXVHRVdTaW5JZER1VkVDQ2NfaEl5dkdGbWFDOHRhOHRPejJuOWVSa24xRFdCOE00V3VEbFBkZ0gxT29IZnVkdU83anc0QkozeldzU3FR?oc=5"}, {"title": "AI News: Artificial Intelligence Trends And Top AI Stocks To Watch - Investor&#x27;s Business Daily", "source": "Google News", "time": "18 hours ago", "summary": "AI News: Artificial Intelligence Trends And Top AI Stocks To Watch  Investor&#x27;s Business Daily", "link": "https://news.google.com/rss/articles/CBMilwFBVV95cUxQMTVTWnJlZkpsVU9ZV0g1WHdKQVBKOFFvcUpPeTJuMW9iT2FTMWI1N2hMYk1ud1cwQlBEVlJObDFVTnpoNnBhejJrZnVFelQ5V3NNRklrM2RlaHUtc2NsbmxWcVV1MWVzd082RUdTYmtJVW9MUmJRTG5sV1dJN3JCd1JNX2Z4VnZtV3VpbzdrNXdKNTVSc3FB?oc=5"}, {"title": "PATENT NEWS: Anthropic’s artificial intelligence systems accused of infringing neural network patents - VitalLaw.com", "source": "Google News", "time": "12 hours ago", "summary": "PATENT NEWS: Anthropic’s artificial intelligence systems accused of infringing neural network patents  VitalLaw.com", "link": "https://news.google.com/rss/articles/CBMi_AFBVV95cUxQa09ZQllGRFA4eTctdzhDMFk4VmkxeGhZcTNpcWQ5SXhSVU83akhfT3lTMDZoMG00U3NTNHl4amhsTjBTYjhmbi1hZGtVZF8xSTFqZ29aZE02WEZvcXpzbW9Zb2s0azROS25sZHpCUlNGbFQ5WHhBRlpja3ZwcktkREZmMDNFbGVDcnlvdHdkeTNFRVV6N21rc3hlQTJUSUk1WFFiM1FidlRfT2RpWVByR2ZYN2lUVU1EUXB1R0JGQkdWaWRzQXFhaERnaTljZDN3QUN0V05WOWtnbkl2ZElqYTAtcVE5TU5NaGItcEctQ0x0SnhBUnBuU2tUdUw?oc=5"}]}, "asia_china": {"label": "🌏 ASIA & CHINA", "items": [{"title": "HANG SENG INDEX (^HSI) charts, data and news - Yahoo Finance Singapore", "source": "Google News", "time": "3 hours ago", "summary": "HANG SENG INDEX (^HSI) charts, data and news  Yahoo Finance Singapore", "link": "https://news.google.com/rss/articles/CBMiVEFVX3lxTE1Ja29OV3kxRk02SlJnZk9UNVlrQmlzS1FBUk1oRlZLeC1nck4wMFlmQXpaeHdBY1JoX1BnMTJCYmVNZEdBelJ5NS0yMXA4a3czV3ZfVA?oc=5"}, {"title": "Chinese Stock Markets Can&#x27;t Quite Shake Off Bearish Sentiment - www.citynewsservice.cn", "source": "Google News", "time": "6 hours ago", "summary": "Chinese Stock Markets Can&#x27;t Quite Shake Off Bearish Sentiment  www.citynewsservice.cn", "link": "https://news.google.com/rss/articles/CBMiygFBVV95cUxQWlV5aVlNOUtwMWZrZ3J5cm9XNVNPUm8wOWlzeFFFSVlueHY5d09Yc3Bzcm1sdmluUGd5QjhoSEZZN3B6ZXQzZVlCUEZLSHhxdGNUR3BkM3dSM09TSVBKVDVDX0dzdHJNRDB5ajZQN0dRS3ZxSDhVUnVIVk5Dei1XSkgyVmZVWWY4MFlVSEJvSFp5MnZ2WWIySnBkSWgybEdmanVLdXVfZURxS2pGTE1vbmg2YjE1YVdla1lUME5oeUVVNjVMaG1VaTNB?oc=5"}, {"title": "Hang Seng Opens Lower as Hong Kong Bears the Tech Selloff&#x27;s Weight - 24/7 Wall St.", "source": "Google News", "time": "23 hours ago", "summary": "Hang Seng Opens Lower as Hong Kong Bears the Tech Selloff&#x27;s Weight  24/7 Wall St.", "link": "https://news.google.com/rss/articles/CBMiywFBVV95cUxPZHZHS1VPbXFwdU5JQmFIOUhnSFluU3dOaTlqd1BYM1p2QVZXTjVsZEdyLTV1X2tNajNQeFhuMFNTbmYwQnlMZTFGUk8waXI2MzRaOVBiZGVySHZFZGhpZEVjcmxoU2R0clljOEtnaGFjUzJvRm1sdXdlTkUydkZ3TWRQek83aEVlM3BTV3dGQVdOdE5WSGZlYXhmQXpSejUzMXVVMlF6amtnQ19OY1E2NGxlMmF2QjVPUzRXNDRxcjJtTlROX1hHYVR3aw?oc=5"}, {"title": "HANG SENG INDEX (^HSI) Charts, Data &amp; News - Yahoo Finance - Yahoo! Finance Canada", "source": "Google News", "time": "2 hours ago", "summary": "HANG SENG INDEX (^HSI) Charts, Data &amp; News - Yahoo Finance  Yahoo! Finance Canada", "link": "https://news.google.com/rss/articles/CBMiVEFVX3lxTE55Skp3dFFpR29zQVMwWEY4MVY4WlA3UmZDZm9udFN4eFNOZW5Wa01FWUJKdHZHLUNPdHZRWEN5c09SbEVXM1VLbE50b1Y1dlJzVEY1TQ?oc=5"}, {"title": "Gold Erases Eight Months of Gains in Two Months; Who in China&#x27;s A-Share Gold Supply Chain Is Under Pressure? - BigGo Finance", "source": "Google News", "time": "23 hours ago", "summary": "Gold Erases Eight Months of Gains in Two Months; Who in China&#x27;s A-Share Gold Supply Chain Is Under Pressure?  BigGo Finance", "link": "https://news.google.com/rss/articles/CBMidkFVX3lxTFA0emxSX0E1S0JFN0hVb3dXYmk5TFFwTWFPazc1NW9uTE9qYzlxTnRubEU4ZGJlRTZyYkFXcXBFX01WaDRDNXQ1NlhPOXRVRUZtbzZTdnNldlhHTFFOMElzendmTlpTb3hHcUNxX0RtNkVNek8yQ0E?oc=5"}, {"title": "XPeng Inc. (9868.HK) Stock Price, News, Quote &amp; History - Yahoo! Finance Canada", "source": "Google News", "time": "14 hours ago", "summary": "XPeng Inc. (9868.HK) Stock Price, News, Quote &amp; History  Yahoo! Finance Canada", "link": "https://news.google.com/rss/articles/CBMiVkFVX3lxTE0wVk1saTNuX3JtcXM4NHRHLUc4STlMRnN6Vlc3TWxNZzdKZ3lndHpEemdVNldnWmlpTGZUT095SElyLVRWX0gtcmt6bFpvMUJ4aXJuT2t3?oc=5"}, {"title": "Copper under stress, down 5% this month - Capital Market", "source": "Google News", "time": "22 hours ago", "summary": "Copper under stress, down 5% this month  Capital Market", "link": "https://news.google.com/rss/articles/CBMinwFBVV95cUxQYWIxaWNpa3N6NHE0YTkxODgtdHNXNGhUY0FYZ2JWNHdGVWtIVU9IWWdUZnUzYU5ZdmsweGloV0tweGVDdVFObXZDSW1TQnN0UmR6RXdvZWRZbGI1RkJXQ1l0djZVd1pEZGphLWZkbU5aNFd5ZWZub1N6WVRmU1BlVlg5S3hPQ29wWmItcTJrVE1GMUk3YVVSUTlxZ3RsSkk?oc=5"}, {"title": "Hong Kong Stock Exchange Today: Hang Seng Index Drops 1.55% to 23,637.60 as Tech Index Sinks 3% on Nvidia Fallout - BBN Times", "source": "Google News", "time": "14 hours ago", "summary": "Hong Kong Stock Exchange Today: Hang Seng Index Drops 1.55% to 23,637.60 as Tech Index Sinks 3% on Nvidia Fallout  BBN Times", "link": "https://news.google.com/rss/articles/CBMi3gFBVV95cUxQZW9mUGVJZlB3djNoNmZ4a1FIdmdMWlR1TnhTMFZsazI4dV9ySGtjYmFLbENOSXNTN1VSdjAtWEo1b2FHdUN2TXV0X1ZudVFQVFBLa1JOQ2syUmtmV3UzblNRZFQxbFVUbi1QWUVEQUhqeGVhTWJaZ0hZRlJxeEJYcW1fM2ZpYXp3c2hCVU01VXh5TWtSdVBvNWJVeUxoUDdpdVZfWVBJTmZmeVVYYXd1RGtxNk9WWkkzclo2RzRtcWtjV3REd3c2Q2I3eERUejNPRjloX2o0MU5RaW0xX0E?oc=5"}, {"title": "Overseas Stock Markets for Friday, Nov. 13, 2026 - STL.News", "source": "Google News", "time": "21 hours ago", "summary": "Overseas Stock Markets for Friday, Nov. 13, 2026  STL.News", "link": "https://news.google.com/rss/articles/CBMidkFVX3lxTE02aHJkSkRjOVRKNWV2NmFEZVFKSFpPaGVLdk16ZmlJTUZwcjhkSlNXdlozbzc3WC16S0d2X3NkV2dWUVA1X0oyNk1QbFF4M1gtN0lHbjc3ekZfeERrSGJ1Y3dJZ285SHNmOGIwNVh3WnVfcmQzNVE?oc=5"}, {"title": "SSE Composite Today: Shanghai Edges Up 0.32% to 3,660.79 as Coal Stocks Rally and Turnover Thins - BBN Times", "source": "Google News", "time": "8 hours ago", "summary": "SSE Composite Today: Shanghai Edges Up 0.32% to 3,660.79 as Coal Stocks Rally and Turnover Thins  BBN Times", "link": "https://news.google.com/rss/articles/CBMiyAFBVV95cUxNQ21lazlhbi1jUzEyZjhIb2EtaWFVTEF3VnlzZ2xYM0RnVjRpWFB1RXNyQWVlU1VDRlo4MjlqQkZLX3BINXBGemJjZEg0YzdXN19QZ3ktTDBrSThYdTRPdzV5eHh1UEQ0bHhmQUZKR0YzdGpheVFOelF1WG5rMzF1OU9CamRqc29wdVJCeFhJRGU3MHd4eHdoWGtWSWZUcHZiZFdkVXRwQ1FRSmFyMTMyU3JDV0tqNlctYXllaVlTM21WQ19NcU1ZNg?oc=5"}]}, "europe_uk": {"label": "🇪🇺 EUROPE & UK", "items": [{"title": "Market Movers blog: Microsoft shares shudder on global Outlook outage while tech rivals benefit - Investment Week", "source": "Google News", "time": "2 hours ago", "summary": "Market Movers blog: Microsoft shares shudder on global Outlook outage while tech rivals benefit  Investment Week", "link": "https://news.google.com/rss/articles/CBMickFVX3lxTE5mZHNUUnlOeExDV2hSRjhxWEs0blpwaGhqUzIzQ054d1JaTnNIcGZWbkhtTDVwZFdwUXM5ekRkX2Z5UFJEWW5uMGtRSzVnd2NwZDFRUWZnYm9JWHFlTUptZzJGSHdKOS1oTEJxOUk0bFRWdw?oc=5"}, {"title": "What does Goldman expect for European stocks in 2027? - Investing.com", "source": "Google News", "time": "1 hour ago", "summary": "What does Goldman expect for European stocks in 2027?  Investing.com", "link": "https://news.google.com/rss/articles/CBMirgFBVV95cUxQT2VUanlRenhCOFZzNzNoSmRzNWxSb1lvSHMxdVlKaTB5RzJzT1B3NnVfc0d1N1lMZzRHTGVVRVA3RUZFVHlxbVFrRl9XZnZHSkFNQWFuZ3daazZWN2dFUF9OWHdrMGNhU2dNU1Q2cm5ZSWJ3X2tRYkc2TFdnY1BhRzctVEE0bjdlcWRMSGVRTWdFbEFzaGk3M1V0Q3hMSmtxeVBFdGZNdlNVbjFNVEE?oc=5"}, {"title": "US stocks close mixed as tech losses weigh on Nasdaq, Europe mostly up - Anadolu Ajansı", "source": "Google News", "time": "13 hours ago", "summary": "US stocks close mixed as tech losses weigh on Nasdaq, Europe mostly up  Anadolu Ajansı", "link": "https://news.google.com/rss/articles/CBMisAFBVV95cUxNd2VvSUl4MVRPMU0zUk9VUjdxRHBuLXBoMW5tQ0lKV193d0p3ZlhMNWR5bXRVcFVPUDM2M0ZwTjgzVXc3RVhZd09zUGs4eHhFb0Rpdmh4SmQxeHNWTVprbS11czFQNUlxbWVDaUwyakpkWWhZNXQ4ZzNtVkpUWUhFLVNtdV9lSG1OdFZmdm1lRmxYOTdVcnlVMFJiZXRfNy03a3dEVTY1SEtka191MFZYbQ?oc=5"}, {"title": "European stocks close at another record as insurers and oil majors offset a chip selloff, capping the STOXX 600&#x27;s best week since June - MLQ.ai", "source": "Google News", "time": "14 hours ago", "summary": "European stocks close at another record as insurers and oil majors offset a chip selloff, capping the STOXX 600&#x27;s best week since June  MLQ.ai", "link": "https://news.google.com/rss/articles/CBMi6AFBVV95cUxQNEhFZXBMOFRtS2JaNzhBOHVISlMxUk55cDlIU1lIT2p6RUR2bGZpck9VamFrWGg5bkNiejFZOUJaN21vaFdPaDVyX09UMjFENEJob3UwYVVGVTAzdUpnN09ORWFLN3A3b2xmaUFMQXo2SHVnczFfZFBndEs0QzNUaklnZkV6SURMR19qbVRLaGEwemNBb0ZaMG9NclNtLTBJdGhlbHQ0a0RsYVFtRTl5ZXBySTZ6R3dnM3N6aFNzeFMxem1uRnFXbkk2UWhJcTJBUVNFZGpBckI3aHZadkVIOUdlM0g4cjQy?oc=5"}, {"title": "European Stocks Little Changed; Stoxx 600 Hits Third Straight Record High — AI Stocks Watched After Nvidia CEO Resigns - BigGo Finance", "source": "Google News", "time": "17 hours ago", "summary": "European Stocks Little Changed; Stoxx 600 Hits Third Straight Record High — AI Stocks Watched After Nvidia CEO Resigns  BigGo Finance", "link": "https://news.google.com/rss/articles/CBMidkFVX3lxTE5ZLWdKRlp1WDJvX3dPMEdsWWZ0bnFMSGRxWlpZX3RNdzB5OC1TWlBvQ3hHZWFnU3dPT3BlNC1WM01wWW1Mb1BMa0Y4Z2M3REVWN3dabDJfNjhJRUd4cXQ5cGZ3NV9RUDJSc2ZOcTNJb1RTUGdGMEE?oc=5"}, {"title": "European Shares Retreat From Record Highs as AI Uncertainty and Fed Rate Expectations Weigh on Sentiment: DAX, CAC, FTSE100 - Yahoo Finance UK", "source": "Google News", "time": "21 hours ago", "summary": "European Shares Retreat From Record Highs as AI Uncertainty and Fed Rate Expectations Weigh on Sentiment: DAX, CAC, FTSE100  Yahoo Finance UK", "link": "https://news.google.com/rss/articles/CBMijgFBVV95cUxOUFZIcE03UHpuOXRQUHZXUlhZRlp4QXVUSGphcnJmenRSdl9aTkR1V1FrUkJUTWZmcFFMZTczUWU3dkJRZS0yOVRnQ1M2UVlvZ1dfZXJiX3ZuV0dyejN5LXR3RXJFeXB0cXBBMFBuN1RKRUplSlBDSHpla214aDZ1UnBlVUhHQTZLbkNHWjh3?oc=5"}, {"title": "Europe closes mixed lower after data - Breakingthenews.net", "source": "Google News", "time": "19 hours ago", "summary": "Europe closes mixed lower after data  Breakingthenews.net", "link": "https://news.google.com/rss/articles/CBMiiAFBVV95cUxOQWd5YVhVcGpSSEZZalF3TkpCMjE4OHJxcl9OZmVKdUZERDR4STdOODZkMXZtOUJzbVZzTE9ycG5VV3pOV0VpbVZGYjJBWUNlUWwzbTNZV0h3eDA4cHlWRkIwQXQ2MlhPRnIxNjVfWFZHYkpsbG94Yi01YUJnX0pFdU5pazVtNFJh?oc=5"}, {"title": "European stocks near record highs, US dollar gains on Fed rate hike bets - The Business Times", "source": "Google News", "time": "22 hours ago", "summary": "European stocks near record highs, US dollar gains on Fed rate hike bets  The Business Times", "link": "https://news.google.com/rss/articles/CBMi3wFBVV95cUxOVmE2bF9NUUs1UDl0dm1QWFlaWUNZMHd1SHBBUWZxZFRwZHJibUZMT0ZRN3ZVQi1UdGxmN1JhU2JkNlRQNWU1cVVIcXFyaXE2Y1d0dWFuRS01MVFsRDJmVGI3a2RaNWEzZDlkOHhBOE1uYjRkN3ZtaVdURFM5RWFFNXlYb2ZoaHpzdkdGZm01ZGxzTFNXdU1VYUdpTDNRMXBBcHVrazVBb3ZjbGQxZWQ0M3hMZ3pnWkZLNjBBMmJUeUpFOUJTbU83UFdUbm02NmZfV1dqcnZzbmhRYXZQNlo0?oc=5"}, {"title": "Analysis-How US tech pain is European stock markets&#x27; gain - Yahoo Finance UK", "source": "Google News", "time": "23 hours ago", "summary": "Analysis-How US tech pain is European stock markets&#x27; gain  Yahoo Finance UK", "link": "https://news.google.com/rss/articles/CBMihgFBVV95cUxQWnJhTHJVNjNMdTJVNnJIa0s4MHdaVldzTlptQUlpQTVRVUtqYWYzRjhLVTk4em81Q2RBdnFoWUpBNWpyeWdZNFRiSGctSjN6d2xhMktJVm9UZkxGa09mVUotSXZORGJZVVlRVUdfVGlsTjhnbTlFVlo2MFh5WEhGa1A0SnNWZw?oc=5"}, {"title": "FTSE 100 today: Stocks edge up as energy names track oil on U.S.-Iran tension - Investing.com", "source": "Google News", "time": "17 hours ago", "summary": "FTSE 100 today: Stocks edge up as energy names track oil on U.S.-Iran tension  Investing.com", "link": "https://news.google.com/rss/articles/CBMiwAFBVV95cUxQdHAzQXFzTmZZWlp2dS1Od1VUUzhmRUZTODhWclJaQ0tOWkJJR1pGNXVmNHFubnpHSTl6RFllZ0ZESHl0NTctOTM4TTJqbURhV05zQk9iX1J4elRabklUbGE5MmJuRFViSzZsRnNOYU1yNFc1d0NtVkp5YVE1cVM2UGZPRllTQ1hia2JpLUtsWDdMd2Z0RDZlY3d4TGZzVE1oRkVDY3B6cXpjNmNNRmwwYy12ZXJ5RHFfdmIxTGp4Nmg?oc=5"}]}, "esg_climate": {"label": "🌱 ESG & CLIMATE", "items": [{"title": "Beyond the AI boom: A framework for evaluating data center bonds - T. Rowe Price", "source": "Google News", "time": "5 hours ago", "summary": "Beyond the AI boom: A framework for evaluating data center bonds  T. Rowe Price", "link": "https://news.google.com/rss/articles/CBMipgFBVV95cUxQMGhrT1NYS28wLXpRQkVSVENFUGxweTZ4T3F1QmZLeDgyV3E3el9zS0Y4TVo1amUySkRvQ3hLOHR1dGF5c3ZwcVpoRDhqTFRvaC0tWFcyaThtRUN4T2hmSmYzQldmcm5FdG8wcjU0N2lFeWVmZFRCR01raTFWdkN3SG93RjJOSF9IMi0yZ1l0eEE2TEFmWlpKZlZuU0RBWnFNaUxoXzZR?oc=5"}, {"title": "Nuveen Natural Capital Lands $100M TIAA Anchor to Combine Farmland, Timberland and Carbon in One Vehicle - ESG News", "source": "Google News", "time": "20 hours ago", "summary": "Nuveen Natural Capital Lands $100M TIAA Anchor to Combine Farmland, Timberland and Carbon in One Vehicle  ESG News", "link": "https://news.google.com/rss/articles/CBMickFVX3lxTE1uRlFGTzM2RGxxN2hiX0g5QmNJSlU5WkkyZGNnV29FNHpJRnpzenZzSm9RR2dsZEFSZmhFWmhEZ010cDVpaVo5aUxXaU02N2NFbEZMTExXdzNJamxhRWdxWDRyM1NnLTd1MWU2Q09zcnZoZw?oc=5"}, {"title": "China prints first sovereign offshore green bond in Canada - Asset Publishing and Research", "source": "Google News", "time": "18 hours ago", "summary": "China prints first sovereign offshore green bond in Canada  Asset Publishing and Research", "link": "https://news.google.com/rss/articles/CBMiowFBVV95cUxQVHZxUUczaURCdk5wNWZBX0pma3RIZjNTNDhibGUyQjh6UVhwVVpZZ0xxVmVtOC1nWEFFUFJFNjB0dHUyNzNZWjAtNGdFWVdPNFFlU18yaHpxdkVyeFlOTmV4d0M5bmtLdEZNdnVOMHZ0ZVJTWElfZjRhMEc2WTNCYWlPdU9uRElKbXlTU2NJdXhSLVFvUHZ3TUJ1dWR5ZUllVXdV?oc=5"}, {"title": "IGBC Targets Net-Zero Urban Growth - ESG News.earth", "source": "Google News", "time": "6 hours ago", "summary": "IGBC Targets Net-Zero Urban Growth  ESG News.earth", "link": "https://news.google.com/rss/articles/CBMiiwFBVV95cUxNUDJ2U0s0aXd4MEhXZm9QaG5MMER3SnpzUTVUTk1tSGtNelJ3YU5heS1RT01oOGFydlBrc2hsbUQ4WmxVM0JBSlkxaVk5NHFXWjM1R2lJX1JheF9rVEExLUR4MjVHeEZCTF91R1ptdy1wRm51TTBwZW1Xem8tYUZXdmttODU2VHFqZHlV?oc=5"}, {"title": "COP31 Climate Finance Falls $840 Billion Short, Brazil Says - ESG News", "source": "Google News", "time": "20 hours ago", "summary": "COP31 Climate Finance Falls $840 Billion Short, Brazil Says  ESG News", "link": "https://news.google.com/rss/articles/CBMiakFVX3lxTFBlUkV0QkJHQlM2R0Y2blVVSmVtQmFtTTBlYktfN0swcDUzaUIwa0thOEhaeWxFdlBRR3BZWmdKRXRCOHB1c3JqSVp5NHZETENCRjFQcjJSWUhsMVBFNlJHa1lqVUk1bDMxX0E?oc=5"}, {"title": "Chemicals, Glass and Paper Makers Win 121 Million Free ETS Allowances Under EU Deal - ESG News", "source": "Google News", "time": "18 hours ago", "summary": "Chemicals, Glass and Paper Makers Win 121 Million Free ETS Allowances Under EU Deal  ESG News", "link": "https://news.google.com/rss/articles/CBMickFVX3lxTE8yTkdxcUx5b3A3S1dNbzVOdDQyYmp2SWl4Y3BFTnF2cWttMUFmWVRoTHBsS3UtSG9ES2VEbVdNX3ZUTG9wSWVJU1Z0MGZFSkJPZzBOSm94TncyVlR5TFZYT01sclVYY05SYWV2QXFIX3otUQ?oc=5"}, {"title": "AI and Clean Energy Stocks: The Diversification Trap - Securities.io", "source": "Google News", "time": "20 hours ago", "summary": "AI and Clean Energy Stocks: The Diversification Trap  Securities.io", "link": "https://news.google.com/rss/articles/CBMihAFBVV95cUxOZzlUSnVOSk5saDM5WjRxRlhxdzg4NC1CaW0tUkNER3VTOVdRVzlLc0VvLU1hLTJPOHFGTmZhMUN5a3FfYU9jeTNvZzEwMHJQbkJfLWU5S2FSS2RKbHhYbmNydndjeEUzcE5mYldMTG1mc1VPTWREOEdXQ2w0ZGRSeUduVk8?oc=5"}, {"title": "IGBC Green Building Congress 2026 to Spotlight Sustainable Construction and Net Zero Development - The Realty Today", "source": "Google News", "time": "17 hours ago", "summary": "IGBC Green Building Congress 2026 to Spotlight Sustainable Construction and Net Zero Development  The Realty Today", "link": "https://news.google.com/rss/articles/CBMi0wFBVV95cUxNS0R3T1A0OGhYWVBNMnc5NEg0WUgzR1ZUWERSNm95eng0b1ljcWxRRnliZDc5Wk1odTFQQnBSbVl4STdwUlJjSng2T0w2WnhKaVpjVkRoWlkxbWV5anVQRGhhMWNUMW1PYmJWVDZzcjJFNXNON3hfTWNqSllUclM2bW16SVZQMzRDNlpEeEhnZjJxVFBvTzVlRHV6dC12b2l0VENKVi1UMnRZMENPU2dicEtFVnM1Z2VXNkZrWUF5T2tZb1Q4WEhhQnZvNlo0a05seG9B?oc=5"}, {"title": "From the United Nations climate summit, Governor Newsom declares to the world that America’s climate fight is far from over - California State Portal | CA.gov", "source": "Google News", "time": "14 hours ago", "summary": "From the United Nations climate summit, Governor Newsom declares to the world that America’s climate fight is far from over  California State Portal | CA.gov", "link": "https://news.google.com/rss/articles/CBMi7AFBVV95cUxNVFg1OS13dFVrNnR5Y2pOY1Q5Mnl3akVhcV9wTlJPYVhPYmsybXpUbk1BWURDMkxEZlhoRGxKOFpSVGROUzFaV3BZN0pYT21PcXNncXdvdmtyQU9jNFVKRjNISzl6VXZhM2U2UC1RRzVpRC1WcHJhZ2JxWnl5N0ExMng1N0xIQlNxWExTOVFUTU5qYWp1dlhjVXZsZmNjZklJVVlwczNLSVpSZWlnOVRONm80enN5QWpqQkVlbE5DQXJlc05vdlY4dklYbGdJOS1nenA1U1pXQkFLcUk4YXVHR0pLT1NfMWFLT0NBMg?oc=5"}, {"title": "Kazakhstan unveils over 32 billion tenge in green projects at COP31 - Qazinform", "source": "Google News", "time": "6 hours ago", "summary": "Kazakhstan unveils over 32 billion tenge in green projects at COP31  Qazinform", "link": "https://news.google.com/rss/articles/CBMiowFBVV95cUxOZzBoaE9nVlRuR3h0NWtVWnZXcmcxOUJQcXU1RzhWaVdBcHFFLTZBUERlejQ3dC1fVG03QW8zdmMtOFNXaWJ4eVpPeTRQZzIxNld0Tm5EVHVSeUVaSGVrSTB0OEpLb3BrVEZMOXVPM2RxM0dFZFZRdFVCZjAzc2I4MjhEeEFkTVBtMnIwMHUxTEIzdkRkWWR0RmR2c01jYjNpcW9N0gGjAUFVX3lxTE5nMGhoT2dWVG5HeHQ1a1VadldyZzE5QlBxdTVHOFZpV0FwcUUtNkFQRGV6NDd0LV9UbTdBbzN2Yy04U1dpYnh5Wk95NFBnMjE2V3RObkRUdVJ5RVpIZWtJMHQ4SktvcGtURkw5dU8zZHEzR0VkVlF0VUJmMDNzYjgyOER4QWRNUG0ycjAwdTFMQjN2RGRZZHRGZHZzTWNiM2lxb00?oc=5"}]}, "latam": {"label": "🌎 LATAM", "items": [{"title": "Brazil stocks higher at close of trade; Bovespa up 0.65% - Investing.com", "source": "Google News", "time": "15 hours ago", "summary": "Brazil stocks higher at close of trade; Bovespa up 0.65%  Investing.com", "link": "https://news.google.com/rss/articles/CBMirwFBVV95cUxPVVYwZDhMbl8ybTRXZWp4S1FlZ2JOcGNKTjdFejhKcFFfdHdhSFpKX0tBc0poNDd5ODV5QnV2WE1CY1lkSmxFMk0zTkk4TXBqYVByUW5iMV9NTnNvY2JTMnQ5MXMyN3NldGxjeENtSWJKSkI4VzV5dDBYMWR1YUxHNE1GbkVXS1VXaDVGX3pJbTA3QUwySV84T3VKVFZfZHdBaG1udkswZUxGNzdZQkUw?oc=5"}, {"title": "Brazil shares higher at close of trade; Bovespa up 0.65% By Investing.com - Investing.com UK", "source": "Google News", "time": "15 hours ago", "summary": "Brazil shares higher at close of trade; Bovespa up 0.65% By Investing.com  Investing.com UK", "link": "https://news.google.com/rss/articles/CBMirgFBVV95cUxORnkxZ245dVJIeDJoRG9xdTJvd0puS3VzQV9WdU1OeEJhcDA2T0RLWU1Mb2gyNWwzNFJxazRpcHlXT0hIekpzVVhXVXVubWR3cXlacEJSNWh0VDdHai1xV0hMcTNGZ1pRQm5zVVNkUVBtM1I0aHlCV1NveVA4MVJQV045YzROaUZCRW1XenF6TC1HMzNQNXBtQlloN2FkYU1JejI4ZGQzaEVTajRsQUE?oc=5"}, {"title": "B3 expects post-election ‘hangover’ after October spike in trading - Valor International", "source": "Google News", "time": "21 hours ago", "summary": "B3 expects post-election ‘hangover’ after October spike in trading  Valor International", "link": "https://news.google.com/rss/articles/CBMi2gFBVV95cUxPcE5kV0tmR29SQW8xck0wMVV5SHRKa25uVEpiZVk3TFA3QkhhRGRlMWtZd3dreVJIN29WNDhlS21Fc0VBbWhybU9fR3dvN2huXy02dVo3UDZUVUZvZ0piRlJMNDB2TjlMYXdjMWx4Tlc2TkhKd1p1REpzWWYxdHFSc3ZESThTS0JGOGVFcXBEcWNhTlFKT09hMVBpakx1S1Y4bFpyLWlHWEUxeTIzVXktZWtRdWhwMFY4Y1ZFbjJ2c3ZKMXBNeHIyTWh0ZmFGWHRsaWpjeDM4SEg5UdIB2gFBVV95cUxPcE5kV0tmR29SQW8xck0wMVV5SHRKa25uVEpiZVk3TFA3QkhhRGRlMWtZd3dreVJIN29WNDhlS21Fc0VBbWhybU9fR3dvN2huXy02dVo3UDZUVUZvZ0piRlJMNDB2TjlMYXdjMWx4Tlc2TkhKd1p1REpzWWYxdHFSc3ZESThTS0JGOGVFcXBEcWNhTlFKT09hMVBpakx1S1Y4bFpyLWlHWEUxeTIzVXktZWtRdWhwMFY4Y1ZFbjJ2c3ZKMXBNeHIyTWh0ZmFGWHRsaWpjeDM4SEg5UQ?oc=5"}, {"title": "Ibovespa heads into Friday after 0.43% decline to 171,324 points - ad-hoc-news.de", "source": "Google News", "time": "23 hours ago", "summary": "Ibovespa heads into Friday after 0.43% decline to 171,324 points  ad-hoc-news.de", "link": "https://news.google.com/rss/articles/CBMiwwFBVV95cUxOT2o5bWxYU3l6NnJuZ1lmYXZ3bC1ibHVpalh6bU9sR0FMLVdWWWQ4S1ZjY1NzQmJSc2RmT0poY0Z0OWJONEtmTTRGTTlfaUkwdU5oN25NTzk4WG8ta0hYcG5hRzBmYllFZUhUX3pUUVo0OVYzYUxDSC1udmw3VHFCa0dPYWxHY0dITVQ5STZaR2U4dGVQdVB1cFMyazBGOV93U3ROcEhhek5mVWdESFpCbmVBMVJ4V3liZUI1bUZzb2Rwdjg?oc=5"}, {"title": "Ibovespa gains 0.66% to 172,457.76 points on Friday - ad-hoc-news.de", "source": "Google News", "time": "14 hours ago", "summary": "Ibovespa gains 0.66% to 172,457.76 points on Friday  ad-hoc-news.de", "link": "https://news.google.com/rss/articles/CBMisgFBVV95cUxQRUtrQzhpUEFsbUg2X3hiV3ZhaEtVbjZMOUFBLWJwR2MxcERQVnNETzMtaVB1dUdGV3VPQ0tfbWhLY0JKOUUtUEdLejVuMS1neVczSHh4U3VjLXdUNUR5MHAyVTV3dVJVYWpCWnBPcFVoU0JfR2hHekQ1NHdSU1htemNxcnJObUdlRGh1eGw3b3hMcEpuZUF2ZWR1VThxQVFzY2RlQ0JYRXpvaEpTMnYtaThB?oc=5"}, {"title": "Ibovespa gains 0.47% as fiscal concerns meet earnings support - ad-hoc-news.de", "source": "Google News", "time": "18 hours ago", "summary": "Ibovespa gains 0.47% as fiscal concerns meet earnings support  ad-hoc-news.de", "link": "https://news.google.com/rss/articles/CBMivwFBVV95cUxPb3RMRW1QTng4ZGhrUXNuQXZ5YmpDdmpxdEdUNHpvY2ZLMWVNUVUxcE5pYjdqNEJuZnkwM0lCZWxRazlHQWxCN2VZVW11ZmdzTHdBUmYzeWx1NmRxbV9nQl9ocG9sZ2pZTU1ab0lWU2xBU1E5WGlnUmlHcHAyaUVEUWhMUENweWVpTndVbEdKSFVrWVllN1pLWE9HbktvSENEY3g3c2lfdnJCOEJobDdvTnhQakl2VW9JZl9zVGJROA?oc=5"}, {"title": "The End of Convergence - Council on Foreign Relations", "source": "Google News", "time": "16 hours ago", "summary": "The End of Convergence  Council on Foreign Relations", "link": "https://news.google.com/rss/articles/CBMiX0FVX3lxTE52NVJyNGhkU1ZjdlM0dUxLbGExbWV5ZUpXajZLV0JRcm9ROEVBNUpXQ3Y4LThTV0ZIa1JnVnl3UC1pM1Z3NVl5WVJXRl9DN1g1QkhnRzlXYjFFY0ROMFZv?oc=5"}, {"title": "Grain Silos Ancillary Equipment Market To 2035: Demand Accelerates on Loss Reduction - News and Statistics - IndexBox", "source": "Google News", "time": "1 hour ago", "summary": "Grain Silos Ancillary Equipment Market To 2035: Demand Accelerates on Loss Reduction - News and Statistics  IndexBox", "link": "https://news.google.com/rss/articles/CBMiwAFBVV95cUxOZ20yN09lUXY3dl9hcWlINXRMTi03REM5RE9FalhQc3RMOV9TdzNDVlgtX1JwZHpvaXJZT2E1dFhzMWpQTlpkMWdoWUpPWU40UFNmLVc1d1hmdHRvdVNzQnpLX1hwb0RrQU5wTmVRUmNkdXV2WEpWSXJ5X3JpZjlkMnAzUFZNVGJYTVJxc2NyT0lEUVJJbVZaT3Nxd0pJazJRLXFoU3hDNWxRMDNmeFVRcnRfZ25JcHhNSW1nYXRBQ0o?oc=5"}, {"title": "Emerging economies: An almost complete recovery in manufacturing activity but heavy capital outflows from the equity markets - Etudes Economiques – BNP Paribas", "source": "Google News", "time": "17 hours ago", "summary": "Emerging economies: An almost complete recovery in manufacturing activity but heavy capital outflows from the equity markets  Etudes Economiques – BNP Paribas", "link": "https://news.google.com/rss/articles/CBMiigJBVV95cUxNa0RNSHZ2XzdTSnRlcE1jQzJMMnA2Y3U4R2M0V09jUi04dF83VjU0WVBPRDEyRy1MNnBFLWJFZ0lHT2V6R25faVlSZ1o3TEZsUDJxRXhzdkd4UUJUcW85V3c0MkJSZDJTMkd2OExPWS03OG9XcDh3VG1Rc1VEX3MxbGNlSWQ5WWo4ZjJGNEhlUHJfZVBfOS1WWG5DcUFzeVRnaHptNWVwejFvaHhLSEVuNDB5bmx0YkV1R2RrTGJvRDBGTlNHdjNSTk5fNGtBUjVkS19hbUtzak9vN1ROTWhHdkVydFBKRXgtOGdCM0t6SzhEbFgwMnE2QmtiN2JJeGJSZGVQTjc1SDFyQQ?oc=5"}, {"title": "Should You Buy, Hold or Sell Abbott Stock Post-Q3 Earnings? - Yahoo Finance", "source": "Google News", "time": "20 hours ago", "summary": "Should You Buy, Hold or Sell Abbott Stock Post-Q3 Earnings?  Yahoo Finance", "link": "https://news.google.com/rss/articles/CBMilgFBVV95cUxObEMzV0QtUnlKTHJEQ19qRjJaelgyV0JGMlhWT3VRak5lRXJRUlhNS2UyX2JJQTFpRUJfaUNjc1h0ZWRmY1ZuZFIyYmx0Q1FIaW5GZU9jUWd0eFB1VE9uYm1rLTNRNGZPMVNLT0dXalhrSDZZY3NxdWxQOVBJa1dnNnRMbmhIVmFsak4tZ2VOSTZqa0FlTEE?oc=5"}]}};
+const EVENT_CALENDAR = [{"date": "2026-11-26", "date_display": "Nov 26, 2026 (Thu)", "title": "🇮🇳 F&O Monthly Expiry (Nov)", "category": "Derivatives", "impact": "🟡 MEDIUM", "region": "India", "country": "", "days_away": 11, "status": "UPCOMING", "actual": "", "forecast": "", "previous": ""}, {"date": "2026-11-28", "date_display": "Nov 28, 2026 (Sat)", "title": "🇮🇳 India GDP Data (Nov)", "category": "GDP", "impact": "🟡 MEDIUM", "region": "India", "country": "", "days_away": 13, "status": "UPCOMING", "actual": "", "forecast": "", "previous": ""}, {"date": "2026-12-01", "date_display": "Dec 01, 2026 (Tue)", "title": "🛢️ OPEC+ Meeting (Dec)", "category": "Energy", "impact": "🟡 MEDIUM", "region": "Global", "country": "", "days_away": 16, "status": "UPCOMING", "actual": "", "forecast": "", "previous": ""}, {"date": "2026-12-04", "date_display": "Dec 04, 2026 (Fri)", "title": "🇮🇳 RBI MPC Repo Rate Decision (Dec)", "category": "Central Bank", "impact": "🔴 HIGH", "region": "India", "country": "", "days_away": 19, "status": "UPCOMING", "actual": "", "forecast": "", "previous": ""}, {"date": "2026-12-04", "date_display": "Dec 04, 2026 (Fri)", "title": "🇺🇸 US Non-Farm Payrolls (Dec)", "category": "Jobs Data", "impact": "🔴 HIGH", "region": "USA", "country": "", "days_away": 19, "status": "UPCOMING", "actual": "", "forecast": "", "previous": ""}, {"date": "2026-12-09", "date_display": "Dec 09, 2026 (Wed)", "title": "🇺🇸 FOMC Rate Decision (Dec 8-9)", "category": "Central Bank", "impact": "🔴 HIGH", "region": "USA", "country": "", "days_away": 24, "status": "UPCOMING", "actual": "", "forecast": "", "previous": ""}, {"date": "2026-12-12", "date_display": "Dec 12, 2026 (Sat)", "title": "🇮🇳 India CPI Data (Dec)", "category": "Inflation", "impact": "🟡 MEDIUM", "region": "India", "country": "", "days_away": 27, "status": "UPCOMING", "actual": "", "forecast": "", "previous": ""}, {"date": "2026-12-13", "date_display": "Dec 13, 2026 (Sun)", "title": "🇺🇸 US CPI Inflation Data (Dec)", "category": "Inflation", "impact": "🔴 HIGH", "region": "USA", "country": "", "days_away": 28, "status": "UPCOMING", "actual": "", "forecast": "", "previous": ""}, {"date": "2026-12-17", "date_display": "Dec 17, 2026 (Thu)", "title": "🇪🇺 ECB Rate Decision (Dec 17)", "category": "Central Bank", "impact": "🟡 MEDIUM", "region": "Europe", "country": "", "days_away": 32, "status": "SCHEDULED", "actual": "", "forecast": "", "previous": ""}, {"date": "2026-12-18", "date_display": "Dec 18, 2026 (Fri)", "title": "🇯🇵 BOJ Rate Decision (Dec 18)", "category": "Central Bank", "impact": "🟡 MEDIUM", "region": "Asia", "country": "", "days_away": 33, "status": "SCHEDULED", "actual": "", "forecast": "", "previous": ""}, {"date": "2026-12-31", "date_display": "Dec 31, 2026 (Thu)", "title": "🇮🇳 F&O Monthly Expiry (Dec)", "category": "Derivatives", "impact": "🟡 MEDIUM", "region": "India", "country": "", "days_away": 46, "status": "SCHEDULED", "actual": "", "forecast": "", "previous": ""}];
+const EVENT_NEWS = [{"title": "RBI MPC decision today: Will RBI hike repo rate by 25 bps to 5.50%? - India Today", "source": "Google News", "time": "Oct 07, 2026", "summary": "RBI MPC decision today: Will RBI hike repo rate by 25 bps to 5.50%?  India Today", "link": "https://news.google.com/rss/articles/CBMi1gFBVV95cUxPeWNHX29aX0JTbW9XSDczckNwMmhqVTdGaW5OMG0xT2d5RnMzM1RBaDladTgzYjN6QzlCbkdaUUZPbUJ3YmhGLVpFa3BpZWtXNlNKZXJrZWtCV1ZTMGxCNWhONmUyeWlzblFqT2c4U1BYay0yeGRWXzk2ZGdJTWhnVVJ5LVJQeTM2Vzl2REw3V2Z4NWFaVVFvaWllNXN5R3VQZXp4dUtGT0dDaFRXNXFUNzJUVXlqbzJtUnJ5b21tRldEZVBmMlJmQm5zekJ2UWM3YjZ1ZXVR0gHbAUFVX3lxTE9VTVE3NU0yWUZDUnNSb0lqQmNJNWdQVTJoSnlsVUNTYUFidUFhOWNPTzE4Sk1mQ2RoQnBwZzFqTTg2d3Ytc2ctaGlOWWdSWTBRLWRTaFYxNTNJQTVnUk5XeEk2ZkJCbk1FVFRVZHlWLWVObDkzcUxjczJraU1PeURIYUJKYjNYWDljTUhtNHhvWU9NQkF1NDU1ZlN1MGtCVGpkX3lGalFGNXdNREFKZVlOWjNoMnp0aTVCUUtURWJ2NndWclhMOEJKYzZpamxuNTJlWHN2WkJWQjZ6NA?oc=5"}, {"title": "RBI MPC August 2026 meeting: When and where to watch rate decision live - Business Standard", "source": "Google News", "time": "Aug 03, 2026", "summary": "RBI MPC August 2026 meeting: When and where to watch rate decision live  Business Standard", "link": "https://news.google.com/rss/articles/CBMi2AFBVV95cUxPT0ViTXh3VEZUREVZeU9QYkVybkJPakNWVlZ5bXBVQ2lBcUlFSDN1MUNuelFtVklVenU3bVREcGlKYW1CMEl6SzhXNndOQm8zZGluZk9IRE5SS3pHME9vVlRHOFdQSGtobTdUUFlsdjFFVDhEeExlUGlzdm1tVDRkQ0R2c2FuRG5HVHZMZGlvdHdhTUgwMXJJXzc2Y1MxdksxZk5pLTFaeVpYbzZacGhyMTRyUlZqNHJnV3ZlV05CQU9sUlFxT1hBMmU5Y3VPZVVSVTUxYk1NU1_SAd4BQVVfeXFMT2N2T3FZZGdGOFFCdEJMbXI1eGJMUDZzTjlfbzRJVWVvQmtlTlUtS1RkT3VyMFdUWXZUQ25oUVdDSE1KX0kydzAyWDgyQld0M2xrWmdsRnpfdlhfMFFIVmVqRDdab2xFMzc5SFFFci1COEZrTm5XQkw2UHlDS1JKN0F4TC1nc3VPQkdfcnlsRlIxUEhNNlBjdDhyZHJZSTh1Ull2MW1JaG9pZnpSdmlfZmdXUVFUUVN5TGhCbUF2RGZxVzhxTUJWcG82OE83WUVLZXg2Tl8yTnlmOVdDZExB?oc=5"}, {"title": "RBI MPC October 2026: Will repo rate rise 25 bps? What borrowers and FD savers should know - Upstox", "source": "Google News", "time": "Oct 06, 2026", "summary": "RBI MPC October 2026: Will repo rate rise 25 bps? What borrowers and FD savers should know  Upstox", "link": "https://news.google.com/rss/articles/CBMi-wFBVV95cUxQQlFJQzdEeUQyOFhzZjB6cnlzc1JmYzg4RkJGRzEwWWZxZWNnWmZsckpDdWZHeko2Mm5pVGdxRnMzUGg5d0dUSVEyUnFzVkR6OUs5X1dKbGtsY1o5VFhhLWoybG9YT2ZlWkJNU2Y5VFg2RGNCWEgzeWR6aWtoOVFXUnJIOElyVXdUWEJVZ0lmRG1UU19QQkRXa1JzQnBuMnVSb3AxWU5MQ29JbUdMVkMzVGo0RGFjb2FsTFltbmJJeHVpSjVTRkN2LVhFX2ZQanBUam9UeklVQkJ0MTdrZjNHVk5IMXBoWkJCcjY0emRacGRvbWh5eVpqRjZNZw?oc=5"}, {"title": "RBI set to announce repo rate decision amid geopolitical tensions - DD News", "source": "Google News", "time": "Oct 07, 2026", "summary": "RBI set to announce repo rate decision amid geopolitical tensions  DD News", "link": "https://news.google.com/rss/articles/CBMilgFBVV95cUxNNTRHOVQyMkdXS1E4eG9mVEozXzZCdUZQWlJPSUpwMDJQT3RzbjdMVjJXUV9QZE9NMFRfdllGWlQ1NVZMZUlGTk9lX1dGeWtSYmd1NVFYUm5scjk4NFJRVGtxYlJZR3VPcXV3Y2xLODljeWdYajNJMko4SUh3dHRZOEs0NjFRcFo3RElBTDd5enBUZ21jblE?oc=5"}, {"title": "RBI Begins First Monetary Policy Meet of FY25; Repo Rate Decision Due Wednesday - News On AIR", "source": "Google News", "time": "Jun 03, 2026", "summary": "RBI Begins First Monetary Policy Meet of FY25; Repo Rate Decision Due Wednesday  News On AIR", "link": "https://news.google.com/rss/articles/CBMipwFBVV95cUxNa1ZnT3JkYnpmY2hfdklPN0FZV1RiWGh6QjBrU25Gb0hWQXdodUkybTAyVlRPcXZwMm94VWpHOC1IMl9yLXhYeEIxZnQ3cEk3emhuWW1SbG5DTlJwSGl0RXZTeDdmbTJrei1qU29Vc0VaSTdXTldldlY3T3BZQlo1b0JjZGhqeXZ1MTJQS2hkTkEzeXZURjRQdWZXUzNFQmpqSWJkOTdwNA?oc=5"}, {"title": "RBI Keeps Repo Rate Unchanged at 5.25%, Maintains Neutral Stance Amidst Global Uncertainty - Groww", "source": "Google News", "time": "Jun 05, 2026", "summary": "RBI Keeps Repo Rate Unchanged at 5.25%, Maintains Neutral Stance Amidst Global Uncertainty  Groww", "link": "https://news.google.com/rss/articles/CBMipAFBVV95cUxQbGZzSjJHWWpVUnZNOTNpM1BwS3ptMDQzR1lZYkQ5aU9qNWJHR19DeWI3R2p6N0N0VFNoQThCX1A0RVRZbXE1R3V3Z2hhT1FKVWM4NV9fZzROUjdIME5NTkRzdUdxVUNlV0hvQVVpYWV5cktQZXRlODZVZWR2VThkSzlydDNYckQtdTZGU3c5UXNITEt5VHBkU0VRaEp0U1FwR3Z5cA?oc=5"}, {"title": "RBI POLICY WATCH 25 bps rate hike: unanimous call in the CNBC-TV18 RBI policy poll. But how far does the tightening cycle go? Will RBI turn more hawkish? What happens to liquidity? And where does RBI see inflation and growth? Ritu Singh brings you th - LinkedIn", "source": "Google News", "time": "Oct 05, 2026", "summary": "RBI POLICY WATCH 25 bps rate hike: unanimous call in the CNBC-TV18 RBI policy poll. But how far does the tightening cycle go? Will RBI turn more hawkish? What happens to liquidity? And where does RBI see inflation and growth? Ritu Singh brings you th  LinkedIn", "link": "https://news.google.com/rss/articles/CBMimwFBVV95cUxQQzcxNTZLemNpWExnV2NKb0thR2Z6VE9CWjctakw4YWJxYzcwMzNnUHI2VndLcVVmWHBFOVdrdkxKUy12WGZQSWF2b2dabGNWb0xsQURBVllXRERjWlJKNVFzbU5ab0pYZ3NWSHNtaHN1V0JmajlXTDhxQjVjVW44NlN4VUR4YkVYRkNId3JSM0xqelQxa2QyaGg4NA?oc=5"}, {"title": "RBI Issues April 2025 Policy Update - www.pib.gov.in", "source": "Google News", "time": "Apr 09, 2025", "summary": "RBI Issues April 2025 Policy Update  www.pib.gov.in", "link": "https://news.google.com/rss/articles/CBMicEFVX3lxTE9vZEpCS2YwS29qTmRRay1VclVmOUQzWThsT2RWRFc5cTg2eGNYYkEyUGtSalZBNnJTR2ZuQmd0dnJtdUtHZ0s1a3lSOHhKS21COWxPYnJvblJDWkduNVNXMm5FUFIxbWFydjBYbTZEenc?oc=5"}, {"title": "RBI MPC meeting begins today: Will Governor Sanjay Malhotra hike repo rate for first time since February... - Moneycontrol.com", "source": "Google News", "time": "Oct 05, 2026", "summary": "RBI MPC meeting begins today: Will Governor Sanjay Malhotra hike repo rate for first time since February...  Moneycontrol.com", "link": "https://news.google.com/rss/articles/CBMigwJBVV95cUxNSHcwNTN5NGlGbUloMGZjSFNXVEpmUXpNSnFTc2RlZ2FpY0JvdnF2OUVvVW1PMzBWbTJDMHd6Z0VJOEJZMmRWd2g5Um9hY1FfaXcxS1hYbXI0M2FmUzFqbm9FRHFkeFVqQkNWNllwUXpFRnJON0Y0ejRmTDBfTDhRQmlvbFk2R2NWcWxrYUViVzdiRmttbkM5T3pBVkVIMmtkeTF2RG5Bd19TUlh0OVQzWExWVERQTzN5X2NveGlBblhJYWxyOTFXcTFZNWw0cUhfaHF2bEpkd3pwS3JnSnJ0Ny1PZHFKV21iOHdpckc2Y2twMDNzcjZqTUZXanBYM1BBRmRR0gGIAkFVX3lxTE8zYnQ1b1FSMVA2TTJlZTJObEd5RHNoUzI4aUh1bmlQSURPMFp6TEtibC1qQU9Jdlk2eEZuZXJ6bFA0ZHozUEJMQnMyU3BOMGdJQU10U3VxOW1mal8wSVk5ZXJfeDJSSGpTcEdQRDR3YU9QTkd6N2dpMC00SUJiZmVoSmZVSUFsOVRfd3QxMVoyRUxNci1KYkVMc1ctSXpwZElBLXFsQkc1VU5xeUJDNlA3bWgzWHFDcGdPQUVGRVFUTk90MkRORGNpYlFycXJWalFCNm02ZElfWUdzdUVSOGJBcWJiMFFicXE3c2kyOXE1bkllMDVPclNYN3U3bTNnLTBfVUxuV1pmSw?oc=5"}, {"title": "RBI Monetary Policy 2026: Repo Rate, CRR, SLR and Important Terms - Bankersadda", "source": "Google News", "time": "Nov 08, 2026", "summary": "RBI Monetary Policy 2026: Repo Rate, CRR, SLR and Important Terms  Bankersadda", "link": "https://news.google.com/rss/articles/CBMiY0FVX3lxTE1GTnJnTWctT3U1NTdNYXVPMkIzdXJwb1I4M0RQWHdrM2dwRDFNWk5MU0E3bWhMdVFLb2pDQVJmQnZ4eDJPX2JsTnJyUFlkaXdKX3I2NTVmMk4teFRoWVZXRUh4RQ?oc=5"}, {"title": "Kevin Warsh’s Plan to Remake the Fed: Fewer Rate Votes, More Deliberating - WSJ", "source": "Google News", "time": "15 hours ago", "summary": "Kevin Warsh’s Plan to Remake the Fed: Fewer Rate Votes, More Deliberating  WSJ", "link": "https://news.google.com/rss/articles/CBMijgFBVV95cUxPWWREYWtpWllac2NUdW9FOW1tdXZrTS1FclFzZnA4TEhkOEFJQ0liTEZZdElXbU5BUHMtTnNVME1zYUVpWHY5VXZmM0Z4YWRMY0U4YzVFdldTOEhEQUpSSnluaXNNM2VVVlQ0YnNXR0hUNHRhM1gwSWhtZXl3QlB2QXR5aUVXajZBTTlRdDhB?oc=5"}, {"title": "In a policy switch, the Fed says its October 2027 meeting will not see a vote on interest rates - CNBC", "source": "Google News", "time": "1 day ago", "summary": "In a policy switch, the Fed says its October 2027 meeting will not see a vote on interest rates  CNBC", "link": "https://news.google.com/rss/articles/CBMiwwFBVV95cUxPWlF0NTdyNlg3YzhrMXU5RjhKTjB5UGdOQ3RQM1lHQXdzclJpMS1iVTQzTzd3eElndENaWXpnYmpSU2VCZ2dEYXRRelN1SmliTzYwWF9NeTJkRWZxbGFqQ0gta0hFN2t4ZF9jbEtmd0V2WFU3MHlaRHRneWZDd2lHcmJzVnZJRE1GRjhkZFdPbWJOeVRtOWJSLV9GazFfcU81Y29aSUJKQVVVdzF6LU5mYl9aeE9OcTdpUXkzYUw2LUtGdWfSAcgBQVVfeXFMTjFzV2JqQVZZeTFuLWQ3U1Z0V1hvNWFacE1JUFRsX1Y4OG81SXgwaXVxbnJ4VS1FZUt6YkRuUEE2OE9CeGlkSWJWZFB6dk1aVDNSaDFiYkk1bUVXWFpVc3BnMG9RRXdLcHpDNF9XS1NiOWNBTkxHYzBKbGRjbEttTElCdk9pbG1PVEREN08tSzhHbS1QOHAyRGY4YWVYcUw1d3Z5UENNRkw4elNBYTd4YjVTNkxqZ2FEM3FqMWwxbHIxdDJjeWliUU0?oc=5"}, {"title": "Fed releases meeting schedule for 2027, will not hold policy meeting next October - Yahoo Finance", "source": "Google News", "time": "1 day ago", "summary": "Fed releases meeting schedule for 2027, will not hold policy meeting next October  Yahoo Finance", "link": "https://news.google.com/rss/articles/CBMi3AFBVV95cUxObDJpc05NQ2FfbElIM2w3VWg0X0pCU0hLTm5OdUpDeWQ0dFNkLVlSOWEtN1JJaGs0S1dhRDU5bWN5T0czdVNQQjYwb0NXS0tYMnA5MHExdnd2MS05SlBTLWVJNFBxQ1BhS0RNUDBfbG05R2FjYU5DWHg5N3hZTVpFcEpoMThSMXNoZ2FXekVZM205azI4WUJ5X2taa2ZOVVBJMXczQnYxODJWbDhwRmJnNno5OURCc1FMRUF6dk95NE40M2RmSFpsUFFtMVZJUlFLb1FwTThtOXpyY2pl?oc=5"}, {"title": "Federal Reserve to Forgo Rate Decision at October 2027 Meeting - WSJ", "source": "Google News", "time": "1 day ago", "summary": "Federal Reserve to Forgo Rate Decision at October 2027 Meeting  WSJ", "link": "https://news.google.com/rss/articles/CBMitgFBVV95cUxPWkZiVk1uU2k5a1RQRGUxdFBJMEcxSVhtWEJfR0s3Q3E3T185OXRrZHRZMDVsQlhTdVpIbVlfQnNPem4zbGlTMDR6elFDRlM3RzhETUhCVzlTTDJvWmtfQzctcUFhRXZsVmxpVjBQUXpXTkRUTThQNVJwQV9YX19qaTZGVGswRGF1N2d0dktsZW5DVHlFWVNENmtQaERZYm5ZTmREdm8tMzVjX3ZCQUdqbTFCbWktdw?oc=5"}, {"title": "Fed on Track to Raise Interest Rates Next Month And Maybe Again in January - Bloomberg.com", "source": "Google News", "time": "16 hours ago", "summary": "Fed on Track to Raise Interest Rates Next Month And Maybe Again in January  Bloomberg.com", "link": "https://news.google.com/rss/articles/CBMivAFBVV95cUxNeXJmalVqcjF1WEgxXzRyZ2hNRTRMWXdCWGdpblhnaGwxY0ZDeFIwYTVnWENtQ2U2NFg3YkpUS21EdkNHaXlwVlVicGxWd2RJZnJqOXlySXJfZzdscXlqRFNJSkswUjZ0ZjFINC11aU9GMWdrMGR6SzdfYUlkN3pGaDZZci1NbnkxWmtoZ1lNa3E2MmxDcnFqRnN0MWpwUURLT05odHBpdVlhNXRjNUJOd3JGcnNCYzd6bjVqWQ?oc=5"}, {"title": "Inflation isn&#x27;t going away. Here&#x27;s what that means for interest rates. - CBS News", "source": "Google News", "time": "15 hours ago", "summary": "Inflation isn&#x27;t going away. Here&#x27;s what that means for interest rates.  CBS News", "link": "https://news.google.com/rss/articles/CBMiekFVX3lxTE53dzBGV004V2lLZGdMR2FUVjByX1E4Q3BCemoxSzhCWF9YVEpJZUo4ejJlcktSeGdSWEozX0NFaEc2V29IYVJaZGpfN2p6WmNaeWpDa0dYc25LaU9NdVJJS1o2d290X2R4S3ZCWlpELVpraUc2bm42VXRn?oc=5"}, {"title": "Wall Street thinks the Fed made a &#x27;mistake&#x27; — and now more hikes are coming - Yahoo Finance", "source": "Google News", "time": "Nov 11, 2026", "summary": "Wall Street thinks the Fed made a &#x27;mistake&#x27; — and now more hikes are coming  Yahoo Finance", "link": "https://news.google.com/rss/articles/CBMiyAFBVV95cUxNdGY2RnBVRFBmcnVBQWw3TG1jSV94WHcyTTFtV3ZPZE1PYU13QlhhbFlDZHpweDhKTGc5TzcyVDZJcEJYbmNFMGdLYjdVQlhxRUxiQTUwX3p2RVZXMUs0ZjkwQU8yQVdsQ2ZuNEtOWHpfSWdFREVNRXFZeEE0bTJtZUQ5SVJUX1k5ZDA0TUFqSzJVRks3N3AwbTVMVHNoUThKUk91MjRFZHFqUDNnb1pseHB3SUxuc1FzMFpLZjNfMElrc2xtWTBXUw?oc=5"}, {"title": "The Fed Is Weighing a Supersized Rate Hike. Here’s How That Could Affect Your 401(k) - money.com", "source": "Google News", "time": "22 hours ago", "summary": "The Fed Is Weighing a Supersized Rate Hike. Here’s How That Could Affect Your 401(k)  money.com", "link": "https://news.google.com/rss/articles/CBMiV0FVX3lxTFAyLV9YeGJ2d3B2bXdBX3RUbnJjZUpYUUJ3OHRUNkpDRmtqNGVCTXd2dnp2MmM3TnFrMjJIOFFPMEEtWDZIV3lWcW1rWlNHWlZzcUd1cGZCWQ?oc=5"}, {"title": "If the Fed&#x27;s Next Move Is a Rate Hike, Here&#x27;s How a Long-Term Portfolio Should (and Shouldn&#x27;t) Change - The Motley Fool", "source": "Google News", "time": "1 day ago", "summary": "If the Fed&#x27;s Next Move Is a Rate Hike, Here&#x27;s How a Long-Term Portfolio Should (and Shouldn&#x27;t) Change  The Motley Fool", "link": "https://news.google.com/rss/articles/CBMimAFBVV95cUxQWWw3OFphOF9kRm0zTGZ6clM2R3Z0cTl4ZUN2VnU0MTlOeVRBQzZaa1kzZzVSYVV3NC1seEMtSXVRYTI3U1FJR1UycGZMOFNyVGV1Ym12Mm1zMDZSZWpWbjF6MEZTSFJaZnhCWkZMVHA3LWptenltLS04cEwzdzBrdDUzdUttTzJuLWxLVGg3OWZudXlVYWVRbw?oc=5"}, {"title": "Fed’s Williams signals more rate hikes as inflation stays stubborn - Mortgage Professional America", "source": "Google News", "time": "15 hours ago", "summary": "Fed’s Williams signals more rate hikes as inflation stays stubborn  Mortgage Professional America", "link": "https://news.google.com/rss/articles/CBMizAFBVV95cUxOdUQzX1BCZTJESlVCQUdLSXBDTVU1X0poaEtveUltOS1ZNFpnZnA5S0w3d0RTNHYxX0k0ZTVKaWlZcGhGdV9fMHZBVzVUSXdpNHVabGN1ci1XODFxSEhUV2FHSmpMNE1VZDdvMjRwRGV4aUJ3dUtNVExpRS00NVJ1UjN6WXMtMW1ubUJYdzZ2NVFudFZ0ZS1aRWo0MERRVVVGenNNWUphYWJmQTk5UmlrNlJIWGZCQWl6aThmdVM2WEM4cVYyaU1TNjBlazc?oc=5"}];
+const ECON_DATA = {"us_fedfunds": {"value": "3.75–4.00%", "note": "FRED · target range", "css": "neu"}, "us_cpi": {"value": "4.1%", "note": "YoY · Oct 2026", "css": "neg"}, "us_core_cpi": {"value": "2.9%", "note": "Core YoY · Oct 2026", "css": "neu"}, "us_gdp": {"value": "3.4%", "note": "Q3 2026 annualised", "css": "pos"}, "us_unemployment": {"value": "4.1%", "note": "Oct 2026", "css": "neu"}, "us_nfp": {"value": "+165K", "note": "Oct 2026", "css": "pos"}, "us_ppi": {"value": "6.5%", "note": "YoY · Oct 2026", "css": "neg"}, "india_repo": {"value": "6.00%", "note": "RBI · news", "css": "neu"}, "india_cpi": {"value": "2.4%", "note": "FY25 (WB annual)", "css": "pos"}, "india_gdp": {"value": "7.6%", "note": "FY25 (WB annual)", "css": "pos"}, "india_unemp": {"value": "4.2%", "note": "FY25 (WB annual)", "css": "pos"}, "india_wpi": {"value": "1.7%", "note": "FY24 (WB annual)", "css": "neu"}, "india_pmi": {"value": "55.1", "note": "Mfg PMI · news", "css": "pos"}, "india_fiscal": null};
+const X_POSTS_DATA = [{"handle": "realDonaldTrump", "name": "Donald Trump", "tag": "US Politics", "color": "#e05060", "title": "Does the Trump Administration’s Campaign to Rebrand AI as ‘Super Intelligence’ Matter? - Tech Policy Press", "link": "https://news.google.com/rss/articles/CBMisgFBVV95cUxOaTB2WXVOTHRMRElJZDJyQ2hZa053UkRyRndaRzNEajhxQnJyakgtWGRRUEI1TXhTMzRucUJTS3d6dngwOXpLbFo0RkhJNUpJMTRCZDl2NXcyUWU0aWhXaHBScWhjcGZ1UFAzM0s1TkpPMjd5NGhSajlzYzdLWWZaZ1NnUnFHcTM1Yk1Fc2hlTXduTVpJaUpSb1NSTTRsQXJVY0luUWthNVdLNm1fZk5rMnln?oc=5", "summary": "Does the Trump Administration’s Campaign to Rebrand AI as ‘Super Intelligence’ Matter?  Tech Policy Press", "time": "11 hours ago", "pubDate": "Sat, 14 Nov 2026 00:44:55 GMT"}, {"handle": "realDonaldTrump", "name": "Donald Trump", "tag": "US Politics", "color": "#e05060", "title": "Trump signs executive order renaming Lake Ontario to &#x27;Lake America&#x27; - ABC News - Breaking News, Latest News and Videos", "link": "https://news.google.com/rss/articles/CBMipAFBVV95cUxPQlBlQmpWSlZmeUdKc1o1OE1oZVZPZ29BamlFN09JQ2ZRakNVaHhBOXdvLXhNUVdnNlRpeGZFSDZGZVk1dUFTa24tVEk5WjJwcExib2EwU0pVQWtPYW9YVTA0azhlanFrcUNUWmY5R241SS1oclpjUk40MGNNY1p0RDJoWUdtR0kzNEtXV0lpLXhBM05Fb3k2VzZVXzE5VEZybEZlYdIBqgFBVV95cUxOTjFSRmJucGJvQVZtXzRRZkEyeFZpNEcxcnd6a1FYU0JWYnNFS0NkdW5DX20xdFdXbzRicS1seGJ4c3Rlc25iM3hWYlBsMHdNMmFLaW5IelBsc1M2dlYxd1M1TWJSZUNGcGNBY0VsYVgzaGs4djVSUXZndUZlZzJhbFFfYjdkNFF1SEdlSmZBSjlxLUFpeGhzZllmd2Nic0lETjFsY1l1aXk0QQ?oc=5", "summary": "Trump signs executive order renaming Lake Ontario to &#x27;Lake America&#x27;  ABC News - Breaking News, Latest News and Videos", "time": "13 hours ago", "pubDate": "Fri, 13 Nov 2026 22:35:55 GMT"}, {"handle": "realDonaldTrump", "name": "Donald Trump", "tag": "US Politics", "color": "#e05060", "title": "Supreme Court takes up Trump ban on asylum claims at US-Mexico border - OSV News", "link": "https://news.google.com/rss/articles/CBMimgFBVV95cUxOVjhHbGlJVjgwTWFjeWVITWRuaHFtN3FFaXdnWVZwV2xRLWZBckdmYzZCS2JRdFV3dnBwSlVpSmRPUHg1U3FybkE4V29Nb2ZlaFlScnF3REpZa3pyLXZtenBWLUF4R0dBU0tpTE1EMlNsbFhCT2dZQkVwd3JIUkxjdHRPUGVNNjVJd09oTWpfb05aUk9YRVJUNGZn?oc=5", "summary": "Supreme Court takes up Trump ban on asylum claims at US-Mexico border  OSV News", "time": "13 hours ago", "pubDate": "Fri, 13 Nov 2026 22:20:26 GMT"}, {"handle": "realDonaldTrump", "name": "Donald Trump", "tag": "US Politics", "color": "#e05060", "title": "Supreme Court will consider Trump’s executive order suspending asylum access at the southern border - AP News", "link": "https://news.google.com/rss/articles/CBMijwFBVV95cUxNdExwdTBia3RDdGYzWFRuYUkxaERSQkpTVmY0Ymp5S05jR0ZLSC10ekFMcjQ0Rkg5NFVmOFR3MENlTm04ajFoemlGclMtX09RZVBtd3VTUVpXd0hiNFlVLVZBME9wUU1UdDFWYzVXQl8yTno3Z1M3WlZnTjZnaTJKQlVCS3g0WmZaUVJ2UnVlaw?oc=5", "summary": "Supreme Court will consider Trump’s executive order suspending asylum access at the southern border  AP News", "time": "14 hours ago", "pubDate": "Fri, 13 Nov 2026 21:33:00 GMT"}, {"handle": "realDonaldTrump", "name": "Donald Trump", "tag": "US Politics", "color": "#e05060", "title": "Policy Brief: Trump admin unveils $10B in second-year rural health awards; HHS invests $9.7M to combat elder abuse - Fierce Healthcare", "link": "https://news.google.com/rss/articles/CBMizAFBVV95cUxObUNoVTVHTWRRRVJ2VGVaSUFIWDRmblpNNGpqeW90eXh3bTNXMThXdXlza0kyWmFRWUhVS0FNbHdzNzNaV0htN3lxVTBMdWhTNUllUk1BQWdTQ2ItV1VMWG93aTEzR1h6TzY0YUY0cHpRejRaSG94YWEwU2JCUTB5aFFNYTBNN1NHWlR0d0YtRmZBNG5FOU5ZOWFkN21zbmRuVW5GcEZndjdpVW95enhRaG4wMXd1ZHhkUmZ0eDBWQk5QeEE2dy1iS0I2VnU?oc=5", "summary": "Policy Brief: Trump admin unveils $10B in second-year rural health awards; HHS invests $9.7M to combat elder abuse  Fierce Healthcare", "time": "17 hours ago", "pubDate": "Fri, 13 Nov 2026 19:00:00 GMT"}];
+const X_ACCOUNTS_META = [{"handle": "elonmusk", "name": "Elon Musk", "tag": "Influencer", "color": "#1d9bf0"}, {"handle": "realDonaldTrump", "name": "Donald Trump", "tag": "US Politics", "color": "#e05060"}, {"handle": "narendramodi", "name": "Narendra Modi", "tag": "India", "color": "#ff9933"}, {"handle": "sama", "name": "Sam Altman", "tag": "Tech/AI", "color": "#10a37f"}, {"handle": "nytimes", "name": "The New York Times", "tag": "News", "color": "#aaaaaa"}, {"handle": "CNN", "name": "CNN", "tag": "News", "color": "#cc0000"}, {"handle": "BBCWorld", "name": "BBC World News", "tag": "News", "color": "#bb1919"}, {"handle": "WSJmarkets", "name": "WSJ Markets", "tag": "Markets", "color": "#0080c6"}, {"handle": "Deltaone", "name": "Walter Bloomberg", "tag": "Markets", "color": "#f5a623"}, {"handle": "Unusual_Whales", "name": "Unusual Whales", "tag": "Options", "color": "#7c3aed"}, {"handle": "FirstSquawk", "name": "First Squawk", "tag": "Breaking", "color": "#16a34a"}];
+
+// ════════════════════════════
+// HYDRATE SIDEBAR FROM SERVER-SIDE DATA
+// (Python-fetched, always fresh, no CORS needed)
+// ════════════════════════════
+function hydrateEconData() {
+  const map = {
+    'us_fedfunds':     { val: 'sbv-fedfunds', note: 'sbn-fedfunds' },
+    'us_cpi':          { val: 'sbv-cpi', note: 'sbn-cpi' },
+    'us_core_cpi':     { val: 'sbv-corecpi', note: 'sbn-corecpi' },
+    'us_gdp':          { val: 'sbv-gdp', note: 'sbn-gdp' },
+    'us_unemployment': { val: 'sbv-unemployment', note: 'sbn-unemployment' },
+    'us_nfp':          { val: 'sbv-nfp', note: 'sbn-nfp' },
+    'us_ppi':          { val: 'sbv-ppi', note: 'sbn-ppi' },
+    'india_repo':      { val: 'sbv-reporate', note: 'sbn-reporate' },
+    'india_cpi':       { val: 'sbv-india-cpi', note: 'sbn-india-cpi' },
+    'india_wpi':       { val: 'sbv-india-wpi', note: 'sbn-india-wpi' },
+    'india_unemp':     { val: 'sbv-india-unemp', note: 'sbn-india-unemp' },
+    'india_pmi':       { val: 'sbv-india-pmi', note: 'sbn-india-pmi' },
+    'india_gdp':       { val: 'sbv-india-gdp', note: 'sbn-india-gdp' },
+    'india_fiscal':    { val: 'sbv-india-fiscal', note: 'sbn-india-fiscal' },
+  };
+
+  for (const [key, ids] of Object.entries(map)) {
+    const d = ECON_DATA[key];
+    if (!d) continue;  // fetch failed server-side, leave for JS fallback
+    const el = document.getElementById(ids.val);
+    if (el) {
+      el.textContent = d.value;
+      el.className = 'sb-econ-val ' + (d.css || 'neu');
+    }
+    if (ids.note && d.note) {
+      const noteEl = document.getElementById(ids.note);
+      if (noteEl) noteEl.innerHTML = d.note + ' <span class="stale-badge">server</span>';
+    }
+  }
+}
+
+// ── Current active category ──
+let currentCat = 'markets';
+let eventFilter = 'all';
+
+// ════════════════════════════
+// EVENT CALENDAR RENDERING
+// ════════════════════════════
+function filterEvents(filter) {
+  eventFilter = filter;
+  document.querySelectorAll('.ecal-filter-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  renderEventCalendar();
+}
+
+function renderEventCalendar() {
+  const body = document.getElementById('ecalBody');
+  let events = EVENT_CALENDAR;
+
+  if (eventFilter === 'HIGH') {
+    events = events.filter(e => e.impact.includes('HIGH'));
+  } else if (eventFilter !== 'all') {
+    events = events.filter(e => e.region === eventFilter);
+  }
+
+  // Group by month
+  const months = {};
+  events.forEach(e => {
+    const key = e.date.slice(0, 7); // YYYY-MM
+    if (!months[key]) months[key] = [];
+    months[key].push(e);
+  });
+
+  let html = '';
+  for (const [monthKey, items] of Object.entries(months)) {
+    const d = new Date(monthKey + '-01');
+    const label = d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    html += `<div class="ecal-month-group">
+      <div class="ecal-month-label">${label.toUpperCase()} <span style="color:var(--muted);font-size:10px">(${items.length} events)</span></div>`;
+
+    items.forEach(e => {
+      const dateParts = e.date.split('-');
+      const dayDate = new Date(dateParts[0], dateParts[1]-1, dateParts[2]);
+      const dayStr = dayDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', weekday: 'short' });
+
+      const impactCls = e.impact.includes('HIGH') ? 'high' : e.impact.includes('MEDIUM') ? 'medium' : 'low';
+      const statusCls = e.status === 'TODAY' ? 'today'
+        : e.status === 'JUST PASSED' ? 'justpassed'
+        : e.status === 'THIS WEEK' ? 'thisweek'
+        : e.status === 'UPCOMING' ? 'upcoming' : 'scheduled';
+
+      // Days ago label for JUST PASSED
+      const daysAgo = e.days_away < 0 ? Math.abs(e.days_away) : 0;
+      const statusLabel = e.status === 'JUST PASSED'
+        ? `JUST PASSED · ${daysAgo}d ago`
+        : e.status + (e.days_away > 0 ? ' · ' + e.days_away + 'd' : '');
+
+      // Outcome result pill (shown when actual data exists or for JUST PASSED events)
+      let outcomePill = '';
+      if (e.actual) {
+        outcomePill = `<span style="background:rgba(0,200,100,0.15);color:#4ade80;border:1px solid rgba(0,200,100,0.3);font-size:11px;font-weight:700;padding:2px 8px;border-radius:3px;margin-left:8px;">✓ OUTCOME: ${e.actual}</span>`;
+      } else if (e.status === 'JUST PASSED') {
+        outcomePill = `<span style="background:rgba(180,100,255,0.12);color:#c084fc;border:1px solid rgba(180,100,255,0.25);font-size:11px;font-weight:600;padding:2px 8px;border-radius:3px;margin-left:8px;">⏳ Result pending</span>`;
+      }
+
+      html += `<div class="ecal-event">
+        <div class="ecal-date">${dayStr}</div>
+        <div class="ecal-event-title">${e.title}
+          <span class="ecal-region-badge">${e.category}</span>
+          ${e.country ? '<span class="ecal-region-badge">' + e.country + '</span>' : ''}
+          ${outcomePill}
+          ${e.forecast ? '<span style="color:var(--blue);font-size:11px;margin-left:6px">Fcst: ' + e.forecast + '</span>' : ''}
+          ${e.previous ? '<span style="color:var(--muted);font-size:11px;margin-left:4px">Prev: ' + e.previous + '</span>' : ''}
+        </div>
+        <div class="ecal-event-meta">
+          <span class="ecal-impact ${impactCls}">${e.impact}</span>
+          <span class="ecal-status ${statusCls}">${statusLabel}</span>
+        </div>
+      </div>`;
+    });
+    html += '</div>';
+  }
+
+  // Add related news
+  if (EVENT_NEWS.length > 0) {
+    html += `<div class="ecal-news-section">
+      <div class="ecal-news-title">▶ RELATED EVENT NEWS (${EVENT_NEWS.length} ARTICLES)</div>`;
+    EVENT_NEWS.forEach((n, i) => {
+      const link = n.link && n.link !== '#' ? `<a class="ecal-news-link" href="${n.link}" target="_blank">Read ↗</a>` : '';
+      html += `<div class="ecal-news-item" onclick="this.classList.toggle('open')">
+        <div class="ecal-news-headline">${n.title}</div>
+        <div class="ecal-news-meta">${n.source} · ${n.time}</div>
+        <div class="ecal-news-expand">
+          <div class="ecal-news-summary">${n.summary}</div>
+          ${link}
+        </div>
+      </div>`;
+    });
+    html += '</div>';
+  }
+
+  if (!html) html = '<div class="no-news">No events match this filter.</div>';
+  body.innerHTML = html;
+
+  // Update sidebar count
+  const countEl = document.getElementById('ecal-sidebar-count');
+  if (countEl) countEl.textContent = EVENT_CALENDAR.length;
+
+  // Show data source
+  const srcEl = document.getElementById('ecalSource');
+  if (srcEl) {
+    const isLive = EVENT_CALENDAR.length > 0 && EVENT_CALENDAR[0].country;
+    srcEl.innerHTML = isLive
+      ? '<span style="color:var(--green)">● LIVE</span> Trading Economics API'
+      : '<span style="color:var(--yellow)">● FALLBACK</span> Computed Dates';
+  }
+}
+
+// ════════════════════════════
+// RENDER NEWS — NEWSPAPER COLUMN (Option B)
+// ════════════════════════════
+function renderNews(cat) {
+  const d = NEWS_DATA[cat];
+  if (!d) return;
+  const col = document.getElementById('newsCol');
+  const items = d.items;
+  const query = (document.getElementById('newsSearchInput')?.value || '').toLowerCase();
+
+  // Filter items if search query present
+  const filtered = query
+    ? items.filter(item => item.title.toLowerCase().includes(query) || item.summary.toLowerCase().includes(query) || item.source.toLowerCase().includes(query))
+    : items;
+
+  if (!filtered || filtered.length === 0) {
+    col.innerHTML = '<div class="no-news">' + (query ? 'No articles match your filter.' : 'No articles available for this category.') + '</div>';
+    document.getElementById('newsTitle').textContent = '▶ ' + d.label + ' — 0 ARTICLES';
+    return;
+  }
+
+  // Build HTML safely — titles/sources are already escaped by Python
+  col.innerHTML = filtered.map((item, i) => {
+    const num = String(i + 1).padStart(2, '0');
+    const link = item.link && item.link !== '#'
+      ? `<a class="nc-link" href="${item.link}" target="_blank" rel="noopener">Read Full Article ↗</a>`
+      : '';
+    return `<div class="nc-item" onclick="toggleNC(this)" tabindex="0" role="button" aria-expanded="false" id="nc-${cat}-${i}">
+  <div class="nc-row">
+    <span class="nc-num">${num}</span>
+    <span class="nc-headline">${item.title}</span>
+    <span class="nc-arrow">▼</span>
+  </div>
+  <div class="nc-expand-body" id="nc-exp-${cat}-${i}">
+    <div class="nc-meta">
+      <span class="nc-src">${item.source}</span>
+      <span class="nc-sep">·</span>
+      <span class="nc-time">${item.time}</span>
+    </div>
+    <div class="nc-summary">${item.summary}</div>
+    ${link}
+  </div>
+</div>`;
+  }).join('');
+
+  document.getElementById('newsTitle').textContent = '▶ ' + d.label + ' — ' + filtered.length + (query ? '/' + items.length : '') + ' ARTICLES';
+}
+function toggleNC(row) {
+  row.classList.toggle('open');
+  const exp = row.querySelector('.nc-expand-body');
+  if (exp) exp.classList.toggle('open');
+  row.setAttribute('aria-expanded', row.classList.contains('open'));
+}
+
+// ════════════════════════════
+// SEARCH / FILTER NEWS
+// ════════════════════════════
+function filterNews() {
+  renderNews(currentCat);
+}
+
+// ════════════════════════════
+// THEME TOGGLE (DARK ↔ LIGHT)
+// ════════════════════════════
+function toggleTheme() {
+  document.body.classList.toggle('light');
+  const isLight = document.body.classList.contains('light');
+  localStorage.setItem('nf-theme', isLight ? 'light' : 'dark');
+}
+// Restore theme from last visit
+if (localStorage.getItem('nf-theme') === 'light') document.body.classList.add('light');
+
+// ════════════════════════════
+// SCROLL-TO-TOP
+// ════════════════════════════
+function scrollToTop() {
+  const mainEl = document.querySelector('.main');
+  if (mainEl) mainEl.scrollTo({ top: 0, behavior: 'smooth' });
+}
+(function() {
+  const mainEl = document.querySelector('.main');
+  const btn = document.getElementById('scrollTopBtn');
+  if (mainEl && btn) {
+    mainEl.addEventListener('scroll', () => {
+      btn.classList.toggle('visible', mainEl.scrollTop > 300);
+    });
+  }
+})();
+
+// ════════════════════════════
+// HAMBURGER / SIDEBAR DRAWER
+// ════════════════════════════
+function toggleSidebar() {
+  const sidebar = document.querySelector('.sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  const isOpen  = sidebar.classList.contains('open');
+  sidebar.classList.toggle('open', !isOpen);
+  overlay.classList.toggle('open', !isOpen);
+}
+
+// ════════════════════════════
+// SWITCH CATEGORY
+// ════════════════════════════
+function switchCat(cat, sidebarEl) {
+  currentCat = cat;
+
+  // Update sidebar items
+  document.querySelectorAll('.sb-item').forEach(el => el.classList.remove('active'));
+  const sbEl = document.getElementById('sb-' + cat);
+  if (sbEl) sbEl.classList.add('active');
+
+  // Update tabs
+  document.querySelectorAll('.cat-tab').forEach(el => el.classList.remove('active'));
+  const tabEl = document.getElementById('tab-' + cat);
+  if (tabEl) tabEl.classList.add('active');
+
+  // Toggle panels
+  const newsPanel  = document.getElementById('newsPanel');
+  const ecalPanel  = document.getElementById('eventCalendarPanel');
+  const xPanel     = document.getElementById('xPostsPanel');
+  const searchBox  = document.querySelector('.news-search');
+
+  // Hide all special panels first
+  if (newsPanel)  newsPanel.style.display = '';
+  if (ecalPanel)  ecalPanel.classList.remove('active');
+  if (xPanel)     xPanel.classList.remove('active');
+  if (searchBox)  searchBox.style.display = '';
+
+  if (cat === 'event_calendar') {
+    if (newsPanel) newsPanel.style.display = 'none';
+    if (ecalPanel) ecalPanel.classList.add('active');
+    if (searchBox) searchBox.style.display = 'none';
+    renderEventCalendar();
+  } else if (cat === 'x_posts') {
+    if (newsPanel) newsPanel.style.display = 'none';
+    if (xPanel)    xPanel.classList.add('active');
+    if (searchBox) searchBox.style.display = 'none';
+    renderXPosts('all');
+  } else {
+    renderNews(cat);
+  }
+}
+
+// ════════════════════════════
+// X POSTS — RENDER & FILTER
+// ════════════════════════════
+let xPostFilter = 'all';
+
+function initXAccountFilters() {
+  const wrap = document.getElementById('xAccountFilters');
+  if (!wrap) return;
+  // Build per-account filter buttons from meta
+  X_ACCOUNTS_META.forEach(acc => {
+    const btn = document.createElement('button');
+    btn.className = 'xacc-filter';
+    btn.textContent = '@' + acc.handle;
+    btn.style.borderColor = acc.color + '55';
+    btn.onclick = function() { filterXPosts(acc.handle, this); };
+    wrap.appendChild(btn);
+  });
+
+  // Update sidebar count
+  const countEl = document.getElementById('xposts-sidebar-count');
+  if (countEl) countEl.textContent = X_POSTS_DATA.length;
+
+  // Update header label
+  const lbl = document.getElementById('xposts-count-label');
+  if (lbl) lbl.textContent = X_POSTS_DATA.length;
+}
+
+function filterXPosts(handle, btnEl) {
+  xPostFilter = handle;
+  document.querySelectorAll('.xacc-filter').forEach(b => b.classList.remove('active'));
+  if (btnEl) btnEl.classList.add('active');
+  renderXPosts(handle);
+}
+
+function renderXPosts(handle) {
+  const body = document.getElementById('xPostsBody');
+  if (!body) return;
+
+  const posts = handle === 'all'
+    ? X_POSTS_DATA
+    : X_POSTS_DATA.filter(p => p.handle === handle);
+
+  if (!posts || posts.length === 0) {
+    const hasAny = X_POSTS_DATA.length > 0;
+    body.innerHTML = `
+      <div class="xposts-no-data-note">
+        ℹ️ <strong>How X Posts work:</strong> Posts are fetched via free RSS bridges (RSSHub / Nitter).
+        These bridges may be temporarily blocked by X. Re-run the script to retry fetching.
+        If posts still don't appear, the bridge for this account may be down — try again later.
+      </div>
+      <div class="xposts-empty">
+        <span class="x-big">𝕏</span>
+        ${handle === 'all'
+          ? 'No posts from the last 2 days were fetched.<br>Re-run the Python script to refresh.'
+          : 'No posts from <strong>@' + handle + '</strong> in the last 2 days.<br>The RSS bridge may be temporarily unavailable.'
+        }
+      </div>`;
+    return;
+  }
+
+  // Group by account for visual separation when showing ALL
+  let html = '';
+  if (handle !== 'all') {
+    html = posts.map(p => xPostCardHTML(p)).join('');
+  } else {
+    // Group by account handle preserving recency order, show divider per account
+    let lastHandle = null;
+    posts.forEach(p => {
+      if (p.handle !== lastHandle) {
+        if (lastHandle !== null) html += '<div class="xpost-divider">· · ·</div>';
+        lastHandle = p.handle;
+      }
+      html += xPostCardHTML(p);
+    });
+  }
+
+  body.innerHTML = html;
+}
+
+function xPostCardHTML(p) {
+  // Avatar: first 2 chars of name
+  const initials = p.name.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
+  const linkHtml = p.link && p.link !== '#'
+    ? `<a class="xpost-link" href="${p.link}" target="_blank" rel="noopener">View on X ↗</a>`
+    : '';
+  // Clean up summary — strip repeated title text
+  const text = p.summary && p.summary.length > 10 && p.summary !== p.title
+    ? p.summary
+    : p.title;
+
+  return `<div class="xpost-card">
+  <div class="xpost-account-row">
+    <div class="xpost-avatar" style="background:${p.color}">${initials}</div>
+    <div>
+      <div class="xpost-name">${p.name}</div>
+      <div class="xpost-handle">@${p.handle}</div>
+    </div>
+    <span class="xpost-tag">${p.tag}</span>
+    <span class="xpost-time">${p.time}</span>
+  </div>
+  <div class="xpost-text">${text}</div>
+  <div class="xpost-footer">${linkHtml}</div>
+</div>`;
+}
+
+// ════════════════════════════
+// TOGGLE ECON SECTIONS IN SIDEBAR
+// ════════════════════════════
+function toggleEcon(id) {
+  const body  = document.getElementById('body-'  + id);
+  const arrow = document.getElementById('arrow-' + id);
+  if (!body) return;
+  body.classList.toggle('collapsed');
+  arrow.classList.toggle('collapsed');
+  // Set explicit max-height for smooth animation
+  if (!body.classList.contains('collapsed')) {
+    body.style.maxHeight = body.scrollHeight + 'px';
+  } else {
+    body.style.maxHeight = '0';
+  }
+}
+
+// ════════════════════════════
+// TICKER STRIP
+// ════════════════════════════
+const TICKER_SYMBOLS = [
+  ['GIFT NIFTY', 'gift-nifty'],
+  ['DOW',    'dow'],
+  ['S&P 500','sp500'],
+  ['NASDAQ', 'nasdaq'],
+  ['VIX',    'vix'],
+  ['10Y',    'us10y'],
+  ['2Y',     'us2y'],
+  ['CRUDE',  'oil'],
+  ['GOLD',   'gold'],
+  ['SILVER', 'silver'],
+  ['USD IDX','dollar'],
+  ['USD/INR','usdinr'],
+];
+
+function buildTicker() {
+  const track = document.getElementById('tickerTrack');
+  // Double for seamless loop
+  const items = [...TICKER_SYMBOLS, ...TICKER_SYMBOLS];
+  track.innerHTML = items.map(([name, key]) => `
+    <span class="ticker-item" data-key="${key}">
+      <span class="t-sym">${name}</span>
+      <span class="t-val t-neu" data-tv="${key}">--</span>
+    </span>
+  `).join('');
+}
+
+function updateTicker(key, val, pct) {
+  const els = document.querySelectorAll('[data-tv="' + key + '"]');
+  if (!els.length) return;
+  const p = parseFloat(pct);
+  const text = val + (pct ? ' (' + (p >= 0 ? '+' : '') + pct + '%)' : '');
+  const cls = 't-val ' + (p > 0 ? 't-pos' : p < 0 ? 't-neg' : 't-neu');
+  els.forEach(e => {
+    e.textContent = text;
+    e.className = cls;
+  });
+}
+
+// ════════════════════════════
+// INDICATOR CARD UPDATE
+// ════════════════════════════
+function updateCard(id, value, change, pchange) {
+  const vEl = document.getElementById('val-' + id);
+  const cEl = document.getElementById('chg-' + id);
+  const card = document.getElementById('card-' + id);
+  if (vEl) vEl.textContent = value;
+  if (cEl) {
+    const p = parseFloat(pchange);
+    const sign = p >= 0 ? '+' : '';
+    cEl.textContent = sign + change + ' (' + sign + pchange + '%)';
+    const cls = p > 0 ? 'pos' : p < 0 ? 'neg' : 'neu';
+    cEl.className = 'ind-chg ' + cls;
+    if (card) card.className = 'ind-cell ' + cls;
+  }
+  // Update sidebar
+  const sbEl = document.getElementById('sbv-' + id);
+  if (sbEl) {
+    sbEl.textContent = value;
+    const p = parseFloat(pchange);
+    sbEl.className = 'sb-ind-val ' + (p > 0 ? 'pos' : p < 0 ? 'neg' : 'neu');
+  }
+  updateTicker(id, value, pchange);
+}
+
+// ════════════════════════════
+// YAHOO FINANCE FETCH
+// ════════════════════════════
+const SYMBOLS = {
+  'dow':    '^DJI',
+  'sp500':  '^GSPC',
+  'nasdaq': '^IXIC',
+  'vix':    '^VIX',
+  'us10y':  '^TNX',
+  'us2y':   '^IRX',
+  'oil':    'CL=F',
+  'dollar': 'DX-Y.NYB',
+  'gold':   'GC=F',
+  'silver': 'SI=F',
+  'usdinr': 'INR=X'
+};
+
+// Multiple CORS proxies for resilience
+const CORS_PROXIES = [
+  (u) => 'https://corsproxy.io/?' + encodeURIComponent(u),
+  (u) => 'https://api.allorigins.win/get?url=' + encodeURIComponent(u),
+  (u) => 'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(u),
+  (u) => 'https://thingproxy.freeboard.io/fetch/' + u,
+  (u) => u  // direct (may work for some APIs)
+];
+
+async function fetchWithProxies(url, opts = {}) {
+  for (const mkProxy of CORS_PROXIES) {
+    try {
+      const proxied = mkProxy(url);
+      const r = await fetch(proxied, { mode: 'cors', signal: AbortSignal.timeout(10000), ...opts });
+      if (!r.ok) continue;
+      return r;
+    } catch(e) { /* try next */ }
+  }
+  throw new Error('All proxies failed for ' + url);
+}
+
+async function fetchYahoo(key, sym) {
+  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${sym}?interval=1d&range=1d`;
+  for (const mkProxy of CORS_PROXIES) {
+    try {
+      const u = mkProxy(url);
+      const r = await fetch(u, {mode: 'cors', signal: AbortSignal.timeout(8000)});
+      if (!r.ok) continue;
+      let d = await r.json();
+      if (d.contents) d = JSON.parse(d.contents);
+      const meta = d?.chart?.result?.[0]?.meta;
+      if (!meta) continue;
+      const cur = meta.regularMarketPrice;
+      const prev = meta.chartPreviousClose || meta.previousClose;
+      if (!cur || !prev) continue;
+      const chg = (cur - prev).toFixed(2);
+      const pct = (((cur - prev) / prev) * 100).toFixed(2);
+      let val;
+      if (['dow', 'sp500', 'nasdaq'].includes(key)) {
+        val = cur.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+      } else if (key === 'vix') {
+        val = cur.toFixed(2);
+      } else if (['us10y', 'us2y'].includes(key)) {
+        val = cur.toFixed(2) + '%';
+      } else if (key === 'dollar') {
+        val = cur.toFixed(2);
+      } else if (key === 'usdinr') {
+        val = '₹' + cur.toFixed(2);
+      } else {
+        val = '$' + cur.toFixed(2);
+      }
+      updateCard(key, val, chg, pct);
+      // Extra sidebar updates for usdinr
+      if (key === 'usdinr') {
+        const sbEl = document.getElementById('sbv-usdinr');
+        if (sbEl) { sbEl.textContent = '₹' + cur.toFixed(2); }
+        const sbEl2 = document.getElementById('sbv-usdinr2');
+        if (sbEl2) { sbEl2.textContent = '₹' + cur.toFixed(2); }
+      }
+      return true;
+    } catch (e) { /* try next */ }
+  }
+  return false;
+}
+
+// ════════════════════════════
+// GIFT NIFTY FETCH
+// ════════════════════════════
+async function fetchGiftNifty() {
+  // Attempt 1: NSE IFSC via CORS proxy
+  const nseUrl = 'https://www.nseifsc.com/market/GetIndexChartDetails?indices=NIFTY50&type=I';
+  try {
+    const r = await fetch('https://corsproxy.io/?' + encodeURIComponent(nseUrl), {mode: 'cors', signal: AbortSignal.timeout(6000)});
+    if (r.ok) {
+      const d = await r.json();
+      if (d && d.length > 0) {
+        const last = d[d.length - 1];
+        const first = d[0];
+        const cur = parseFloat(last[1]);
+        const prev = parseFloat(first[1]);
+        if (cur && prev) {
+          const chg = (cur - prev).toFixed(2);
+          const pct = (((cur - prev) / prev) * 100).toFixed(2);
+          const val = cur.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+          const vEl = document.getElementById('val-gift-nifty');
+          const cEl = document.getElementById('chg-gift-nifty');
+          const card = document.getElementById('card-gift-nifty');
+          if (vEl) vEl.textContent = val;
+          if (cEl) {
+            const p = parseFloat(pct);
+            const sign = p >= 0 ? '+' : '';
+            cEl.textContent = sign + chg + ' (' + sign + pct + '%) · NSE IX';
+            const cls = p > 0 ? 'pos' : p < 0 ? 'neg' : 'neu';
+            cEl.className = 'ind-chg ' + cls;
+            if (card) card.className = 'ind-cell ' + cls;
+          }
+          updateTicker('gift-nifty', val, pct);
+          // sidebar nifty
+          const sbN = document.getElementById('sbv-nifty');
+          if (sbN) { sbN.textContent = val; sbN.className = 'sb-ind-val ' + (parseFloat(pct) > 0 ? 'pos' : parseFloat(pct) < 0 ? 'neg' : 'neu'); }
+          return;
+        }
+      }
+    }
+  } catch (e) { /* fall through */ }
+
+  // Attempt 2: Stooq
+  try {
+    const stooqUrl = 'https://stooq.com/q/l/?s=nifty.ix&f=sd2t2ohlcv&e=csv';
+    const r = await fetch('https://corsproxy.io/?' + encodeURIComponent(stooqUrl), {signal: AbortSignal.timeout(5000)});
+    if (r.ok) {
+      const text = await r.text();
+      const lines = text.trim().split('\n');
+      if (lines.length >= 2) {
+        const cols = lines[1].split(',');
+        const close = parseFloat(cols[6]);
+        const open = parseFloat(cols[3]);
+        if (close && open) {
+          const chg = (close - open).toFixed(2);
+          const pct = (((close - open) / open) * 100).toFixed(2);
+          const val = close.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+          const vEl = document.getElementById('val-gift-nifty');
+          const cEl = document.getElementById('chg-gift-nifty');
+          const card = document.getElementById('card-gift-nifty');
+          if (vEl) vEl.textContent = val;
+          if (cEl) {
+            const p = parseFloat(pct);
+            const sign = p >= 0 ? '+' : '';
+            cEl.textContent = sign + chg + ' (' + sign + pct + '%) · NSE IX ~';
+            const cls = p > 0 ? 'pos' : p < 0 ? 'neg' : 'neu';
+            cEl.className = 'ind-chg ' + cls;
+            if (card) card.className = 'ind-cell ' + cls;
+          }
+          updateTicker('gift-nifty', val, pct);
+          return;
+        }
+      }
+    }
+  } catch (e) { /* fall through */ }
+
+  // Attempt 3: Fallback – Nifty 50 spot as proxy
+  try {
+    const url = 'https://query1.finance.yahoo.com/v8/finance/chart/%5ENSEI?interval=1d&range=1d';
+    const r = await fetch('https://corsproxy.io/?' + encodeURIComponent(url), {mode: 'cors', signal: AbortSignal.timeout(5000)});
+    if (r.ok) {
+      const d = await r.json();
+      const meta = d?.chart?.result?.[0]?.meta;
+      if (meta) {
+        const cur = meta.regularMarketPrice;
+        const prev = meta.chartPreviousClose || meta.previousClose;
+        if (cur && prev) {
+          const chg = (cur - prev).toFixed(2);
+          const pct = (((cur - prev) / prev) * 100).toFixed(2);
+          const val = cur.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+          const titleEl = document.querySelector('#card-gift-nifty .ind-name');
+          if (titleEl) titleEl.textContent = '⚠ NIFTY 50 (GIFT proxy)';
+          const vEl = document.getElementById('val-gift-nifty');
+          const cEl = document.getElementById('chg-gift-nifty');
+          const card = document.getElementById('card-gift-nifty');
+          if (vEl) vEl.textContent = val;
+          if (cEl) {
+            const p = parseFloat(pct);
+            const sign = p >= 0 ? '+' : '';
+            cEl.textContent = sign + chg + ' (' + sign + pct + '%) · INR spot';
+            const cls = p > 0 ? 'pos' : p < 0 ? 'neg' : 'neu';
+            cEl.className = 'ind-chg ' + cls;
+            if (card) card.className = 'ind-cell ' + cls;
+          }
+          updateTicker('gift-nifty', val, pct);
+          // sidebar sensex/nifty
+          const sbN = document.getElementById('sbv-nifty');
+          if (sbN) { sbN.textContent = val; sbN.className = 'sb-ind-val ' + (parseFloat(pct) > 0 ? 'pos' : parseFloat(pct) < 0 ? 'neg' : 'neu'); }
+          return;
+        }
+      }
+    }
+  } catch (e) { /* fall through */ }
+
+  // Hard fallback
+  const vEl = document.getElementById('val-gift-nifty');
+  const cEl = document.getElementById('chg-gift-nifty');
+  if (vEl) vEl.textContent = 'N/A';
+  if (cEl) cEl.textContent = 'Data unavailable';
+}
+
+// ════════════════════════════
+// CPI via FRED CSV (CORS proxy)
+// ════════════════════════════
+async function fetchCPI() {
+  const csvUrl = 'https://fred.stlouisfed.org/graph/fredgraph.csv?id=CPIAUCSL';
+  try {
+    const r = await fetchWithProxies(csvUrl);
+    let text = await r.text();
+    try { const j = JSON.parse(text); if (j.contents) text = j.contents; } catch(e) {}
+    const lines = text.trim().split('\n').filter(l => l && !l.startsWith('DATE'));
+    if (lines.length < 13) throw new Error('Not enough data');
+    const lastLine = lines[lines.length - 1].split(',');
+    const prevLine = lines[lines.length - 13].split(',');
+    const lastVal = parseFloat(lastLine[1]);
+    const prevVal = parseFloat(prevLine[1]);
+    if (isNaN(lastVal) || isNaN(prevVal) || prevVal === 0) throw new Error('Bad values');
+    const yoy = (((lastVal - prevVal) / prevVal) * 100).toFixed(1);
+    const date = lastLine[0];
+    const d = new Date(date + 'T12:00:00Z');
+    const label = d.toLocaleString('en-US', {month: 'short', year: 'numeric', timeZone: 'UTC'});
+    const vEl = document.getElementById('val-cpi');
+    const cEl = document.getElementById('chg-cpi');
+    const card = vEl ? vEl.closest('.ind-cell') : null;
+    if (vEl) vEl.textContent = yoy + '%';
+    if (cEl) cEl.textContent = 'YoY · ' + label;
+    if (card) {
+      const p = parseFloat(yoy);
+      card.className = 'ind-cell ' + (p > 3 ? 'neg' : p <= 2 ? 'pos' : 'neu');
+    }
+    // Update sidebar CPI
+    const sbCpi = document.getElementById('sbv-cpi');
+    if (sbCpi) { sbCpi.textContent = yoy + '%'; sbCpi.className = 'sb-econ-val ' + (parseFloat(yoy) > 3 ? 'neg' : parseFloat(yoy) <= 2 ? 'pos' : 'neu'); }
+  } catch (e) {
+    const vEl = document.getElementById('val-cpi');
+    const cEl = document.getElementById('chg-cpi');
+    if (vEl) vEl.textContent = '—';
+    if (cEl) cEl.textContent = '—';
+    const sbCpi = document.getElementById('sbv-cpi');
+    if (sbCpi) sbCpi.textContent = '—';
+  }
+}
+
+// ════════════════════════════
+// FED FUNDS RATE via FRED CSV
+// ════════════════════════════
+// ════════════════════════════
+// SHARED FRED CSV HELPER
+// ════════════════════════════
+// ════════════════════════════
+// USA: CORE CPI (CPILFESL)
+// ════════════════════════════
+// ════════════════════════════
+// USA: GDP GROWTH (A191RL1Q225SBEA)
+// ════════════════════════════
+// ════════════════════════════
+// USA: UNEMPLOYMENT (UNRATE)
+// ════════════════════════════
+// ════════════════════════════
+// USA: NFP (PAYEMS – MoM change)
+// ════════════════════════════
+// ════════════════════════════
+// USA: PPI YoY (PPIFIS)
+// ════════════════════════════
+// ════════════════════════════
+// INDIA: World Bank API helper
+// ════════════════════════════
+// ════════════════════════════
+// INDIA: CPI (World Bank FP.CPI.TOTL.ZG)
+// ════════════════════════════
+// ════════════════════════════
+// INDIA: GDP Growth (World Bank NY.GDP.MKTP.KD.ZG)
+// ════════════════════════════
+// ════════════════════════════
+// INDIA: Unemployment (World Bank SL.UEM.TOTL.ZS)
+// ════════════════════════════
+// ════════════════════════════
+// INDIA: Repo Rate — 2 reliable free sources (no API key)
+// ════════════════════════════// ════════════════════════════
+// INDIA: WPI via World Bank (FP.WPI.TOTL)
+// ════════════════════════════
+// ════════════════════════════
+// INDIA: Mfg PMI — no free official API;
+//   try a proxy to tradingeconomics data
+// ════════════════════════════
+// ════════════════════════════
+// INDIA: Fiscal Deficit (World Bank GC.BAL.CASH.GD.ZS)
+// ════════════════════════════
+// ════════════════════════════
+// CLOCK & REFRESH
+// ════════════════════════════
+function updateClock() {
+  const now = new Date();
+  const fmtSec = (tz) => now.toLocaleString('en-US', {hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true, timeZone: tz});
+  const fmtMin = (tz) => now.toLocaleString('en-US', {hour: '2-digit', minute: '2-digit', hour12: true, timeZone: tz});
+
+  const cst = fmtSec('America/Chicago');
+  const ist = fmtSec('Asia/Kolkata');
+  const sgt = fmtSec('Asia/Singapore');
+
+  const elCST = document.getElementById('clockCST');
+  const elIST = document.getElementById('clockIST');
+  const elSGT = document.getElementById('clockSGT');
+  const elDate = document.getElementById('clockbarDate');
+
+  if (elCST) elCST.textContent = cst;
+  if (elIST) elIST.textContent = ist;
+  if (elSGT) elSGT.textContent = sgt;
+  if (elDate) {
+    elDate.textContent = '📅 ' + now.toLocaleDateString('en-US', {weekday:'short', month:'short', day:'numeric', year:'numeric', timeZone:'Asia/Kolkata'});
+  }
+
+  const st = document.getElementById('statusClock');
+  if (st) st.textContent = fmtSec('Asia/Kolkata') + ' IST';
+  const ref = document.getElementById('newsSubtitle');
+  if (ref) {
+    ref.textContent = 'Click any headline to expand · Last refresh: ' + fmtMin('Asia/Kolkata') + ' IST';
+  }
+}
+
+let isFirstLoad = true;
+
+async function loadAll() {
+  fetchGiftNifty();
+  await Promise.all(
+    Object.entries(SYMBOLS).map(async ([k, s]) => {
+      const ok = await fetchYahoo(k, s);
+      if (!ok) {
+        const vEl = document.getElementById('val-' + k);
+        const cEl = document.getElementById('chg-' + k);
+        if (vEl) vEl.textContent = 'N/A';
+        if (cEl) cEl.textContent = 'Unavailable';
+      }
+    })
+  );
+  updateClock();
+  if (isFirstLoad) {
+    setTimeout(() => document.getElementById('loadingOverlay').classList.remove('visible'), 500);
+    isFirstLoad = false;
+  }
+}
+
+// ════════════════════════════
+// KEYBOARD NAVIGATION
+// ════════════════════════════
+document.addEventListener('keydown', (e) => {
+  if (e.target.classList.contains('sb-item') && (e.key === 'Enter' || e.key === ' ')) {
+    e.preventDefault();
+    e.target.click();
+  }
+  if (e.target.classList.contains('nc-item') && (e.key === 'Enter' || e.key === ' ')) {
+    e.preventDefault();
+    toggleNC(e.target);
+  }
+  if (e.target.classList.contains('cat-tab') && (e.key === 'Enter' || e.key === ' ')) {
+    e.preventDefault();
+    e.target.click();
+  }
+});
+
+// ════════════════════════════
+// INIT
+// ════════════════════════════
+window.addEventListener('DOMContentLoaded', () => {
+  buildTicker();
+  renderNews('markets');
+  // Set event calendar sidebar count
+  const ecalCount = document.getElementById('ecal-sidebar-count');
+  if (ecalCount) ecalCount.textContent = EVENT_CALENDAR.length;
+
+  // Hydrate sidebar with server-fetched data (instant, no CORS)
+  hydrateEconData();
+
+  // Set initial max-height for smooth collapse animation
+  ['usa', 'india'].forEach(id => {
+    const body = document.getElementById('body-' + id);
+    if (body) body.style.maxHeight = body.scrollHeight + 'px';
+  });
+
+  if (!sessionStorage.getItem('visited')) {
+    document.getElementById('loadingOverlay').classList.add('visible');
+    sessionStorage.setItem('visited', '1');
+  }
+
+  loadAll();
+  fetchCPI();
+  // USA economic indicators (FRED)
+  // India economic indicators (World Bank + RBI)
+  setInterval(loadAll, 5 * 60 * 1000);
+  setInterval(updateClock, 1000);
+
+  // Init X Posts account filter buttons
+  initXAccountFilters();
+
+  // ── Drag-to-scroll for category tabs ──
+  const catTabs = document.getElementById('catTabs');
+  if (catTabs) {
+    let isDown = false, startX = 0, scrollStart = 0, hasDragged = false;
+    catTabs.style.cursor = 'grab';
+
+    catTabs.addEventListener('mousedown', e => {
+      isDown = true; hasDragged = false;
+      startX = e.pageX;
+      scrollStart = catTabs.scrollLeft;
+      catTabs.style.cursor = 'grabbing';
+      catTabs.style.userSelect = 'none';
+      e.preventDefault();
+    });
+
+    document.addEventListener('mouseup', () => {
+      isDown = false;
+      catTabs.style.cursor = 'grab';
+      catTabs.style.userSelect = '';
+    });
+
+    document.addEventListener('mousemove', e => {
+      if (!isDown) return;
+      const dx = e.pageX - startX;
+      if (Math.abs(dx) > 4) hasDragged = true;
+      catTabs.scrollLeft = scrollStart - dx;
+    });
+
+    // Suppress click on tabs if we actually dragged
+    catTabs.addEventListener('click', e => {
+      if (hasDragged) { e.stopPropagation(); e.preventDefault(); hasDragged = false; }
+    }, true);
+
+    // Touch support
+    let touchStartX = 0, touchScrollStart = 0;
+    catTabs.addEventListener('touchstart', e => {
+      touchStartX = e.touches[0].pageX;
+      touchScrollStart = catTabs.scrollLeft;
+    }, { passive: true });
+    catTabs.addEventListener('touchmove', e => {
+      catTabs.scrollLeft = touchScrollStart - (e.touches[0].pageX - touchStartX);
+    }, { passive: true });
+  }
+
+  // Scroll-to-top observer
+  const mainEl = document.querySelector('.main');
+  const btn = document.getElementById('scrollTopBtn');
+  if (mainEl && btn) {
+    mainEl.addEventListener('scroll', () => {
+      btn.classList.toggle('visible', mainEl.scrollTop > 300);
+    });
+  }
+});
+</script>
+</body>
+</html>
